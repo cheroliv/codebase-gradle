@@ -1921,7 +1921,7 @@ fun chatbotApp(
         .use(headerBar.col(1))
 
     if (searchClicked) {
-        Jt.sessionState()["searchOpen"] = !searchOpen
+        Jt.sessionState().put("searchOpen", !searchOpen)
         Jt.rerun()
     }
 
@@ -1952,8 +1952,8 @@ fun chatbotApp(
         val searchSubmitted = Jt.formSubmitButton("🔍").use(searchInputBar.col(1))
 
         if (searchSubmitted) {
-            Jt.sessionState()["searchTerm"] = typedTerm.trim()
-            Jt.sessionState()["searchIndex"] = 0
+            Jt.sessionState().put("searchTerm",  typedTerm.trim())
+            Jt.sessionState().put("searchIndex", 0)
             Jt.rerun()
         }
 
@@ -1967,7 +1967,6 @@ fun chatbotApp(
             }
             val total = hits.size
             // searchIndex borné entre 0 et total-1
-            @Suppress("MISSING_DEPENDENCY_SUPERCLASS_IN_TYPE_ARGUMENT")
             val safeIndex = if (total == 0) 0 else searchIndex.coerceIn(0, total - 1)
 
             // Résumé + navigation
@@ -1996,11 +1995,11 @@ fun chatbotApp(
                     .use(navBar.col(2))
 
                 if (prevClicked) {
-                    Jt.sessionState()["searchIndex"] = (safeIndex - 1 + total) % total
+                    Jt.sessionState().put("searchIndex", (safeIndex - 1 + total) % total)
                     Jt.rerun()
                 }
                 if (nextClicked) {
-                    Jt.sessionState()["searchIndex"] = (safeIndex + 1) % total
+                    Jt.sessionState().put("searchIndex", (safeIndex + 1) % total)
                     Jt.rerun()
                 }
 
@@ -2111,7 +2110,7 @@ fun chatbotApp(
         .use(modelExpander)
 
     if (pickedModel != currentModel) {
-        Jt.sessionState()["selectedModel"] = pickedModel
+        Jt.sessionState().put("selectedModel", pickedModel)
         Jt.rerun()
     }
 
