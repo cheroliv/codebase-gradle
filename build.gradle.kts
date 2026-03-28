@@ -1613,7 +1613,7 @@ tasks.register("verifyCodebaseToAnonymizedYaml") {
         // résolution normale
         val resolved = localConfig.resolveActiveKey(config7, logger)
         check(resolved?.key == "sk-ant-chatbot") { "FAIL case 7: expected chatbot key, got ${resolved?.key}" }
-        check(resolved?.label == "chatbot")       { "FAIL case 7: expected label 'chatbot', got ${resolved?.label}" }
+        check(resolved.label == "chatbot")       { "FAIL case 7: expected label 'chatbot', got ${resolved?.label}" }
 
         // surcharge CLI provider+account+key
         val resolvedCli = localConfig.resolveActiveKey(config7, logger,
@@ -1921,7 +1921,7 @@ fun chatbotApp(
         .use(headerBar.col(1))
 
     if (searchClicked) {
-        Jt.sessionState().put("searchOpen", !searchOpen)
+        Jt.sessionState()["searchOpen"] = !searchOpen
         Jt.rerun()
     }
 
@@ -1952,8 +1952,8 @@ fun chatbotApp(
         val searchSubmitted = Jt.formSubmitButton("🔍").use(searchInputBar.col(1))
 
         if (searchSubmitted) {
-            Jt.sessionState().put("searchTerm",  typedTerm.trim())
-            Jt.sessionState().put("searchIndex", 0)
+            Jt.sessionState()["searchTerm"] = typedTerm.trim()
+            Jt.sessionState()["searchIndex"] = 0
             Jt.rerun()
         }
 
@@ -1967,6 +1967,7 @@ fun chatbotApp(
             }
             val total = hits.size
             // searchIndex borné entre 0 et total-1
+            @Suppress("MISSING_DEPENDENCY_SUPERCLASS_IN_TYPE_ARGUMENT")
             val safeIndex = if (total == 0) 0 else searchIndex.coerceIn(0, total - 1)
 
             // Résumé + navigation
@@ -1995,11 +1996,11 @@ fun chatbotApp(
                     .use(navBar.col(2))
 
                 if (prevClicked) {
-                    Jt.sessionState().put("searchIndex", (safeIndex - 1 + total) % total)
+                    Jt.sessionState()["searchIndex"] = (safeIndex - 1 + total) % total
                     Jt.rerun()
                 }
                 if (nextClicked) {
-                    Jt.sessionState().put("searchIndex", (safeIndex + 1) % total)
+                    Jt.sessionState()["searchIndex"] = (safeIndex + 1) % total
                     Jt.rerun()
                 }
 
@@ -2110,7 +2111,7 @@ fun chatbotApp(
         .use(modelExpander)
 
     if (pickedModel != currentModel) {
-        Jt.sessionState().put("selectedModel", pickedModel)
+        Jt.sessionState()["selectedModel"] = pickedModel
         Jt.rerun()
     }
 
