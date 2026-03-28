@@ -8,7 +8,7 @@ build
 .kotlin
 
 .idea
-
 readme.yml
-
+local.properties
 gradle/wrapper/gradle-wrapper.jar
+snapshot.adoc
