@@ -11,6 +11,8 @@ import java.io.File
 import java.time.LocalDate
 import java.util.concurrent.CountDownLatch
 import org.gradle.api.logging.Logger
+import io.javelit.core.JtComponent
+import io.javelit.components.layout.ColumnsComponent
 
 buildscript {
     repositories { mavenCentral() }
@@ -1826,21 +1828,30 @@ fun availableModels(cfg: CodebaseConfiguration, providerName: String): List<Stri
     return provider.models.ifEmpty { listOf("${providerName}-default") }
 }
 
-/**
- * Rendu Javelit du chatbot.
- * Appelé à chaque rerun par le serveur Javelit.
- *
- * Barre de saisie (style Claude) :
- *  ┌─────────────────────────────┬──────────────────┬──────────┐
- *  │  Votre message (textArea)   │  [ opus-4-5 ▾ ]  │  [ ➤ ]  │
- *  └─────────────────────────────┴──────────────────┴──────────┘
- *
- * Le bouton modèle ouvre un popover contenant :
- *  - la liste des modèles disponibles (radio)
- *  - un bouton "⚙ Settings" sans comportement pour l'instant
- *
- * Le LLM est mocké — seule l'UI est validée à ce stade.
- */
+
+// ── chatbotApp ────────────────────────────────────────────────────────────────
+//
+// Layout général :
+//
+//  ┌──────────────────────────────────────────────────────────────────────────┐
+//  │  🤖 Codebase Chatbot                                                     │
+//  │  Provider : anthropic  ·  Modèle actif : opus-4-5  ·  LLM mocké         │
+//  ├──────────────────────────────────────────────────────────────────────────┤
+//  │  👤 Vous :       message utilisateur (fond bleu)                         │
+//  │  🤖 Assistant :  réponse             (fond vert)                         │
+//  ├──────────────────────────────────────────────────────────────────────────┤
+//  │  col(0) 82% — form                       │  col(1) 18% — popover modèle  │
+//  │   ├─ sous-col(0) 85% : textArea          │  (hors form — contrainte)     │
+//  │   └─ sous-col(1) 15% : formSubmitButton  │                               │
+//  └──────────────────────────────────────────────────────────────────────────┘
+//
+// Règles Javelit respectées :
+//  - formSubmitButton DOIT être dans un form container → innerBar dans le form
+//  - form et popover ne peuvent pas partager la même colonne → col(1) dédié
+//  - textArea avec labelVisibility(HIDDEN) → contrainte height min levée
+//  - radio avec .index(Int) → pré-sélection propre sans réordonner la liste
+//
+// Le LLM est mocké — seule l'UI est validée à ce stade.
 fun chatbotApp(
     cfg:          CodebaseConfiguration,
     providerName: String
@@ -1856,85 +1867,124 @@ fun chatbotApp(
     Jt.sessionState().putIfAbsent("selectedModel", defaultModel)
     val currentModel = Jt.sessionState().getString("selectedModel") ?: defaultModel
 
-    // ── Titre + sous-titre provider ───────────────────────────────────────────
-    Jt.title("🤖 Codebase Chatbot").use()
-    Jt.markdown("_Provider :_ `$providerName` · _LLM mocké_").use()
-    Jt.markdown("---").use()
+    // Index du modèle courant pour .index() sur le radio
+    // — évite de réordonner la liste (Jt.radio n'a pas de .value())
+    val currentIndex = models.indexOf(currentModel).takeIf { it >= 0 } ?: 0
 
-    // ── Historique ────────────────────────────────────────────────────────────
-    if (history.isEmpty()) {
-        Jt.info("Aucun message pour l'instant. Commencez la conversation !").use()
-    } else {
-        history.forEach { (role, content) ->
-            val label = if (role == "user") "**Vous :**" else "**Assistant :**"
-            Jt.markdown("$label $content").use()
-        }
-    }
-
-    Jt.markdown("---").use()
-
-    // ── Barre de saisie : textArea | [modèle ▾] | [➤] ────────────────────────
-    //
-    // Layout 3 colonnes :
-    //   col(0) 70% — textArea dans le form
-    //   col(1) 18% — bouton modèle + popover (hors form)
-    //   col(2) 12% — bouton submit dans le form
-    //
-    // Contrainte Javelit : form et popover ne peuvent pas partager la même colonne.
-
-    val bar = Jt.columns(3)
-        .widths(listOf(0.70, 0.18, 0.12))
-        .use()
-
-    // col(0) — zone de saisie
-    val form      = Jt.form().use(bar.col(0))
-    val userInput = Jt.textArea("Message").placeholder("Votre message…").height(80).use(form)
-
-    // col(1) — bouton modèle abrégé + popover liste des modèles
-    //
-    // Abréviation : on garde les 3 derniers segments séparés par '-'
+    // Abréviation du modèle : 3 derniers segments séparés par '-'
     // ex: "claude-opus-4-5" → "opus-4-5" | "gemini-2.5-pro" → "2.5-pro"
     val shortModel = currentModel.split('-').let { parts ->
         if (parts.size >= 3) parts.takeLast(3).joinToString("-") else currentModel
     }
 
-    val modelPopover = Jt.popover("$shortModel ▾")
-        .key("model-picker")
-        .use(bar.col(1))
+    // ── En-tête : titre + indicateurs d'état ─────────────────────────────────
+    Jt.title("🤖 Codebase Chatbot").use()
+    Jt.markdown(
+        "**Provider :** `$providerName`  ·  **Modèle actif :** `$shortModel`  ·  _LLM mocké_"
+    ).use()
+    Jt.markdown("---").use()
 
-    // Contenu du popover
-    Jt.markdown("#### Choisir un modèle").use(modelPopover)
-    Jt.markdown("---").use(modelPopover)
-
-    // On place le modèle courant en tête de liste pour qu'il soit pré-sélectionné
-    // (Jt.radio ne supporte pas .value() — la sélection par défaut = premier élément)
-    val orderedModels = listOf(currentModel) + models.filter { it != currentModel }
-    val pickedModel = Jt.radio("", orderedModels)
-        .use(modelPopover)
-
-    if (pickedModel != currentModel) {
-        Jt.sessionState().put("selectedModel", pickedModel)
-        Jt.rerun()
+    // ── Historique de conversation ────────────────────────────────────────────
+    if (history.isEmpty()) {
+        Jt.info("Aucun message pour l'instant — commencez la conversation !").use()
+    } else {
+        history.forEach { (role, content) ->
+            if (role == "user") {
+                Jt.html("""
+                    <div style="
+                        background:#e8f4fd;
+                        border-left:4px solid #2196F3;
+                        border-radius:4px;
+                        padding:8px 12px;
+                        margin:4px 0;
+                        font-size:0.95em;">
+                      <strong>👤 Vous</strong><br/>
+                      ${content.replace("\n", "<br/>")}
+                    </div>
+                """.trimIndent()).use()
+            } else {
+                Jt.html("""
+                    <div style="
+                        background:#f1f8e9;
+                        border-left:4px solid #4CAF50;
+                        border-radius:4px;
+                        padding:8px 12px;
+                        margin:4px 0;
+                        font-size:0.95em;">
+                      <strong>🤖 Assistant</strong><br/>
+                      ${content.replace("\n", "<br/>")}
+                    </div>
+                """.trimIndent()).use()
+            }
+        }
     }
 
-    Jt.markdown("---").use(modelPopover)
+    Jt.markdown("---").use()
 
-    // Bouton Settings — pas de comportement pour l'instant
-    Jt.button("⚙ Settings")
-        .key("settings-in-popover")
-        .icon(":material/build:")
-        .use(modelPopover)
+    // ── Zone de saisie ────────────────────────────────────────────────────────
+    //
+    // Layout :
+    //
+    //  ┌─────────────────────────────────────────────────────┐
+    //  │  textArea  (pleine largeur, dans le form)           │
+    //  ├─────────────────────────────────────────────────────┤
+    //  │  selectBox : current_model ⚙  (85%)  │  [ ↑ ] (15%)│
+    //  └─────────────────────────────────────────────────────┘
+    //
+    // Tout est dans le form :
+    //  - textArea    : message à envoyer
+    //  - selectBox   : modèle sélectionné — valeur lue au submit pour màj sessionState
+    //  - formSubmitButton : déclenche le submit
+    //
+    // Règles Javelit respectées :
+    //  - formSubmitButton DOIT être dans un form container ✅
+    //  - textArea labelVisibility(HIDDEN) → contrainte height min levée ✅
+    //  - selectBox .index(currentIndex) → pré-sélection propre ✅
+    //  - .useContainerWidth() déprécié, aucun remplacement dispo (confirmé javap) → supprimé ✅
 
-    // col(2) — bouton submit
-    val submitted = Jt.formSubmitButton("➤").use(bar.col(2))
+    val form = Jt.form()
+        .clearOnSubmit(true)
+        .use()
+
+    // Ligne 1 — textArea pleine largeur
+    val userInput = Jt.textArea("Message")
+        .placeholder("Votre message…")
+        .labelVisibility(JtComponent.LabelVisibility.HIDDEN)
+        .height(120)
+        .use(form)
+
+    // Ligne 2 — selectBox modèle + bouton submit
+    val ctrlBar = Jt.columns(2)
+        .widths(listOf(0.85, 0.15))
+        .gap(ColumnsComponent.Gap.SMALL)
+        .verticalAlignment(ColumnsComponent.VerticalAlignment.CENTER)
+        .use(form)
+
+    // selectBox dans le form — .index() pour pré-sélection, label masqué
+    // .width("stretch") = pleine largeur colonne
+    // Valeurs valides : "stretch", "content", ou entier pixels — "100%" est invalide
+    val selectedModel = Jt.selectbox("Modèle", models)
+        .index(currentIndex)
+        .labelVisibility(JtComponent.LabelVisibility.HIDDEN)
+        .width("stretch")
+        .use(ctrlBar.col(0))
+
+    // formSubmitButton dans le form via ctrlBar.col(1)
+    // Label vide accepté (confirmé bytecode EmojiUtils : null/empty → skip validation)
+    // Icône : emoji unicode — syntaxe ":xxx:" reconnue par EmojiManager ou emoji direct
+    // ":material/xxx:" affiche le texte littéral (icônes Material non embarquées dans le jar)
+    val submitted = Jt.formSubmitButton("")
+        .icon("⬆️")
+        .use(ctrlBar.col(1))
 
     // ── Traitement du message soumis ──────────────────────────────────────────
     if (submitted && userInput.isNotBlank()) {
-        val model = Jt.sessionState().getString("selectedModel") ?: defaultModel
+        // Mise à jour du modèle actif depuis la valeur du selectBox
+        Jt.sessionState().put("selectedModel", selectedModel)
         history += "user" to userInput.trim()
 
         // Mock LLM
-        val mockResponse = "[mock] `$model` — reçu : « ${userInput.trim()} » " +
+        val mockResponse = "[mock] `$selectedModel` — reçu : « ${userInput.trim()} » " +
                 "(${history.count { it.first == "user" }} msg)"
         history += "assistant" to mockResponse
 
