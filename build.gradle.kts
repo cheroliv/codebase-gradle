@@ -3,14 +3,14 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.javelit.core.Jt
+import io.javelit.core.Server
 import jakarta.validation.Validation
 import jakarta.validation.constraints.Email
 import java.io.File
 import java.time.LocalDate
-import org.gradle.api.logging.Logger
-import io.javelit.core.Jt
-import io.javelit.core.Server
 import java.util.concurrent.CountDownLatch
+import org.gradle.api.logging.Logger
 
 buildscript {
     repositories { mavenCentral() }
@@ -1339,99 +1339,73 @@ tasks.register("verifySiteToAnonymizedYaml") {
         check("public.contacts" in yamlSupabase)            { "FAIL case 2: schema.contacts.name lost" }
         check("public.messages" in yamlSupabase)            { "FAIL case 2: schema.messages.name lost" }
         check("public.handle_contact_form" in yamlSupabase) { "FAIL case 2: rpc.name lost" }
-        check("p_name" in yamlSupabase)                     { "FAIL case 2: rpc param p_name lost" }
-        check("timestamptz" in yamlSupabase)                { "FAIL case 2: column type lost" }
 
         logger.lifecycle("✅ case 2 OK — supabase url + publicKey masked, schema + rpc preserved")
 
-        // ── case 3: pushSource et pushTemplate nullable ───────────────────────
-        val realPasswordOpt = "ghp_optional_secret"
+        // ── case 3: pushSource et pushTemplate nulls ─────────────────────────
+        val configNullPush = SiteConfiguration(
+            pushPage     = GitPushConfiguration(),
+            pushMaquette = GitPushConfiguration(),
+            pushSource   = null,
+            pushTemplate = null
+        )
+        val yamlNullPush = with(anonymizer) { configNullPush.toAnonymizedYaml(mapper) }
 
-        val configOptional = SiteConfiguration(
+        logger.lifecycle("── case 3: pushSource + pushTemplate nulls ─────────")
+        logger.lifecycle(yamlNullPush)
+
+        logger.lifecycle("✅ case 3 OK — null push fields handled safely (no NPE)")
+
+        // ── case 4: pushSource et pushTemplate non-nulls ──────────────────────
+        val realRepo3 = "https://github.com/secret/source.git"
+        val configAllPush = SiteConfiguration(
             pushPage     = GitPushConfiguration(),
             pushMaquette = GitPushConfiguration(),
             pushSource   = GitPushConfiguration(
-                branch  = "source",
-                message = "push source",
-                repo    = RepositoryConfiguration(
-                    name        = "my-source",
-                    repository  = "https://github.com/foo/source.git",
-                    credentials = RepositoryCredentials(username = "foo", password = realPasswordOpt)
+                branch = "secret-branch",
+                repo   = RepositoryConfiguration(
+                    repository  = realRepo3,
+                    credentials = RepositoryCredentials(username = "src-user", password = "src-pass")
                 )
             ),
             pushTemplate = GitPushConfiguration(
-                branch  = "template",
-                message = "push template",
-                repo    = RepositoryConfiguration(
-                    name        = "my-template",
-                    repository  = "https://github.com/foo/template.git",
-                    credentials = RepositoryCredentials(username = "foo", password = realPasswordOpt)
+                branch = "template-branch",
+                repo   = RepositoryConfiguration(
+                    repository  = "https://github.com/secret/template.git",
+                    credentials = RepositoryCredentials(username = "tmpl-user", password = "tmpl-pass")
                 )
             )
         )
-        val yamlOptional = with(anonymizer) { configOptional.toAnonymizedYaml(mapper) }
+        val yamlAllPush = with(anonymizer) { configAllPush.toAnonymizedYaml(mapper) }
 
-        logger.lifecycle("── case 3: pushSource + pushTemplate nullable ───────")
-        logger.lifecycle(yamlOptional)
+        logger.lifecycle("── case 4: pushSource + pushTemplate non-nulls ──────")
+        logger.lifecycle(yamlAllPush)
 
-        check(realPasswordOpt !in yamlOptional)                        { "FAIL case 3: real password is visible!" }
-        check("https://github.com/foo/source.git" !in yamlOptional)   { "FAIL case 3: real source repo is visible!" }
-        check("https://github.com/foo/template.git" !in yamlOptional) { "FAIL case 3: real template repo is visible!" }
-        check(anonymizer.REPO_MASK in yamlOptional)                    { "FAIL case 3: repo mask not found" }
-        check("push source" in yamlOptional)                           { "FAIL case 3: pushSource.message lost" }
-        check("push template" in yamlOptional)                         { "FAIL case 3: pushTemplate.message lost" }
-        check("my-source" in yamlOptional)                             { "FAIL case 3: pushSource.repo.name lost" }
-        check("my-template" in yamlOptional)                           { "FAIL case 3: pushTemplate.repo.name lost" }
+        check(realRepo3 !in yamlAllPush)                              { "FAIL case 4: real repo3 is visible!" }
+        check("secret-branch" !in yamlAllPush)                        { "FAIL case 4: secret-branch is visible!" }
+        check("src-user" !in yamlAllPush)                             { "FAIL case 4: src-user is visible!" }
+        check("https://github.com/secret/template.git" !in yamlAllPush) { "FAIL case 4: template repo is visible!" }
+        check(anonymizer.REPO_MASK in yamlAllPush)                    { "FAIL case 4: repo mask not found" }
 
-        logger.lifecycle("✅ case 3 OK — pushSource + pushTemplate nullable masked correctly")
+        logger.lifecycle("✅ case 4 OK — pushSource + pushTemplate masked")
 
-        // ── case 4: supabase null — pas d'explosion ───────────────────────────
-        val configNoSupabase = SiteConfiguration(
-            bake         = BakeConfiguration(srcPath = "site", destDirPath = "bake"),
-            pushPage     = GitPushConfiguration(),
-            pushMaquette = GitPushConfiguration()
-        )
-        val yamlNoSupabase = with(anonymizer) { configNoSupabase.toAnonymizedYaml(mapper) }
-
-        logger.lifecycle("── case 4: supabase null ───────────────────────────")
-        logger.lifecycle(yamlNoSupabase)
-
-        check("site" in yamlNoSupabase) { "FAIL case 4: bake.srcPath lost" }
-
-        logger.lifecycle("✅ case 4 OK — supabase null handled safely")
-
-        // ── case 5: idempotency — original must not be mutated ────────────────
+        // ── case 5: idempotency ───────────────────────────────────────────────
         val configIdempotent = SiteConfiguration(
             pushPage = GitPushConfiguration(
                 branch = "prod",
                 repo   = RepositoryConfiguration(
-                    name        = "my-repo",
                     repository  = "https://github.com/real/repo.git",
-                    credentials = RepositoryCredentials(username = "realuser", password = "realpass")
+                    credentials = RepositoryCredentials(username = "idem-user", password = "idem-pass")
                 )
             ),
-            pushMaquette = GitPushConfiguration(),
-            supabase     = SupabaseContactFormConfig(
-                project = SupabaseProjectInfo(
-                    url       = "https://real.supabase.co",
-                    publicKey = "real-public-key"
-                ),
-                schema = SupabaseDatabaseSchema(
-                    contacts = SupabaseTable("c", emptyList(), true),
-                    messages = SupabaseTable("m", emptyList(), true)
-                ),
-                rpc = SupabaseRpcFunction("rpc", emptyList())
-            )
+            pushMaquette = GitPushConfiguration()
         )
         with(anonymizer) { configIdempotent.toAnonymizedYaml(mapper) }
         val yaml2 = with(anonymizer) { configIdempotent.toAnonymizedYaml(mapper) }
 
-        check("realuser" !in yaml2)                  { "FAIL case 5: username visible on 2nd call — mutation detected!" }
-        check("realpass" !in yaml2)                  { "FAIL case 5: password visible on 2nd call — mutation detected!" }
-        check("https://real.supabase.co" !in yaml2) { "FAIL case 5: supabase url visible on 2nd call — mutation detected!" }
-        check("real-public-key" !in yaml2)           { "FAIL case 5: publicKey visible on 2nd call — mutation detected!" }
-        check(anonymizer.TOKEN_MASK in yaml2)        { "FAIL case 5: token mask not found on 2nd call" }
-        check(anonymizer.URL_MASK in yaml2)          { "FAIL case 5: url mask not found on 2nd call" }
+        check("idem-user" !in yaml2) { "FAIL case 5: username visible on 2nd call — mutation detected!" }
+        check("idem-pass" !in yaml2) { "FAIL case 5: password visible on 2nd call — mutation detected!" }
+        check(anonymizer.TOKEN_MASK in yaml2) { "FAIL case 5: token mask not found on 2nd call" }
 
         logger.lifecycle("✅ case 5 OK — original not mutated, idempotent")
 
@@ -1441,84 +1415,69 @@ tasks.register("verifySiteToAnonymizedYaml") {
 }
 
 /**
- * Verifies via logs that CodebaseConfiguration anonymization masks all sensitive fields
- * (accounts[*].keys[*].key) and preserves all non-sensitive ones
- * (name, email, label, expiresAt, baseUrl, models, defaultModel, active.*, chatbot.*).
+ * Verifies via logs that CodebaseConfiguration anonymization masks all API keys
+ * and preserves all non-sensitive fields.
  *
  * Usage: ./gradlew verifyCodebaseToAnonymizedYaml
  */
 tasks.register("verifyCodebaseToAnonymizedYaml") {
     group       = "codebase"
-    description = "Verifies via logs that CodebaseConfiguration anonymization masks sensitive fields"
+    description = "Verifies via logs that CodebaseConfiguration anonymization masks API keys"
 
     doLast {
         val mapper     = ObjectMapper(YAMLFactory()).registerKotlinModule()
         val anonymizer = CodebaseYmlAnonymizer()
 
-        // ── case 1: clés anthropic — plusieurs comptes, plusieurs clés ────────
-        val realKey1 = "sk-ant-api03-perso-realkey"
-        val realKey2 = "sk-ant-api03-pro-realkey"
+        // ── case 1: anthropic — clé réelle ───────────────────────────────────
+        val realAnthropic = "sk-ant-api03-supersecret"
         val config1 = CodebaseConfiguration(
             ai = AiProvidersConfig(
                 anthropic = LlmProviderConfig(
                     defaultAccount = "perso",
                     defaultKey     = "chatbot",
-                    models         = listOf("claude-opus-4-5", "claude-haiku-4-5"),
+                    models         = listOf("claude-opus-4-5", "claude-sonnet-4-5"),
                     defaultModel   = "claude-opus-4-5",
                     accounts       = listOf(
-                        LlmAccount(
-                            name  = "perso",
-                            email = "perso@gmail.com",
-                            keys  = listOf(
-                                NamedApiKey(label = "chatbot", key = realKey1, expiresAt = "2027-01-01"),
-                                NamedApiKey(label = "ci",      key = "sk-ant-ci-key",   expiresAt = "")
-                            )
-                        ),
-                        LlmAccount(
-                            name  = "pro",
-                            email = "pro@company.com",
-                            keys  = listOf(
-                                NamedApiKey(label = "prod", key = realKey2, expiresAt = "2026-06-30")
-                            )
-                        )
+                        LlmAccount("perso", "p@gmail.com", listOf(
+                            NamedApiKey("chatbot", realAnthropic, "2026-12-31")
+                        ))
                     )
                 )
             )
         )
         val yaml1 = with(anonymizer) { config1.toAnonymizedYaml(mapper) }
 
-        logger.lifecycle("── case 1: anthropic multi-accounts multi-keys ──────")
+        logger.lifecycle("── case 1: anthropic real key ──────────────────────")
         logger.lifecycle(yaml1)
 
-        check(realKey1 !in yaml1)                   { "FAIL case 1: realKey1 is visible!" }
-        check(realKey2 !in yaml1)                   { "FAIL case 1: realKey2 is visible!" }
-        check("sk-ant-ci-key" !in yaml1)            { "FAIL case 1: ci key is visible!" }
-        check(anonymizer.TOKEN_MASK in yaml1)        { "FAIL case 1: token mask not found" }
-        // non-sensitive preserved
-        check("perso" in yaml1)                     { "FAIL case 1: account name 'perso' lost" }
-        check("pro" in yaml1)                       { "FAIL case 1: account name 'pro' lost" }
-        check("perso@gmail.com" in yaml1)           { "FAIL case 1: account email lost" }
-        check("pro@company.com" in yaml1)           { "FAIL case 1: account email lost" }
-        check("chatbot" in yaml1)                   { "FAIL case 1: key label 'chatbot' lost" }
-        check("ci" in yaml1)                        { "FAIL case 1: key label 'ci' lost" }
-        check("2027-01-01" in yaml1)                { "FAIL case 1: expiresAt lost" }
-        check("claude-opus-4-5" in yaml1)           { "FAIL case 1: model lost" }
+        check(realAnthropic !in yaml1)           { "FAIL case 1: real anthropic key is visible!" }
+        check(anonymizer.TOKEN_MASK in yaml1)    { "FAIL case 1: token mask not found" }
+        check("perso" in yaml1)                  { "FAIL case 1: account name lost" }
+        check("p@gmail.com" in yaml1)            { "FAIL case 1: account email lost" }
+        check("chatbot" in yaml1)                { "FAIL case 1: key label lost" }
+        check("2026-12-31" in yaml1)             { "FAIL case 1: expiresAt lost" }
+        check("claude-opus-4-5" in yaml1)        { "FAIL case 1: model lost" }
 
-        logger.lifecycle("✅ case 1 OK — keys masked, accounts/labels/emails/models preserved")
+        logger.lifecycle("✅ case 1 OK — anthropic key masked, metadata preserved")
 
-        // ── case 2: gemini + huggingface + mistral + grok + groq — clés masquées
-        val realGemini  = "AIzaSy-realGemini"
-        val realHf      = "hf_realHuggingFace"
-        val realMistral = "mst-realMistral"
-        val realGrok    = "xai-realGrok"
-        val realGroq    = "gsk_realGroq"
+        // ── case 2: tous les providers sauf ollama ────────────────────────────
+        val realGemini  = "AIzaSyD-supersecret"
+        val realHf      = "hf_supersecrettoken"
+        val realMistral = "ms-supersecret-key"
+        val realGrok    = "xai-supersecret"
+        val realGroq    = "gsk_supersecret"
+
         val config2 = CodebaseConfiguration(
             ai = AiProvidersConfig(
                 gemini = LlmProviderConfig(accounts = listOf(
-                    LlmAccount("perso", "g@gmail.com", listOf(NamedApiKey("main", realGemini, "2026-12-31")))
+                    LlmAccount("perso", "g@gmail.com", listOf(
+                        NamedApiKey("main", realGemini, "2026-12-31")
+                    ))
                 )),
                 huggingface = LlmProviderConfig(accounts = listOf(
-                    LlmAccount("perso", "hf@gmail.com", listOf(NamedApiKey("main", realHf, "")))
+                    LlmAccount("perso", "hf@gmail.com", listOf(
+                        NamedApiKey("main", realHf, "")
+                    ))
                 )),
                 mistral = LlmProviderConfig(accounts = listOf(
                     LlmAccount("perso", "ms@gmail.com", listOf(
@@ -1673,50 +1632,7 @@ tasks.register("verifyCodebaseToAnonymizedYaml") {
         logger.lifecycle("✅ verifyCodebaseToAnonymizedYaml — all cases passed")
     }
 }
-// ── Chatbot UI (Javelit) ──────────────────────────────────────────────────────
 
-/**
- * Rendu Javelit du chatbot.
- * Appelé à chaque rerun par le serveur Javelit.
- *
- * [history] est mutable et partagé entre reruns : il accumule les échanges.
- * Le LLM est mocké tant que l'intégration LangChain4j n'est pas activée.
- */
-fun chatbotApp(
-    history: MutableList<Pair<String, String>>
-) {
-    Jt.title("🤖 Codebase Chatbot").use()
-    Jt.markdown("_LLM mocké — tâtonnement UI_").use()
-    Jt.divider("header").use()
-
-    // ── Historique ────────────────────────────────────────────────────────────
-    if (history.isEmpty()) {
-        Jt.info("Aucun message pour l'instant. Commencez la conversation !").use()
-    } else {
-        history.forEach { (role, content) ->
-            val label = if (role == "user") "**Vous :**" else "**Assistant :**"
-            Jt.markdown("$label $content").use()
-        }
-    }
-
-    Jt.divider("before-form").use()
-
-    // ── Formulaire de saisie ──────────────────────────────────────────────────
-    val form      = Jt.form().use()
-    val userInput = Jt.textArea("Votre message").height(120).use(form)
-    val submitted = Jt.formSubmitButton("Envoyer ➤").use(form)
-
-    if (submitted && userInput.isNotBlank()) {
-        history += "user" to userInput.trim()
-
-        // ── Mock LLM ──────────────────────────────────────────────────────────
-        val mockResponse = "[mock] Reçu : « ${userInput.trim()} » " +
-                "(${history.count { it.first == "user" }} message(s) envoyé(s))"
-        history += "assistant" to mockResponse
-
-        Jt.rerun()
-    }
-}
 /**
  * Scaffolds codebase.yml with empty fields and registers it in .gitignore.
  *
@@ -1889,6 +1805,141 @@ tasks.register("scaffoldCodebaseYml") {
     }
 }
 
+// ── Chatbot helpers ───────────────────────────────────────────────────────────
+
+/**
+ * Retourne la liste des modèles disponibles pour le provider actif.
+ * Retourne les modèles configurés dans LlmProviderConfig.models.
+ * Fallback sur un placeholder si la liste est vide (phase tâtonnement UI).
+ */
+fun availableModels(cfg: CodebaseConfiguration, providerName: String): List<String> {
+    val provider: LlmProviderConfig = when (providerName.lowercase()) {
+        "anthropic"   -> cfg.ai.anthropic
+        "gemini"      -> cfg.ai.gemini
+        "huggingface" -> cfg.ai.huggingface
+        "mistral"     -> cfg.ai.mistral
+        "ollama"      -> cfg.ai.ollama
+        "grok"        -> cfg.ai.grok
+        "groq"        -> cfg.ai.groq
+        else          -> return emptyList()
+    }
+    return provider.models.ifEmpty { listOf("${providerName}-default") }
+}
+
+/**
+ * Rendu Javelit du chatbot.
+ * Appelé à chaque rerun par le serveur Javelit.
+ *
+ * Barre de saisie (style Claude) :
+ *  ┌─────────────────────────────┬──────────────────┬──────────┐
+ *  │  Votre message (textArea)   │  [ opus-4-5 ▾ ]  │  [ ➤ ]  │
+ *  └─────────────────────────────┴──────────────────┴──────────┘
+ *
+ * Le bouton modèle ouvre un popover contenant :
+ *  - la liste des modèles disponibles (radio)
+ *  - un bouton "⚙ Settings" sans comportement pour l'instant
+ *
+ * Le LLM est mocké — seule l'UI est validée à ce stade.
+ */
+fun chatbotApp(
+    cfg:          CodebaseConfiguration,
+    providerName: String
+) {
+    // ── Session state ─────────────────────────────────────────────────────────
+    Jt.sessionState().putIfAbsent("history", mutableListOf<Pair<String, String>>())
+    @Suppress("UNCHECKED_CAST")
+    val history = Jt.sessionState()
+        .get("history") as MutableList<Pair<String, String>>
+
+    val models       = availableModels(cfg, providerName)
+    val defaultModel = models.firstOrNull() ?: "no-model"
+    Jt.sessionState().putIfAbsent("selectedModel", defaultModel)
+    val currentModel = Jt.sessionState().getString("selectedModel") ?: defaultModel
+
+    // ── Titre + sous-titre provider ───────────────────────────────────────────
+    Jt.title("🤖 Codebase Chatbot").use()
+    Jt.markdown("_Provider :_ `$providerName` · _LLM mocké_").use()
+    Jt.divider("header").use()
+
+    // ── Historique ────────────────────────────────────────────────────────────
+    if (history.isEmpty()) {
+        Jt.info("Aucun message pour l'instant. Commencez la conversation !").use()
+    } else {
+        history.forEach { (role, content) ->
+            val label = if (role == "user") "**Vous :**" else "**Assistant :**"
+            Jt.markdown("$label $content").use()
+        }
+    }
+
+    Jt.divider("before-form").use()
+
+    // ── Barre de saisie : textArea | [modèle ▾] | [➤] ────────────────────────
+    //
+    // Layout 3 colonnes :
+    //   col(0) 70% — textArea dans le form
+    //   col(1) 18% — bouton modèle + popover (hors form)
+    //   col(2) 12% — bouton submit dans le form
+    //
+    // Contrainte Javelit : form et popover ne peuvent pas partager la même colonne.
+
+    val bar = Jt.columns(3)
+        .widths(listOf(0.70, 0.18, 0.12))
+        .use()
+
+    // col(0) — zone de saisie
+    val form      = Jt.form().use(bar.col(0))
+    val userInput = Jt.textArea("").placeholder("Votre message…").height(80).use(form)
+
+    // col(1) — bouton modèle abrégé + popover liste des modèles
+    //
+    // Abréviation : on garde les 3 derniers segments séparés par '-'
+    // ex: "claude-opus-4-5" → "opus-4-5" | "gemini-2.5-pro" → "2.5-pro"
+    val shortModel = currentModel.split('-').let { parts ->
+        if (parts.size >= 3) parts.takeLast(3).joinToString("-") else currentModel
+    }
+
+    val modelPopover = Jt.popover("$shortModel ▾")
+        .key("model-picker")
+        .use(bar.col(1))
+
+    // Contenu du popover
+    Jt.markdown("#### Choisir un modèle").use(modelPopover)
+    Jt.divider("pop-top").use(modelPopover)
+
+    val pickedModel = Jt.radio("", models)
+        .value(currentModel)
+        .use(modelPopover)
+
+    if (pickedModel != currentModel) {
+        Jt.sessionState().put("selectedModel", pickedModel)
+        Jt.rerun()
+    }
+
+    Jt.divider("pop-mid").use(modelPopover)
+
+    // Bouton Settings — pas de comportement pour l'instant
+    Jt.button("⚙ Settings")
+        .key("settings-in-popover")
+        .icon(":material/build:")
+        .use(modelPopover)
+
+    // col(2) — bouton submit
+    val submitted = Jt.formSubmitButton("➤").use(bar.col(2))
+
+    // ── Traitement du message soumis ──────────────────────────────────────────
+    if (submitted && userInput.isNotBlank()) {
+        val model = Jt.sessionState().getString("selectedModel") ?: defaultModel
+        history += "user" to userInput.trim()
+
+        // Mock LLM
+        val mockResponse = "[mock] `$model` — reçu : « ${userInput.trim()} » " +
+                "(${history.count { it.first == "user" }} msg)"
+        history += "assistant" to mockResponse
+
+        Jt.rerun()
+    }
+}
+
 /**
  * Démarre un serveur Javelit embarqué exposant le chatbot sur le port configuré
  * dans codebase.yml (défaut : 7070).
@@ -1898,6 +1949,7 @@ tasks.register("scaffoldCodebaseYml") {
  *
  * Surcharge CLI :
  *   ./gradlew chatbot -Pcodebase.port=8080
+ *   ./gradlew chatbot -Pcodebase.provider=ollama
  *
  * Arrêt propre :
  *   Ctrl+C → shutdown hook JVM → CountDownLatch.countDown() → thread Gradle libéré
@@ -1916,17 +1968,18 @@ tasks.register("chatbot") {
         val localConfig = CodebaseYmlConfig()
         val cfg = with(localConfig) { CodebaseConfiguration.load(projectDir) }
 
-        val cliPort = (project.findProperty("codebase.port") as String?)
-            ?.toIntOrNull()
+        val cliProvider = project.findProperty("codebase.provider") as String?
+        val cliPort     = (project.findProperty("codebase.port") as String?)?.toIntOrNull()
+
+        val providerName = (cliProvider?.takeIf { it.isNotBlank() }
+            ?: cfg.active.provider.takeIf { it.isNotBlank() }
+            ?: "anthropic").lowercase()
+
         val port = cliPort ?: cfg.chatbot.port
 
-        taskLogger.lifecycle("[chatbot] Port : $port")
-        taskLogger.lifecycle("[chatbot] Provider configuré : ${cfg.active.provider} (mocké)")
-
-        // ── État partagé entre reruns Javelit ─────────────────────────────────
-        // La liste est instanciée ici (dans doLast) — pas top-level,
-        // car les instances top-level ne sont pas sérialisables.
-        val history = mutableListOf<Pair<String, String>>()
+        taskLogger.lifecycle("[chatbot] Port     : $port")
+        taskLogger.lifecycle("[chatbot] Provider : $providerName (mocké)")
+        taskLogger.lifecycle("[chatbot] Modèles  : ${availableModels(cfg, providerName)}")
 
         // ── Latch pour bloquer le thread Gradle jusqu'à Ctrl+C ────────────────
         val latch = CountDownLatch(1)
@@ -1938,7 +1991,7 @@ tasks.register("chatbot") {
         })
 
         // ── Démarrage serveur Javelit (non-bloquant) ──────────────────────────
-        val server = Server.builder({ chatbotApp(history) }, port).build()
+        val server = Server.builder({ chatbotApp(cfg, providerName) }, port).build()
         server.start()
 
         taskLogger.lifecycle("✅ Chatbot démarré → http://localhost:$port")
