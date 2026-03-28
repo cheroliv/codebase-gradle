@@ -1833,23 +1833,41 @@ fun availableModels(cfg: CodebaseConfiguration, providerName: String): List<Stri
 //
 // Layout général :
 //
-//  ┌──────────────────────────────────────────────────────────────────────────┐
-//  │  🤖 Codebase Chatbot                                                     │
-//  │  Provider : anthropic  ·  Modèle actif : opus-4-5  ·  LLM mocké         │
-//  ├──────────────────────────────────────────────────────────────────────────┤
-//  │  👤 Vous :       message utilisateur (fond bleu)                         │
-//  │  🤖 Assistant :  réponse             (fond vert)                         │
-//  ├──────────────────────────────────────────────────────────────────────────┤
-//  │  col(0) 82% — form                       │  col(1) 18% — popover modèle  │
-//  │   ├─ sous-col(0) 85% : textArea          │  (hors form — contrainte)     │
-//  │   └─ sous-col(1) 15% : formSubmitButton  │                               │
-//  └──────────────────────────────────────────────────────────────────────────┘
+//  ┌─────────────────────────────────────────────────────────────┐
+//  │  🤖 Codebase Chatbot                                        │
+//  │  Provider · Modèle actif · LLM mocké  │  🔍                │  ← bouton loupe
+//  ├─────────────────────────────────────────────────────────────┤
+//  │  [ Expander recherche — sessionState["searchOpen"] ]        │
+//  │    [ textInput terme ]  [ 🔍 ]                              │
+//  │    ◀  2 / 5  ▶                                              │
+//  │    résultats filtrés avec occurrences surlignées (html)     │
+//  ├─────────────────────────────────────────────────────────────┤
+//  │  historique conversation (bulles HTML)                      │
+//  ├─────────────────────────────────────────────────────────────┤
+//  │  [ ⚙️ shortModel (expander) ]  │  │  [ ⬆️ ]               │
+//  │    radio modèles               │  │  (form dédié)          │
+//  │    ➕ Ajouter provider         │  │                         │
+//  ├─────────────────────────────────────────────────────────────┤
+//  │  textArea (pleine largeur, hors form)                       │
+//  └─────────────────────────────────────────────────────────────┘
+//
+// Recherche :
+//  - sessionState["searchOpen"]  : Boolean — expander ouvert/fermé
+//  - sessionState["searchTerm"]  : String  — terme saisi
+//  - sessionState["searchIndex"] : Int     — occurrence courante (0-based)
+//  - occurrences calculées à chaque rerun en filtrant history sur searchTerm
+//  - surlignage via <mark> dans Jt.html(), insensible à la casse
 //
 // Règles Javelit respectées :
-//  - formSubmitButton DOIT être dans un form container → innerBar dans le form
-//  - form et popover ne peuvent pas partager la même colonne → col(1) dédié
-//  - textArea avec labelVisibility(HIDDEN) → contrainte height min levée
-//  - radio avec .index(Int) → pré-sélection propre sans réordonner la liste
+//  - formSubmitButton DOIT être dans un form ✅
+//  - form et expander peuvent coexister dans la même colonne ✅
+//  - textArea hors form, valeur persistée via .onChange() → sessionState ✅
+//  - textArea labelVisibility(HIDDEN) → contrainte height min levée ✅
+//  - radio .index(currentIndex) → pré-sélection propre ✅
+//  - formSubmitButton label obligatoire non-vide → emoji direct ✅
+//  - .useContainerWidth() déprécié, aucun remplacement dispo → supprimé ✅
+//  - Séparateur vertical : Jt.html() avec border-left CSS ✅
+//  - Jt.html() = HTML statique — ne peut pas contenir de composants Javelit ✅
 //
 // Le LLM est mocké — seule l'UI est validée à ce stade.
 fun chatbotApp(
@@ -1867,21 +1885,162 @@ fun chatbotApp(
     Jt.sessionState().putIfAbsent("selectedModel", defaultModel)
     val currentModel = Jt.sessionState().getString("selectedModel") ?: defaultModel
 
-    // Index du modèle courant pour .index() sur le radio
-    // — évite de réordonner la liste (Jt.radio n'a pas de .value())
     val currentIndex = models.indexOf(currentModel).takeIf { it >= 0 } ?: 0
 
-    // Abréviation du modèle : 3 derniers segments séparés par '-'
-    // ex: "claude-opus-4-5" → "opus-4-5" | "gemini-2.5-pro" → "2.5-pro"
+    // Abréviation : 3 derniers segments séparés par '-'
     val shortModel = currentModel.split('-').let { parts ->
         if (parts.size >= 3) parts.takeLast(3).joinToString("-") else currentModel
     }
 
-    // ── En-tête : titre + indicateurs d'état ─────────────────────────────────
+    Jt.sessionState().putIfAbsent("pendingMessage", "")
+    Jt.sessionState().putIfAbsent("searchOpen",  false)
+    Jt.sessionState().putIfAbsent("searchTerm",  "")
+    Jt.sessionState().putIfAbsent("searchIndex", 0)
+
+    val searchOpen  = Jt.sessionState().get("searchOpen")  as Boolean
+    val searchTerm  = Jt.sessionState().getString("searchTerm") ?: ""
+    val searchIndex = (Jt.sessionState().get("searchIndex") as? Int) ?: 0
+
+    // ── En-tête : titre + indicateurs + bouton loupe ─────────────────────────
     Jt.title("🤖 Codebase Chatbot").use()
+
+    // Ligne indicateurs : 2 colonnes — texte à gauche, loupe à droite
+    val headerBar = Jt.columns(2)
+        .widths(listOf(0.92, 0.08))
+        .gap(ColumnsComponent.Gap.NONE)
+        .verticalAlignment(ColumnsComponent.VerticalAlignment.CENTER)
+        .use()
+
     Jt.markdown(
         "**Provider :** `$providerName`  ·  **Modèle actif :** `$shortModel`  ·  _LLM mocké_"
-    ).use()
+    ).use(headerBar.col(0))
+
+    // Bouton loupe — toggle sessionState["searchOpen"] + rerun
+    val searchClicked = Jt.button("🔍")
+        .key("search-toggle")
+        .use(headerBar.col(1))
+
+    if (searchClicked) {
+        Jt.sessionState().put("searchOpen", !searchOpen)
+        Jt.rerun()
+    }
+
+    // Séparateur visible uniquement quand la recherche est ouverte
+    if (searchOpen) Jt.markdown("---").use()
+
+    // ── Bloc recherche — rendu uniquement si searchOpen == true ─────────────
+    // Pas d'expander : on conditionne tout le rendu pour libérer l'espace
+    // quand la recherche est fermée. Le bouton loupe dans headerBar est le seul toggle.
+    val searchContainer = Jt.container().key("search-container").use()
+
+    if (searchOpen) {
+        // Ligne saisie : textInput (90%) + bouton 🔍 (10%) dans un form
+        val searchForm = Jt.form().key("search-form").use(searchContainer)
+
+        val searchInputBar = Jt.columns(2)
+            .widths(listOf(0.90, 0.10))
+            .gap(ColumnsComponent.Gap.SMALL)
+            .verticalAlignment(ColumnsComponent.VerticalAlignment.CENTER)
+            .use(searchForm)
+
+        val typedTerm = Jt.textInput("Rechercher")
+            .placeholder("Terme de recherche…")
+            .labelVisibility(JtComponent.LabelVisibility.HIDDEN)
+            .value(searchTerm)
+            .use(searchInputBar.col(0))
+
+        val searchSubmitted = Jt.formSubmitButton("🔍").use(searchInputBar.col(1))
+
+        if (searchSubmitted) {
+            Jt.sessionState().put("searchTerm",  typedTerm.trim())
+            Jt.sessionState().put("searchIndex", 0)
+            Jt.rerun()
+        }
+
+        // ── Résultats de recherche ────────────────────────────────────────────────
+        if (searchTerm.isNotBlank()) {
+
+            // Calcul des occurrences : (msgIndex, role, content, liste des positions du terme)
+            data class Hit(val msgIndex: Int, val role: String, val content: String)
+            val hits = history.mapIndexedNotNull { i, (role, content) ->
+                if (content.contains(searchTerm, ignoreCase = true)) Hit(i, role, content) else null
+            }
+            val total = hits.size
+            // searchIndex borné entre 0 et total-1
+            val safeIndex = if (total == 0) 0 else searchIndex.coerceIn(0, total - 1)
+
+            // Résumé + navigation
+            if (total == 0) {
+                Jt.warning("Aucune occurrence trouvée pour « $searchTerm »").use(searchContainer)
+            } else {
+                // Ligne navigation : ◀  N / T  ▶  —  3 colonnes dans un form dédié
+                val navForm = Jt.form().key("search-nav-form").use(searchContainer)
+                val navBar = Jt.columns(3)
+                    .widths(listOf(0.15, 0.70, 0.15))
+                    .gap(ColumnsComponent.Gap.NONE)
+                    .verticalAlignment(ColumnsComponent.VerticalAlignment.CENTER)
+                    .use(navForm)
+
+                val prevClicked = Jt.formSubmitButton("◀")
+                    .key("search-prev")
+                    .use(navBar.col(0))
+
+                Jt.markdown(
+                    "${safeIndex + 1} / $total occurrence${if (total > 1) "s" else ""}  " +
+                            "· « **$searchTerm** »"
+                ).use(navBar.col(1))
+
+                val nextClicked = Jt.formSubmitButton("▶")
+                    .key("search-next")
+                    .use(navBar.col(2))
+
+                if (prevClicked) {
+                    Jt.sessionState().put("searchIndex", (safeIndex - 1 + total) % total)
+                    Jt.rerun()
+                }
+                if (nextClicked) {
+                    Jt.sessionState().put("searchIndex", (safeIndex + 1) % total)
+                    Jt.rerun()
+                }
+
+                Jt.markdown("---").use(searchContainer)
+
+                // Affichage du hit courant avec occurrences surlignées
+                // + résumé de tous les hits (numéro + extrait)
+                hits.forEachIndexed { hitIdx, hit ->
+                    val isCurrent = hitIdx == safeIndex
+                    val label     = if (hit.role == "user") "👤 Vous" else "🤖 Assistant"
+                    val bgColor   = if (hit.role == "user") "#e8f4fd" else "#f1f8e9"
+                    val border    = if (isCurrent) "2px solid #FF9800" else "1px solid #ddd"
+                    val shadow    = if (isCurrent) "box-shadow:0 0 0 2px #FF980044;" else ""
+
+                    // Surlignage insensible à la casse via regex
+                    val highlighted = hit.content.replace(
+                        Regex("(?i)(${Regex.escape(searchTerm)})"),
+                        "<mark style=\"background:#FFF176;border-radius:2px;\">$1</mark>"
+                    )
+
+                    Jt.html("""
+                    <div style="
+                        background:$bgColor;
+                        border:$border;
+                        border-radius:4px;
+                        padding:8px 12px;
+                        margin:4px 0;
+                        font-size:0.92em;
+                        $shadow">
+                      <strong>$label</strong>
+                      ${if (isCurrent) " <span style=\"color:#FF9800;font-size:0.85em;\">◀ occurrence ${hitIdx + 1}</span>" else ""}
+                      <br/>
+                      ${highlighted.replace("\n", "<br/>")}
+                    </div>
+                """.trimIndent()).use(searchContainer)
+                }
+            }
+        }
+
+    } // fin if (searchOpen)
+
     Jt.markdown("---").use()
 
     // ── Historique de conversation ────────────────────────────────────────────
@@ -1921,76 +2080,83 @@ fun chatbotApp(
 
     Jt.markdown("---").use()
 
-    // ── Zone de saisie ────────────────────────────────────────────────────────
-    //
-    // Layout :
-    //
-    //  ┌─────────────────────────────────────────────────────┐
-    //  │  textArea  (pleine largeur, dans le form)           │
-    //  ├─────────────────────────────────────────────────────┤
-    //  │  selectBox : current_model ⚙  (85%)  │  [ ↑ ] (15%)│
-    //  └─────────────────────────────────────────────────────┘
-    //
-    // Tout est dans le form :
-    //  - textArea    : message à envoyer
-    //  - selectBox   : modèle sélectionné — valeur lue au submit pour màj sessionState
-    //  - formSubmitButton : déclenche le submit
-    //
-    // Règles Javelit respectées :
-    //  - formSubmitButton DOIT être dans un form container ✅
-    //  - textArea labelVisibility(HIDDEN) → contrainte height min levée ✅
-    //  - selectBox .index(currentIndex) → pré-sélection propre ✅
-    //  - .useContainerWidth() déprécié, aucun remplacement dispo (confirmé javap) → supprimé ✅
+    // ── Groupe saisie : barre de contrôle + textArea collés ensemble ──────────
+    // Le container groupe les deux blocs pour supprimer l'espace entre eux
+    // et donner plus de place à l'historique au-dessus.
+    val inputGroup = Jt.container().key("input-group").use()
 
-    val form = Jt.form()
-        .clearOnSubmit(true)
-        .use()
+    // ── Barre de contrôle : 3 colonnes ───────────────────────────────────────
+    //  col(0) 80% : expander sélecteur de modèle
+    //  col(1)  2% : séparateur vertical HTML
+    //  col(2) 18% : form + formSubmitButton
 
-    // Ligne 1 — textArea pleine largeur
+    val ctrlBar = Jt.columns(3)
+        .widths(listOf(0.80, 0.02, 0.18))
+        .gap(ColumnsComponent.Gap.NONE)
+        .verticalAlignment(ColumnsComponent.VerticalAlignment.TOP)
+        .use(inputGroup)
+
+    // col(0) — expander sélecteur de modèle
+    val modelExpander = Jt.expander("⚙️ $shortModel")
+        .expanded(false)
+        .use(ctrlBar.col(0))
+
+    Jt.markdown("#### Modèles disponibles").use(modelExpander)
+    Jt.markdown("---").use(modelExpander)
+
+    val pickedModel = Jt.radio("Modèle", models)
+        .index(currentIndex)
+        .labelVisibility(JtComponent.LabelVisibility.COLLAPSED)
+        .use(modelExpander)
+
+    if (pickedModel != currentModel) {
+        Jt.sessionState().put("selectedModel", pickedModel)
+        Jt.rerun()
+    }
+
+    Jt.markdown("---").use(modelExpander)
+
+    Jt.button("➕ Ajouter un provider / modèle")
+        .use(modelExpander)
+
+    // col(1) — séparateur vertical
+    Jt.html("""
+        <div style="
+            border-left:1px solid #ccc;
+            height:32px;
+            margin:0 auto;
+            width:1px;">
+        </div>
+    """.trimIndent()).use(ctrlBar.col(1))
+
+    // col(2) — form dédié au formSubmitButton
+    val submitForm = Jt.form().key("submit-form").use(ctrlBar.col(2))
+    val submitted  = Jt.formSubmitButton("⬆️").use(submitForm)
+
+    // ── textArea — pleine largeur, hors form ──────────────────────────────────
     val userInput = Jt.textArea("Message")
         .placeholder("Votre message…")
         .labelVisibility(JtComponent.LabelVisibility.HIDDEN)
         .height(120)
-        .use(form)
-
-    // Ligne 2 — selectBox modèle + bouton submit
-    val ctrlBar = Jt.columns(2)
-        .widths(listOf(0.85, 0.15))
-        .gap(ColumnsComponent.Gap.SMALL)
-        .verticalAlignment(ColumnsComponent.VerticalAlignment.CENTER)
-        .use(form)
-
-    // selectBox dans le form — .index() pour pré-sélection, label masqué
-    // .width("stretch") = pleine largeur colonne
-    // Valeurs valides : "stretch", "content", ou entier pixels — "100%" est invalide
-    val selectedModel = Jt.selectbox("Modèle", models)
-        .index(currentIndex)
-        .labelVisibility(JtComponent.LabelVisibility.HIDDEN)
-        .width("stretch")
-        .use(ctrlBar.col(0))
-
-    // formSubmitButton dans le form via ctrlBar.col(1)
-    // Label vide accepté (confirmé bytecode EmojiUtils : null/empty → skip validation)
-    // Icône : emoji unicode — syntaxe ":xxx:" reconnue par EmojiManager ou emoji direct
-    // ":material/xxx:" affiche le texte littéral (icônes Material non embarquées dans le jar)
-    val submitted = Jt.formSubmitButton("")
-        .icon("⬆️")
-        .use(ctrlBar.col(1))
+        .onChange { Jt.sessionState().put("pendingMessage", it) }
+        .use(inputGroup)
 
     // ── Traitement du message soumis ──────────────────────────────────────────
-    if (submitted && userInput.isNotBlank()) {
-        // Mise à jour du modèle actif depuis la valeur du selectBox
-        Jt.sessionState().put("selectedModel", selectedModel)
-        history += "user" to userInput.trim()
+    if (submitted) {
+        val pending = Jt.sessionState().getString("pendingMessage") ?: ""
+        if (pending.isNotBlank()) {
+            Jt.sessionState().put("pendingMessage", "")
+            history += "user" to pending.trim()
 
-        // Mock LLM
-        val mockResponse = "[mock] `$selectedModel` — reçu : « ${userInput.trim()} » " +
-                "(${history.count { it.first == "user" }} msg)"
-        history += "assistant" to mockResponse
+            val mockResponse = "[mock] `$currentModel` — reçu : « ${pending.trim()} » " +
+                    "(${history.count { it.first == "user" }} msg)"
+            history += "assistant" to mockResponse
 
-        Jt.rerun()
+            Jt.rerun()
+        }
     }
 }
+
 
 /**
  * Démarre un serveur Javelit embarqué exposant le chatbot sur le port configuré
