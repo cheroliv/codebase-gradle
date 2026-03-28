@@ -1119,10 +1119,10 @@ tasks.register("verifySliderToAnonymizedYaml") {
         check(realUsername !in yamlReal)                             { "FAIL case 1: real username is visible!" }
         check(realRepo !in yamlReal)                                 { "FAIL case 1: real repo is visible!" }
         check(realBranch !in yamlReal)                               { "FAIL case 1: real branch is visible!" }
-        check("FAKE-gemini-key-for-test-only" !in yamlReal)      { "FAIL case 1: real gemini key is visible!" }
-        check("FAKE-hf-key-for-test-only" !in yamlReal) { "FAIL case 1: real huggingface key is visible!" }
-        check("FAKE-mistral-key-1" !in yamlReal)                   { "FAIL case 1: real mistral key is visible!" }
-        check("FAKE-mistral-key-2" !in yamlReal)                  { "FAIL case 1: real mistral key 2 is visible!" }
+        check("FAKE-gemini-key-for-test-only" !in yamlReal)  { "FAIL case 1: real gemini key is visible!" }
+        check("FAKE-hf-key-for-test-only" !in yamlReal)      { "FAIL case 1: real huggingface key is visible!" }
+        check("FAKE-mistral-key-1" !in yamlReal)              { "FAIL case 1: real mistral key is visible!" }
+        check("FAKE-mistral-key-2" !in yamlReal)              { "FAIL case 1: real mistral key 2 is visible!" }
         check(anonymizer.TOKEN_MASK in yamlReal)                     { "FAIL case 1: token mask not found" }
         check(anonymizer.ANONYMOUS_USERNAME in yamlReal)             { "FAIL case 1: anonymous username not found" }
         check(anonymizer.REPO_MASK in yamlReal)                      { "FAIL case 1: repo mask not found" }
@@ -1461,11 +1461,11 @@ tasks.register("verifyCodebaseToAnonymizedYaml") {
         logger.lifecycle("✅ case 1 OK — anthropic key masked, metadata preserved")
 
         // ── case 2: tous les providers sauf ollama ────────────────────────────
-        val realGemini  = "AIzaSyD-supersecret"
-        val realHf      = "hf_supersecrettoken"
-        val realMistral = "ms-supersecret-key"
-        val realGrok    = "xai-supersecret"
-        val realGroq    = "gsk_supersecret"
+        val realGemini  = "FAKE-gemini-AIzaSy-test"
+        val realHf      = "FAKE-hf-token-test"
+        val realMistral = "FAKE-mistral-key-test"
+        val realGrok    = "FAKE-grok-key-test"
+        val realGroq    = "FAKE-groq-gsk-test"
 
         val config2 = CodebaseConfiguration(
             ai = AiProvidersConfig(
@@ -1859,7 +1859,7 @@ fun chatbotApp(
     // ── Titre + sous-titre provider ───────────────────────────────────────────
     Jt.title("🤖 Codebase Chatbot").use()
     Jt.markdown("_Provider :_ `$providerName` · _LLM mocké_").use()
-    Jt.divider("header").use()
+    Jt.markdown("---").use()
 
     // ── Historique ────────────────────────────────────────────────────────────
     if (history.isEmpty()) {
@@ -1871,7 +1871,7 @@ fun chatbotApp(
         }
     }
 
-    Jt.divider("before-form").use()
+    Jt.markdown("---").use()
 
     // ── Barre de saisie : textArea | [modèle ▾] | [➤] ────────────────────────
     //
@@ -1888,7 +1888,7 @@ fun chatbotApp(
 
     // col(0) — zone de saisie
     val form      = Jt.form().use(bar.col(0))
-    val userInput = Jt.textArea("").placeholder("Votre message…").height(80).use(form)
+    val userInput = Jt.textArea("Message").placeholder("Votre message…").height(80).use(form)
 
     // col(1) — bouton modèle abrégé + popover liste des modèles
     //
@@ -1904,10 +1904,12 @@ fun chatbotApp(
 
     // Contenu du popover
     Jt.markdown("#### Choisir un modèle").use(modelPopover)
-    Jt.divider("pop-top").use(modelPopover)
+    Jt.markdown("---").use(modelPopover)
 
-    val pickedModel = Jt.radio("", models)
-        .value(currentModel)
+    // On place le modèle courant en tête de liste pour qu'il soit pré-sélectionné
+    // (Jt.radio ne supporte pas .value() — la sélection par défaut = premier élément)
+    val orderedModels = listOf(currentModel) + models.filter { it != currentModel }
+    val pickedModel = Jt.radio("", orderedModels)
         .use(modelPopover)
 
     if (pickedModel != currentModel) {
@@ -1915,7 +1917,7 @@ fun chatbotApp(
         Jt.rerun()
     }
 
-    Jt.divider("pop-mid").use(modelPopover)
+    Jt.markdown("---").use(modelPopover)
 
     // Bouton Settings — pas de comportement pour l'instant
     Jt.button("⚙ Settings")
@@ -1948,13 +1950,20 @@ fun chatbotApp(
  * L'intégration réelle (LangChain4j + resolveActiveKey) est planifiée en roadmap.
  *
  * Surcharge CLI :
- *   ./gradlew chatbot -Pcodebase.port=8080
- *   ./gradlew chatbot -Pcodebase.provider=ollama
+ *   ./gradlew --no-daemon chatbot
+ *   ./gradlew --no-daemon chatbot -Pcodebase.port=8080
+ *   ./gradlew --no-daemon chatbot -Pcodebase.provider=ollama
  *
  * Arrêt propre :
- *   Ctrl+C → shutdown hook JVM → CountDownLatch.countDown() → thread Gradle libéré
+ *   Ctrl+C → shutdown hook → latch.countDown() → server.stop() → Runtime.halt(0)
  *
- * Usage: ./gradlew chatbot
+ * Note : --no-daemon est obligatoire. Sans lui, Gradle exécute la tâche dans
+ *         le Gradle Daemon — Runtime.halt(0) ne tue pas le daemon, le serveur
+ *         Javelit reste accessible après Ctrl+C. Gradle 9.x ne permet pas de
+ *         désactiver le daemon programmatiquement depuis le build script
+ *         (StartParameter.isNoDaemonBuild supprimé en Gradle 9).
+ *
+ * Usage: ./gradlew --no-daemon chatbot
  */
 tasks.register("chatbot") {
     group       = "codebase"
@@ -1981,14 +1990,6 @@ tasks.register("chatbot") {
         taskLogger.lifecycle("[chatbot] Provider : $providerName (mocké)")
         taskLogger.lifecycle("[chatbot] Modèles  : ${availableModels(cfg, providerName)}")
 
-        // ── Latch pour bloquer le thread Gradle jusqu'à Ctrl+C ────────────────
-        val latch = CountDownLatch(1)
-
-        // ── Shutdown hook : signal propre à la JVM ────────────────────────────
-        Runtime.getRuntime().addShutdownHook(Thread {
-            taskLogger.lifecycle("[chatbot] Arrêt en cours…")
-            latch.countDown()
-        })
 
         // ── Démarrage serveur Javelit (non-bloquant) ──────────────────────────
         val server = Server.builder({ chatbotApp(cfg, providerName) }, port).build()
@@ -1997,9 +1998,26 @@ tasks.register("chatbot") {
         taskLogger.lifecycle("✅ Chatbot démarré → http://localhost:$port")
         taskLogger.lifecycle("   Ctrl+C pour arrêter")
 
-        // ── Blocage du thread Gradle ──────────────────────────────────────────
+        // ── Latch + shutdown hook ──────────────────────────────────────────
+        // Stratégie : le hook signal le latch, le thread principal appelle
+        // server.stop() puis Runtime.halt(0) pour forcer la mort du Gradle Daemon.
+        // Undertow non-daemon qui survivent sinon au stop().
+        val latch = CountDownLatch(1)
+
+        Runtime.getRuntime().addShutdownHook(Thread {
+            taskLogger.lifecycle("[chatbot] Arrêt en cours…")
+            latch.countDown()
+        })
+
+        // ── Blocage du thread Gradle ─────────────────────────────────────────────────
         latch.await()
+
+        // Ctrl+C reçu : on arrête Javelit puis on force la sortie JVM.
+        // Runtime.halt(0) est nécessaire : System.exit() ne tue pas le Gradle Daemon
+        // qui héberge la JVM — halt() contourne ce mécanisme.
+        // --no-daemon est aussi recommandé : ./gradlew --no-daemon chatbot
         taskLogger.lifecycle("[chatbot] Arrêté proprement.")
+        Runtime.getRuntime().halt(0)
     }
 }
 
