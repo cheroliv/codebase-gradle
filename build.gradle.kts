@@ -494,8 +494,8 @@ data class NamedApiKey(
  * - [keys]   → liste des apiKeys nommées de ce compte
  */
 data class LlmAccount(
-    val name:  String           = "",
-    val email: String           = "",
+    val name:  String            = "",
+    val email: String            = "",
     val keys:  List<NamedApiKey> = emptyList()
 )
 
@@ -510,11 +510,11 @@ data class LlmAccount(
  * - [accounts]       → liste des comptes, chacun avec ses propres apiKeys nommées
  */
 data class LlmProviderConfig(
-    val defaultAccount: String          = "",
-    val defaultKey:     String          = "",
-    val baseUrl:        String          = "",
-    val models:         List<String>    = emptyList(),
-    val defaultModel:   String          = "",
+    val defaultAccount: String           = "",
+    val defaultKey:     String           = "",
+    val baseUrl:        String           = "",
+    val models:         List<String>     = emptyList(),
+    val defaultModel:   String           = "",
     val accounts:       List<LlmAccount> = emptyList()
 )
 
@@ -553,7 +553,7 @@ data class ChatbotConfig(
  * Racine de codebase.yml — centralise credentials AI et config chatbot.
  */
 data class CodebaseConfiguration(
-    val active:  ActiveSelection  = ActiveSelection(),
+    val active:  ActiveSelection   = ActiveSelection(),
     val ai:      AiProvidersConfig = AiProvidersConfig(),
     val chatbot: ChatbotConfig     = ChatbotConfig()
 ) {
@@ -626,7 +626,6 @@ class CodebaseYmlConfig {
             ?: cfg.active.provider.takeIf { it.isNotBlank() }
             ?: "anthropic").lowercase()
 
-        // Réassignation en non-nullable après le when pour que le compilateur garde le smart cast
         val provider: LlmProviderConfig = when (providerName) {
             "anthropic"   -> cfg.ai.anthropic
             "gemini"      -> cfg.ai.gemini
@@ -729,7 +728,7 @@ class CodebaseYmlAnonymizer {
             gemini      = ai.gemini.anonymized(),
             huggingface = ai.huggingface.anonymized(),
             mistral     = ai.mistral.anonymized(),
-            ollama      = ai.ollama.anonymized(maskKeys = false), // baseUrl non masquée, pas de clés
+            ollama      = ai.ollama.anonymized(maskKeys = false),
             grok        = ai.grok.anonymized(),
             groq        = ai.groq.anonymized()
         )
@@ -1610,19 +1609,15 @@ tasks.register("verifyCodebaseToAnonymizedYaml") {
             )
         )
 
-        // résolution normale
         val resolved = localConfig.resolveActiveKey(config7, logger)
         check(resolved?.key == "sk-ant-chatbot") { "FAIL case 7: expected chatbot key, got ${resolved?.key}" }
         check(resolved.label == "chatbot")       { "FAIL case 7: expected label 'chatbot', got ${resolved?.label}" }
 
-        // surcharge CLI provider+account+key
         val resolvedCli = localConfig.resolveActiveKey(config7, logger,
             cliProvider = "anthropic", cliAccount = "pro", cliKey = "prod"
         )
         check(resolvedCli?.key == "sk-ant-prod") { "FAIL case 7: CLI override failed, got ${resolvedCli?.key}" }
-        // la clé est expirée → warning attendu dans les logs (pas d'erreur)
 
-        // surcharge CLI key seule
         val resolvedCliKey = localConfig.resolveActiveKey(config7, logger,
             cliKey = "ci"
         )
@@ -1651,144 +1646,141 @@ tasks.register("scaffoldCodebaseYml") {
         val projectDir = layout.projectDirectory.asFile
         val target     = projectDir.resolve("codebase.yml")
 
-        // ── Warning + skip si déjà présent ───────────────────────────────────
         if (target.exists()) {
             logger.warn("⚠️  codebase.yml already exists — scaffold skipped (delete it manually to regenerate)")
             return@doLast
         }
 
-        // ── Génération du fichier scaffold ────────────────────────────────────
         val scaffold = """
-            # codebase.yml — LLM provider credentials and chatbot configuration
-            # ⚠️  This file contains secrets. It is listed in .gitignore — NEVER commit it.
-            #
-            # Structure:
-            #   ai.<provider>.accounts[]  → liste de comptes (name + email)
-            #   account.keys[]            → liste de clés nommées (label + key + expiresAt)
-            #   active                    → sélection active globale
-            #
-            # CLI override: ./gradlew <task> -Pcodebase.provider=gemini -Pcodebase.account=pro -Pcodebase.key=prod
+        # codebase.yml — LLM provider credentials and chatbot configuration
+        # ⚠️  This file contains secrets. It is listed in .gitignore — NEVER commit it.
+        #
+        # Structure:
+        #   ai.<provider>.accounts[]  → liste de comptes (name + email)
+        #   account.keys[]            → liste de clés nommées (label + key + expiresAt)
+        #   active                    → sélection active globale
+        #
+        # CLI override: ./gradlew <task> -Pcodebase.provider=gemini -Pcodebase.account=pro -Pcodebase.key=prod
 
-            active:
-              provider: anthropic
-              account: ""
-              key: ""
+        active:
+          provider: anthropic
+          account: ""
+          key: ""
 
-            ai:
-              anthropic:
-                defaultAccount: ""
-                defaultKey: ""
-                models:
-                  - claude-opus-4-5
-                  - claude-sonnet-4-5
-                  - claude-haiku-4-5
-                defaultModel: claude-opus-4-5
-                accounts:
-                  - name: ""
-                    email: ""
-                    keys:
-                      - label: ""
-                        key: ""
-                        expiresAt: ""
+        ai:
+          anthropic:
+            defaultAccount: ""
+            defaultKey: ""
+            models:
+              - claude-opus-4-5
+              - claude-sonnet-4-5
+              - claude-haiku-4-5
+            defaultModel: claude-opus-4-5
+            accounts:
+              - name: ""
+                email: ""
+                keys:
+                  - label: ""
+                    key: ""
+                    expiresAt: ""
 
-              gemini:
-                defaultAccount: ""
-                defaultKey: ""
-                models:
-                  - gemini-2.5-pro
-                  - gemini-2.5-flash
-                defaultModel: gemini-2.5-pro
-                accounts:
-                  - name: ""
-                    email: ""
-                    keys:
-                      - label: ""
-                        key: ""
-                        expiresAt: ""
+          gemini:
+            defaultAccount: ""
+            defaultKey: ""
+            models:
+              - gemini-2.5-pro
+              - gemini-2.5-flash
+            defaultModel: gemini-2.5-pro
+            accounts:
+              - name: ""
+                email: ""
+                keys:
+                  - label: ""
+                    key: ""
+                    expiresAt: ""
 
-              huggingface:
-                defaultAccount: ""
-                defaultKey: ""
-                models:
-                  - mistralai/Mistral-7B-Instruct-v0.3
-                  - meta-llama/Llama-3.1-8B-Instruct
-                defaultModel: mistralai/Mistral-7B-Instruct-v0.3
-                accounts:
-                  - name: ""
-                    email: ""
-                    keys:
-                      - label: ""
-                        key: ""
-                        expiresAt: ""
+          huggingface:
+            defaultAccount: ""
+            defaultKey: ""
+            models:
+              - mistralai/Mistral-7B-Instruct-v0.3
+              - meta-llama/Llama-3.1-8B-Instruct
+            defaultModel: mistralai/Mistral-7B-Instruct-v0.3
+            accounts:
+              - name: ""
+                email: ""
+                keys:
+                  - label: ""
+                    key: ""
+                    expiresAt: ""
 
-              mistral:
-                defaultAccount: ""
-                defaultKey: ""
-                models:
-                  - mistral-large-latest
-                  - mistral-small-latest
-                  - codestral-latest
-                defaultModel: mistral-large-latest
-                accounts:
-                  - name: ""
-                    email: ""
-                    keys:
-                      - label: ""
-                        key: ""
-                        expiresAt: ""
+          mistral:
+            defaultAccount: ""
+            defaultKey: ""
+            models:
+              - mistral-large-latest
+              - mistral-small-latest
+              - codestral-latest
+            defaultModel: mistral-large-latest
+            accounts:
+              - name: ""
+                email: ""
+                keys:
+                  - label: ""
+                    key: ""
+                    expiresAt: ""
 
-              ollama:
-                baseUrl: "http://localhost:11434"
-                models:
-                  - llama3.2
-                  - codellama
-                  - mistral
-                defaultModel: llama3.2
-                accounts:
-                  - name: local
-                    email: ""
-                    keys: []
+          ollama:
+            baseUrl: "http://localhost:11434"
+            models:
+              - llama3.2
+              - codellama
+              - mistral
+            defaultModel: llama3.2
+            accounts:
+              - name: local
+                email: ""
+                keys: []
 
-              grok:
-                defaultAccount: ""
-                defaultKey: ""
-                models:
-                  - grok-3
-                  - grok-3-mini
-                defaultModel: grok-3
-                accounts:
-                  - name: ""
-                    email: ""
-                    keys:
-                      - label: ""
-                        key: ""
-                        expiresAt: ""
+          grok:
+            defaultAccount: ""
+            defaultKey: ""
+            models:
+              - grok-3
+              - grok-3-mini
+            defaultModel: grok-3
+            accounts:
+              - name: ""
+                email: ""
+                keys:
+                  - label: ""
+                    key: ""
+                    expiresAt: ""
 
-              groq:
-                defaultAccount: ""
-                defaultKey: ""
-                models:
-                  - llama-3.3-70b-versatile
-                  - llama-3.1-8b-instant
-                  - mixtral-8x7b-32768
-                defaultModel: llama-3.3-70b-versatile
-                accounts:
-                  - name: ""
-                    email: ""
-                    keys:
-                      - label: ""
-                        key: ""
-                        expiresAt: ""
+          groq:
+            defaultAccount: ""
+            defaultKey: ""
+            models:
+              - llama-3.3-70b-versatile
+              - llama-3.1-8b-instant
+              - mixtral-8x7b-32768
+            defaultModel: llama-3.3-70b-versatile
+            accounts:
+              - name: ""
+                email: ""
+                keys:
+                  - label: ""
+                    key: ""
+                    expiresAt: ""
 
-            chatbot:
-              port: 7070
-              defaultProvider: anthropic
-        """.trimIndent()
+        chatbot:
+          port: 7070
+          defaultProvider: anthropic
+    """.trimIndent()
 
         target.writeText(scaffold)
         logger.lifecycle("✅ codebase.yml generated at ${target.absolutePath}")
 
-        // ── Ajout au .gitignore ───────────────────────────────────────────────
         val gitignore = projectDir.resolve(".gitignore")
         val entry     = "codebase.yml"
 
@@ -1828,117 +1820,217 @@ fun availableModels(cfg: CodebaseConfiguration, providerName: String): List<Stri
     return provider.models.ifEmpty { listOf("${providerName}-default") }
 }
 
+// ── Embeds models + loader ────────────────────────────────────────────────────
+
+/**
+ * Un embed RAG — nom affiché dans l'UI + chemin fichier source relatif au projet.
+ */
+data class EmbedEntry(
+    val name: String = "",
+    val path: String = ""
+)
+
+/**
+ * Racine de embeds.yml — liste des embeds disponibles pour enrichissement RAG.
+ */
+data class EmbedsConfig(
+    val embeds: List<EmbedEntry> = emptyList()
+) {
+    companion object
+}
+
+/**
+ * Loader pour embeds.yml — même pattern que les autres YmlConfig.
+ * Fallback sur liste vide si le fichier est absent.
+ */
+class EmbedsYmlConfig {
+    private val MAPPER = ObjectMapper(YAMLFactory()).registerKotlinModule()
+    val CONFIG_FILE_NAME = "embeds.yml"
+
+    fun EmbedsConfig.Companion.load(projectDir: File): EmbedsConfig {
+        val f = File(projectDir, CONFIG_FILE_NAME)
+        if (!f.exists() || f.length() == 0L) return EmbedsConfig()
+        return try {
+            MAPPER.readValue(f, EmbedsConfig::class.java)
+        } catch (e: Exception) {
+            println("[embeds] WARNING: $CONFIG_FILE_NAME invalid — ${e.message}")
+            EmbedsConfig()
+        }
+    }
+}
+
+val embedsYmlConfig = EmbedsYmlConfig()
+
+// ── setupSidebar ──────────────────────────────────────────────────────────────
+//
+// Sidebar commune aux deux vues.
+// Rendu dans Jt.SIDEBAR — appelée en tête de chatbotApp, avant le dispatch.
+// "New Chat" et les liens de navigation sont statiques (Javelit ne supporte
+// pas de routing multi-page fiable sans switchPage).
+//
+fun setupSidebar() {
+    val sidebar = Jt.SIDEBAR
+    val state   = Jt.sessionState()
+
+    // ── Logo ──────────────────────────────────────────────────────────────────
+    Jt.html("""
+        <div style="padding:18px 14px 10px 14px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="background:#1a3a6b;border-radius:8px;width:34px;height:34px;
+                display:flex;align-items:center;justify-content:center;
+                color:white;font-size:1.1em;font-weight:700;">✦</div>
+            <span style="font-weight:700;font-size:1.05em;color:#1a1a2e;
+                letter-spacing:0.01em;">Assistant</span>
+          </div>
+        </div>
+    """.trimIndent()).use(sidebar)
+
+    // ── New Conversation — form actif ─────────────────────────────────────────
+    val newConvForm = Jt.form().key("sidebar-new-conv").use(sidebar)
+    Jt.formSubmitButton("➕ New Conversation").use(newConvForm)
+
+    Jt.markdown("---").use(sidebar)
+
+    // ── Navigation statique ───────────────────────────────────────────────────
+    // "New Chat" surligné si page == "chat"
+    val currentPage = state.getString("page") ?: "chat"
+    val newChatBg   = if (currentPage == "chat") "#e8f0fe" else "transparent"
+    Jt.html("""
+        <div style="background:$newChatBg;border-radius:6px;padding:7px 10px;
+            margin:2px 0;display:flex;align-items:center;gap:8px;
+            font-size:0.93em;color:#1a1a2e;cursor:default;">
+          <span style="color:#1a3a6b;font-weight:600;">＋</span> New Chat
+        </div>
+        <div style="border-radius:6px;padding:7px 10px;margin:2px 0;
+            display:flex;align-items:center;gap:8px;
+            font-size:0.93em;color:#444;cursor:default;">
+          🕐 History
+        </div>
+        <div style="border-radius:6px;padding:7px 10px;margin:2px 0;
+            display:flex;align-items:center;gap:8px;
+            font-size:0.93em;color:#444;cursor:default;">
+          📖 Knowledge Base
+        </div>
+        <div style="border-radius:6px;padding:7px 10px;margin:2px 0;
+            display:flex;align-items:center;gap:8px;
+            font-size:0.93em;color:#444;cursor:default;">
+          ⚙️ Settings
+        </div>
+    """.trimIndent()).use(sidebar)
+
+    // ── Handler New Conversation ──────────────────────────────────────────────
+    if (Jt.componentsState().get("sidebar-new-conv") == true) {
+        @Suppress("UNCHECKED_CAST")
+        val history = state.get("history") as? MutableList<Triple<String, String, String>>
+        history?.clear()
+        state.put("page",             "chat")
+        state.put("pendingMessage",   "")
+        state.put("wordCount",        0)
+        state.put("pendingToolCall",  "")
+        state.put("toolCallArgs",     "")
+        state.put("searchOpen",       false)
+        state.put("searchTerm",       "")
+        state.put("searchIndex",      0)
+        state.put("enrichRawPrompt",  "")
+        state.put("enrichedPrompt",   "")
+        state.put("enrichEmbeds",     mutableListOf<String>())
+        state.put("playwrightStatus", "idle")
+        Jt.rerun()
+    }
+}
 
 // ── chatbotApp ────────────────────────────────────────────────────────────────
 //
-// Layout général :
+// Deux vues pilotées par sessionState["page"] :
+//   "chat"   → vue conversation principale
+//   "enrich" → vue enrichissement du prompt
 //
-//  ┌─────────────────────────────────────────────────────────────┐
-//  │  🤖 Codebase Chatbot                                        │
-//  │  Provider · Modèle actif · LLM mocké  │  🔍                │  ← bouton loupe
-//  ├─────────────────────────────────────────────────────────────┤
-//  │  [ Expander recherche — sessionState["searchOpen"] ]        │
-//  │    [ textInput terme ]  [ 🔍 ]                              │
-//  │    ◀  2 / 5  ▶                                              │
-//  │    résultats filtrés avec occurrences surlignées (html)     │
-//  ├─────────────────────────────────────────────────────────────┤
-//  │  historique conversation (bulles HTML)                      │
-//  ├─────────────────────────────────────────────────────────────┤
-//  │  [ ⚙️ shortModel (expander) ]  │  │  [ ⬆️ ]               │
-//  │    radio modèles               │  │  (form dédié)          │
-//  │    ➕ Ajouter provider         │  │                         │
-//  ├─────────────────────────────────────────────────────────────┤
-//  │  textArea (pleine largeur, hors form)                       │
-//  └─────────────────────────────────────────────────────────────┘
+// Règles Javelit : pas de switchPage — rendu conditionnel if/else sur "page".
 //
-// Recherche :
-//  - sessionState["searchOpen"]  : Boolean — expander ouvert/fermé
-//  - sessionState["searchTerm"]  : String  — terme saisi
-//  - sessionState["searchIndex"] : Int     — occurrence courante (0-based)
-//  - occurrences calculées à chaque rerun en filtrant history sur searchTerm
-//  - surlignage via <mark> dans Jt.html(), insensible à la casse
-//
-// Règles Javelit respectées :
-//  - formSubmitButton DOIT être dans un form ✅
-//  - form et expander peuvent coexister dans la même colonne ✅
-//  - textArea hors form, valeur persistée via .onChange() → sessionState ✅
-//  - textArea labelVisibility(HIDDEN) → contrainte height min levée ✅
-//  - radio .index(currentIndex) → pré-sélection propre ✅
-//  - formSubmitButton label obligatoire non-vide → emoji direct ✅
-//  - .useContainerWidth() déprécié, aucun remplacement dispo → supprimé ✅
-//  - Séparateur vertical : Jt.html() avec border-left CSS ✅
-//  - Jt.html() = HTML statique — ne peut pas contenir de composants Javelit ✅
-//
-// Le LLM est mocké — seule l'UI est validée à ce stade.
 fun chatbotApp(
     cfg:          CodebaseConfiguration,
     providerName: String
 ) {
-    // ── Session state ─────────────────────────────────────────────────────────
-    Jt.sessionState().putIfAbsent("history", mutableListOf<Pair<String, String>>())
+    val state = Jt.sessionState()
+
+    // ── Session state — init ──────────────────────────────────────────────────
+    state.putIfAbsent("history",          mutableListOf<Triple<String, String, String>>())
+    state.putIfAbsent("page",             "chat")
+    state.putIfAbsent("pendingMessage",   "")
+    state.putIfAbsent("wordCount",        0)
+    state.putIfAbsent("playwrightStatus", "idle")
+    state.putIfAbsent("pendingToolCall",  "")
+    state.putIfAbsent("toolCallArgs",     "")
+    state.putIfAbsent("searchOpen",       false)
+    state.putIfAbsent("searchTerm",       "")
+    state.putIfAbsent("searchIndex",      0)
+    state.putIfAbsent("enrichRawPrompt",  "")
+    state.putIfAbsent("enrichedPrompt",   "")
+    state.putIfAbsent("enrichProvider",   "ollama")
+    state.putIfAbsent("enrichModel",      "")
+    state.putIfAbsent("enrichEmbeds",     mutableListOf<String>())
+
     @Suppress("UNCHECKED_CAST")
-    val history = Jt.sessionState()
-        .get("history") as MutableList<Pair<String, String>>
+    val history = state.get("history") as MutableList<Triple<String, String, String>>
+
+    val currentPage = state.getString("page") ?: "chat"
 
     val models       = availableModels(cfg, providerName)
     val defaultModel = models.firstOrNull() ?: "no-model"
-    Jt.sessionState().putIfAbsent("selectedModel", defaultModel)
-    val currentModel = Jt.sessionState().getString("selectedModel") ?: defaultModel
-
+    state.putIfAbsent("selectedModel", defaultModel)
+    val currentModel = state.getString("selectedModel") ?: defaultModel
     val currentIndex = models.indexOf(currentModel).takeIf { it >= 0 } ?: 0
 
-    // Abréviation : 3 derniers segments séparés par '-'
-    val shortModel = currentModel.split('-').let { parts ->
-        if (parts.size >= 3) parts.takeLast(3).joinToString("-") else currentModel
+    val busy = (state.getString("playwrightStatus") ?: "idle") == "waiting"
+
+    // ── Sidebar — rendue avant le dispatch ────────────────────────────────────
+    setupSidebar()
+
+    // ── Dispatch vue ──────────────────────────────────────────────────────────
+    if (currentPage == "enrich") {
+        enrichView(cfg, history)
+        return
     }
 
-    Jt.sessionState().putIfAbsent("pendingMessage", "")
-    Jt.sessionState().putIfAbsent("searchOpen",  false)
-    Jt.sessionState().putIfAbsent("searchTerm",  "")
-    Jt.sessionState().putIfAbsent("searchIndex", 0)
+    // ════════════════════════════════════════════════════════════════════════
+    // VUE "chat"
+    // ════════════════════════════════════════════════════════════════════════
 
-    val searchOpen  = Jt.sessionState().get("searchOpen")  as Boolean
-    val searchTerm  = Jt.sessionState().getString("searchTerm") ?: ""
-    val searchIndex = (Jt.sessionState().get("searchIndex") as? Int) ?: 0
+    val searchOpen  = state.get("searchOpen")  as? Boolean ?: false
+    val searchTerm  = state.getString("searchTerm")  ?: ""
+    val searchIndex = (state.get("searchIndex") as? Int) ?: 0
 
-    // ── En-tête : titre + indicateurs + bouton loupe ─────────────────────────
-    Jt.title("🤖 Codebase Chatbot").use()
-
-    // Ligne indicateurs : 2 colonnes — texte à gauche, loupe à droite
+    // ── Header ────────────────────────────────────────────────────────────────
     val headerBar = Jt.columns(2)
-        .widths(listOf(0.92, 0.08))
+        .widths(listOf(0.85, 0.15))
         .gap(ColumnsComponent.Gap.NONE)
         .verticalAlignment(ColumnsComponent.VerticalAlignment.CENTER)
         .use()
 
-    Jt.markdown(
-        "**Provider :** `$providerName`  ·  **Modèle actif :** `$shortModel`  ·  _LLM mocké_"
-    ).use(headerBar.col(0))
+    Jt.html("""
+        <div style="display:flex;align-items:center;gap:12px;padding:6px 0;">
+          <span style="font-size:1.5em;font-weight:700;color:#1a1a2e;">Chat</span>
+          <span style="background:#e8f0fe;border-radius:12px;padding:3px 12px;
+              font-size:0.82em;font-weight:600;color:#1a3a6b;white-space:nowrap;">
+            ● $currentModel
+          </span>
+        </div>
+    """.trimIndent()).use(headerBar.col(0))
 
-    // Bouton loupe — toggle sessionState["searchOpen"] + rerun
-    val searchClicked = Jt.button("🔍")
-        .key("search-toggle")
-        .use(headerBar.col(1))
-
+    val searchClicked = Jt.button("🔍").key("search-toggle").use(headerBar.col(1))
     if (searchClicked) {
-        Jt.sessionState().put("searchOpen", !searchOpen)
+        state.put("searchOpen", !searchOpen)
         Jt.rerun()
     }
 
-    // Séparateur visible uniquement quand la recherche est ouverte
-    if (searchOpen) Jt.markdown("---").use()
+    Jt.markdown("---").use()
 
-    // ── Bloc recherche — rendu uniquement si searchOpen == true ─────────────
-    // Pas d'expander : on conditionne tout le rendu pour libérer l'espace
-    // quand la recherche est fermée. Le bouton loupe dans headerBar est le seul toggle.
+    // ── Bloc recherche — conditionnel ─────────────────────────────────────────
     val searchContainer = Jt.container().key("search-container").use()
-
     if (searchOpen) {
-        // Ligne saisie : textInput (90%) + bouton 🔍 (10%) dans un form
-        val searchForm = Jt.form().key("search-form").use(searchContainer)
-
+        val searchForm     = Jt.form().key("search-form").use(searchContainer)
         val searchInputBar = Jt.columns(2)
-            .widths(listOf(0.90, 0.10))
+            .widths(listOf(0.88, 0.12))
             .gap(ColumnsComponent.Gap.SMALL)
             .verticalAlignment(ColumnsComponent.VerticalAlignment.CENTER)
             .use(searchForm)
@@ -1949,214 +2041,584 @@ fun chatbotApp(
             .value(searchTerm)
             .use(searchInputBar.col(0))
 
-        val searchSubmitted = Jt.formSubmitButton("🔍").use(searchInputBar.col(1))
+        Jt.formSubmitButton("🔍").use(searchInputBar.col(1))
 
-        if (searchSubmitted) {
-            Jt.sessionState().put("searchTerm",  typedTerm.trim())
-            Jt.sessionState().put("searchIndex", 0)
+        if (Jt.componentsState().get("search-form") == true) {
+            state.put("searchTerm",  typedTerm.trim())
+            state.put("searchIndex", 0)
             Jt.rerun()
         }
 
-        // ── Résultats de recherche ────────────────────────────────────────────────
         if (searchTerm.isNotBlank()) {
-
-            // Calcul des occurrences : (msgIndex, role, content, liste des positions du terme)
             data class Hit(val msgIndex: Int, val role: String, val content: String)
-            val hits = history.mapIndexedNotNull { i, (role, content) ->
-                if (content.contains(searchTerm, ignoreCase = true)) Hit(i, role, content) else null
+            val hits = history.mapIndexedNotNull { i, (role, content, _) ->
+                if (content.contains(searchTerm, ignoreCase = true))
+                    Hit(i, role, content) else null
             }
-            val total = hits.size
-            // searchIndex borné entre 0 et total-1
+            val total     = hits.size
             val safeIndex = if (total == 0) 0 else searchIndex.coerceIn(0, total - 1)
 
-            // Résumé + navigation
             if (total == 0) {
-                Jt.warning("Aucune occurrence trouvée pour « $searchTerm »").use(searchContainer)
+                Jt.warning("Aucune occurrence pour « $searchTerm »").use(searchContainer)
             } else {
-                // Ligne navigation : ◀  N / T  ▶  —  3 colonnes dans un form dédié
                 val navForm = Jt.form().key("search-nav-form").use(searchContainer)
-                val navBar = Jt.columns(3)
-                    .widths(listOf(0.15, 0.70, 0.15))
+                val navBar  = Jt.columns(3)
+                    .widths(listOf(0.12, 0.76, 0.12))
                     .gap(ColumnsComponent.Gap.NONE)
                     .verticalAlignment(ColumnsComponent.VerticalAlignment.CENTER)
                     .use(navForm)
 
-                val prevClicked = Jt.formSubmitButton("◀")
-                    .key("search-prev")
-                    .use(navBar.col(0))
+                Jt.formSubmitButton("◀").key("search-prev").use(navBar.col(0))
+                Jt.markdown("${safeIndex + 1} / $total  · « **$searchTerm** »")
+                    .use(navBar.col(1))
+                Jt.formSubmitButton("▶").key("search-next").use(navBar.col(2))
 
-                Jt.markdown(
-                    "${safeIndex + 1} / $total occurrence${if (total > 1) "s" else ""}  " +
-                            "· « **$searchTerm** »"
-                ).use(navBar.col(1))
-
-                val nextClicked = Jt.formSubmitButton("▶")
-                    .key("search-next")
-                    .use(navBar.col(2))
-
-                if (prevClicked) {
-                    Jt.sessionState().put("searchIndex", (safeIndex - 1 + total) % total)
-                    Jt.rerun()
+                val navCs = Jt.componentsState()
+                if (navCs.get("search-prev") == true) {
+                    state.put("searchIndex", (safeIndex - 1 + total) % total); Jt.rerun()
                 }
-                if (nextClicked) {
-                    Jt.sessionState().put("searchIndex", (safeIndex + 1) % total)
-                    Jt.rerun()
+                if (navCs.get("search-next") == true) {
+                    state.put("searchIndex", (safeIndex + 1) % total); Jt.rerun()
                 }
 
                 Jt.markdown("---").use(searchContainer)
 
-                // Affichage du hit courant avec occurrences surlignées
-                // + résumé de tous les hits (numéro + extrait)
                 hits.forEachIndexed { hitIdx, hit ->
-                    val isCurrent = hitIdx == safeIndex
-                    val label     = if (hit.role == "user") "👤 Vous" else "🤖 Assistant"
-                    val bgColor   = if (hit.role == "user") "#e8f4fd" else "#f1f8e9"
-                    val border    = if (isCurrent) "2px solid #FF9800" else "1px solid #ddd"
-                    val shadow    = if (isCurrent) "box-shadow:0 0 0 2px #FF980044;" else ""
-
-                    // Surlignage insensible à la casse via regex
+                    val isCurrent   = hitIdx == safeIndex
+                    val bgColor     = if (hit.role == "👤") "#e8f4fd" else "#f8f9ff"
+                    val border      = if (isCurrent) "2px solid #FF9800" else "1px solid #ddd"
+                    val shadow      = if (isCurrent) "box-shadow:0 0 0 2px #FF980044;" else ""
                     val highlighted = hit.content.replace(
                         Regex("(?i)(${Regex.escape(searchTerm)})"),
                         "<mark style=\"background:#FFF176;border-radius:2px;\">$1</mark>"
                     )
-
                     Jt.html("""
-                    <div style="
-                        background:$bgColor;
-                        border:$border;
-                        border-radius:4px;
-                        padding:8px 12px;
-                        margin:4px 0;
-                        font-size:0.92em;
-                        $shadow">
-                      <strong>$label</strong>
-                      ${if (isCurrent) " <span style=\"color:#FF9800;font-size:0.85em;\">◀ occurrence ${hitIdx + 1}</span>" else ""}
-                      <br/>
-                      ${highlighted.replace("\n", "<br/>")}
-                    </div>
-                """.trimIndent()).use(searchContainer)
+                        <div style="background:$bgColor;border:$border;border-radius:6px;
+                            padding:8px 12px;margin:4px 0;font-size:0.91em;$shadow">
+                          <strong>${hit.role}</strong>
+                          ${if (isCurrent) " <span style=\"color:#FF9800;font-size:0.83em;\">◀ occ.${hitIdx+1}</span>" else ""}
+                          <br/>${highlighted.replace("\n", "<br/>")}
+                        </div>
+                    """.trimIndent()).use(searchContainer)
                 }
             }
         }
+        Jt.markdown("---").use()
+    }
 
-    } // fin if (searchOpen)
-
-    Jt.markdown("---").use()
-
-    // ── Historique de conversation ────────────────────────────────────────────
+    // ── Historique ────────────────────────────────────────────────────────────
     if (history.isEmpty()) {
-        Jt.info("Aucun message pour l'instant — commencez la conversation !").use()
+        Jt.html("""
+            <div style="text-align:center;color:#bdbdbd;padding:56px 0 40px 0;
+                font-size:0.97em;">
+              Démarrez la conversation…
+            </div>
+        """.trimIndent()).use()
     } else {
-        history.forEach { (role, content) ->
-            if (role == "user") {
-                Jt.html("""
-                    <div style="
-                        background:#e8f4fd;
-                        border-left:4px solid #2196F3;
-                        border-radius:4px;
-                        padding:8px 12px;
-                        margin:4px 0;
-                        font-size:0.95em;">
-                      <strong>👤 Vous</strong><br/>
-                      ${content.replace("\n", "<br/>")}
-                    </div>
-                """.trimIndent()).use()
-            } else {
-                Jt.html("""
-                    <div style="
-                        background:#f1f8e9;
-                        border-left:4px solid #4CAF50;
-                        border-radius:4px;
-                        padding:8px 12px;
-                        margin:4px 0;
-                        font-size:0.95em;">
-                      <strong>🤖 Assistant</strong><br/>
-                      ${content.replace("\n", "<br/>")}
-                    </div>
-                """.trimIndent()).use()
+        history.forEachIndexed { i, (role, content, type) ->
+            when (type) {
+                "user" -> {
+                    Jt.html("""
+                        <div style="display:flex;justify-content:flex-end;margin:6px 0;">
+                          <div style="background:#ffffff;border-left:4px solid #1a3a6b;
+                              border-radius:6px;padding:10px 14px;max-width:82%;
+                              font-size:0.94em;
+                              box-shadow:0 1px 3px rgba(0,0,0,0.07);
+                              color:#1a1a2e;">
+                            ${content.replace("\n", "<br/>")}
+                          </div>
+                        </div>
+                    """.trimIndent()).use()
+                }
+
+                "wait" -> {
+                    Jt.html("""
+                        <div style="background:#fff8e1;border-left:4px solid #FF9800;
+                            border-radius:6px;padding:10px 14px;margin:6px 0;
+                            font-size:0.94em;color:#7c6400;">
+                          ⏳ ${content.replace("\n", "<br/>")}
+                        </div>
+                    """.trimIndent()).use()
+                }
+
+                "tool" -> {
+                    Jt.html("""
+                        <div style="background:#fce4ec;border-left:4px solid #E91E63;
+                            border-radius:6px;padding:10px 14px;margin:6px 0;
+                            font-size:0.93em;color:#880e4f;">
+                          <strong>🔧 Tool</strong><br/>
+                          ${content.replace("\n", "<br/>")}
+                        </div>
+                    """.trimIndent()).use()
+                }
+
+                "system" -> {
+                    Jt.html("""
+                        <div style="background:#f5f5f5;border-left:4px solid #9E9E9E;
+                            border-radius:6px;padding:8px 14px;margin:6px 0;
+                            font-size:0.88em;color:#616161;">
+                          ${content.replace("\n", "<br/>")}
+                        </div>
+                    """.trimIndent()).use()
+                }
+
+                else -> {
+                    // "assistant" | "ollama"
+                    val msgBar = Jt.columns(2)
+                        .widths(listOf(0.86, 0.14))
+                        .gap(ColumnsComponent.Gap.SMALL)
+                        .verticalAlignment(ColumnsComponent.VerticalAlignment.TOP)
+                        .use()
+
+                    Jt.html("""
+                        <div style="background:#f8f9ff;border-left:4px solid #1a3a6b;
+                            border-radius:6px;padding:14px 16px;margin:4px 0;
+                            font-size:0.94em;color:#1a1a2e;">
+                          <div style="display:flex;align-items:center;gap:6px;
+                              margin-bottom:8px;color:#1a3a6b;font-size:0.78em;
+                              font-weight:700;text-transform:uppercase;
+                              letter-spacing:0.06em;">
+                            <span>✦</span> ASSISTANT INSIGHT
+                          </div>
+                          ${content.replace("\n", "<br/>")}
+                        </div>
+                    """.trimIndent()).use(msgBar.col(0))
+
+                    val enrichMsgForm = Jt.form().key("enrich-msg-$i").use(msgBar.col(1))
+                    Jt.formSubmitButton("⚡ Enrich").use(enrichMsgForm)
+
+                    if (Jt.componentsState().get("enrich-msg-$i") == true) {
+                        state.put("enrichRawPrompt", content)
+                        state.put("enrichedPrompt",  content)
+                        state.put("page",             "enrich")
+                        Jt.rerun()
+                    }
+                }
             }
         }
     }
 
     Jt.markdown("---").use()
 
-    // ── Groupe saisie : barre de contrôle + textArea collés ensemble ──────────
-    // Le container groupe les deux blocs pour supprimer l'espace entre eux
-    // et donner plus de place à l'historique au-dessus.
+    // ── Bloc tool call — conditionnel ─────────────────────────────────────────
+    val pendingTool = state.getString("pendingToolCall") ?: ""
+    if (pendingTool.isNotBlank()) {
+        Jt.markdown("🔧 **Tool call détecté** : `$pendingTool`").use()
+        Jt.textInput("Arguments")
+            .value(state.getString("toolCallArgs") ?: "")
+            .onChange { state.put("toolCallArgs", it) }
+            .use()
+
+        val toolBar = Jt.columns(2)
+            .widths(listOf(0.50, 0.50))
+            .gap(ColumnsComponent.Gap.SMALL)
+            .use()
+
+        val toolAllowForm = Jt.form().key("tool-allow-form").use(toolBar.col(0))
+        Jt.formSubmitButton("✅ Autoriser").use(toolAllowForm)
+        val toolDenyForm  = Jt.form().key("tool-deny-form").use(toolBar.col(1))
+        Jt.formSubmitButton("❌ Refuser").use(toolDenyForm)
+
+        val toolCs = Jt.componentsState()
+        if (toolCs.get("tool-allow-form") == true) {
+            state.put("pendingToolCall", ""); Jt.rerun()
+        }
+        if (toolCs.get("tool-deny-form") == true) {
+            history.add(Triple("🔧", "Tool `$pendingTool` refusé.", "system"))
+            state.put("pendingToolCall", "")
+            Jt.rerun()
+        }
+        Jt.markdown("---").use()
+    }
+
+    // ── Barre de saisie ───────────────────────────────────────────────────────
+    //
+    // ARCHITECTURE : un seul form "input-form" englobe les deux boutons ET le
+    // textArea. Deux formSubmitButton avec clés distinctes ("enrich-submit" /
+    // "direct-submit") permettent de discriminer l'action dans componentsState.
+    //
+    // Raison : textArea hors form → onChange non garanti au même cycle que le
+    // submit → pendingMessage lu dans les handlers = valeur N-1 (cycle précédent).
+    // Avec textArea dans le form → use() retourne la valeur courante (String) ✅
+    //
     val inputGroup = Jt.container().key("input-group").use()
 
-    // ── Barre de contrôle : 3 colonnes ───────────────────────────────────────
-    //  col(0) 80% : expander sélecteur de modèle
-    //  col(1)  2% : séparateur vertical HTML
-    //  col(2) 18% : form + formSubmitButton
+    val wordCount = (state.get("wordCount") as? Int) ?: 0
 
-    val ctrlBar = Jt.columns(3)
-        .widths(listOf(0.80, 0.02, 0.18))
-        .gap(ColumnsComponent.Gap.NONE)
-        .verticalAlignment(ColumnsComponent.VerticalAlignment.TOP)
-        .use(inputGroup)
-
-    // col(0) — expander sélecteur de modèle
-    val modelExpander = Jt.expander("⚙️ $shortModel")
+    // ── Ligne 1 : expander modèle ─────────────────────────────────────────────
+    val modelExpander = Jt.expander("$currentModel ▾")
         .expanded(false)
-        .use(ctrlBar.col(0))
-
+        .use(inputGroup)
     Jt.markdown("#### Modèles disponibles").use(modelExpander)
     Jt.markdown("---").use(modelExpander)
-
     val pickedModel = Jt.radio("Modèle", models)
         .index(currentIndex)
         .labelVisibility(JtComponent.LabelVisibility.COLLAPSED)
         .use(modelExpander)
-
     if (pickedModel != currentModel) {
-        Jt.sessionState().put("selectedModel", pickedModel)
+        state.put("selectedModel", pickedModel); Jt.rerun()
+    }
+    Jt.markdown("---").use(modelExpander)
+    Jt.button("➕ Ajouter un provider / modèle").use(modelExpander)
+
+    // ── Lignes 2 + 3 : form unique englobant boutons + textArea ──────────────
+    val inputForm = Jt.form().key("input-form").use(inputGroup)
+
+    val btnBar = Jt.columns(3)
+        .widths(listOf(0.15, 0.55, 0.30))
+        .gap(ColumnsComponent.Gap.SMALL)
+        .verticalAlignment(ColumnsComponent.VerticalAlignment.CENTER)
+        .use(inputForm)
+
+    // col(0) — 📁 attach statique (pas encore fonctionnel)
+    Jt.html("""
+        <div style="display:flex;align-items:center;justify-content:center;
+            padding:4px 0;opacity:0.40;cursor:not-allowed;font-size:1.1em;"
+             title="Attach (bientôt disponible)">📁</div>
+    """.trimIndent()).use(btnBar.col(0))
+
+    // col(1) — ⚡ Enrich
+    Jt.formSubmitButton("⚡ Enrich")
+        .key("enrich-submit")
+        .disabled(busy)
+        .use(btnBar.col(1))
+
+    // col(2) — ⬆️ Send direct
+    Jt.formSubmitButton("⬆️")
+        .key("direct-submit")
+        .disabled(busy)
+        .use(btnBar.col(2))
+
+    // Compteur mots
+    if (wordCount > 0) {
+        Jt.html("""
+            <span style="font-size:0.78em;color:#9e9e9e;padding:2px 0;
+                display:block;">Mots : <strong>$wordCount</strong></span>
+        """.trimIndent()).use(inputForm)
+    }
+
+    // textArea dans le form → use() retourne String du cycle courant ✅
+    val typedMessage: String = Jt.textArea("Message")
+        .placeholder(if (busy) "En attente de la réponse…" else "Type your message here…")
+        .labelVisibility(JtComponent.LabelVisibility.HIDDEN)
+        .height(120)
+        .disabled(busy)
+        .value(state.getString("pendingMessage") ?: "")
+        .onChange { txt ->
+            state.put("pendingMessage", txt)
+            state.put("wordCount",
+                if (txt.isBlank()) 0 else txt.trim().split(Regex("\\s+")).size)
+        }
+        .use(inputForm)
+
+    // ── Handlers ──────────────────────────────────────────────────────────────
+    val inputCs = Jt.componentsState()
+
+    if (inputCs.get("enrich-submit") == true) {
+        val pending = typedMessage.trim()
+        println("[DEBUG enrich-submit] fired — pending='$pending'")
+        if (pending.isNotBlank()) {
+            history.add(Triple("👤", pending, "user"))
+        }
+        state.put("enrichRawPrompt", pending)
+        state.put("enrichedPrompt",  pending)
+        state.put("pendingMessage",  "")
+        state.put("wordCount",       0)
+        state.put("page",            "enrich")
         Jt.rerun()
     }
 
-    Jt.markdown("---").use(modelExpander)
-
-    Jt.button("➕ Ajouter un provider / modèle")
-        .use(modelExpander)
-
-    // col(1) — séparateur vertical
-    Jt.html("""
-        <div style="
-            border-left:1px solid #ccc;
-            height:32px;
-            margin:0 auto;
-            width:1px;">
-        </div>
-    """.trimIndent()).use(ctrlBar.col(1))
-
-    // col(2) — form dédié au formSubmitButton
-    val submitForm = Jt.form().key("submit-form").use(ctrlBar.col(2))
-    val submitted  = Jt.formSubmitButton("⬆️").use(submitForm)
-
-    // ── textArea — pleine largeur, hors form ──────────────────────────────────
-    val userInput = Jt.textArea("Message")
-        .placeholder("Votre message…")
-        .labelVisibility(JtComponent.LabelVisibility.HIDDEN)
-        .height(120)
-        .onChange { Jt.sessionState().put("pendingMessage", it) }
-        .use(inputGroup)
-
-    // ── Traitement du message soumis ──────────────────────────────────────────
-    if (submitted) {
-        val pending = Jt.sessionState().getString("pendingMessage") ?: ""
+    if (inputCs.get("direct-submit") == true) {
+        val pending = typedMessage.trim()
+        println("[DEBUG direct-submit] fired — pending='$pending'")
         if (pending.isNotBlank()) {
-            Jt.sessionState().put("pendingMessage", "")
-            history += "user" to pending.trim()
-
-            val mockResponse = "[mock] `$currentModel` — reçu : « ${pending.trim()} » " +
-                    "(${history.count { it.first == "user" }} msg)"
-            history += "assistant" to mockResponse
-
+            history.add(Triple("👤", pending, "user"))
+            history.add(Triple("⏳", "En attente de Claude...", "wait"))
+            state.put("playwrightStatus", "waiting")
+            state.put("pendingMessage",   "")
+            state.put("wordCount",        0)
+            // TODO : envoyer via activePage (étape Playwright)
             Jt.rerun()
         }
     }
 }
 
+// ── enrichView ────────────────────────────────────────────────────────────────
+//
+// Vue d'enrichissement du prompt — rendu conditionnel depuis chatbotApp.
+// Pilotée par sessionState["page"] == "enrich".
+//
+fun enrichView(
+    cfg:     CodebaseConfiguration,
+    history: MutableList<Triple<String, String, String>>
+) {
+    val state        = Jt.sessionState()
+    val projectDir   = File(System.getProperty("user.dir"))
+    val rawPrompt    = state.getString("enrichRawPrompt") ?: ""
+    val enrichedPrompt = state.getString("enrichedPrompt") ?: rawPrompt
+
+    // ── Header "← Back to Chat   Enrichir" ───────────────────────────────────
+    val headerBar = Jt.columns(2)
+        .widths(listOf(0.80, 0.20))
+        .gap(ColumnsComponent.Gap.NONE)
+        .verticalAlignment(ColumnsComponent.VerticalAlignment.CENTER)
+        .use()
+
+    Jt.html("""
+        <div style="display:flex;align-items:center;gap:18px;padding:6px 0;">
+          <span style="color:#1a3a6b;font-size:0.88em;font-weight:500;">
+            ← Back to Chat
+          </span>
+          <span style="font-size:1.35em;font-weight:700;color:#1a1a2e;
+              border-bottom:2px solid #1a3a6b;padding-bottom:2px;">
+            Enrichir
+          </span>
+        </div>
+    """.trimIndent()).use(headerBar.col(0))
+
+    val cancelHeaderForm = Jt.form().key("cancel-header-form").use(headerBar.col(1))
+    Jt.formSubmitButton("← Back to Chat").use(cancelHeaderForm)
+
+    Jt.markdown("---").use()
+
+    // ── Bloc intro "Optimisation du Prompt" ───────────────────────────────────
+    Jt.html("""
+        <div style="background:#f8f9ff;border:1px solid #dde3f5;border-radius:8px;
+            padding:16px 20px;margin:0 0 18px 0;">
+          <div style="font-size:1.15em;font-weight:700;color:#1a1a2e;margin-bottom:5px;">
+            Optimisation du Prompt
+          </div>
+          <div style="font-size:0.87em;color:#666;line-height:1.5;">
+            Affinage de l'intelligence contextuelle pour des résultats de haute
+            précision via le moteur Enrichir AI.
+          </div>
+        </div>
+    """.trimIndent()).use()
+
+    // ── Deux colonnes : Language Model | Select Resources ────────────────────
+    val allProviders = listOf(
+        "anthropic","gemini","huggingface","mistral","ollama","grok","groq"
+    )
+    val currentEnrichProvider = state.getString("enrichProvider")
+        ?.takeIf { it.isNotBlank() } ?: "ollama"
+    val providerIndex = allProviders.indexOf(currentEnrichProvider)
+        .takeIf { it >= 0 } ?: 4
+
+    val enrichModels = availableModels(cfg, currentEnrichProvider)
+        .ifEmpty { listOf("$currentEnrichProvider-default") }
+    val currentEnrichModel = state.getString("enrichModel")
+        ?.takeIf { it.isNotBlank() } ?: enrichModels.first()
+    val enrichModelIndex = enrichModels.indexOf(currentEnrichModel)
+        .takeIf { it >= 0 } ?: 0
+
+    val twoColBar = Jt.columns(2)
+        .widths(listOf(0.48, 0.52))
+        .gap(ColumnsComponent.Gap.MEDIUM)
+        .use()
+
+    // ── col(0) Language Model ─────────────────────────────────────────────────
+    Jt.html("""
+        <div style="font-size:0.85em;font-weight:600;color:#1a3a6b;
+            margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+          🌐 Language Model
+        </div>
+    """.trimIndent()).use(twoColBar.col(0))
+
+    val pickedProvider = Jt.selectbox("Provider", allProviders)
+        .index(providerIndex)
+        .labelVisibility(JtComponent.LabelVisibility.COLLAPSED)
+        .width("stretch")
+        .use(twoColBar.col(0))
+
+    if (pickedProvider != currentEnrichProvider) {
+        state.put("enrichProvider", pickedProvider)
+        state.put("enrichModel",    "")
+        Jt.rerun()
+    }
+
+    val pickedEnrichModel = Jt.selectbox("Modèle", enrichModels)
+        .index(enrichModelIndex)
+        .labelVisibility(JtComponent.LabelVisibility.COLLAPSED)
+        .width("stretch")
+        .use(twoColBar.col(0))
+
+    if (pickedEnrichModel != currentEnrichModel) {
+        state.put("enrichModel", pickedEnrichModel)
+        Jt.rerun()
+    }
+
+    Jt.html("""
+        <div style="font-size:0.79em;color:#9e9e9e;margin-top:6px;line-height:1.4;">
+          Selected model handles complex reasoning and creative generation.
+        </div>
+    """.trimIndent()).use(twoColBar.col(0))
+
+    // ── col(1) Select Resources (embeds RAG) ──────────────────────────────────
+    val embedsCfg  = with(embedsYmlConfig) { EmbedsConfig.load(projectDir) }
+    val embedNames = embedsCfg.embeds.map { it.name }
+
+    @Suppress("UNCHECKED_CAST")
+    val selectedEmbeds = state.get("enrichEmbeds") as? MutableList<String>
+        ?: mutableListOf<String>().also { state.put("enrichEmbeds", it) }
+
+    Jt.html("""
+        <div style="font-size:0.85em;font-weight:600;color:#1a3a6b;
+            margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+          📂 Select Resources
+        </div>
+    """.trimIndent()).use(twoColBar.col(1))
+
+    // Tags pills des embeds sélectionnés
+    if (selectedEmbeds.isNotEmpty()) {
+        val tagsHtml = selectedEmbeds.joinToString("") { name ->
+            val embed    = embedsCfg.embeds.firstOrNull { it.name == name }
+            val pathInfo = embed?.path ?: "?"
+            """<span style="display:inline-flex;align-items:center;gap:4px;
+                background:#f0f4ff;border:1px solid #c5cae9;border-radius:4px;
+                padding:2px 8px;margin:2px 2px;font-size:0.81em;color:#1a3a6b;">
+              📄 $pathInfo
+            </span>"""
+        }
+        Jt.html("""<div style="margin-bottom:6px;flex-wrap:wrap;">$tagsHtml</div>""")
+            .use(twoColBar.col(1))
+    }
+
+    if (embedNames.isEmpty()) {
+        Jt.info("Aucun embed — créez embeds.yml à la racine.").use(twoColBar.col(1))
+    } else {
+        val embedIndex = selectedEmbeds
+            .mapNotNull { name -> embedNames.indexOf(name).takeIf { it >= 0 } }
+            .firstOrNull() ?: 0
+
+        val pickedEmbed = Jt.selectbox("Embed RAG", embedNames)
+            .index(embedIndex)
+            .labelVisibility(JtComponent.LabelVisibility.COLLAPSED)
+            .width("stretch")
+            .use(twoColBar.col(1))
+
+        val addEmbedForm = Jt.form().key("add-embed-form").use(twoColBar.col(1))
+        Jt.formSubmitButton("＋ Attach File").use(addEmbedForm)
+
+        if (Jt.componentsState().get("add-embed-form") == true) {
+            if (pickedEmbed !in selectedEmbeds) {
+                selectedEmbeds.add(pickedEmbed); Jt.rerun()
+            }
+        }
+
+        selectedEmbeds.toList().forEachIndexed { i, name ->
+            val removeForm = Jt.form().key("remove-embed-$i").use(twoColBar.col(1))
+            Jt.formSubmitButton("✕ $name").use(removeForm)
+            if (Jt.componentsState().get("remove-embed-$i") == true) {
+                selectedEmbeds.remove(name); Jt.rerun()
+            }
+        }
+    }
+
+    Jt.markdown("---").use()
+
+    // ── Prompt Editor ─────────────────────────────────────────────────────────
+    //
+    // Header avec toolbar B/I/<>/🔗 simulée en HTML statique + compteur mots.
+    // Contexte injecté visible uniquement si enrichedPrompt ≠ rawPrompt.
+    //
+    val wordCount = enrichedPrompt.trim()
+        .let { if (it.isBlank()) 0 else it.split(Regex("\\s+")).size }
+
+    Jt.html("""
+        <div style="background:#fff;border:1px solid #dde3f5;
+            border-radius:8px 8px 0 0;padding:10px 16px;
+            display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:8px;
+              font-weight:600;font-size:0.92em;color:#1a1a2e;">
+            <span style="color:#e65100;font-size:1.05em;">≡⚡</span>
+            Prompt Editor
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="display:flex;gap:10px;color:#555;font-size:0.93em;
+                align-items:center;">
+              <strong style="cursor:default;">B</strong>
+              <em style="cursor:default;">I</em>
+              <span style="cursor:default;font-weight:700;">•≡</span>
+              <span style="font-family:monospace;cursor:default;">&lt;/&gt;</span>
+              <span style="cursor:default;">🔗</span>
+            </span>
+            <span style="font-size:0.79em;color:#9e9e9e;">
+              Words: <strong>$wordCount</strong>
+            </span>
+          </div>
+        </div>
+    """.trimIndent()).use()
+
+    // Bloc contexte injecté (fond orange, style maquette)
+    if (enrichedPrompt.isNotBlank() && enrichedPrompt != rawPrompt) {
+        val injected = enrichedPrompt.removePrefix(rawPrompt).trim()
+        if (injected.isNotBlank()) {
+            Jt.html("""
+                <div style="background:#fff3e0;border-left:4px solid #e65100;
+                    padding:9px 14px;font-size:0.86em;color:#5d3a00;
+                    font-style:italic;border-radius:0;">
+                  [CONTEXTE_AUTOMATIQUE] ${injected.replace("\n", "<br/>")}
+                </div>
+            """.trimIndent()).use()
+        }
+    }
+
+    Jt.textArea("Prompt enrichi")
+        .value(enrichedPrompt)
+        .height(220)
+        .labelVisibility(JtComponent.LabelVisibility.HIDDEN)
+        .onChange { state.put("enrichedPrompt", it) }
+        .use()
+
+    Jt.markdown("---").use()
+
+    // ── Actions ───────────────────────────────────────────────────────────────
+    val actionsBar = Jt.columns(3)
+        .widths(listOf(0.42, 0.32, 0.26))
+        .gap(ColumnsComponent.Gap.SMALL)
+        .use()
+
+    val sendForm = Jt.form().key("enrich-send-form").use(actionsBar.col(0))
+    Jt.formSubmitButton("⚡ Enrichir AI").use(sendForm)
+
+    val reenrichForm = Jt.form().key("enrich-reenrich-form").use(actionsBar.col(1))
+    Jt.formSubmitButton("♻️ Re-enrichir").use(reenrichForm)
+
+    val cancelForm = Jt.form().key("enrich-cancel-form").use(actionsBar.col(2))
+    Jt.formSubmitButton("❌ Annuler").use(cancelForm)
+
+    val actionCs = Jt.componentsState()
+
+    if (actionCs.get("enrich-send-form") == true) {
+        val finalPrompt = state.getString("enrichedPrompt") ?: rawPrompt
+        history.add(Triple(
+            "⚡",
+            "Prompt enrichi → $currentEnrichModel (${finalPrompt.length} car.)",
+            "ollama"
+        ))
+        history.add(Triple("⏳", "En attente de Claude...", "wait"))
+        state.put("playwrightStatus", "waiting")
+        state.put("page",             "chat")
+        // TODO : envoyer finalPrompt via activePage (étape Playwright)
+        Jt.rerun()
+    }
+
+    if (actionCs["enrich-reenrich-form"] == true) {
+        val mocked = "[$currentEnrichModel + ${selectedEmbeds.size} embed(s)] $rawPrompt"
+        state["enrichedPrompt"] = mocked
+        Jt.rerun()
+    }
+
+    val cancelPressed = actionCs["enrich-cancel-form"] == true
+            || actionCs["cancel-header-form"] == true
+    if (cancelPressed) {
+        if (history.isNotEmpty()) history.removeLastOrNull()
+        state["enrichedPrompt"] = ""
+        state["enrichRawPrompt"] = ""
+        state["page"] = "chat"
+        Jt.rerun()
+    }
+}
 
 /**
  * Démarre un serveur Javelit embarqué exposant le chatbot sur le port configuré
@@ -2206,7 +2668,6 @@ tasks.register("chatbot") {
         taskLogger.lifecycle("[chatbot] Provider : $providerName (mocké)")
         taskLogger.lifecycle("[chatbot] Modèles  : ${availableModels(cfg, providerName)}")
 
-
         // ── Démarrage serveur Javelit (non-bloquant) ──────────────────────────
         val server = Server.builder({ chatbotApp(cfg, providerName) }, port).build()
         server.start()
@@ -2215,9 +2676,6 @@ tasks.register("chatbot") {
         taskLogger.lifecycle("   Ctrl+C pour arrêter")
 
         // ── Latch + shutdown hook ──────────────────────────────────────────
-        // Stratégie : le hook signal le latch, le thread principal appelle
-        // server.stop() puis Runtime.halt(0) pour forcer la mort du Gradle Daemon.
-        // Undertow non-daemon qui survivent sinon au stop().
         val latch = CountDownLatch(1)
 
         Runtime.getRuntime().addShutdownHook(Thread {
@@ -2225,13 +2683,8 @@ tasks.register("chatbot") {
             latch.countDown()
         })
 
-        // ── Blocage du thread Gradle ─────────────────────────────────────────────────
         latch.await()
 
-        // Ctrl+C reçu : on arrête Javelit puis on force la sortie JVM.
-        // Runtime.halt(0) est nécessaire : System.exit() ne tue pas le Gradle Daemon
-        // qui héberge la JVM — halt() contourne ce mécanisme.
-        // --no-daemon est aussi recommandé : ./gradlew --no-daemon chatbot
         taskLogger.lifecycle("[chatbot] Arrêté proprement.")
         Runtime.getRuntime().halt(0)
     }
