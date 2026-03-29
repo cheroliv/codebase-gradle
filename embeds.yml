@@ -1,0 +1,17 @@
+# embeds.yml — liste des embeds RAG disponibles pour enrichissement de prompt
+# Chaque embed est un fichier source indexé par nom affiché dans l'UI.
+# Chemin relatif à la racine du projet.
+#
+# Usage : ./gradlew chatbot → vue Enrichissement → sélectionner les embeds
+#
+embeds:
+  - name: "snapshot"
+    path: "snapshot.adoc"
+  - name: "readme config"
+    path: "readme.yml"
+  - name: "codebase config"
+    path: "codebase.yml"
+  - name: "site config"
+    path: "site.yml"
+  - name: "slider config"
+    path: "slider-context.yml"
