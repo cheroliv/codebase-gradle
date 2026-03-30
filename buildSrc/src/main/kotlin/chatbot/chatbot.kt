@@ -136,14 +136,16 @@ fun chatbotApp(
 
     val busy = (state.getString("playwrightStatus") ?: "idle") == "waiting"
 
-    // ── Sidebar — rendue avant le dispatch ────────────────────────────────────
-    setupSidebar()
-
-    // ── Dispatch vue ──────────────────────────────────────────────────────────
+    // ── Dispatch vue — AVANT setupSidebar() ───────────────────────────────────
+    // Jt.SIDEBAR ferme le conteneur principal — enrichView doit être rendue avant.
     if (currentPage == "enrich") {
+        setupSidebar()
         enrichView(cfg, history)
         return
     }
+
+    // ── Sidebar — rendue uniquement pour la vue chat ──────────────────────────
+    setupSidebar()
 
     // ════════════════════════════════════════════════════════════════════════
     // VUE "chat"
@@ -808,5 +810,3 @@ fun enrichView(
         Jt.rerun()
     }
 }
-
-
