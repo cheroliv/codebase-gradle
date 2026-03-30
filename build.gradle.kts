@@ -4,6 +4,12 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.javelit.core.Server
 import java.util.concurrent.CountDownLatch
+import chatbot.*
+import codebase.*
+import readme.*
+import site.*
+import slider.*
+import snapshot.*
 
 
 buildscript {
@@ -20,7 +26,7 @@ buildscript {
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.readme)
+//    alias(libs.plugins.readme)
 }
 
 repositories {
