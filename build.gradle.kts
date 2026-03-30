@@ -4,11 +4,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.javelit.core.Server
 import java.util.concurrent.CountDownLatch
-import snapshot.*
-import chatbot.*
-import config.*
-import config.readme.*
-import config.slider.*
+
 
 buildscript {
     repositories { mavenCentral() }
