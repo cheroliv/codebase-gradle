@@ -945,7 +945,7 @@ tasks.register("chatbot") {
 
         // ── Config ────────────────────────────────────────────────────────────
         val localConfig = CodebaseYmlConfig()
-        val cfg = with(localConfig) { CodebaseConfiguration.load(projectDir) }
+        val cfg = with(localConfig) { projectDir.loadCodebaseConfiguration() }
 
         val cliProvider = project.findProperty("codebase.provider") as String?
         val cliPort = (project.findProperty("codebase.port") as String?)?.toIntOrNull()
