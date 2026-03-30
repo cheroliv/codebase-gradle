@@ -146,3 +146,18 @@ class ReadmeYmlAnonymizer {
 }
 
 val readmeYmlAnonymizer = ReadmeYmlAnonymizer()
+
+// ── Git helpers ───────────────────────────────────────────────────────────────
+
+/**
+ * Resolves the GitHub token from [this].
+ * Throws [IllegalStateException] if the token is blank or still a placeholder.
+ * Defined here (package readme) because GitConfig belongs to this package.
+ */
+fun GitConfig.resolvedToken(): String =
+    token.takeIf { it.isNotBlank() && it != "<YOUR_GITHUB_PAT>" }
+        ?: error(
+            "GitHub token is empty or still a placeholder in readme.yml.\n" +
+                    "→ Check the README_GRADLE_PLUGIN secret in:\n" +
+                    "   GitHub → Settings → Secrets and variables → Actions"
+        )
