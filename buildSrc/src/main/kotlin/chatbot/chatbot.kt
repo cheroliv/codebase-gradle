@@ -136,16 +136,295 @@ fun chatbotApp(
 
     val busy = (state.getString("playwrightStatus") ?: "idle") == "waiting"
 
-    // ── Dispatch vue — AVANT setupSidebar() ───────────────────────────────────
-    // Jt.SIDEBAR ferme le conteneur principal — enrichView doit être rendue avant.
+    // ── Sidebar — rendue avant le dispatch ────────────────────────────────────
+    setupSidebar()
+
+    // ── Dispatch vue ──────────────────────────────────────────────────────────
     if (currentPage == "enrich") {
-        setupSidebar()
-        enrichView(cfg, history)
+        val projectDir = File(System.getProperty("user.dir"))
+        val rawPrompt = state.getString("enrichRawPrompt") ?: ""
+        val enrichedPrompt = state.getString("enrichedPrompt") ?: rawPrompt
+
+        // ── Header "← Back to Chat   Enrichir" ───────────────────────────────────
+        val headerBar = Jt.columns(2)
+            .widths(listOf(0.80, 0.20))
+            .gap(ColumnsComponent.Gap.NONE)
+            .verticalAlignment(ColumnsComponent.VerticalAlignment.CENTER)
+            .use()
+
+        Jt.html(
+            """
+            <div style="display:flex;align-items:center;gap:18px;padding:6px 0;">
+              <span style="color:#1a3a6b;font-size:0.88em;font-weight:500;">
+                ← Back to Chat
+              </span>
+              <span style="font-size:1.35em;font-weight:700;color:#1a1a2e;
+                  border-bottom:2px solid #1a3a6b;padding-bottom:2px;">
+                Enrichir
+              </span>
+            </div>
+        """.trimIndent()
+        ).use(headerBar.col(0))
+
+        val cancelHeaderForm = Jt.form().key("cancel-header-form").use(headerBar.col(1))
+        Jt.formSubmitButton("← Back to Chat").use(cancelHeaderForm)
+
+        Jt.markdown("---").use()
+
+        // ── Bloc intro "Optimisation du Prompt" ───────────────────────────────────
+        Jt.html(
+            """
+            <div style="background:#f8f9ff;border:1px solid #dde3f5;border-radius:8px;
+                padding:16px 20px;margin:0 0 18px 0;">
+              <div style="font-size:1.15em;font-weight:700;color:#1a1a2e;margin-bottom:5px;">
+                Optimisation du Prompt
+              </div>
+              <div style="font-size:0.87em;color:#666;line-height:1.5;">
+                Affinage de l'intelligence contextuelle pour des résultats de haute
+                précision via le moteur Enrichir AI.
+              </div>
+            </div>
+        """.trimIndent()
+        ).use()
+
+        // ── Deux colonnes : Language Model | Select Resources ────────────────────
+        val allProviders = listOf(
+            "anthropic", "gemini", "huggingface", "mistral", "ollama", "grok", "groq"
+        )
+        val currentEnrichProvider = state.getString("enrichProvider")
+            ?.takeIf { it.isNotBlank() } ?: "ollama"
+        val providerIndex = allProviders.indexOf(currentEnrichProvider)
+            .takeIf { it >= 0 } ?: 4
+
+        val enrichModels = availableModels(cfg, currentEnrichProvider)
+            .ifEmpty { listOf("$currentEnrichProvider-default") }
+        val currentEnrichModel = state.getString("enrichModel")
+            ?.takeIf { it.isNotBlank() } ?: enrichModels.first()
+        val enrichModelIndex = enrichModels.indexOf(currentEnrichModel)
+            .takeIf { it >= 0 } ?: 0
+
+        val twoColBar = Jt.columns(2)
+            .widths(listOf(0.48, 0.52))
+            .gap(ColumnsComponent.Gap.MEDIUM)
+            .use()
+
+        // ── col(0) Language Model ─────────────────────────────────────────────────
+        Jt.html(
+            """
+            <div style="font-size:0.85em;font-weight:600;color:#1a3a6b;
+                margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+              🌐 Language Model
+            </div>
+        """.trimIndent()
+        ).use(twoColBar.col(0))
+
+        val pickedProvider = Jt.selectbox("Provider", allProviders)
+            .index(providerIndex)
+            .labelVisibility(JtComponent.LabelVisibility.COLLAPSED)
+            .width("stretch")
+            .use(twoColBar.col(0))
+
+        if (pickedProvider != currentEnrichProvider) {
+            state["enrichProvider"] = pickedProvider
+            state["enrichModel"] = ""
+            Jt.rerun()
+        }
+
+        val pickedEnrichModel = Jt.selectbox("Modèle", enrichModels)
+            .index(enrichModelIndex)
+            .labelVisibility(JtComponent.LabelVisibility.COLLAPSED)
+            .width("stretch")
+            .use(twoColBar.col(0))
+
+        if (pickedEnrichModel != currentEnrichModel) {
+            state["enrichModel"] = pickedEnrichModel
+            Jt.rerun()
+        }
+
+        Jt.html(
+            """
+            <div style="font-size:0.79em;color:#9e9e9e;margin-top:6px;line-height:1.4;">
+              Selected model handles complex reasoning and creative generation.
+            </div>
+        """.trimIndent()
+        ).use(twoColBar.col(0))
+
+        // ── col(1) Select Resources (embeds RAG) ──────────────────────────────────
+        val embedsCfg = with(embedsYmlConfig) { projectDir.loadEmbedsConfiguration() }
+        val embedNames = embedsCfg.embeds.map { it.name }
+
+        @Suppress("UNCHECKED_CAST")
+        val selectedEmbeds = state["enrichEmbeds"] as? MutableList<String>
+            ?: mutableListOf<String>().also { state["enrichEmbeds"] = it }
+
+        Jt.html(
+            """
+            <div style="font-size:0.85em;font-weight:600;color:#1a3a6b;
+                margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+              📂 Select Resources
+            </div>
+        """.trimIndent()
+        ).use(twoColBar.col(1))
+
+        // Tags pills des embeds sélectionnés
+        if (selectedEmbeds.isNotEmpty()) {
+            val tagsHtml = selectedEmbeds.joinToString("") { name ->
+                val embed = embedsCfg.embeds.firstOrNull { it.name == name }
+                val pathInfo = embed?.path ?: "?"
+                """<span style="display:inline-flex;align-items:center;gap:4px;
+                    background:#f0f4ff;border:1px solid #c5cae9;border-radius:4px;
+                    padding:2px 8px;margin:2px 2px;font-size:0.81em;color:#1a3a6b;">
+                  📄 $pathInfo
+                </span>"""
+            }
+            Jt.html("""<div style="margin-bottom:6px;flex-wrap:wrap;">$tagsHtml</div>""")
+                .use(twoColBar.col(1))
+        }
+
+        if (embedNames.isEmpty()) {
+            Jt.info("Aucun embed — créez embeds.yml à la racine.").use(twoColBar.col(1))
+        } else {
+            val embedIndex = selectedEmbeds
+                .mapNotNull { name -> embedNames.indexOf(name).takeIf { it >= 0 } }
+                .firstOrNull() ?: 0
+
+            val pickedEmbed = Jt.selectbox("Embed RAG", embedNames)
+                .index(embedIndex)
+                .labelVisibility(JtComponent.LabelVisibility.COLLAPSED)
+                .width("stretch")
+                .use(twoColBar.col(1))
+
+            val addEmbedForm = Jt.form().key("add-embed-form").use(twoColBar.col(1))
+            Jt.formSubmitButton("＋ Attach File").use(addEmbedForm)
+
+            if (Jt.componentsState()["add-embed-form"] == true) {
+                if (pickedEmbed !in selectedEmbeds) {
+                    selectedEmbeds.add(pickedEmbed); Jt.rerun()
+                }
+            }
+
+            selectedEmbeds.toList().forEachIndexed { i, name ->
+                val removeForm = Jt.form().key("remove-embed-$i").use(twoColBar.col(1))
+                Jt.formSubmitButton("✕ $name").use(removeForm)
+                if (Jt.componentsState().get("remove-embed-$i") == true) {
+                    selectedEmbeds.remove(name); Jt.rerun()
+                }
+            }
+        }
+
+        Jt.markdown("---").use()
+
+        // ── Prompt Editor ─────────────────────────────────────────────────────────
+        //
+        // Header avec toolbar B/I/<>/🔗 simulée en HTML statique + compteur mots.
+        // Contexte injecté visible uniquement si enrichedPrompt ≠ rawPrompt.
+        //
+        val wordCount = enrichedPrompt.trim()
+            .let { if (it.isBlank()) 0 else it.split(Regex("\\s+")).size }
+
+        Jt.html(
+            """
+            <div style="background:#fff;border:1px solid #dde3f5;
+                border-radius:8px 8px 0 0;padding:10px 16px;
+                display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:8px;
+                  font-weight:600;font-size:0.92em;color:#1a1a2e;">
+                <span style="color:#e65100;font-size:1.05em;">≡⚡</span>
+                Prompt Editor
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <span style="display:flex;gap:10px;color:#555;font-size:0.93em;
+                    align-items:center;">
+                  <strong style="cursor:default;">B</strong>
+                  <em style="cursor:default;">I</em>
+                  <span style="cursor:default;font-weight:700;">•≡</span>
+                  <span style="font-family:monospace;cursor:default;">&lt;/&gt;</span>
+                  <span style="cursor:default;">🔗</span>
+                </span>
+                <span style="font-size:0.79em;color:#9e9e9e;">
+                  Words: <strong>$wordCount</strong>
+                </span>
+              </div>
+            </div>
+        """.trimIndent()
+        ).use()
+
+        // Bloc contexte injecté (fond orange, style maquette)
+        if (enrichedPrompt.isNotBlank() && enrichedPrompt != rawPrompt) {
+            val injected = enrichedPrompt.removePrefix(rawPrompt).trim()
+            if (injected.isNotBlank()) {
+                Jt.html(
+                    """
+                    <div style="background:#fff3e0;border-left:4px solid #e65100;
+                        padding:9px 14px;font-size:0.86em;color:#5d3a00;
+                        font-style:italic;border-radius:0;">
+                      [CONTEXTE_AUTOMATIQUE] ${injected.replace("\n", "<br/>")}
+                    </div>
+                """.trimIndent()
+                ).use()
+            }
+        }
+
+        Jt.textArea("Prompt enrichi")
+            .value(enrichedPrompt)
+            .height(220)
+            .labelVisibility(JtComponent.LabelVisibility.HIDDEN)
+            .onChange { state["enrichedPrompt"] = it }
+            .use()
+
+        Jt.markdown("---").use()
+
+        // ── Actions ───────────────────────────────────────────────────────────────
+        val actionsBar = Jt.columns(3)
+            .widths(listOf(0.42, 0.32, 0.26))
+            .gap(ColumnsComponent.Gap.SMALL)
+            .use()
+
+        val sendForm = Jt.form().key("enrich-send-form").use(actionsBar.col(0))
+        Jt.formSubmitButton("⚡ Enrichir AI").use(sendForm)
+
+        val reenrichForm = Jt.form().key("enrich-reenrich-form").use(actionsBar.col(1))
+        Jt.formSubmitButton("♻️ Re-enrichir").use(reenrichForm)
+
+        val cancelForm = Jt.form().key("enrich-cancel-form").use(actionsBar.col(2))
+        Jt.formSubmitButton("❌ Annuler").use(cancelForm)
+
+        val actionCs = Jt.componentsState()
+
+        if (actionCs.get("enrich-send-form") == true) {
+            val finalPrompt = state.getString("enrichedPrompt") ?: rawPrompt
+            history.add(
+                Triple(
+                    "⚡",
+                    "Prompt enrichi → $currentEnrichModel (${finalPrompt.length} car.)",
+                    "ollama"
+                )
+            )
+            history.add(Triple("⏳", "En attente de Claude...", "wait"))
+            state["playwrightStatus"] = "waiting"
+            state["page"] = "chat"
+            // TODO : envoyer finalPrompt via activePage (étape Playwright)
+            Jt.rerun()
+        }
+
+        if (actionCs["enrich-reenrich-form"] == true) {
+            val mocked = "[$currentEnrichModel + ${selectedEmbeds.size} embed(s)] $rawPrompt"
+            state["enrichedPrompt"] = mocked
+            Jt.rerun()
+        }
+
+        val cancelPressed = actionCs["enrich-cancel-form"] == true
+                || actionCs["cancel-header-form"] == true
+        if (cancelPressed) {
+            if (history.isNotEmpty()) history.removeLastOrNull()
+            state["enrichedPrompt"] = ""
+            state["enrichRawPrompt"] = ""
+            state["page"] = "chat"
+            Jt.rerun()
+        }
+
         return
     }
-
-    // ── Sidebar — rendue uniquement pour la vue chat ──────────────────────────
-    setupSidebar()
 
     // ════════════════════════════════════════════════════════════════════════
     // VUE "chat"
@@ -514,299 +793,5 @@ fun chatbotApp(
             // TODO : envoyer via activePage (étape Playwright)
             Jt.rerun()
         }
-    }
-}
-
-
-// ── enrichView ────────────────────────────────────────────────────────────────
-//
-// Vue d'enrichissement du prompt — rendu conditionnel depuis chatbotApp.
-// Pilotée par sessionState["page"] == "enrich".
-//
-fun enrichView(
-    cfg: CodebaseConfiguration,
-    history: MutableList<Triple<String, String, String>>
-) {
-    val state = Jt.sessionState()
-    val projectDir = File(System.getProperty("user.dir"))
-    val rawPrompt = state.getString("enrichRawPrompt") ?: ""
-    val enrichedPrompt = state.getString("enrichedPrompt") ?: rawPrompt
-
-    // ── Header "← Back to Chat   Enrichir" ───────────────────────────────────
-    val headerBar = Jt.columns(2)
-        .widths(listOf(0.80, 0.20))
-        .gap(ColumnsComponent.Gap.NONE)
-        .verticalAlignment(ColumnsComponent.VerticalAlignment.CENTER)
-        .use()
-
-    Jt.html(
-        """
-        <div style="display:flex;align-items:center;gap:18px;padding:6px 0;">
-          <span style="color:#1a3a6b;font-size:0.88em;font-weight:500;">
-            ← Back to Chat
-          </span>
-          <span style="font-size:1.35em;font-weight:700;color:#1a1a2e;
-              border-bottom:2px solid #1a3a6b;padding-bottom:2px;">
-            Enrichir
-          </span>
-        </div>
-    """.trimIndent()
-    ).use(headerBar.col(0))
-
-    val cancelHeaderForm = Jt.form().key("cancel-header-form").use(headerBar.col(1))
-    Jt.formSubmitButton("← Back to Chat").use(cancelHeaderForm)
-
-    Jt.markdown("---").use()
-
-    // ── Bloc intro "Optimisation du Prompt" ───────────────────────────────────
-    Jt.html(
-        """
-        <div style="background:#f8f9ff;border:1px solid #dde3f5;border-radius:8px;
-            padding:16px 20px;margin:0 0 18px 0;">
-          <div style="font-size:1.15em;font-weight:700;color:#1a1a2e;margin-bottom:5px;">
-            Optimisation du Prompt
-          </div>
-          <div style="font-size:0.87em;color:#666;line-height:1.5;">
-            Affinage de l'intelligence contextuelle pour des résultats de haute
-            précision via le moteur Enrichir AI.
-          </div>
-        </div>
-    """.trimIndent()
-    ).use()
-
-    // ── Deux colonnes : Language Model | Select Resources ────────────────────
-    val allProviders = listOf(
-        "anthropic", "gemini", "huggingface", "mistral", "ollama", "grok", "groq"
-    )
-    val currentEnrichProvider = state.getString("enrichProvider")
-        ?.takeIf { it.isNotBlank() } ?: "ollama"
-    val providerIndex = allProviders.indexOf(currentEnrichProvider)
-        .takeIf { it >= 0 } ?: 4
-
-    val enrichModels = availableModels(cfg, currentEnrichProvider)
-        .ifEmpty { listOf("$currentEnrichProvider-default") }
-    val currentEnrichModel = state.getString("enrichModel")
-        ?.takeIf { it.isNotBlank() } ?: enrichModels.first()
-    val enrichModelIndex = enrichModels.indexOf(currentEnrichModel)
-        .takeIf { it >= 0 } ?: 0
-
-    val twoColBar = Jt.columns(2)
-        .widths(listOf(0.48, 0.52))
-        .gap(ColumnsComponent.Gap.MEDIUM)
-        .use()
-
-    // ── col(0) Language Model ─────────────────────────────────────────────────
-    Jt.html(
-        """
-        <div style="font-size:0.85em;font-weight:600;color:#1a3a6b;
-            margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-          🌐 Language Model
-        </div>
-    """.trimIndent()
-    ).use(twoColBar.col(0))
-
-    val pickedProvider = Jt.selectbox("Provider", allProviders)
-        .index(providerIndex)
-        .labelVisibility(JtComponent.LabelVisibility.COLLAPSED)
-        .width("stretch")
-        .use(twoColBar.col(0))
-
-    if (pickedProvider != currentEnrichProvider) {
-        state["enrichProvider"] = pickedProvider
-        state["enrichModel"] = ""
-        Jt.rerun()
-    }
-
-    val pickedEnrichModel = Jt.selectbox("Modèle", enrichModels)
-        .index(enrichModelIndex)
-        .labelVisibility(JtComponent.LabelVisibility.COLLAPSED)
-        .width("stretch")
-        .use(twoColBar.col(0))
-
-    if (pickedEnrichModel != currentEnrichModel) {
-        state["enrichModel"] = pickedEnrichModel
-        Jt.rerun()
-    }
-
-    Jt.html(
-        """
-        <div style="font-size:0.79em;color:#9e9e9e;margin-top:6px;line-height:1.4;">
-          Selected model handles complex reasoning and creative generation.
-        </div>
-    """.trimIndent()
-    ).use(twoColBar.col(0))
-
-    // ── col(1) Select Resources (embeds RAG) ──────────────────────────────────
-    val embedsCfg = with(embedsYmlConfig) { projectDir.loadEmbedsConfiguration() }
-    val embedNames = embedsCfg.embeds.map { it.name }
-
-    @Suppress("UNCHECKED_CAST")
-    val selectedEmbeds = state["enrichEmbeds"] as? MutableList<String>
-        ?: mutableListOf<String>().also { state["enrichEmbeds"] = it }
-
-    Jt.html(
-        """
-        <div style="font-size:0.85em;font-weight:600;color:#1a3a6b;
-            margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-          📂 Select Resources
-        </div>
-    """.trimIndent()
-    ).use(twoColBar.col(1))
-
-    // Tags pills des embeds sélectionnés
-    if (selectedEmbeds.isNotEmpty()) {
-        val tagsHtml = selectedEmbeds.joinToString("") { name ->
-            val embed = embedsCfg.embeds.firstOrNull { it.name == name }
-            val pathInfo = embed?.path ?: "?"
-            """<span style="display:inline-flex;align-items:center;gap:4px;
-                background:#f0f4ff;border:1px solid #c5cae9;border-radius:4px;
-                padding:2px 8px;margin:2px 2px;font-size:0.81em;color:#1a3a6b;">
-              📄 $pathInfo
-            </span>"""
-        }
-        Jt.html("""<div style="margin-bottom:6px;flex-wrap:wrap;">$tagsHtml</div>""")
-            .use(twoColBar.col(1))
-    }
-
-    if (embedNames.isEmpty()) {
-        Jt.info("Aucun embed — créez embeds.yml à la racine.").use(twoColBar.col(1))
-    } else {
-        val embedIndex = selectedEmbeds
-            .mapNotNull { name -> embedNames.indexOf(name).takeIf { it >= 0 } }
-            .firstOrNull() ?: 0
-
-        val pickedEmbed = Jt.selectbox("Embed RAG", embedNames)
-            .index(embedIndex)
-            .labelVisibility(JtComponent.LabelVisibility.COLLAPSED)
-            .width("stretch")
-            .use(twoColBar.col(1))
-
-        val addEmbedForm = Jt.form().key("add-embed-form").use(twoColBar.col(1))
-        Jt.formSubmitButton("＋ Attach File").use(addEmbedForm)
-
-        if (Jt.componentsState()["add-embed-form"] == true) {
-            if (pickedEmbed !in selectedEmbeds) {
-                selectedEmbeds.add(pickedEmbed); Jt.rerun()
-            }
-        }
-
-        selectedEmbeds.toList().forEachIndexed { i, name ->
-            val removeForm = Jt.form().key("remove-embed-$i").use(twoColBar.col(1))
-            Jt.formSubmitButton("✕ $name").use(removeForm)
-            if (Jt.componentsState().get("remove-embed-$i") == true) {
-                selectedEmbeds.remove(name); Jt.rerun()
-            }
-        }
-    }
-
-    Jt.markdown("---").use()
-
-    // ── Prompt Editor ─────────────────────────────────────────────────────────
-    //
-    // Header avec toolbar B/I/<>/🔗 simulée en HTML statique + compteur mots.
-    // Contexte injecté visible uniquement si enrichedPrompt ≠ rawPrompt.
-    //
-    val wordCount = enrichedPrompt.trim()
-        .let { if (it.isBlank()) 0 else it.split(Regex("\\s+")).size }
-
-    Jt.html(
-        """
-        <div style="background:#fff;border:1px solid #dde3f5;
-            border-radius:8px 8px 0 0;padding:10px 16px;
-            display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;align-items:center;gap:8px;
-              font-weight:600;font-size:0.92em;color:#1a1a2e;">
-            <span style="color:#e65100;font-size:1.05em;">≡⚡</span>
-            Prompt Editor
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;">
-            <span style="display:flex;gap:10px;color:#555;font-size:0.93em;
-                align-items:center;">
-              <strong style="cursor:default;">B</strong>
-              <em style="cursor:default;">I</em>
-              <span style="cursor:default;font-weight:700;">•≡</span>
-              <span style="font-family:monospace;cursor:default;">&lt;/&gt;</span>
-              <span style="cursor:default;">🔗</span>
-            </span>
-            <span style="font-size:0.79em;color:#9e9e9e;">
-              Words: <strong>$wordCount</strong>
-            </span>
-          </div>
-        </div>
-    """.trimIndent()
-    ).use()
-
-    // Bloc contexte injecté (fond orange, style maquette)
-    if (enrichedPrompt.isNotBlank() && enrichedPrompt != rawPrompt) {
-        val injected = enrichedPrompt.removePrefix(rawPrompt).trim()
-        if (injected.isNotBlank()) {
-            Jt.html(
-                """
-                <div style="background:#fff3e0;border-left:4px solid #e65100;
-                    padding:9px 14px;font-size:0.86em;color:#5d3a00;
-                    font-style:italic;border-radius:0;">
-                  [CONTEXTE_AUTOMATIQUE] ${injected.replace("\n", "<br/>")}
-                </div>
-            """.trimIndent()
-            ).use()
-        }
-    }
-
-    Jt.textArea("Prompt enrichi")
-        .value(enrichedPrompt)
-        .height(220)
-        .labelVisibility(JtComponent.LabelVisibility.HIDDEN)
-        .onChange { state["enrichedPrompt"] = it }
-        .use()
-
-    Jt.markdown("---").use()
-
-    // ── Actions ───────────────────────────────────────────────────────────────
-    val actionsBar = Jt.columns(3)
-        .widths(listOf(0.42, 0.32, 0.26))
-        .gap(ColumnsComponent.Gap.SMALL)
-        .use()
-
-    val sendForm = Jt.form().key("enrich-send-form").use(actionsBar.col(0))
-    Jt.formSubmitButton("⚡ Enrichir AI").use(sendForm)
-
-    val reenrichForm = Jt.form().key("enrich-reenrich-form").use(actionsBar.col(1))
-    Jt.formSubmitButton("♻️ Re-enrichir").use(reenrichForm)
-
-    val cancelForm = Jt.form().key("enrich-cancel-form").use(actionsBar.col(2))
-    Jt.formSubmitButton("❌ Annuler").use(cancelForm)
-
-    val actionCs = Jt.componentsState()
-
-    if (actionCs.get("enrich-send-form") == true) {
-        val finalPrompt = state.getString("enrichedPrompt") ?: rawPrompt
-        history.add(
-            Triple(
-                "⚡",
-                "Prompt enrichi → $currentEnrichModel (${finalPrompt.length} car.)",
-                "ollama"
-            )
-        )
-        history.add(Triple("⏳", "En attente de Claude...", "wait"))
-        state["playwrightStatus"] = "waiting"
-        state["page"] = "chat"
-        // TODO : envoyer finalPrompt via activePage (étape Playwright)
-        Jt.rerun()
-    }
-
-    if (actionCs["enrich-reenrich-form"] == true) {
-        val mocked = "[$currentEnrichModel + ${selectedEmbeds.size} embed(s)] $rawPrompt"
-        state["enrichedPrompt"] = mocked
-        Jt.rerun()
-    }
-
-    val cancelPressed = actionCs["enrich-cancel-form"] == true
-            || actionCs["cancel-header-form"] == true
-    if (cancelPressed) {
-        if (history.isNotEmpty()) history.removeLastOrNull()
-        state["enrichedPrompt"] = ""
-        state["enrichRawPrompt"] = ""
-        state["page"] = "chat"
-        Jt.rerun()
     }
 }
