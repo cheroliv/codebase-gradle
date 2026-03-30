@@ -66,7 +66,7 @@ class ReadmeYmlConfig {
      * Loads [ReadmePlantUmlConfig] from [projectDir]/readme.yml.
      * Falls back to defaults if the file is absent, empty, or contains invalid YAML.
      */
-    fun ReadmePlantUmlConfig.Companion.load(projectDir: File): ReadmePlantUmlConfig {
+    fun ReadmePlantUmlConfig.Companion.loadReadmeConfiguration(projectDir: File): ReadmePlantUmlConfig {
         val configFile = File(projectDir, CONFIG_FILE_NAME)
 
         if (!configFile.exists() || configFile.length() == 0L) {
@@ -208,7 +208,7 @@ class SliderYmlConfig {
      * Loads [SliderConfiguration] from [projectDir]/slider-context.yml.
      * Falls back to defaults if the file is absent, empty, or contains invalid YAML.
      */
-    fun SliderConfiguration.Companion.load(projectDir: File): SliderConfiguration {
+    fun SliderConfiguration.Companion.loadSliderConfiguration(projectDir: File): SliderConfiguration {
         val configFile = File(projectDir, CONFIG_FILE_NAME)
 
         if (!configFile.exists() || configFile.length() == 0L) {
@@ -372,7 +372,7 @@ class SiteYmlConfig {
      * Loads [SiteConfiguration] from [projectDir]/site.yml.
      * Falls back to defaults if the file is absent, empty, or contains invalid YAML.
      */
-    fun SiteConfiguration.Companion.load(projectDir: File): SiteConfiguration {
+    fun SiteConfiguration.Companion.loadSiteConfiguration(projectDir: File): SiteConfiguration {
         val configFile = File(projectDir, CONFIG_FILE_NAME)
 
         if (!configFile.exists() || configFile.length() == 0L) {
@@ -559,9 +559,7 @@ data class CodebaseConfiguration(
     val active: ActiveSelection = ActiveSelection(),
     val ai: AiProvidersConfig = AiProvidersConfig(),
     val chatbot: ChatbotConfig = ChatbotConfig()
-) {
-    companion object
-}
+)
 
 // ── CodebaseYmlConfig ─────────────────────────────────────────────────────────
 
@@ -589,8 +587,8 @@ class CodebaseYmlConfig {
      * Loads [CodebaseConfiguration] from [projectDir]/codebase.yml.
      * Falls back to defaults if the file is absent, empty, or contains invalid YAML.
      */
-    fun CodebaseConfiguration.Companion.load(projectDir: File): CodebaseConfiguration {
-        val configFile = File(projectDir, CONFIG_FILE_NAME)
+    fun File.loadCodebaseConfiguration(): CodebaseConfiguration {
+        val configFile = File(this, CONFIG_FILE_NAME)
 
         if (!configFile.exists() || configFile.length() == 0L) {
             return CodebaseConfiguration()
@@ -899,22 +897,22 @@ class SnapshotManager {
         appendLine("----")
         val content = when (file.name) {
             readmeYmlConfig.CONFIG_FILE_NAME -> {
-                val cfg = with(readmeYmlConfig) { ReadmePlantUmlConfig.load(root) }
+                val cfg = with(readmeYmlConfig) { ReadmePlantUmlConfig.loadReadmeConfiguration(root) }
                 with(readmeYmlAnonymizer) { cfg.toAnonymizedYaml(this@renderFileSection) }
             }
 
             sliderYmlConfig.CONFIG_FILE_NAME -> {
-                val cfg = with(sliderYmlConfig) { SliderConfiguration.load(root) }
+                val cfg = with(sliderYmlConfig) { SliderConfiguration.loadSliderConfiguration(root) }
                 with(sliderYmlAnonymizer) { cfg.toAnonymizedYaml(this@renderFileSection) }
             }
 
             siteYmlConfig.CONFIG_FILE_NAME -> {
-                val cfg = with(siteYmlConfig) { SiteConfiguration.load(root) }
+                val cfg = with(siteYmlConfig) { SiteConfiguration.loadSiteConfiguration(root) }
                 with(siteYmlAnonymizer) { cfg.toAnonymizedYaml(this@renderFileSection) }
             }
 
             codebaseYmlConfig.CONFIG_FILE_NAME -> {
-                val cfg = with(codebaseYmlConfig) { CodebaseConfiguration.load(root) }
+                val cfg = with(codebaseYmlConfig) { root.loadCodebaseConfiguration() }
                 with(codebaseYmlAnonymizer) { cfg.toAnonymizedYaml(this@renderFileSection) }
             }
 
@@ -1008,9 +1006,7 @@ data class EmbedEntry(
  */
 data class EmbedsConfig(
     val embeds: List<EmbedEntry> = emptyList()
-) {
-    companion object
-}
+)
 
 /**
  * Loader pour embeds.yml — même pattern que les autres YmlConfig.
@@ -1023,8 +1019,8 @@ class EmbedsYmlConfig {
     @Suppress("PropertyName")
     val CONFIG_FILE_NAME = "embeds.yml"
 
-    fun EmbedsConfig.Companion.load(projectDir: File): EmbedsConfig {
-        val f = File(projectDir, CONFIG_FILE_NAME)
+    fun File.loadEmbedsConfiguration(): EmbedsConfig {
+        val f = File(this, CONFIG_FILE_NAME)
         if (!f.exists() || f.length() == 0L) return EmbedsConfig()
         return try {
             MAPPER.readValue(f, EmbedsConfig::class.java)
@@ -1663,7 +1659,7 @@ fun enrichView(
     ).use(twoColBar.col(0))
 
     // ── col(1) Select Resources (embeds RAG) ──────────────────────────────────
-    val embedsCfg = with(embedsYmlConfig) { EmbedsConfig.load(projectDir) }
+    val embedsCfg = with(embedsYmlConfig) { projectDir.loadEmbedsConfiguration() }
     val embedNames = embedsCfg.embeds.map { it.name }
 
     @Suppress("UNCHECKED_CAST")
