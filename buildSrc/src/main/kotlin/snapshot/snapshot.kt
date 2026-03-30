@@ -1,20 +1,20 @@
 package snapshot
 
-import codebase.codebaseYmlAnonymizer
-import codebase.codebaseYmlConfig
+import codebase.CodebaseYmlAnonymizer
+import codebase.CodebaseYmlConfig
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.gradle.api.logging.Logger
 import readme.GitConfig
-import readme.readmeYmlAnonymizer
-import readme.readmeYmlConfig
-import site.siteYmlAnonymizer
-import site.siteYmlConfig
-import slider.sliderYmlAnonymizer
-import slider.sliderYmlConfig
+import readme.ReadmeYmlAnonymizer
+import readme.ReadmeYmlConfig
+import readme.resolvedToken
+import site.SiteYmlAnonymizer
+import site.SiteYmlConfig
+import slider.SliderYmlAnonymizer
+import slider.SliderYmlConfig
 import java.io.File
-import kotlin.collections.forEach
 
 // ── SnapshotManager ───────────────────────────────────────────────────────────
 
@@ -101,18 +101,6 @@ class SnapshotManager {
     }
 
     /**
-     * Resolves the GitHub token from [this].
-     * Throws [IllegalStateException] if the token is blank or still a placeholder.
-     */
-    fun GitConfig.resolvedToken(): String =
-        token.takeIf { it.isNotBlank() && it != "<YOUR_GITHUB_PAT>" }
-            ?: error(
-                "GitHub token is empty or still a placeholder in readme.yml.\n" +
-                        "→ Check the README_GRADLE_PLUGIN secret in:\n" +
-                        "   GitHub → Settings → Secrets and variables → Actions"
-            )
-
-    /**
      * Walks [this] directory, collecting all source files for the snapshot.
      */
     fun File.walk(collected: LinkedHashSet<File> = linkedSetOf()): LinkedHashSet<File> {
@@ -157,32 +145,44 @@ class SnapshotManager {
      * Renders one AsciiDoc section for [file], relative to [root].
      * Sensitive YAML files are rendered anonymized via explicit with(anonymizer) —
      * no top-level facade to avoid ambiguous resolution and StackOverflow.
+     * All Config/Anonymizer instances are provided by the caller (no global singletons).
      */
-    fun ObjectMapper.renderFileSection(file: File, root: File): String = buildString {
+    fun ObjectMapper.renderFileSection(
+        file: File,
+        root: File,
+        readmeCfg: ReadmeYmlConfig,
+        readmeAnon: ReadmeYmlAnonymizer,
+        sliderCfg: SliderYmlConfig,
+        sliderAnon: SliderYmlAnonymizer,
+        siteCfg: SiteYmlConfig,
+        siteAnon: SiteYmlAnonymizer,
+        codebaseCfg: CodebaseYmlConfig,
+        codebaseAnon: CodebaseYmlAnonymizer
+    ): String = buildString {
         val relPath = file.relativeTo(root).path
         appendLine("== $relPath")
         appendLine()
         appendLine("[source,${file.asciidocLang()}]")
         appendLine("----")
         val content = when (file.name) {
-            readmeYmlConfig.CONFIG_FILE_NAME -> {
-                val cfg = with(readmeYmlConfig) { root.loadReadmeConfiguration() }
-                with(readmeYmlAnonymizer) { cfg.toAnonymizedYaml(this@renderFileSection) }
+            readmeCfg.CONFIG_FILE_NAME -> {
+                val cfg = with(readmeCfg) { root.loadReadmeConfiguration() }
+                with(readmeAnon) { cfg.toAnonymizedYaml(this@renderFileSection) }
             }
 
-            sliderYmlConfig.CONFIG_FILE_NAME -> {
-                val cfg = with(sliderYmlConfig) { root.loadSliderConfiguration() }
-                with(sliderYmlAnonymizer) { cfg.toAnonymizedYaml(this@renderFileSection) }
+            sliderCfg.CONFIG_FILE_NAME -> {
+                val cfg = with(sliderCfg) { root.loadSliderConfiguration() }
+                with(sliderAnon) { cfg.toAnonymizedYaml(this@renderFileSection) }
             }
 
-            siteYmlConfig.CONFIG_FILE_NAME -> {
-                val cfg = with(siteYmlConfig) { root.loadSiteConfiguration() }
-                with(siteYmlAnonymizer) { cfg.toAnonymizedYaml(this@renderFileSection) }
+            siteCfg.CONFIG_FILE_NAME -> {
+                val cfg = with(siteCfg) { root.loadSiteConfiguration() }
+                with(siteAnon) { cfg.toAnonymizedYaml(this@renderFileSection) }
             }
 
-            codebaseYmlConfig.CONFIG_FILE_NAME -> {
-                val cfg = with(codebaseYmlConfig) { root.loadCodebaseConfiguration() }
-                with(codebaseYmlAnonymizer) { cfg.toAnonymizedYaml(this@renderFileSection) }
+            codebaseCfg.CONFIG_FILE_NAME -> {
+                val cfg = with(codebaseCfg) { root.loadCodebaseConfiguration() }
+                with(codebaseAnon) { cfg.toAnonymizedYaml(this@renderFileSection) }
             }
 
             else -> file.readText()
@@ -194,8 +194,19 @@ class SnapshotManager {
 
     /**
      * Assembles the full AsciiDoc document from [root].
+     * All Config/Anonymizer instances are created locally — no global singletons.
      */
-    fun ObjectMapper.buildAdoc(root: File): String {
+    fun ObjectMapper.buildAdoc(
+        root: File,
+        readmeCfg: ReadmeYmlConfig,
+        readmeAnon: ReadmeYmlAnonymizer,
+        sliderCfg: SliderYmlConfig,
+        sliderAnon: SliderYmlAnonymizer,
+        siteCfg: SiteYmlConfig,
+        siteAnon: SiteYmlAnonymizer,
+        codebaseCfg: CodebaseYmlConfig,
+        codebaseAnon: CodebaseYmlAnonymizer
+    ): String {
         val sourceFiles = root.collectFiles()
         return buildString {
             appendLine("= Project Snapshot")
@@ -210,15 +221,36 @@ class SnapshotManager {
             appendLine(root.buildTreeView())
             appendLine("----")
             appendLine()
-            sourceFiles.forEach { append(renderFileSection(it, root)) }
+            sourceFiles.forEach {
+                append(
+                    renderFileSection(
+                        it, root,
+                        readmeCfg, readmeAnon,
+                        sliderCfg, sliderAnon,
+                        siteCfg, siteAnon,
+                        codebaseCfg, codebaseAnon
+                    )
+                )
+            }
         }
     }
 
     /**
      * Entry point — generates snapshot.adoc under [this] root directory.
+     * All Config/Anonymizer instances are created locally in doLast scope —
+     * no global singletons, no cascade initialization at package load time.
      */
     fun File.generate(logger: Logger): List<File> {
-        val mapper = ObjectMapper(YAMLFactory()).registerKotlinModule()
+        val mapper       = ObjectMapper(YAMLFactory()).registerKotlinModule()
+        val readmeCfg    = ReadmeYmlConfig()
+        val readmeAnon   = ReadmeYmlAnonymizer()
+        val sliderCfg    = SliderYmlConfig()
+        val sliderAnon   = SliderYmlAnonymizer()
+        val siteCfg      = SiteYmlConfig()
+        val siteAnon     = SiteYmlAnonymizer()
+        val codebaseCfg  = CodebaseYmlConfig()
+        val codebaseAnon = CodebaseYmlAnonymizer()
+
         val sourceFiles = collectFiles()
 
         logger.lifecycle("── project tree ────────────────────────────────────")
@@ -226,7 +258,15 @@ class SnapshotManager {
         logger.lifecycle("── collected files (${sourceFiles.size}) ──────────────────────────")
         sourceFiles.forEach { logger.lifecycle("  ${it.relativeTo(this).path}") }
 
-        File(this, "snapshot.adoc").writeText(mapper.buildAdoc(this))
+        File(this, "snapshot.adoc").writeText(
+            mapper.buildAdoc(
+                this,
+                readmeCfg, readmeAnon,
+                sliderCfg, sliderAnon,
+                siteCfg, siteAnon,
+                codebaseCfg, codebaseAnon
+            )
+        )
 
         logger.lifecycle("════════════════════════════════════════════════════")
         logger.lifecycle("✅ snapshot.adoc generated — ${sourceFiles.size} file(s) captured")
@@ -237,4 +277,3 @@ class SnapshotManager {
 }
 
 val snapshotManager = SnapshotManager()
-
