@@ -27,6 +27,7 @@ buildscript {
 plugins {
     alias(libs.plugins.kotlin.jvm)
 //    alias(libs.plugins.readme)
+    application
 }
 
 repositories {
@@ -34,6 +35,10 @@ repositories {
     gradlePluginPortal()
 }
 
+application {
+    // Define the main class for the application.
+    mainClass = "chatbot.ChatbotFrame"
+}
 
 // ── Tasks ─────────────────────────────────────────────────────────────────────
 
