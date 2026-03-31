@@ -35,7 +35,12 @@ application.mainClass = "chatbot.ChatbotFrame"
 
 
 // ── Tasks ─────────────────────────────────────────────────────────────────────
-
+tasks.register<DefaultTask>("chatbot") {
+    group = "codebase"
+    description = "Launch swing chatbot"
+    finalizedBy("run")
+    doFirst { println("Launch plumbery.") }
+}
 /**
  * Verifies via logs that ReadmePlantUmlConfig anonymization masks token, userName
  * and userEmail, and preserves all other fields.
