@@ -1,15 +1,12 @@
 // build.gradle.kts
+import codebase.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import io.javelit.core.Server
-import java.util.concurrent.CountDownLatch
-import chatbot.*
-import codebase.*
 import readme.*
 import site.*
 import slider.*
-import snapshot.*
+import snapshot.SnapshotManager
 
 
 buildscript {
@@ -20,7 +17,6 @@ buildscript {
         classpath("jakarta.validation:jakarta.validation-api:3.1.0")
         classpath("org.hibernate.validator:hibernate-validator:8.0.1.Final")
         classpath("org.glassfish.expressly:expressly:5.0.0")
-        classpath("io.javelit:javelit:0.86.0")
     }
 }
 
@@ -35,10 +31,8 @@ repositories {
     gradlePluginPortal()
 }
 
-application {
-    // Define the main class for the application.
-    mainClass = "chatbot.ChatbotFrame"
-}
+application.mainClass = "chatbot.ChatbotFrame"
+
 
 // ── Tasks ─────────────────────────────────────────────────────────────────────
 
@@ -728,7 +722,7 @@ tasks.register("verifyCodebaseToAnonymizedYaml") {
 
         val resolved = localConfig.resolveActiveKey(config7, logger)
         check(resolved?.key == "sk-ant-chatbot") { "FAIL case 7: expected chatbot key, got ${resolved?.key}" }
-        check(resolved.label == "chatbot") { "FAIL case 7: expected label 'chatbot', got ${resolved?.label}" }
+        check(resolved.label == "chatbot") { "FAIL case 7: expected label 'chatbot', got ${resolved.label}" }
 
         val resolvedCli = localConfig.resolveActiveKey(
             config7, logger,
@@ -922,76 +916,6 @@ tasks.register("scaffoldCodebaseYml") {
     }
 }
 
-
-/**
- * Démarre un serveur Javelit embarqué exposant le chatbot sur le port configuré
- * dans codebase.yml (défaut : 7070).
- *
- * Le LLM est mocké — seule l'UI et le cycle démarrage/arrêt sont validés ici.
- * L'intégration réelle (LangChain4j + resolveActiveKey) est planifiée en roadmap.
- *
- * Surcharge CLI :
- *   ./gradlew --no-daemon chatbot
- *   ./gradlew --no-daemon chatbot -Pcodebase.port=8080
- *   ./gradlew --no-daemon chatbot -Pcodebase.provider=ollama
- *
- * Arrêt propre :
- *   Ctrl+C → shutdown hook → latch.countDown() → server.stop() → Runtime.halt(0)
- *
- * Note : --no-daemon est obligatoire. Sans lui, Gradle exécute la tâche dans
- *         le Gradle Daemon — Runtime.halt(0) ne tue pas le daemon, le serveur
- *         Javelit reste accessible après Ctrl+C. Gradle 9.x ne permet pas de
- *         désactiver le daemon programmatiquement depuis le build script
- *         (StartParameter.isNoDaemonBuild supprimé en Gradle 9).
- *
- * Usage: ./gradlew --no-daemon chatbot
- */
-tasks.register("chatbot") {
-    group = "codebase"
-    description = "Starts an embedded Javelit chatbot (LLM mocked) on port from codebase.yml"
-
-    doLast {
-        val projectDir = layout.projectDirectory.asFile
-        val taskLogger = logger
-
-        // ── Config ────────────────────────────────────────────────────────────
-        val localConfig = CodebaseYmlConfig()
-        val cfg = with(localConfig) { projectDir.loadCodebaseConfiguration() }
-
-        val cliProvider = project.findProperty("codebase.provider") as String?
-        val cliPort = (project.findProperty("codebase.port") as String?)?.toIntOrNull()
-
-        val providerName = (cliProvider?.takeIf { it.isNotBlank() }
-            ?: cfg.active.provider.takeIf { it.isNotBlank() }
-            ?: "anthropic").lowercase()
-
-        val port = cliPort ?: cfg.chatbot.port
-
-        taskLogger.lifecycle("[chatbot] Port     : $port")
-        taskLogger.lifecycle("[chatbot] Provider : $providerName (mocké)")
-        taskLogger.lifecycle("[chatbot] Modèles  : ${availableModels(cfg, providerName)}")
-
-        // ── Démarrage serveur Javelit (non-bloquant) ──────────────────────────
-        val server = Server.builder({ chatbotApp(cfg, providerName) }, port).build()
-        server.start()
-
-        taskLogger.lifecycle("✅ Chatbot démarré → http://localhost:$port")
-        taskLogger.lifecycle("   Ctrl+C pour arrêter")
-
-        // ── Latch + shutdown hook ──────────────────────────────────────────
-        val latch = CountDownLatch(1)
-
-        Runtime.getRuntime().addShutdownHook(Thread {
-            taskLogger.lifecycle("[chatbot] Arrêt en cours…")
-            latch.countDown()
-        })
-
-        latch.await()
-
-        taskLogger.lifecycle("[chatbot] Arrêté proprement.")
-        Runtime.getRuntime().halt(0)
-    }
-}
 
 /**
  * Generates snapshot.adoc — a full AsciiDoc snapshot of the project sources.
