@@ -11,8 +11,6 @@ dependencies {
         "jakarta.validation:jakarta.validation-api:3.1.0",
         "org.hibernate.validator:hibernate-validator:8.0.1.Final",
         "org.glassfish.expressly:expressly:5.0.0",
-        // Javelit UI chatbot
-        "io.javelit:javelit:0.86.0"
     ).forEach(::implementation)
 }
 
