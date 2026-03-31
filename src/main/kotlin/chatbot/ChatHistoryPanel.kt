@@ -6,7 +6,9 @@ import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.geom.GeneralPath
 import javax.swing.*
-import javax.swing.border.*
+import javax.swing.border.CompoundBorder
+import javax.swing.border.EmptyBorder
+import javax.swing.border.LineBorder
 
 // ── Données ──────────────────────────────────────────────────────────────────
 
@@ -20,25 +22,25 @@ data class BranchRequest(
 // ── Constantes de design ──────────────────────────────────────────────────────
 
 private object Theme {
-    val userBubble  = Color(0x534AB7)
-    val userText    = Color(0xEEEDFE)
-    val aiBubble    = Color(0xF4F4F2)
-    val aiText      = Color(0x1A1A18)
-    val border      = Color(0xD3D1C7)
-    val actionBg    = Color.WHITE
-    val actionFg    = Color(0x5F5E5A)
-    val branchFg    = Color(0x534AB7)
-    val branchBdr   = Color(0xAFA9EC)
-    val meta        = Color(0x888780)
-    val avatarAi    = Color(0xE8E6E0)
-    val avatarUser  = Color(0x534AB7)
+    val userBubble = Color(0x534AB7)
+    val userText = Color(0xEEEDFE)
+    val aiBubble = Color(0xF4F4F2)
+    val aiText = Color(0x1A1A18)
+    val border = Color(0xD3D1C7)
+    val actionBg = Color.WHITE
+    val actionFg = Color(0x5F5E5A)
+    val branchFg = Color(0x534AB7)
+    val branchBdr = Color(0xAFA9EC)
+    val meta = Color(0x888780)
+    val avatarAi = Color(0xE8E6E0)
+    val avatarUser = Color(0x534AB7)
 
-    const val bubbleArc    = 16
-    const val maxBubbleW   = 520
-    const val avatarSize   = 28
-    const val hGap        = 10
-    const val vGap        = 8
-    const val panelPad    = 16
+    const val bubbleArc = 16
+    const val maxBubbleW = 520
+    const val avatarSize = 28
+    const val hGap = 10
+    const val vGap = 8
+    const val panelPad = 16
 
     val models = arrayOf("claude-opus-4-6", "claude-sonnet-4-6", "claude-haiku-4-5")
 }
@@ -155,7 +157,11 @@ private class ChatTurn(
         return JPanel(FlowLayout(if (isUser) FlowLayout.RIGHT else FlowLayout.LEFT, Theme.hGap, 0)).apply {
             isOpaque = false
             alignmentX = LEFT_ALIGNMENT
-            if (isUser) { add(bubble); add(avatar) } else { add(avatar); add(bubble) }
+            if (isUser) {
+                add(bubble); add(avatar)
+            } else {
+                add(avatar); add(bubble)
+            }
         }
     }
 
@@ -179,7 +185,10 @@ private class ChatTurn(
         bar.add(branchBtn)
 
         val hoverListener = object : MouseAdapter() {
-            override fun mouseEntered(e: MouseEvent) { bar.isVisible = true }
+            override fun mouseEntered(e: MouseEvent) {
+                bar.isVisible = true
+            }
+
             override fun mouseExited(e: MouseEvent) {
                 val root = SwingUtilities.getRoot(this@ChatTurn) ?: return
                 val hovered = SwingUtilities.getDeepestComponentAt(root, e.xOnScreen, e.yOnScreen)
@@ -218,6 +227,7 @@ private class ChatTurn(
             super.paintComponent(g2)
             g2.dispose()
         }
+
         override fun paintBorder(g: Graphics) {
             val g2 = g.create() as Graphics2D
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
@@ -264,7 +274,7 @@ private class BubbleLabel(text: String, private val isUser: Boolean) : JPanel(Bo
             x = 0f, y = 0f, w = width.toFloat(), h = height.toFloat(),
             r = Theme.bubbleArc.toFloat(),
             squareTL = !isUser, squareTR = false,
-            squareBR = isUser,  squareBL = false,
+            squareBR = isUser, squareBL = false,
         )
         g2.color = if (isUser) Theme.userBubble else Theme.aiBubble
         g2.fill(shape)
@@ -382,7 +392,9 @@ private class BranchDialog(
             addActionListener {
                 val edited = editArea.text.trim()
                 val model = modelCombo.selectedItem as String
-                if (edited.isNotEmpty()) { onConfirm(edited, model); dispose() }
+                if (edited.isNotEmpty()) {
+                    onConfirm(edited, model); dispose()
+                }
             }
         }
 
