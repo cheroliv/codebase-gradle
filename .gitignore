@@ -13,3 +13,4 @@ local.properties
 gradle/wrapper/gradle-wrapper.jar
 snapshot.adoc
 libs
+/.webui_secret_key
