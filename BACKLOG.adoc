@@ -18,12 +18,13 @@
 == EPIC 2 : Expert Anonymisation LangChain4j — Prérequis Transverse
 
 **Statut** : A FAIRE
-**Priorite** : P0
+**Priorite** : P0 — **MVP0** (premier livrable commercial)
 
-*Pourquoi* : Avant tout RAG renforcé ou fine-tuning, les données brutes doivent être
-anonymisées. L'expert anonymisation est un expert de commodité LangChain4j appelé en amont
-de chaque requêtage LLM. Il nettoie les datasets issus de sources multi-technologies
-(PostgreSQL SQL + pgvector + ONNX + Graphify). Il est le gardien RGPD de la chaîne.
+*Pourquoi* : L'expert anonymisation est le produit. Il transforme un probleme universel
+(donnees sales pleines de PII) en actif (datasets propres pour RAG et fine-tuning).
+C'est une methode reproductible donc marketable. Il fait le sale boulot bete et mechant
+de nettoyage multi-sources. Une fois stabilise, il ouvre la porte a MVP1 (RAG), MVP2
+(Graphify+ONNX+SQL DDD) et MVP3 (SaaS Edster).
 
 === Sous-tâches
 
