@@ -1,0 +1,76 @@
+= PROMPT_REPRISE — Session 1 — Codebase Gradle
+:jbake-status: draft
+
+== Contexte de Reprise
+
+Session initiale après migration depuis openclaw-codingame. Le backlog contient
+13 EPICs (1 à 13). La gouvernance agent globale (`AGENT_GOVERNANCE.adoc`) est
+à jour. Le pattern STIMULUS est formalisé.
+
+L'utilisateur a demandé d'ajouter à l'EPIC 13 une idée d'implantation précise
+qui doit être **picture me rollin dès l'ouverture de la prochaine session**.
+
+== Mission — STIMULUS : Ségrégation Vision/Opinion en Base de Données, Pas dans les Documents
+
+=== Le constat
+
+Actuellement, la classification Vision/Opinion est pensée comme un **marquage
+dans les documents** (`// @vision`, `// @opinion` en commentaires AsciiDoc, tags
+en tête de section). Ce marquage pollue le contexte — il ajoute du bruit
+dans les fichiers que le LLM lit en EAGER/LAZY.
+
+=== L'idée
+
+La classification Vision/Opinion doit être **externalisée du document**.
+Le document reste propre. La métadonnée de classification vit dans une base
+de données relationnelle (PostgreSQL) — une table `epistemic_classification`
+qui référence :
+- Le chemin du fichier (ou la section)
+- Le statut (VISION, OPINION, STRATEGIE, HYPOTHESE)
+- La date de classification
+- Le classifieur (LLM ou humain)
+- Le niveau de confiance
+
+Le `ClassificationGraph` LangGraph4j (EPIC 13) lit cette table avant de router.
+Le LLM lit le document sans aucun marquage — il interroge la table pour savoir
+ce qui est diluable.
+
+=== Questions à challenger en session 1
+
+. *Quelle granularité de référencement ?* Fichier entier ? Section ?
+  Paragraphe ? Ligne ? Un fichier peut contenir à la fois de la Vision et de
+  l'Opinion — comment granulariser ?
+
+. *Qui peuple la table ?* Le LLM (via ClassifierNode) ? L'humain ?
+  Un processus hybride (LLM propose, humain valide) ?
+
+. *Quand a lieu la classification ?* À la création du contenu ? En fin de
+  session ? Les deux ?
+
+. *Comment la table est-elle interrogée par le LLM ?* Via une recherche
+  SQL directe ? Via pgvector (similarité avec la section en cours) ?
+  Via un appel d'outil LangChain4j ?
+
+. *Est-ce que la table remplace complètement le marquage document ?* Ou
+  est-ce un cache complémentaire ? La table est la source de vérité,
+  le document n'est jamais marqué.
+
+=== Prototype d'implantation
+
+[source]
+----
+PostgreSQL table epistemic_classification:
+  - id                  UUID
+  - file_path           TEXT     (chemin relatif workspace)
+  - section_identifier  TEXT     (titre de section, anchor AsciiDoc, ou hash du contenu)
+  - content_hash        TEXT     (SHA256 du contenu — pour détection de delta)
+  - status              ENUM     (VISION, OPINION, STRATEGIE, HYPOTHESE)
+  - classifier          ENUM     (LLM, HUMAN)
+  - confidence          FLOAT    (0.0 → 1.0)
+  - classified_at       TIMESTAMP
+  - expires_at          TIMESTAMP (NULL = permanent, sinon maturation programmée)
+  - parent_id           UUID     (auto-ref: trace la maturation Opinion → Vision)
+----
+
+[.text-right]
+*Généré le 3 mai 2026 (nuit). Première session codebase-gradle à venir.*
