@@ -1,0 +1,275 @@
+= VISION_ORCHESTRATION_LLM — Rôle de codebase-gradle dans l'architecture d'orchestration
+:toc: left
+:toclevels: 3
+:icons: font
+
+[abstract]
+--
+Ce document présente la vision d'architecture d'orchestration LLM du workspace
+et le rôle spécifique de **codebase-gradle** dans cette architecture.
+Il est destiné à être le document de référence pour les futures sessions agent
+sur ce projet.
+
+**Projet liés** : `bakery-gradle`, `plantuml-gradle`, `slider-gradle`,
+`readme-gradle`, `magic_stick`, `edster`
+
+**Documents de référence** :
+`/home/cheroliv/workspace/WHAT_THE_GAMES_BEEN_MISSING.adoc` (v10),
+`/home/cheroliv/workspace/WORKSPACE_AS_PRODUCT.adoc`,
+`/home/cheroliv/workspace/WORKSPACE_VISION.adoc`,
+`/home/cheroliv/workspace/WORKSPACE_ORGANIZATION.adoc`
+--
+
+== La Vision Globale
+
+Le workspace est un écosystème de plugins Gradle (8 publiés, Apache 2.0) qui
+automatisent la génération de contenu et de logiciel. L'utilisateur décrit un
+besoin → les plugins Gradle transforment des données structurées en artefacts
+publiables :
+
+* `plantuml-gradle` : diagrammes PlantUML via RAG + LLM
+* `slider-gradle` : slides Reveal.js pédagogiques
+* `bakery-gradle` : sites statiques JBake
+* `readme-gradle` : README formatés multilangues
+* `training-gradle` : extraction de référentiels AFNOR/REAC
+* `newpipe-gradle` : extraction audio/vidéo
+* `school-backoffice/forms` : quiz Google Forms
+* `jhipster-gradle-plugins` : génération JHipster + assistant RAG
+
+La cible : générer des formations professionnelles complètes (slides, quiz,
+capsules vidéo, livrets PDF) pour deux métiers RNCP (FPA et CDA), distribuées
+via YouTube/TikTok et provisionnées via le SaaS Edster.
+
+== Pourquoi un seul LLM ne suffit pas
+
+Les plugins Gradle actuels utilisent des LLM généralistes (Claude, Gemini, etc.)
+via LangChain4j. Mais un modèle généraliste :
+
+* Ne connaît pas les spécificités de Kotlin/Gradle avancé
+* N'a pas le contexte pédagogique Qualiopi/Bloom
+* Ne maîtrise pas les JSON Schemas du workspace
+* Produit du code non idiomatique pour l'écosystème
+
+La solution : des **modèles spécialisés fine-tunés** sur le matériel du workspace.
+
+== L'Architecture Dispatcher + Experts
+
+=== Principe
+
+[source]
+----
+TÂCHE COMPLEXE
+    ↓
+DISPATCHER (deepseek-v4-pro)
+├── Décomposition en sous-tâches de complexité moindre
+├── Distribution batch → experts spécialisés
+├── Collecte des résultats
+└── Synthèse finale
+    ↓
+EXPERTS MÉTIERS (modèles 70B fine-tunés)
+├── CDA : Kotlin, Gradle, JHipster, Spring Boot
+└── FPA  : pédagogie, Qualiopi, taxonomies Bloom/Harrow/Krathwohl
+    ↓
+VALIDATION (ONNX)
+├── Analyse de sentiment
+├── Détection de hors-sujet
+└── Contrôle qualité
+    ↓
+PERSISTANCE (LangChain4j + PostgreSQL)
+├── Mémoire partagée entre agents
+├── Historique des décisions
+└── Suivi d'avancement
+----
+
+=== Les deux experts
+
+[cols="1,2,3"]
+|===
+| Expert | Domaine | Matériel de fine-tuning
+| **CDA** (Concepteur Développeur d'Applications)
+| Kotlin, Gradle, JHipster, Spring Boot, LangChain4j, PostgreSQL + pgvector,
+Docker, CI/CD GitHub Actions
+| Cours EduTools Kotlin (UTBM/CNAM), Algorithmic Toolbox,
+doc Gradle/Kotlin (`office/books-collection/`), JSON Schemas (`office/data-engineering/`),
+codebase-gradle lui-même (auto-référencement)
+
+| **FPA** (Formateur Professionnel pour Adultes)
+| Ingénierie pédagogique, scénarisation, évaluation, remédiation, Qualiopi,
+RNCP, AFNOR, taxonomies Bloom/Harrow/Krathwohl
+| 38 répertoires `cours/` dans `office/metiers/FPA/`,
+SPG/SPD AsciiDoc (419 lignes), évaluations, grilles Qualiopi,
+normes AFNOR, datasets `data-engineering/llm/datasets.json`
+|===
+
+== Le Rôle de codebase-gradle
+
+codebase-gradle est le **propriétaire exclusif** du pipeline de fine-tuning
+des experts métiers. C'est le projet qui transforme la documentation et les
+cours du workspace en modèles LLM spécialisés.
+
+=== Ce que codebase-gradle a déjà
+
+* BYOK 7 providers (Anthropic, Gemini, HuggingFace, Mistral, Ollama, Grok, Groq)
+  avec gestion multi-compte, clés nommées avec expiration, CLI override, scaffold
+* Anonymisation des YAML de configuration pour tous les plugins du workspace
+  (`ReadmeYmlAnonymizer`, `SliderYmlAnonymizer`, `SiteYmlAnonymizer`,
+  `CodebaseYmlAnonymizer`)
+* Chatbot Javelit embarqué avec enrichissement RAG (embeds personnalisables
+  via `embeds.yml`)
+* Snapshot AsciiDoc du codebase complet (`./gradlew snapshot`)
+* Intégration ONNX déjà évoquée (analyse de sentiment)
+* Résolution de provider actif avec fallback et override CLI
+  (`resolveActiveKey`)
+
+=== Ce que codebase-gradle doit construire
+
+. *Pipeline de préparation de dataset*
+  * Charger `office/books-collection/` (PDF/EPUB Kotlin, Gradle, pédagogie)
+  * Charger `office/data-engineering/json-schemas/` (6 schémas JSON draft-07)
+  * Charger les cours métiers (`office/metiers/FPA/cours/`, `office/metiers/CDA/`)
+  * Structurer en datasets d'entraînement par domaine (CDA vs FPA)
+  * Format : prompt/réponse, contexte, métadonnées (domaine, difficulté)
+
+. *Fine-tuning des experts*
+  * Fine-tuning du modèle 70B de base (Qwen3.6 ou équivalent) par domaine
+  * Méthode : continual pre-training (cf. arXiv 2311.08545 — 10% corpus suffit)
+  * Itération : évaluation → ajustement → ré-entraînement
+  * Tests de non-régression sur les tâches généralistes
+
+. *Exposition des modèles*
+  * Export ONNX des modèles fine-tunés
+  * Exposition via Ollama (modèles locaux consommables par les plugins Gradle)
+  * Registry local ou partagé
+
+. *Wiring LangChain4j*
+  * Persistance PostgreSQL partagée pour la mémoire agent
+  * API de communication dispatcher → expert (format de tâche strict)
+  * Suivi d'avancement des tâches déléguées
+
+. *Intégration ONNX*
+  * Boucle de validation des outputs experts
+  * Analyse de sentiment (qualité, pertinence, hors-sujet)
+  * Rejet et ré-itération si validation échoue
+
+=== Pourquoi codebase-gradle est le projet naturel pour cette responsabilité
+
+* Il gère déjà tous les credentials LLM du workspace (BYOK 7 providers)
+* Il anonymise déjà toutes les configurations YAML des autres plugins
+* Son chatbot Javelit avec enrichissement RAG est le prototype du
+  dispatcher → expert
+* Il est le seul projet à toucher à la fois au code (buildSrc Kotlin)
+  et à la configuration (YAML, credentials)
+* Son architecture buildSrc + snapshot auto-documenté est le pattern
+  de référence pour les autres plugins
+
+== Le Protocole de Communication Dispatcher → Expert
+
+Les experts ne reçoivent pas de prompts ouverts. Ils reçoivent un format
+strict pour éviter le hors-sujet :
+
+[source,json]
+----
+{
+  "task_id": "uuid",
+  "domain": "CDA | FPA",
+  "subtask_type": "code_generation | slide_generation | quiz_generation | ...",
+  "context": {
+    "max_tokens": 2000,
+    "relevant_schemas": ["formation.json"],
+    "relevant_files": ["SPG_A2SP.adoc"]
+  },
+  "prompt": "question précise et contrainte",
+  "expected_output_format": "kotlin | asciidoc | json | ...",
+  "validation_criteria": ["compiles", "matches_schema", "no_hallucination"]
+}
+----
+
+== Validation par la Littérature Académique et Industrielle
+
+L'architecture est validée point par point :
+
+[cols="1,3,3"]
+|===
+| Source | Titre | Apport
+| Anthropic (Dec 2024)
+| "Building Effective Agents"
+| Définit les patterns **Orchestrator-workers** (délégation dynamique),
+**Evaluator-optimizer** (boucle qualité → ONNX), et
+**Parallelization/Sectioning** (batch d'exécution).
+Les 3 patterns = l'architecture proposée.
+
+| arXiv 2402.05120
+| "More Agents Is All You Need"
+| Preuve quantitative : la performance LLM scale linéairement avec le
+nombre d'agents via sampling-and-voting.
+Confirme : multiplier les experts = meilleurs résultats.
+
+| arXiv 2408.03314
+| "Scaling LLM Test-Time Compute Optimally"
+| Google DeepMind. Un petit modèle avec allocation "compute-optimal"
+de l'inférence surpasse un modèle 14x plus gros.
+Confirme : 70B fine-tuné + dispatch > généraliste massif.
+
+| arXiv 2311.08545
+| "Efficient Continual Pre-training for Domain-Specific LLMs"
+| ACL 2024. Domain-adaptive continual pre-training avec 10% du corpus
+> training from scratch, sans dégradation généraliste.
+Confirme : le fine-tuning du 70B est viable avec le matériel existant.
+|===
+
+== Intégration dans le Flywheel du Workspace
+
+[source]
+----
+MAGIC STICK (bootable Linux + Ollama + modèles pré-chargés)
+    ↓
+CODEBASE-GRADLE (fine-tuning experts CDA/FPA + exposition Ollama)
+    ↓
+PLUGINS GRADLE (appels LLM ciblés vers l'expert approprié)
+    ↓
+EDSTER SaaS (orchestration + provision pour autrui)
+    ↓
+YOUTUBE / TIKTOK / TALARIA (distribution de contenu)
+    ↓
+AUDIENCE → CLIENTS → boucle recommence
+----
+
+Codebase-gradle est le **maillon entre la matière première (les cours, les PDF,
+les schémas) et l'intelligence spécialisée (les experts fine-tunés)**.
+Sans lui, les plugins Gradle ne peuvent pas bénéficier d'une expertise
+domaine. Avec lui, chaque plugin peut router ses appels LLM vers l'expert
+le plus pertinent.
+
+== Feuille de Route (ordre d'attaque)
+
+. *Phase 1* — Préparation du dataset CDA
+  * Extraction des cours EduTools Kotlin + Algorithmic Toolbox
+  * Conversion en paires prompt/réponse structurées
+  * Indexation dans pgvector pour recherche sémantique
+
+. *Phase 2* — Premier fine-tuning
+  * Fine-tuning d'un 70B (Qwen3.6) sur le dataset CDA
+  * Évaluation sur des tâches de génération de code Kotlin/Gradle
+  * Export ONNX → chargement dans Ollama
+
+. *Phase 3* — Intégration ONNX
+  * Boucle de validation des outputs
+  * Métriques : qualité du code, pertinence, absence d'hallucination
+
+. *Phase 4* — Dataset FPA + fine-tuning
+  * Même processus pour le domaine FPA
+  * 38 répertoires de cours → dataset structuré → fine-tuning
+
+. *Phase 5* — Wiring LangChain4j
+  * Persistance PostgreSQL partagée
+  * Protocole de communication dispatcher → expert
+  * Tests d'intégration avec les plugins Gradle
+
+== À enrichir...
+
+Ce document est intentionnellement un point de départ. Il sera enrichi
+au fil des sessions agent sur codebase-gradle.
+
+[.text-right]
+*Document créé le 2 mai 2026.*
+*Issu de la conversation bakery-plugin session du 2 mai 2026.*
