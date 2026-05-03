@@ -163,3 +163,106 @@ Le pipeline est alimenté par les datasets nettoyés via l'expert anonymisation 
 * [ ] Modeles pre-charges dans Magic Stick
 * [ ] Documentation consommation par slider-gradle, plantuml-gradle, bakery-gradle
 * [ ] Tests end-to-end : prompt → anonymisation → expert → output valide → commit
+
+== EPIC 9 : Opencode Augmenté — Réalité Augmentée Développeur
+
+**Statut** : A FAIRE
+**Priorite** : P0
+
+*Pourquoi* : Le premier client, c'est le développeur lui-même. La priorité est d'injecter
+un vecteur composite de contexte dans opencode pour démultiplier la qualité des réponses
+de deepseek-v4-pro. `__repositories__/` ne contient pas de PII — EPIC 9 est **démarrable
+sans EPIC 2** (pas besoin d'anonymiseur sur le code source). L'audit des 41 dépôts
+candidats (vs 12 bruit) est documenté dans `AUDIT_BUSINESS_LOGIC_REPOSITORIES.adoc`.
+Le labo (codebase-gradle) teste sur lui-même avant de livrer aux autres plugins.
+
+*Dépend de* : Néant (pas de prérequis EPIC 2). Brique finance (Stripe + Orange Money)
+souhaitable mais non bloquante.
+
+=== Sous-tâches
+
+* [ ] RAG pgvector indexe office/ + __repositories__/
+* [ ] Graphify knowledge graph transverse (nœuds + arêtes)
+* [ ] pgvector embeddings ONNX (AllMiniLmL6V2)
+* [ ] Vecteur composite injecté dans opencode → deepseek-v4-pro
+* [ ] Raffinement automatique prompts/instructions
+* [ ] Tests : mesurer la pertinence des réponses avec et sans vecteur composite
+
+== EPIC 10 : Instrumentation Gradle du Pattern STIMULUS — Cascade Dilution/Enrichissement Automatique
+
+**Statut** : A FAIRE
+**Priorite** : P0
+
+*Pourquoi* : Le pattern STIMULUS (formalise dans `AGENT_GOVERNANCE.adoc`) est aujourd'hui
+manuel — le dev dit "dilue le stimulus" et le LLM execute. La cible est une **tache
+Gradle typee** qui automatise la cascade : detection des stimuli actifs → mapping vers
+documents cibles → dilution organique → archivage vision-archive/ → suppression.
+La meme tache sera invocable par le LLM, par opencode, ou par la CI/CD.
+
+*Dépend de* : EPIC 9 (opencode augmente — le vecteur composite donne au LLM la capacite
+de mapper automatiquement le contenu du stimulus vers les documents cibles)
+
+=== Sous-tâches
+
+* [ ] Definir la data class `StimulusFile` : path, date, sections, maturite, mapping cibles
+* [ ] Implementer `StimulusDetector` : scanne `workspace/*.adoc`, detecte les stimuli
+  actifs via heuristiques (titre evocateur, metadonnees de date/contexte, signature de brain dump)
+* [ ] Implementer `DilutionMapper` : pour chaque section du stimulus, determine le document
+  cible et la section exacte d'insertion (WORKSPACE_AS_PRODUCT, WORKSPACE_VISION, WHAT_THE_GAMES_BEEN_MISSING, AGENT_GOVERNANCE)
+* [ ] Implementer `DilutionExecutor` : ouvre le document cible, insere le contenu
+  en respectant style/ton/numerotation, met a jour les metadonnees de pied
+* [ ] Implementer `StimulusArchiver` : snapshot dans `configuration/vision-archive/$DATE/`
+  + suppression du stimulus
+* [ ] Tache Gradle `diluteStimuli` : chaine complete → detection → mapping → dilution → archivage → suppression
+* [ ] Tache Gradle `detectStaleStimuli` : alerte si un stimulus survit > 2 sessions
+  sans dilution (anti-pattern)
+* [ ] Tests : 3 stimuli synthetiques → verification d'integrite post-dilution
+  (pas de redondance, pas de contradiction, pas de perte)
+
+== EPIC 11 : LangGraph4j — Chaines de Pensees Structurees pour le Dispatcher LLM
+
+**Statut** : A FAIRE
+**Priorite** : P1
+
+*Pourquoi* : Organiser les chaines de pensees du dispatcher deepseek-v4-pro en graphes
+d'etat structures via https://github.com/langgraph4j/langgraph4j[LangGraph4j].
+Passer du "prompt monolithique" a des **pipelines de raisonnement decomposes**
+ou chaque etape est un noeud du graphe, chaque decision est une arete, et le flux
+est observable, testable, versionnable.
+
+*Dépend de* : EPIC 9 (vecteur composite disponible pour alimenter les noeuds du graphe)
+
+=== Sous-tâches
+
+* [ ] Integrer la dependance LangGraph4j dans le version catalog de codebase-gradle
+* [ ] Modeliser la procedure globale de fin de session comme un graphe d'etat :
+  - [Start] → [Inventaire fichiers modifies] → [Classification RGPD par fichier]
+  → [Branchement par cercle] → [Snapshot|Commit|Archive] → [Rapport] → [End]
+* [ ] Modeliser le pipeline de provisionnement Edster comme un graphe d'etat :
+  - [Start] → [Validation OAuth] → [Provisionnement workspace] → [Injection secrets]
+  → [Generation JHipster (deleguee)] → [Commit repo client] → [End]
+* [ ] Modeliser la cascade de dilution STIMULUS (EPIC 10) comme un sous-graphe :
+  - [Detection stimuli] → [Mapping cibles] → [Dilution] → [Archivage] → [Suppression]
+* [ ] Implementer le `GraphState<T>` generique : etat partage entre noeuds,
+  serialisable en JSON pour observabilite
+* [ ] Implementer le `GraphExecutor` : execute un graphe en mode synchrone ou
+  asynchrone (via Kotlin coroutines), avec retry et circuit breaker par noeud
+* [ ] Tache Gradle `executeGraph --graph=<nom>` : execute un graphe nomme
+  depuis la CI/CD ou opencode
+* [ ] Observabilite : chaque execution produit une trace JSON (noeud → duree →
+  output → decision) commitable dans `.agents/` pour audit
+* [ ] Tests : 3 graphes (fin de session, provisionnement, dilution) executes
+  sur donnees synthetiques avec assertions par etat
+
+=== Roadmap de priorisation
+
+[source]
+----
+EPIC 9 (opencode augmente) → PREMIER — pas de dependance, impact immediat dev
+    ↓
+EPIC 11 (LangGraph4j chaines de pensees) → structure le raisonnement du dispatcher
+    ↓
+EPIC 10 (STIMULUS automatise) → automatise le metabolisme des documents racine
+    ↓
+EPIC 2 (anonymiseur) → ouvre office/ + configuration/ a la realite augmentee
+----
