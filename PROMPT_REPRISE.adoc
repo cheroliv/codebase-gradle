@@ -1,31 +1,38 @@
 = PROMPT_REPRISE — Codebase Gradle — Session 1
 
 > **Statut** : Session 0 (migration) ✅ — gouvernance migree depuis openclaw-codingame
-> **Mission** : Consolider la gouvernance + definir le protocole de benchmark de perception spatiale
+> **Mission** : Créer l'expert anonymisation LangChain4j (EPIC 2) + poser l'architecture multi-canal (EPIC 3)
 
 '''
 == Session 0 (migration) — Resume
 
 **Date** : 2026-05-03
 **Resultat** : ✅ Gouvernance agent integree dans codebase-gradle. .agents/ cree, AGENT.adoc
-adapte au contexte codebase (cercles de confiance, BYOK, fine-tuning experts CDA/FPA,
-benchmark de perception spatiale). INDEX.adoc, BACKLOG.adoc, LAZY_EAGER_ESSENTIALS.adoc
-adaptes. PROMPT_REPRISE.adoc initial (ce fichier). Configuration/ mis a jour avec
-AGENT_GOVERNANCE.adoc + vision-archive snapshot.
+adapte au contexte codebase. BACKLOG enrichi : 8 EPICs (dont expert anonymisation P0 et
+architecture multi-canal convergent P0). PROMPT_REPRISE global mis à jour.
 
 '''
 == Session 1 — Priorites
 
 === Objectif principal
-Definir et documenter le protocole de benchmark de perception spatiale LLM :
-a quel seuil de tokens le LLM perd la notion de cercle de confiance ?
+
+Implementer l'**expert anonymisation LangChain4j** (EPIC 2) — prérequis transverse à
+tout RAG renforcé et fine-tuning. Nettoyage PII multi-sources (PostgreSQL SQL + pgvector +
+ONNX + Graphify). Cet expert sera importé par slider-gradle, plantuml-gradle, bakery-gradle
+comme pre-hook de leurs appels LLM.
+
+=== Second objectif
+
+Formaliser l'**architecture multi-canal convergent** (EPIC 3) : interfaces `ContextChannel`,
+`CompositeContextBuilder`, `ContextBudget`. Première implémentation des 4 canaux.
 
 === Critères d'Acceptation
 
-- [ ] Protocole de mesure formalise (metriques, seuils, scenarios)
-- [ ] Data classes definies (SpatialPerceptionResult, BoundaryCrossingEvent, TokenThreshold)
-- [ ] Au moins 3 scenarios implementes (baseline, RAG seul, RAG + Graphify)
-- [ ] Premier jeu de mesures execute et documente
+- [ ] Expert anonymisation : détection PII multi-sources fonctionnelle
+- [ ] `AnonymizationResult`, `PIIPattern`, `SanitizationReport` data classes + tests
+- [ ] Pipeline anonymisation → requête LLM → vérification output clean
+- [ ] Architecture multi-canal : interfaces définies, 1 canal implémenté (EAGER/LAZY)
+- [ ] `CompositeContextBuilder` agrège le canal EAGER/LAZY + mock RAG
 
 '''
 == Couverture Tests
@@ -36,6 +43,8 @@ a quel seuil de tokens le LLM perd la notion de cercle de confiance ?
 | `verifyReadMeToAnonymizedYaml` | ✅ 7 cases
 | `verifySliderToAnonymizedYaml` | ✅ 5 cases
 | `verifySiteToAnonymizedYaml` | ✅ 5 cases
+| Expert anonymisation PII multi-sources | ❌ 0 cases
+| CompositeContextBuilder convergence | ❌ 0 cases
 | Benchmark perception spatiale | ❌ 0 cases
 |===
 
