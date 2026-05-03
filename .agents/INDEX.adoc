@@ -1,0 +1,71 @@
+= INDEX — Codebase Gradle
+:toc:
+
+_Regles absolues_ : voir `AGENT.adoc`
+_Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
+
+_Derniere mise a jour_ : 2026-05-03
+_Audit gouvernance_ : 2026-05-03 ✅ (gouvernance migree depuis openclaw-codingame, .agents/ cree)
+
+'''
+== REGLES ABSOLUES (resume)
+
+=== 0. PUBLISH TO MAVEN LOCAL — OBLIGATOIRE APRES TOUTE MODIFICATION DU CODE SOURCE
+=== 1. COMMITS/GIT — INTERDICTION FORMELLE sans permission
+=== 1b. FICHIERS DE CONFIGURATION — REGLE ABSOLUE DE SURETE (backup avant modif)
+=== 2. TESTS EN FIN DE SESSION — INTERDICTION FORMELLE
+=== 3. PROCEDURE DE FIN DE SESSION — 6 ETAPES OBLIGATOIRES
+
+'''
+== Sessions
+
+|===
+| # | Date | Type | Sujet | Score
+| — | 2026-05-03 | init (migration) | Gouvernance migree depuis openclaw-codingame | —
+|===
+
+'''
+== Roadmap — Etat Actuel
+
+|===
+| EPIC | Description | Statut | Priorite
+| EPIC 1 | Initialisation gouvernance agent codebase-gradle | EN COURS | P0
+| EPIC 2 | Benchmark de perception spatiale LLM | A FAIRE | P0
+| EPIC 3 | Pipeline fine-tuning experts CDA/FPA | A FAIRE | P0
+| EPIC 4 | Integration ONNX — boucle qualite | A FAIRE | P1
+| EPIC 5 | Wiring LangChain4j + pgvector experts | A FAIRE | P1
+| EPIC 6 | Exposer experts via Ollama (consommation plugins) | A FAIRE | P2
+|===
+
+'''
+== Fichiers Associes
+
+|===
+| Fichier | Role | Type
+| `AGENT.adoc` | Directives completes (cercles de confiance inclus) | EAGER
+| `LAZY_EAGER_ESSENTIALS.adoc` | Principes LAZY/EAGER compacts | EAGER
+| `PROMPT_REPRISE.adoc` | Mission session en cours | EAGER
+| `VISION_ORCHESTRATION_LLM.adoc` | Vision dispatcher + experts (275 lignes) | LAZY
+| `BACKLOG.adoc` | Suivi prioritaire des taches codebase | LAZY
+| `AGENT_GOVERNANCE.adoc` (dans configuration/) | Gouvernance transverse globale | LAZY
+| `.agents/SESSIONS_HISTORY.adoc` | Historique des sessions | EAGER
+| `.agents/TEST_COVERAGE_ANALYSIS.adoc` | Analyse couverture tests | LAZY
+| `.agents/archives/COMPLETED_TASKS_ARCHIVE_*.adoc` | Archives taches | LAZY
+| `.agents/sessions/` | Archives par session | LAZY
+| `.agents/encyclopedies/` | Connaissance froide exhaustive | COLD
+| `.agents/backup/` | Vague froide distillation | FROZEN
+|===
+
+'''
+== Portefeuille — Projets Gouvernes
+
+|===
+| Projet | Chemin | Sessions | Derniere maj
+| plantuml-gradle | `__repositories__/plantuml-gradle/plantuml-plugin/` | ~138 | 2026-05-01
+| magic_stick | `__repositories__/magic_stick/` | 64+ | 2026-04
+| cheroliv.com | `__repositories__/cheroliv.com/` | ~18 | 2026-04
+| bakery-gradle | `__repositories__/bakery-gradle/bakery-plugin/` | ~13+ | 2026-04
+| jhipster-gradle-plugins | `__repositories__/jhipster-gradle-plugins/` | 6 | 2026-04
+| newpipe-gradle | `__repositories__/newpipe-gradle/newpipe-plugin/` | ~11 | 2026-04
+| codebase-gradle | `__repositories__/codebase-gradle/` | 0 (migre) | 2026-05-03
+|===

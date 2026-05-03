@@ -1,0 +1,52 @@
+= PROMPT_REPRISE — Codebase Gradle — Session 1
+
+> **Statut** : Session 0 (migration) ✅ — gouvernance migree depuis openclaw-codingame
+> **Mission** : Consolider la gouvernance + definir le protocole de benchmark de perception spatiale
+
+'''
+== Session 0 (migration) — Resume
+
+**Date** : 2026-05-03
+**Resultat** : ✅ Gouvernance agent integree dans codebase-gradle. .agents/ cree, AGENT.adoc
+adapte au contexte codebase (cercles de confiance, BYOK, fine-tuning experts CDA/FPA,
+benchmark de perception spatiale). INDEX.adoc, BACKLOG.adoc, LAZY_EAGER_ESSENTIALS.adoc
+adaptes. PROMPT_REPRISE.adoc initial (ce fichier). Configuration/ mis a jour avec
+AGENT_GOVERNANCE.adoc + vision-archive snapshot.
+
+'''
+== Session 1 — Priorites
+
+=== Objectif principal
+Definir et documenter le protocole de benchmark de perception spatiale LLM :
+a quel seuil de tokens le LLM perd la notion de cercle de confiance ?
+
+=== Critères d'Acceptation
+
+- [ ] Protocole de mesure formalise (metriques, seuils, scenarios)
+- [ ] Data classes definies (SpatialPerceptionResult, BoundaryCrossingEvent, TokenThreshold)
+- [ ] Au moins 3 scenarios implementes (baseline, RAG seul, RAG + Graphify)
+- [ ] Premier jeu de mesures execute et documente
+
+'''
+== Couverture Tests
+
+|===
+| Feature | Etat
+| `verifyCodebaseToAnonymizedYaml` | ✅ 7 cases
+| `verifyReadMeToAnonymizedYaml` | ✅ 7 cases
+| `verifySliderToAnonymizedYaml` | ✅ 5 cases
+| `verifySiteToAnonymizedYaml` | ✅ 5 cases
+| Benchmark perception spatiale | ❌ 0 cases
+|===
+
+'''
+== Regles
+
+- ❌ Pas de commit sans permission
+- ❌ Pas de tests en fin de session
+- ✅ Procedure de fin de session 6 etapes obligatoires
+- ✅ Classification RGPD a chaque fichier produit/modifie
+- ✅ Cercles de confiance : ce projet = cercle 4 (public), secrets dans configuration/ (cercle 1)
+
+---
+**Session 0** ✅ — **Session 1** 🚀

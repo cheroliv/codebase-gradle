@@ -1,0 +1,68 @@
+= Completed Tasks Archive — Avril 2026
+
+== Session 001 — 2026-04-30 — Renommage + Restructuration gradle-quizz
+
+=== Contexte
+
+Renommage du projet de `codingame-benchmark` vers `gradle-quizz`.
+Restructuration de l'arborescence : tous les fichiers de gouvernance
+deplaces de la racine vers `quizz-benchmark-plugin/`.
+
+=== Taches Realisees
+
+* [x] Renommage `settings.gradle.kts` (project name + include)
+* [x] Renommage `AGENT.adoc` (titre, nom projet, arborescence)
+* [x] Renommage `AGENT_MODUS_OPERANDI.adoc` (titre, arborescence)
+* [x] Renommage `BACKLOG.adoc` (titre, modules)
+* [x] Renommage `TODO.adoc` (titre, modules)
+* [x] Renommage `INDEX.adoc` (titre)
+* [x] Renommage `SESSIONS_HISTORY.adoc` (titre)
+* [x] Renommage `COMPLETED_TASKS_ARCHIVE_2026-04.adoc` (titre, noms)
+* [x] Session archivee + PROCEDURE FIN DE SESSION executee
+
+=== Resultats
+
+* Projet : `gradle-quizz` avec sous-module `quizz-benchmark-plugin`
+* Racine de travail = `quizz-benchmark-plugin/`
+* Cohérence des noms dans tout le projet
+
+=== Prochaine Session
+
+Session 2 — a definir par l'utilisateur.
+
+---
+
+== Session 000 — 2026-04-30
+
+=== Contexte
+
+Initialisation du projet openclaw-codingame (codingame-benchmark) avec
+mise en place de la gouvernance agent complete.
+
+=== Taches Realisees
+
+* [x] Creation AGENT.adoc (directives completes)
+* [x] Creation AGENT_MODUS_OPERANDI.adoc (methodologie LAZY/EAGER + mecanisme backup)
+* [x] Creation PROMPT_REPRISE.adoc (session 1 prete)
+* [x] Creation opencode.json
+* [x] Creation build.gradle.kts racine
+* [x] Creation .gitignore
+* [x] Creation INDEX.adoc (roadmap + regles)
+* [x] Creation SESSIONS_HISTORY.adoc
+* [x] Creation BACKLOG.adoc (6 EPICs)
+* [x] Creation TODO.adoc
+* [x] Creation arborescence .agents/ (sessions, archives, backup)
+* [x] Archivage session 000
+
+=== Resultats
+
+* Gouvernance alignee avec la strategie commune (cheroliv.com, magic_stick,
+  bakery-plugin, plantuml-plugin, jhipster-gradle-plugins)
+* Mecanisme de backup vague froide integre
+* Sliding window 10 sessions configuree
+* Roadmap 6 EPICs priorises
+
+=== Prochaine Session
+
+Session 1 — a definir par l'utilisateur. Pistes : structure plugin Gradle,
+data classes moteur de benchmark.

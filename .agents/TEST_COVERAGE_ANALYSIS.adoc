@@ -1,0 +1,23 @@
+= Test Coverage Analysis — Gradle Quizz
+
+_Statut_ : Aucun test défini pour le moment.
+
+|===
+| Session | Fichiers testés | Couverture | Notes
+| -
+| -
+| -
+| -
+|===
+
+== Modules
+
+=== quizz-benchmark-plugin (src/test/kotlin/)
+
+_Aucun test créé._
+
+== Procédure
+
+Quand des tests sont ajoutés ou modifiés :
+. Ajouter une entrée dans le tableau ci-dessus avec session N et couverture
+. Mettre à jour ce fichier en étape 5 de la procédure de fin de session
