@@ -264,5 +264,110 @@ EPIC 11 (LangGraph4j chaines de pensees) → structure le raisonnement du dispat
     ↓
 EPIC 10 (STIMULUS automatise) → automatise le metabolisme des documents racine
     ↓
-EPIC 2 (anonymiseur) → ouvre office/ + configuration/ a la realite augmentee
 ----
+
+== EPIC 12 : Dilution Article de Blog — Narration Publique Automatique en Fin de Session
+
+**Statut** : A FAIRE
+**Priorite** : P1
+
+*Pourquoi* : Chaque session de travail produit des decisions, patterns, et insights.
+La fin de session est le timing ideal : la pensee est fraiche, les metadonnees
+(date, contexte, auteur) sont deja documentees.
+
+**Contrainte RGPD fondamentale** : l'article est genere **exclusivement** a partir
+de la zone de connaissance `__repositories__/` (Cercle 4 — public natif, Apache 2.0,
+zero PII). Jamais depuis `office/` (Cercle 2, contient des donnees potentiellement
+personnelles) ni `configuration/` (Cercle 1, secrets). Cette segregation par cercle
+garantit qu'aucune donnee sensible ne fuit dans le contenu public — meme sans
+l'anonymiseur (EPIC 2 non requis pour EPIC 12).
+
+La meme cascade qui dilue dans les documents racine (EPIC 10) peut produire un
+**deuxieme format de sortie** : un article AsciiDoc pret a publier, narratif,
+destine au public — mais alimente uniquement par le vecteur composite issu de
+`__repositories__/` (RAG pgvector + Graphify + code source). Le flywheel
+s'enclenche automatiquement : le contenu genere documente les outils et patterns
+qui le generent, sans jamais melanger les cercles de confiance.
+
+*Depend de* : EPIC 9 (opencode augmente — le vecteur composite sur `__repositories__/`
+donne le contexte Cercle 4 necessaire pour une narration publique sans PII)
+
+=== Sous-taches
+
+* [ ] Formaliser le template d'article de blog : structure AsciiDoc standard
+  (titre evocative, abstract, sections en cascade, metadonnees JBake)
+* [ ] Implementer `BlogArticleExtractor` : extrait des elements narrables
+  **exclusivement** depuis le vecteur composite Cercle 4 (`__repositories__/` :
+  RAG pgvector sur le code source, Graphify knowledge graph, historique `.agents/`
+  publics). Circuit d'exclusion strict : rejette toute origine Cercle 0/1/2.
+* [ ] Implementer `BlogArticleRenderer` : applique le template, produit un
+  fichier `.adoc` dans `office/sites/cheroliv/` + metadonnees JBake
+* [ ] Wiring avec EPIC 10 : `diluteStimuli` ajoute une cible blog au pipeline
+  (optionnelle, parametre `--with-blog`)
+* [ ] Tache Gradle `endSessionBlog` : extrait le materiau de la session en cours,
+  genere un brouillon d'article, l'ouvre pour revue humaine
+* [ ] Hook dans la procedure globale de fin de session (etape 6) :
+  le rapport propose "Un article de blog est-il pertinent pour cette session ?"
+  → si oui, invoque `endSessionBlog`
+* [ ] Cibles de publication : `cheroliv.com/` (vitrine JBake, public) +
+  `office/` (brouillon prive pour relecture)
+* [ ] Tests : 3 sessions synthetiques → 3 articles generes, verification
+  structure/narration/absence PII
+
+== EPIC 13 : LangGraph4j Classifieur Vision/Opinion — Filtre Avant Cascade de Dilution
+
+**Statut** : A FAIRE
+**Priorite** : P1
+
+*Pourquoi* : Tout ce qui est ecrit dans `office/` et `configuration/` n'est pas diluable.
+Une decision architecturale validee (= VISION) doit migrer vers les documents racine.
+Une strategie speculative ou une intuition (= OPINION) doit rester confinee. La grille
+RGPD (EPIC 2) dit *ou* router — la classification Vision/Opinion dit *quoi* router.
+
+Le probleme : un LLM monolithique ne peut pas distinguer fiablement Vision d'Opinion
+sans filet de securite. LangGraph4j resout ca avec un graphe d'etat ou le LLM propose
+et l'humain valide les cas ambigus.
+
+**Analyse de la doc LangGraph4j** : lecture du README (`langgraph4j/langgraph4j`,
+v1.8.14, 1.6k stars) valide 4 capacites cles qui repondent exactement au probleme :
+
+* *Conditional Edges* — routage dynamique Vision→dilution / Opinion→confinement
+  en fonction du statut classifie
+* *Human-in-the-Loop* — pattern documente explicitement ("Implementing Human-in-the-Loop
+  at ease"). Le LLM propose, l'humain tranche sur les sections ambigues.
+* *Checkpoints* — sauvegarde de l'etat a chaque etape. Traçabilite complete :
+  qui a classifie quoi, quand, avec quel outcome. Permet la maturation
+  (une section OPINION peut evoluer en VISION — le checkpoint change).
+* *Subgraphs* — le graphe de classification est un sous-graphe reutilisable,
+  insere comme filtre avant la cascade de dilution (EPIC 10).
+
+*Depend de* : EPIC 11 (LangGraph4j infrastructure — le classifieur Vision/Opinion
+est un graphe specialise dans l'ecosysteme LangGraph4j)
+
+=== Sous-taches
+
+* [ ] Definir la data class `EpistemicStatus` : VISION, OPINION, HYPOTHESE, STRATEGIE
+* [ ] Definir la data class `ClassificationState` : content (section AsciiDoc brute),
+  proposedStatus (propose par le LLM), confidence (CONFIANT/INCERTAIN), approved (humain),
+  finalStatus
+* [ ] Implementer `ClassifierNode` : deepseek-v4-pro lit la section, propose un statut
+  et un niveau de confiance
+  - Patterns de detection VISION : langage declaratif ("On utilise", "L'architecture est"),
+    references a des tests/sessions, decisions actees
+  - Patterns de detection OPINION : langage hypothetique ("On pourrait", "Il semble que"),
+    speculation sur le futur, intuitions sans ancrage experimental
+  - Patterns de detection STRATEGIE : pricing, marche cible, positionnement concurrentiel
+* [ ] Implementer `DilutionRouteNode` : conditional edge selon le statut final
+  - VISION → cascade dilution complete (documents racine + blog si EPIC 12)
+  - STRATEGIE → dilution documents racine seulement (pas de blog public)
+  - OPINION / HYPOTHESE → confinement dans office/ (documente dans le rapport)
+* [ ] Implementer `HumanApprovalNode` : si confiance == INCERTAIN, presente la section
+  et le statut propose a l'humain. Retour possible : APPROVED / REJECTED / RECLASSIFY
+* [ ] Implanter le `ClassificationGraph` comme un `StateGraph<ClassificationState>` :
+  [ClassifierNode] → conditional edge (CONFIANT → DilutionRouteNode, INCERTAIN → HumanApprovalNode)
+* [ ] Wiring avec EPIC 10 : inserer `ClassificationGraph` comme sous-graphe (subgraph)
+  avant `DilutionExecutor`. Le filtre est optionnel, parametre `--with-classification`
+* [ ] Checkpoints : chaque classification produit un checkpoint dans `.agents/`
+  pour audit et maturation future
+* [ ] Tests : 20 sections synthetiques (10 VISION, 5 OPINION, 5 STRATEGIE) → mesure
+  du taux de classification correcte avec et sans validation humaine
