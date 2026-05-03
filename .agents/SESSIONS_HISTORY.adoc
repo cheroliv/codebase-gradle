@@ -1,0 +1,8 @@
+= Sessions History — Gradle Quizz
+
+|===
+| # | Date | Type | Sujet | Score
+
+| 001 | 2026-04-30 | chore | Renommage + restructuration gradle-quizz | -
+| 000 | 2026-04-30 | init | Mise en place gouvernance agent | -
+|===

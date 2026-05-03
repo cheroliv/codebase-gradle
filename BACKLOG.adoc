@@ -1,0 +1,80 @@
+= Backlog — Codebase Gradle
+
+== EPIC 1 : Initialisation gouvernance agent codebase-gradle
+
+**Statut** : EN COURS
+**Priorite** : P0
+
+* [x] Migrer .agents/ + fichiers gouvernance depuis openclaw-codingame
+* [x] Creer AGENT.adoc adapte a codebase-gradle (cercles de confiance, BYOK, fine-tuning)
+* [x] Creer INDEX.adoc (dashboard EAGER)
+* [x] Mettre a jour BACKLOG.adoc (ce fichier)
+* [ ] Creer PROMPT_REPRISE.adoc pour session 1
+* [ ] Mettre a jour AGENT_GOVERNANCE.adoc dans configuration/ (ajouter codebase au portefeuille)
+* [ ] Snapshot vision-archive post-migration dans configuration/
+* [ ] Commit initial codebase-gradle
+
+== EPIC 2 : Benchmark de perception spatiale LLM
+
+**Statut** : A FAIRE
+**Priorite** : P0
+
+*Pourquoi* : Mesurer a quel seuil de tokens le LLM perd la notion de cercle de confiance.
+Evaluer l'apport du vecteur composite (RAG pgvector + Graphify knowledge graph).
+
+* [ ] Definir le protocole de mesure (metriques, seuils, scenarios)
+* [ ] Definir les scenarios de test :
+  - Sans RAG ni Graphify (baseline)
+  - Avec RAG pgvector seul (office/ + codebase)
+  - Avec RAG + Graphify knowledge graph (scope local projet)
+  - Avec RAG + Graphify knowledge graph agregé (scope workspace complet)
+* [ ] Implementer les data classes (SpatialPerceptionResult, BoundaryCrossingEvent, TokenThreshold)
+* [ ] Mesurer le taux d'erreur de classification par cercle a 10K, 30K, 60K, 100K, 128K tokens
+* [ ] Integrer le benchmark dans les taches Gradle existantes (`verify*ToAnonymizedYaml` comme pattern)
+* [ ] Generer des rapports AsciiDoc + JSON
+
+== EPIC 3 : Pipeline fine-tuning experts CDA/FPA
+
+**Statut** : A FAIRE
+**Priorite** : P0
+
+*Pourquoi* : codebase-gradle est le proprietaire exclusif du fine-tuning des experts metiers.
+
+* [ ] Inventaire du materiel existant (office/books-collection/, office/data-engineering/, cours)
+* [ ] Preparation dataset CDA : Kotlin + Gradle + JHipster + langage
+* [ ] Preparation dataset FPA : pedagogie + Qualiopi + AFNOR + taxonomies Bloom/Harrow/Krathwohl
+* [ ] Selection du modele 70B (Qwen3.6, etc.)
+* [ ] Script de fine-tuning (via LangChain4j ou ONNX Runtime)
+* [ ] Validation des experts (test de coherence sur 100 prompts par domaine)
+
+== EPIC 4 : Integration ONNX — boucle qualite
+
+**Statut** : A FAIRE
+**Priorite** : P1
+
+*Pourquoi* : Valider chaque output expert avant synthese par le dispatcher.
+
+* [ ] Analyse de sentiment sur les outputs experts (ONNX)
+* [ ] Detection de hors-sujet (classifieur ONNX)
+* [ ] Seuil de rejet configurable
+* [ ] Circuit de retry (max 3 iterations, feedback au LLM)
+
+== EPIC 5 : Wiring LangChain4j + pgvector experts
+
+**Statut** : A FAIRE
+**Priorite** : P1
+
+* [ ] Persistance partagee entre agents (PostgreSQL + pgvector)
+* [ ] API d'appel aux experts fine-tunes (via Ollama)
+* [ ] Integration avec le dispatcher deepseek-v4-pro
+* [ ] Suivi d'avancement et historique des decisions
+
+== EPIC 6 : Exposer experts via Ollama (consommation par plugins)
+
+**Statut** : A FAIRE
+**Priorite** : P2
+
+* [ ] Packaging ONNX → Ollama
+* [ ] Modeles pre-charges dans Magic Stick
+* [ ] Documentation consommation par slider-gradle, plantuml-gradle, bakery-gradle
+* [ ] Tests end-to-end : prompt → expert → output valide → commit
