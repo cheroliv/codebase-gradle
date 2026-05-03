@@ -1,23 +1,26 @@
-= Test Coverage Analysis — Gradle Quizz
+= Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : Aucun test défini pour le moment.
+_Statut_ : US-9.1 ✅ — 2/2 scenarios Cucumber PASS (pgvector container start/stop)
 
 |===
-| Session | Fichiers testés | Couverture | Notes
-| -
-| -
-| -
-| -
+| Session | Fichiers testes | Couverture | Notes
+| 001 | `PgVectorContainerSteps.kt` (Cucumber) | 2 scenarios PASS | PostgreSQLContainer pgvector/pgvector:pg17, ephemeral, auto-cleanup
 |===
 
 == Modules
 
-=== quizz-benchmark-plugin (src/test/kotlin/)
+=== codebase-gradle (src/test/kotlin/codebase/scenarios/)
 
-_Aucun test créé._
+- `PgVectorContainerSteps.kt` : demarrage/arret conteneur pgvector + verification
+  extension vector + creation table vector(384)
+- `CucumberTestRunner.kt` : @Suite JUnit Platform, cucumber engine, features dans
+  `src/test/features/`
+- `TestCleanupExtension.kt` : nettoyage containers orphelins + /tmp/gradle-test-*
 
-== Procédure
+=== Features Cucumber
 
-Quand des tests sont ajoutés ou modifiés :
-. Ajouter une entrée dans le tableau ci-dessus avec session N et couverture
-. Mettre à jour ce fichier en étape 5 de la procédure de fin de session
+- `9_1_pgvector_container.feature` : 2 scenarios (start + stop)
+
+== Prochaine etape
+
+US-9.2 — Dataset de test committe → ajouter tests Cucumber sur la validation du dataset

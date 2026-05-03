@@ -3,10 +3,12 @@ import codebase.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 import readme.*
 import site.*
 import slider.*
 import snapshot.SnapshotManager
+import java.time.Duration
 
 
 buildscript {
@@ -32,6 +34,64 @@ repositories {
 }
 
 application.mainClass = "chatbot.ChatbotFrame"
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xjvm-default=all")
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_23)
+    }
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(23))
+    }
+}
+
+dependencies {
+    implementation(libs.bundles.langchain4j.rag)
+    implementation(libs.bundles.r2dbc)
+    implementation(libs.bundles.arrow)
+    implementation(libs.testcontainers.postgresql)
+    implementation(libs.mapstruct)
+    annotationProcessor(libs.mapstruct.processor)
+
+    testImplementation(kotlin("test-junit5"))
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly(libs.logback.classic)
+    testImplementation(libs.testcontainers.postgresql)
+    testImplementation(libs.testcontainers.junit5)
+    testImplementation(libs.bundles.cucumber)
+}
+
+// ── Cucumber test task ───────────────────────────────────────────────────────
+
+val cucumberTest = tasks.register<Test>("cucumberTest") {
+    description = "Runs Cucumber BDD tests (EPIC 9 — pgvector infra)"
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+
+    dependsOn(tasks.classes)
+    useJUnitPlatform { excludeEngines("junit-jupiter") }
+    systemProperty("cucumber.junit-platform.naming-strategy", "long")
+    maxHeapSize = "1g"
+    maxParallelForks = 1
+    forkEvery = 1
+    jvmArgs("-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=256m", "-XX:TieredStopAtLevel=1")
+    timeout.set(Duration.ofMinutes(5))
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+        exceptionFormat = FULL
+    }
+    outputs.upToDateWhen { false }
+}
+
+tasks.withType<Test>().configureEach {
+    jvmArgs("-XX:+EnableDynamicAgentLoading")
+}
 
 
 // ── Tasks ─────────────────────────────────────────────────────────────────────
