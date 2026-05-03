@@ -1,0 +1,55 @@
+= Session 001 — US-9.1 — Container pgvector Éphémère + Dilution Stimulus EPIC 9
+:docdate: 2026-05-03 (nuit)
+
+== Contexte
+
+Première session de travail effective sur codebase-gradle après migration de la
+gouvernance depuis openclaw-codingame.
+
+== Réalisé
+
+=== PICTURE_ME_ROLLIN_EPIC9 — Décomposition US
+
+- EPIC 9 décomposé de 6 sous-tâches monolithiques en 13 US baby-step (max 3 pts/US)
+- Pattern Baby-Step + TestContainer + Doc Vivante formalisé comme pattern transverse
+- Délégation Vision/Opinion confiée au LLM via prompt engineering (pas de code)
+- US-9.13 ajoutée : ségrégation Vision/Opinion dans le prompt système avant blog cheroliv.com
+
+=== Dette Technique Réglée
+
+- `gradle/libs.versions.toml` : ajout versions langchain4j (1.12.2+beta22),
+  testcontainers (1.21.4), cucumber (7.34.3), arrow-kt (2.2.2), r2dbc,
+  mapstruct (1.6.3)
+- `build.gradle.kts` : bloc `kotlin.compilerOptions` + `java.toolchain`,
+  dépendances implementation + testImplementation, tâche `cucumberTest`
+- `gradle.properties` : `org.gradle.java.home` → JDK 23 (Kotlin 2.1.0
+  incompatible JDK 25)
+- `src/test/features/9_1_pgvector_container.feature` : 2 scénarios Gherkin EN
+- `src/test/kotlin/codebase/scenarios/PgVectorContainerSteps.kt` :
+  `@When`/`@Then` avec PostgreSQLContainer<Nothing>("pgvector/pgvector:pg17")
+- `CucumberTestRunner.kt` : @Suite JUnit Platform avec cucumber engine
+- `TestCleanupExtension.kt` : nettoyage containers orphelins + `/tmp/gradle-test-*`
+
+=== Tests
+
+2/2 scénarios Cucumber PASS :
+- Start an ephemeral pgvector container → container running, vector extension
+  available, table vector(384) created
+- Automatic container stop after test → container stopped
+
+Commande : `./gradlew cucumberTest --no-daemon` → BUILD SUCCESSFUL en ~20s
+
+=== Dilution Stimulus
+
+`PICTURE_ME_ROLLIN_EPIC9.adoc` dilué dans `configuration/.agents/AGENT_GOVERNANCE.adoc` :
+- Pattern Baby-Step + TestContainer + Doc Vivante (5 principes + stack canonique)
+- Délégation Vision/Opinion au LLM (prompt système + cohabitation LangGraph4j)
+- Historique des stimuli mis à jour (2 entrées)
+
+== Prochaine Session
+
+US-9.2 — Dataset de test minimal committé (5 adoc + 2 repos Gradle miniatures
+dans `src/test/resources/`). Prérequis à toutes les US d'indexation (9.3→9.6).
+
+[.text-right]
+*Session 001 — 3 mai 2026 (nuit)*

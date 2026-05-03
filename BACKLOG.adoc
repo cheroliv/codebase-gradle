@@ -166,8 +166,9 @@ Le pipeline est alimenté par les datasets nettoyés via l'expert anonymisation 
 
 == EPIC 9 : Opencode Augmenté — Réalité Augmentée Développeur
 
-**Statut** : A FAIRE
+**Statut** : EN COURS
 **Priorite** : P0
+**Pattern** : Baby-step (max 3 pts/US) + TestContainer + Doc Vivante
 
 *Pourquoi* : Le premier client, c'est le développeur lui-même. La priorité est d'injecter
 un vecteur composite de contexte dans opencode pour démultiplier la qualité des réponses
@@ -176,17 +177,54 @@ sans EPIC 2** (pas besoin d'anonymiseur sur le code source). L'audit des 41 dép
 candidats (vs 12 bruit) est documenté dans `AUDIT_BUSINESS_LOGIC_REPOSITORIES.adoc`.
 Le labo (codebase-gradle) teste sur lui-même avant de livrer aux autres plugins.
 
-*Dépend de* : Néant (pas de prérequis EPIC 2). Brique finance (Stripe + Orange Money)
-souhaitable mais non bloquante.
+*Dépend de* : Néant (pas de prérequis EPIC 2).
 
-=== Sous-tâches
+*Décomposition* : `~/workspace/PICTURE_ME_ROLLIN_EPIC9.adoc`
 
-* [ ] RAG pgvector indexe office/ + __repositories__/
-* [ ] Graphify knowledge graph transverse (nœuds + arêtes)
-* [ ] pgvector embeddings ONNX (AllMiniLmL6V2)
-* [ ] Vecteur composite injecté dans opencode → deepseek-v4-pro
-* [ ] Raffinement automatique prompts/instructions
-* [ ] Tests : mesurer la pertinence des réponses avec et sans vecteur composite
+=== Phase 0 — Infra (zéro dépendance)
+
+|===
+| US | Description | pts | Statut
+| US-9.1 | Container pgvector éphémère — dépendance testcontainers, step Cucumber `startPgvectorContainer()`, validation démarrage <30s | 2 | ✅ TERMINE
+| US-9.2 | Dataset de test minimal committé — 5 adoc + 2 repos Gradle miniatures dans `src/test/resources/`, structure miroir workspace, zéro PII | 2 | A FAIRE
+|===
+
+=== Phase 1 — Indexation
+
+|===
+| US | Description | pts | Statut
+| US-9.3 | Walk récursif typé — `WorkspaceWalker` scanne rootDir → `List<WorkspaceFile>` (+ filter build/.git/.gradle/node_modules) | 2 | A FAIRE
+| US-9.4 | Indexation adoc → pgvector — split 500 tokens/overlap 50, embedding ONNX AllMiniLmL6V2 (384d), insert pgvector | 3 | A FAIRE
+| US-9.5 | Indexation code source Kotlin/Java → pgvector — même pipeline, metadata package/class/repo | 2 | A FAIRE
+| US-9.6 | Indexation YAML/JSON configs → pgvector — anonymisation pre-embedding (CodebaseYmlAnonymizer), zéro secret dans pgvector | 3 | A FAIRE
+|===
+
+=== Phase 2 — Requêtage
+
+|===
+| US | Description | pts | Statut
+| US-9.7 | Query vectorielle simple — `VectorQueryService.query()` → embedding → pgvector topK=10 → `List<RelevantChunk>` | 2 | A FAIRE
+| US-9.8 | Query filtrée par type — extension US-9.7, `filter=ChunkType.ADOC|CODE|CONFIG`, pondération par source | 1 | A FAIRE
+|===
+
+=== Phase 3 — Assemblage
+
+|===
+| US | Description | pts | Statut
+| US-9.9 | CompositeContextBuilder — agrège EAGER/LAZY + RAG pgvector + Graphify(placeholder), token budget 40/30/20/10 | 3 | A FAIRE
+| US-9.10 | Format export opencode — `OpencodeInjector` format structuré [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY], prêt à concaténer au prompt système | 2 | A FAIRE
+|===
+
+=== Phase 4 — Intégration
+
+|===
+| US | Description | pts | Statut
+| US-9.11 | Tâche Gradle `augmentOpencode` — pipeline complet walk→index→query→format, output `/tmp/opencode-context.txt` | 3 | A FAIRE
+| US-9.12 | Benchmark pertinence — 10 questions métier, deepseek-v4-pro avec/sans vecteur composite, rapport AsciiDoc auto-généré | 3 | A FAIRE
+| US-9.13 | Ségrégation Vision/Opinion déléguée au LLM — prompt engineering dans le vecteur composite, le LLM assume la responsabilité de classifier avant dilution et publication blog cheroliv.com | 2 | A FAIRE
+|===
+
+*Total* : 30 pts, 13 US, complexité max 3 pts/US.
 
 == EPIC 10 : Instrumentation Gradle du Pattern STIMULUS — Cascade Dilution/Enrichissement Automatique
 
