@@ -78,3 +78,4 @@ _Session terminee_ : 001 (US-9.1 pgvector container + dilution stimulus)
 | newpipe-gradle | `__repositories__/newpipe-gradle/newpipe-plugin/` | ~11 | 2026-04
 | codebase-gradle | `__repositories__/codebase-gradle/` | 0 (migre) | 2026-05-03
 |===
+| 002 | 2026-05-04 | governance | renommage openclaw→quizz-benchmark | —
