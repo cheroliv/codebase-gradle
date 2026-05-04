@@ -7,3 +7,4 @@
 | 2026-05-03 (nuit) | 001 | chore | PICTURE_ME_ROLLIN_EPIC9 dilue dans configuration/.agents/AGENT_GOVERNANCE.adoc (2 nouvelles sections : Pattern Baby-Step/TestContainer + Delegation Vision/Opinion)
 | 2026-05-03 | 000 | EPIC 1 | Gouvernance agent migree depuis quizz-benchmark-gradle. .agents/ cree, AGENT.adoc adapte, BACKLOG enrichi 8→13 EPICs
 |===
+| 2026-05-04 | 002 | governance | Renommage openclaw-codingame → quizz-benchmark-gradle (gouvernance) |
