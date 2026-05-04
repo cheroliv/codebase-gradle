@@ -3,7 +3,7 @@
 
 == Contexte de Reprise
 
-Session initiale après migration depuis openclaw-codingame. Le backlog contient
+Session initiale après migration depuis quizz-benchmark-gradle. Le backlog contient
 13 EPICs (1 à 13). La gouvernance agent globale (`AGENT_GOVERNANCE.adoc`) est
 à jour. Le pattern STIMULUS est formalisé.
 

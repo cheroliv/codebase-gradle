@@ -35,7 +35,7 @@ Le contenu de cette encyclopédie est destiné à l'humain pour :
 | codebase-gradle | `/home/cheroliv/workspace/__repositories__/codebase-gradle` | Plugin Gradle
 | readme-gradle | `/home/cheroliv/workspace/__repositories__/readme-gradle` | Plugin Gradle
 | jhipster-gradle-plugins | `/home/cheroliv/workspace/__repositories__/jhipster-gradle-plugins` | Mono-repo persistence + assistant
-| **gradle-quizz** | `/home/cheroliv/workspace/__repositories__/openclaw-codingame/quizz-benchmark-plugin` | Plugin Gradle quizz/benchmark
+| **gradle-quizz** | `/home/cheroliv/workspace/__repositories__/quizz-benchmark-gradle/quizz-benchmark-plugin` | Plugin Gradle quizz/benchmark
 |===
 
 _Le plugin plantuml-gradle est le projet source du modèle AGENT_MODUS_OPERANDI._

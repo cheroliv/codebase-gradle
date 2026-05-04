@@ -5,7 +5,7 @@ _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
 _Derniere mise a jour_ : 2026-05-03 (nuit)
-_Audit gouvernance_ : 2026-05-03 ✅ (gouvernance migree depuis openclaw-codingame, .agents/ cree)
+_Audit gouvernance_ : 2026-05-03 ✅ (gouvernance migree depuis quizz-benchmark-gradle, .agents/ cree)
 _Session en cours_ : 2 — US-9.2 dataset test minimal
 _Session terminee_ : 001 (US-9.1 pgvector container + dilution stimulus)
 
@@ -23,7 +23,7 @@ _Session terminee_ : 001 (US-9.1 pgvector container + dilution stimulus)
 
 |===
 | # | Date | Type | Sujet | Score
-| — | 2026-05-03 | init (migration) | Gouvernance migree depuis openclaw-codingame | —
+| — | 2026-05-03 | init (migration) | Gouvernance migree depuis quizz-benchmark-gradle | —
 |===
 
 '''

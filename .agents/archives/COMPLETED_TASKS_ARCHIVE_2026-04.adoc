@@ -36,7 +36,7 @@ Session 2 — a definir par l'utilisateur.
 
 === Contexte
 
-Initialisation du projet openclaw-codingame (codingame-benchmark) avec
+Initialisation du projet quizz-benchmark-gradle (codingame-benchmark) avec
 mise en place de la gouvernance agent complete.
 
 === Taches Realisees
