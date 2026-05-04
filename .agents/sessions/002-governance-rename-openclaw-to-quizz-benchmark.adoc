@@ -1,0 +1,6 @@
+= Session 002 — Renommage gouvernance openclaw→quizz-benchmark (9 fichiers)
+:date: 2026-05-04
+:type: governance
+
+*Gouvernance agent* — Renommage systemique openclaw-codingame → quizz-benchmark-gradle dans tous les fichiers de gouvernance (.adoc, INDEX, encyclopedies, archives). 52 references mises a jour.
+
