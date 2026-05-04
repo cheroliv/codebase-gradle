@@ -10,6 +10,14 @@ Session initiale après migration depuis openclaw-codingame. Le backlog contient
 L'utilisateur a demandé d'ajouter à l'EPIC 13 une idée d'implantation précise
 qui doit être **picture me rollin dès l'ouverture de la prochaine session**.
 
+== 🔑 Règle EAGER — Ségrégation Vision/Opinion/Stratégie (rappel de AGENT_GOVERNANCE Règle 2bis)
+
+Le LLM EST le premier responsable de classifier chaque information avant dilution :
+- VISION → publiable (documents racine + blog cheroliv.com)
+- OPINION → CONFINÉE Cercle 0 (jamais diluée, jamais publiée)
+- STRATÉGIE → dilution restreinte (docs racine section business, PAS de blog)
+Cas ambigus → remonter à l'humain.
+
 == Mission — STIMULUS : Ségrégation Vision/Opinion en Base de Données, Pas dans les Documents
 
 === Le constat
