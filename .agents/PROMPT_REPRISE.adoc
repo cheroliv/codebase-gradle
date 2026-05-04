@@ -1,4 +1,4 @@
-= PROMPT_REPRISE — Session 1 — Codebase Gradle
+= PROMPT_REPRISE — Session 3 — Codebase Gradle
 :jbake-status: draft
 
 == Contexte de Reprise
@@ -81,4 +81,4 @@ PostgreSQL table epistemic_classification:
 ----
 
 [.text-right]
-*Généré le 3 mai 2026 (nuit). Première session codebase-gradle à venir.*
+*Session 002 close (2026-05-04) — renommage gouvernance openclaw→quizz-benchmark. Session 003 prête.*
