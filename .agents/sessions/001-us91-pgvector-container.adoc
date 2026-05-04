@@ -4,7 +4,7 @@
 == Contexte
 
 Première session de travail effective sur codebase-gradle après migration de la
-gouvernance depuis openclaw-codingame.
+gouvernance depuis quizz-benchmark-gradle.
 
 == Réalisé
 

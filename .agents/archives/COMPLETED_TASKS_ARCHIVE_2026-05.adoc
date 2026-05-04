@@ -5,5 +5,5 @@
 | 2026-05-03 (nuit) | 001 | EPIC 9 | EPIC 9 decompose en 13 US baby-step (max 3 pts/US). Pattern Baby-Step + TestContainer + Doc Vivante formalise. Delegation Vision/Opinion confiee au LLM via prompt engineering
 | 2026-05-03 (nuit) | 001 | US-9.1 | Container pgvector ephemere operationnel. 2/2 tests Cucumber PASS. Dependances langchain4j + testcontainers + cucumber + arrow-kt + r2dbc + mapstruct integrees. JDK 23 force via gradle.properties
 | 2026-05-03 (nuit) | 001 | chore | PICTURE_ME_ROLLIN_EPIC9 dilue dans configuration/.agents/AGENT_GOVERNANCE.adoc (2 nouvelles sections : Pattern Baby-Step/TestContainer + Delegation Vision/Opinion)
-| 2026-05-03 | 000 | EPIC 1 | Gouvernance agent migree depuis openclaw-codingame. .agents/ cree, AGENT.adoc adapte, BACKLOG enrichi 8→13 EPICs
+| 2026-05-03 | 000 | EPIC 1 | Gouvernance agent migree depuis quizz-benchmark-gradle. .agents/ cree, AGENT.adoc adapte, BACKLOG enrichi 8→13 EPICs
 |===

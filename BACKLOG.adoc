@@ -6,7 +6,7 @@
 **Statut** : EN COURS
 **Priorite** : P0
 
-* [x] Migrer .agents/ + fichiers gouvernance depuis openclaw-codingame
+* [x] Migrer .agents/ + fichiers gouvernance depuis quizz-benchmark-gradle
 * [x] Creer AGENT.adoc adapte a codebase-gradle (cercles de confiance, BYOK, fine-tuning)
 * [x] Creer INDEX.adoc (dashboard EAGER)
 * [x] Mettre a jour BACKLOG.adoc (ce fichier)

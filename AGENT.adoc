@@ -117,7 +117,7 @@ codebase-gradle/                     # RACINE GIT (cercle 4)
 ├── embeds.yml                       # Sources RAG pour Javelit
 ├── VISION_ORCHESTRATION_LLM.adoc    # Vision dispatcher + experts (275 lignes)
 ├── gradle/libs.versions.toml        # Version catalog
-├── .agents/                         # Gouvernance agent (migree depuis openclaw-codingame)
+├── .agents/                         # Gouvernance agent (migree depuis quizz-benchmark-gradle)
 │   ├── INDEX.adoc                   # Regles absolues + sessions recentes (EAGER)
 │   ├── sessions/                    # Archives par session
 │   ├── archives/                    # Archives mensuelles
