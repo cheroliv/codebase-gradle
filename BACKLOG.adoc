@@ -146,6 +146,9 @@ Le pipeline est alimenté par les datasets nettoyés via l'expert anonymisation 
 
 **Statut** : A FAIRE
 **Priorite** : P1
+**DAG** : Respecte Règle 4bis (`AGENT_GOVERNANCE.adoc`) —
+`codebase-gradle` (N1) ne peut pas être importé par N2.
+Le wiring expose pgvector + graph.json comme données, pas comme code.
 
 * [ ] Persistance partagee entre agents (PostgreSQL + pgvector)
 * [ ] API d'appel aux experts fine-tunes (via Ollama)
@@ -172,12 +175,17 @@ Le pipeline est alimenté par les datasets nettoyés via l'expert anonymisation 
 
 *Pourquoi* : Le premier client, c'est le développeur lui-même. La priorité est d'injecter
 un vecteur composite de contexte dans opencode pour démultiplier la qualité des réponses
-de deepseek-v4-pro. `__repositories__/` ne contient pas de PII — EPIC 9 est **démarrable
+de deepseek-v4-pro. `foundry/` ne contient pas de PII — EPIC 9 est **démarrable
 sans EPIC 2** (pas besoin d'anonymiseur sur le code source). L'audit des 41 dépôts
 candidats (vs 12 bruit) est documenté dans `AUDIT_BUSINESS_LOGIC_REPOSITORIES.adoc`.
 Le labo (codebase-gradle) teste sur lui-même avant de livrer aux autres plugins.
 
 *Dépend de* : Néant (pas de prérequis EPIC 2).
+
+*DAG* : `codebase-gradle` est **N1 — Traitement**. Peut dépendre de N0 (`graphify-gradle`)
+et de pgvector (shared service). Ne peut JAMAIS être importé par N2 (slider-gradle,
+plantuml-gradle, bakery-gradle...). Le couplage N1→N2 passe par pgvector (données),
+pas par `implementation` (code). Voir `AGENT_GOVERNANCE.adoc` → Règle 4bis.
 
 *Décomposition* : `~/workspace/PICTURE_ME_ROLLIN_EPIC9.adoc`
 
@@ -314,7 +322,7 @@ La fin de session est le timing ideal : la pensee est fraiche, les metadonnees
 (date, contexte, auteur) sont deja documentees.
 
 **Contrainte RGPD fondamentale** : l'article est genere **exclusivement** a partir
-de la zone de connaissance `__repositories__/` (Cercle 4 — public natif, Apache 2.0,
+de la zone de connaissance `foundry/` (Cercle 4 — public natif, Apache 2.0,
 zero PII). Jamais depuis `office/` (Cercle 2, contient des donnees potentiellement
 personnelles) ni `configuration/` (Cercle 1, secrets). Cette segregation par cercle
 garantit qu'aucune donnee sensible ne fuit dans le contenu public — meme sans
@@ -323,11 +331,11 @@ l'anonymiseur (EPIC 2 non requis pour EPIC 12).
 La meme cascade qui dilue dans les documents racine (EPIC 10) peut produire un
 **deuxieme format de sortie** : un article AsciiDoc pret a publier, narratif,
 destine au public — mais alimente uniquement par le vecteur composite issu de
-`__repositories__/` (RAG pgvector + Graphify + code source). Le flywheel
+`foundry/` (RAG pgvector + Graphify + code source). Le flywheel
 s'enclenche automatiquement : le contenu genere documente les outils et patterns
 qui le generent, sans jamais melanger les cercles de confiance.
 
-*Depend de* : EPIC 9 (opencode augmente — le vecteur composite sur `__repositories__/`
+*Depend de* : EPIC 9 (opencode augmente — le vecteur composite sur `foundry/`
 donne le contexte Cercle 4 necessaire pour une narration publique sans PII)
 
 === Sous-taches
@@ -335,7 +343,7 @@ donne le contexte Cercle 4 necessaire pour une narration publique sans PII)
 * [ ] Formaliser le template d'article de blog : structure AsciiDoc standard
   (titre evocative, abstract, sections en cascade, metadonnees JBake)
 * [ ] Implementer `BlogArticleExtractor` : extrait des elements narrables
-  **exclusivement** depuis le vecteur composite Cercle 4 (`__repositories__/` :
+  **exclusivement** depuis le vecteur composite Cercle 4 (`foundry/` :
   RAG pgvector sur le code source, Graphify knowledge graph, historique `.agents/`
   publics). Circuit d'exclusion strict : rejette toute origine Cercle 0/1/2.
 * [ ] Implementer `BlogArticleRenderer` : applique le template, produit un

@@ -28,14 +28,14 @@ Le contenu de cette encyclopédie est destiné à l'humain pour :
 
 |===
 | Projet | Chemin | Pattern de Gouvernance
-| bakery-gradle | `/home/cheroliv/workspace/__repositories__/bakery-gradle/bakery-plugin` | Plugin Gradle convention-based
-| plantuml-gradle | `/home/cheroliv/workspace/__repositories__/plantuml-gradle/plantuml-plugin` | Plugin Gradle mature, AGENT_MODUS_OPERANDI original
-| newpipe-gradle | `/home/cheroliv/workspace/__repositories__/newpipe-gradle` | Plugin Gradle
-| slider-gradle | `/home/cheroliv/workspace/__repositories__/slider-gradle` | Plugin Gradle
-| codebase-gradle | `/home/cheroliv/workspace/__repositories__/codebase-gradle` | Plugin Gradle
-| readme-gradle | `/home/cheroliv/workspace/__repositories__/readme-gradle` | Plugin Gradle
-| jhipster-gradle-plugins | `/home/cheroliv/workspace/__repositories__/jhipster-gradle-plugins` | Mono-repo persistence + assistant
-| **gradle-quizz** | `/home/cheroliv/workspace/__repositories__/quizz-benchmark-gradle/quizz-benchmark-plugin` | Plugin Gradle quizz/benchmark
+| bakery-gradle | `/home/cheroliv/workspace/foundry/bakery-gradle/bakery-plugin` | Plugin Gradle convention-based
+| plantuml-gradle | `/home/cheroliv/workspace/foundry/plantuml-gradle/plantuml-plugin` | Plugin Gradle mature, AGENT_MODUS_OPERANDI original
+| newpipe-gradle | `/home/cheroliv/workspace/foundry/newpipe-gradle` | Plugin Gradle
+| slider-gradle | `/home/cheroliv/workspace/foundry/slider-gradle` | Plugin Gradle
+| codebase-gradle | `/home/cheroliv/workspace/foundry/codebase-gradle` | Plugin Gradle
+| readme-gradle | `/home/cheroliv/workspace/foundry/readme-gradle` | Plugin Gradle
+| jhipster-gradle-plugins | `/home/cheroliv/workspace/foundry/jhipster-gradle-plugins` | Mono-repo persistence + assistant
+| **gradle-quizz** | `/home/cheroliv/workspace/foundry/quizz-benchmark-gradle/quizz-benchmark-plugin` | Plugin Gradle quizz/benchmark
 |===
 
 _Le plugin plantuml-gradle est le projet source du modèle AGENT_MODUS_OPERANDI._

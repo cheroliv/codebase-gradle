@@ -22,7 +22,7 @@ du BYOK, et du pipeline de datasets pour l'ecosysteme workspace.
 
 === Contexte — Cercles de Confiance
 
-Ce projet vit dans `__repositories__/codebase-gradle/` → *cercle 4 (public, Apache 2.0)*.
+Ce projet vit dans `foundry/codebase-gradle/` → *cercle 4 (public, Apache 2.0)*.
 - Ne pas referencer de secrets ici (ils sont dans `configuration/`, cercle 1)
 - La data consommee est dans `office/` (cercle 2)
 - La vision est dans `workspace/` (racine hors-CVS, cercle 0)
@@ -193,13 +193,13 @@ il DOIT consulter ces codebases comme reference. Ces chemins sont LAZY — ne ja
 
 |===
 | Projet | Chemin | Role
-| plantuml-gradle | `/home/cheroliv/workspace/__repositories__/plantuml-gradle/plantuml-plugin` | Plugin Gradle mature, reference principale
-| bakery-gradle | `/home/cheroliv/workspace/__repositories__/bakery-gradle/bakery-plugin` | Plugin Gradle convention-based
-| newpipe-gradle | `/home/cheroliv/workspace/__repositories__/newpipe-gradle` | Plugin Gradle
-| slider-gradle | `/home/cheroliv/workspace/__repositories__/slider-gradle` | Plugin Gradle
-| codebase-gradle | `/home/cheroliv/workspace/__repositories__/codebase-gradle` | Plugin Gradle (ce projet)
-| readme-gradle | `/home/cheroliv/workspace/__repositories__/readme-gradle` | Plugin Gradle
-| jhipster-gradle-plugins | `/home/cheroliv/workspace/__repositories__/jhipster-gradle-plugins` | Mono-repo persistence + assistant
+| plantuml-gradle | `/home/cheroliv/workspace/foundry/plantuml-gradle/plantuml-plugin` | Plugin Gradle mature, reference principale
+| bakery-gradle | `/home/cheroliv/workspace/foundry/bakery-gradle/bakery-plugin` | Plugin Gradle convention-based
+| newpipe-gradle | `/home/cheroliv/workspace/foundry/newpipe-gradle` | Plugin Gradle
+| slider-gradle | `/home/cheroliv/workspace/foundry/slider-gradle` | Plugin Gradle
+| codebase-gradle | `/home/cheroliv/workspace/foundry/codebase-gradle` | Plugin Gradle (ce projet)
+| readme-gradle | `/home/cheroliv/workspace/foundry/readme-gradle` | Plugin Gradle
+| jhipster-gradle-plugins | `/home/cheroliv/workspace/foundry/jhipster-gradle-plugins` | Mono-repo persistence + assistant
 |===
 
 == Fichiers EAGER (charges automatiquement)
@@ -235,7 +235,7 @@ il DOIT consulter ces codebases comme reference. Ces chemins sont LAZY — ne ja
 | 2 | **Trop d'agents trop tot** | Multiples agents specialises crees avant que le projet soit stable | Attendre 10+ sessions avant de splitter en agents specialises
 | 3 | **PROMPT_REPRISE fantome** | PROMPT_REPRISE existe mais n'est pas mis a jour en fin de session | L'etape 2 de la procedure de fin de session est obligatoire
 | 4 | **Archive vide** | Le fichier de session cree mais sans contenu utile | Template obligatoire : contexte, actions, commandes, resultats, lecons
-| 5 | **Portefeuille fantome** | INDEX.adoc liste des projets qui ne sont plus gouvernes | Mettre a jour le portefeuille a chaque fin de session. Verifier avec `find __repositories__ -name INDEX.adoc`
+| 5 | **Portefeuille fantome** | INDEX.adoc liste des projets qui ne sont plus gouvernes | Mettre a jour le portefeuille a chaque fin de session. Verifier avec `find foundry -name INDEX.adoc`
 | 6 | **Redondance cachee** | AGENT.adoc et INDEX.adoc decrivent les memes regles avec des divergences | INDEX reference AGENT, pas de duplication. Une seule source de verite.
 | 7 | **Session trop longue** | > 50 messages ou > 3 fichiers paralleles | Splitter. 5x20min > 1x2h.
 |===
