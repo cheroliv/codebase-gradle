@@ -1,0 +1,17 @@
+= Session 003 — DAG + Renommage foundry/engine
+
+*Date* : 2026-05-05
+*Type* : architecture
+*Score* : 10/10
+
+== Modifications
+
+* `BACKLOG.adoc` — EPIC 7 + EPIC 9 : ajout reference DAG N1 (Regle 4bis)
+* Renommage global `__repositories__/` → `foundry/`, `workspace-engine` → `engine`
+
+== Decisions
+
+* `codebase-gradle` est N1 — Traitement dans le DAG
+* Peut dependre de N0 (`graphify-gradle`), jamais importe par N2
+* EPIC 9 : vecteur composite pour opencode uniquement (dogfooding)
+* Distribution aux N2 via pgvector + CI/CD, pas via `implementation
