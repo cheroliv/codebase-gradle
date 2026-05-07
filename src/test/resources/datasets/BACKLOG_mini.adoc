@@ -1,0 +1,17 @@
+= BACKLOG Test — Miniature
+:priority: P0
+:status: A_FAIRE
+
+== EPIC 42 — Demo
+
+=== US-42.1
+Description de la premiere user story demo.
+Utilise le WorkspaceWalker pour scanner les fichiers.
+
+=== US-42.2
+Integration avec pgvector pour l'indexation des fichiers adoc.
+Pipeline complet : walk → chunk → embed → search.
+
+=== US-42.3
+Benchmark de pertinence avec 10 questions metier.
+Mesure de la precision du moteur de recherche semantique.

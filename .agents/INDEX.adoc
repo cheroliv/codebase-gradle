@@ -6,13 +6,13 @@ _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
 _Derniere mise a jour_ : 2026-05-07
 _Audit gouvernance_ : 2026-05-03 ✅ (gouvernance migree depuis quizz-benchmark-gradle, .agents/ cree)
-_Session en cours_ : 3 — US-9.3 WorkspaceWalker + US-9.4 Indexation adoc
-_Session terminee_ : 004 (US-9.2 Dataset + US-9.3 Embeddings ONNX — pipeline complet)
+_Session en cours_ : 005 — US-9.3 WorkspaceWalker + US-9.4 Indexation adoc (dedup steps)
+_Session terminee_ : 005
 
 '''
 == REGLES ABSOLUES (resume)
 
-=== 0. PUBLISH TO MAVEN LOCAL — OBLIGATOIRE APRES TOUTE MODIFICATION DU CODE SOURCE
+=== 0. PUBLISH TO MAVEN LOCAL — OBLIGATOIRE APRES TOUTE MODIFICATION DU CODE SOURCE (non applicable : pas de plugin maven-publish)
 === 1. COMMITS/GIT — INTERDICTION FORMELLE sans permission
 === 1b. FICHIERS DE CONFIGURATION — REGLE ABSOLUE DE SURETE (backup avant modif)
 === 2. TESTS EN FIN DE SESSION — INTERDICTION FORMELLE
@@ -23,6 +23,7 @@ _Session terminee_ : 004 (US-9.2 Dataset + US-9.3 Embeddings ONNX — pipeline c
 
 |===
 | # | Date | Type | Sujet | Score
+| 005 | 2026-05-07 | bugfix | US-9.3 & US-9.4 — Dedup steps Cucumber + PgVectorTestContext | 10/10
 | 004 | 2026-05-07 | feat | US-9.2 & US-9.3 Dataset + Embeddings ONNX → pgvector | 10/10
 | 003 | 2026-05-07 | chore | Migration chemins foundry/ → foundry/OSS/ | -
 | 002 | 2026-05-04 | governance | Renommage openclaw→quizz-benchmark | -
@@ -36,7 +37,7 @@ _Session terminee_ : 004 (US-9.2 Dataset + US-9.3 Embeddings ONNX — pipeline c
 |===
 | EPIC | Description | Statut | Priorite
 | EPIC 1 | Initialisation gouvernance agent codebase-gradle | EN COURS | P0
-| EPIC 9 | Opencode Augmenté — 12 US baby-step (0→12) | EN COURS | P0
+| EPIC 9 | Opencode Augmente — 14 US baby-step (US-9.1 ✅, US-9.2 ✅, US-9.3 ✅, US-9.4 ✅) | EN COURS | P0
 | EPIC 2 | Expert Anonymisation LangChain4j — MVP0 | A FAIRE | P0
 | EPIC 3 | Architecture Multi-Canal Convergent | A FAIRE | P0
 | EPIC 4 | Benchmark de perception spatiale LLM | A FAIRE | P0
@@ -80,6 +81,6 @@ _Session terminee_ : 004 (US-9.2 Dataset + US-9.3 Embeddings ONNX — pipeline c
 | bakery-gradle | `foundry/OSS/bakery-gradle/bakery-plugin/` | ~13+ | 2026-04
 | jhipster-gradle-plugins | `foundry/OSS/jhipster-gradle-plugins/` | 6 | 2026-04
 | newpipe-gradle | `foundry/OSS/newpipe-gradle/newpipe-plugin/` | ~11 | 2026-04
-| codebase-gradle | `foundry/OSS/codebase-gradle/` | 4 | 2026-05-07
+| codebase-gradle | `foundry/OSS/codebase-gradle/` | 5 | 2026-05-07
 | notebook-gradle | `foundry/OSS/notebook-gradle/` | 0 (bootstrap) | 2026-05-05
 |===

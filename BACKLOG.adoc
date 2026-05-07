@@ -169,7 +169,7 @@ Le wiring expose pgvector + graph.json comme données, pas comme code.
 
 == EPIC 9 : Opencode Augmenté — Réalité Augmentée Développeur
 
-**Statut** : EN COURS (3/13 US FAIT — 9.1, 9.2, 9.3 TERMINE)
+**Statut** : EN COURS (3/13 US FAIT — 9.1, 9.2, 9.3 ✅ TERMINE)
 **Priorite** : P0
 **Pattern** : Baby-step (max 3 pts/US) + TestContainer + Doc Vivante
 
@@ -195,44 +195,45 @@ pas par `implementation` (code). Voir `AGENT_GOVERNANCE.adoc` → Règle 4bis.
 | US | Description | pts | Statut
 | US-9.1 | Container pgvector éphémère — dépendance testcontainers, step Cucumber `startPgvectorContainer()`, validation démarrage <30s | 2 | ✅ TERMINE
 | US-9.2 | Dataset de test minimal — 4 fichiers .kt dans `src/test/resources/datasets/`, chunking phrase-level ~512 tokens/overlap 50, tables documents+chunks avec FK, insert pgvector | 2 | ✅ TERMINE
+| US-9.3 | Embeddings ONNX AllMiniLmL6V2 — chargement modele, pipeline tokenizer→ONNX inference→float[384], INSERT pgvector, query cosine similarity <=>, top-K semantic match | 2 | ✅ TERMINE
 |===
 
 === Phase 1 — Indexation
 
 |===
 | US | Description | pts | Statut
-| US-9.3 | Walk récursif typé — `WorkspaceWalker` scanne rootDir → `List<WorkspaceFile>` (+ filter build/.git/.gradle/node_modules) | 2 | A FAIRE
-| US-9.4 | Indexation adoc → pgvector — split 500 tokens/overlap 50, embedding ONNX AllMiniLmL6V2 (384d), insert pgvector | 3 | A FAIRE
-| US-9.5 | Indexation code source Kotlin/Java → pgvector — même pipeline, metadata package/class/repo | 2 | A FAIRE
-| US-9.6 | Indexation YAML/JSON configs → pgvector — anonymisation pre-embedding (CodebaseYmlAnonymizer), zéro secret dans pgvector | 3 | A FAIRE
+| US-9.4 | Walk récursif typé — `WorkspaceWalker` scanne rootDir → `List<WorkspaceFile>` (+ filter build/.git/.gradle/node_modules) | 2 | A FAIRE
+| US-9.5 | Indexation adoc → pgvector — split 500 tokens/overlap 50, embedding ONNX AllMiniLmL6V2 (384d), insert pgvector | 3 | A FAIRE
+| US-9.6 | Indexation code source Kotlin/Java → pgvector — même pipeline, metadata package/class/repo | 2 | A FAIRE
+| US-9.7 | Indexation YAML/JSON configs → pgvector — anonymisation pre-embedding (CodebaseYmlAnonymizer), zéro secret dans pgvector | 3 | A FAIRE
 |===
 
 === Phase 2 — Requêtage
 
 |===
 | US | Description | pts | Statut
-| US-9.7 | Query vectorielle simple — `VectorQueryService.query()` → embedding → pgvector topK=10 → `List<RelevantChunk>` | 2 | A FAIRE
-| US-9.8 | Query filtrée par type — extension US-9.7, `filter=ChunkType.ADOC|CODE|CONFIG`, pondération par source | 1 | A FAIRE
+| US-9.8 | Query vectorielle simple — `VectorQueryService.query()` → embedding → pgvector topK=10 → `List<RelevantChunk>` | 2 | A FAIRE
+| US-9.9 | Query filtrée par type — extension US-9.8, `filter=ChunkType.ADOC|CODE|CONFIG`, pondération par source | 1 | A FAIRE
 |===
 
 === Phase 3 — Assemblage
 
 |===
 | US | Description | pts | Statut
-| US-9.9 | CompositeContextBuilder — agrège EAGER/LAZY + RAG pgvector + Graphify(placeholder), token budget 40/30/20/10 | 3 | A FAIRE
-| US-9.10 | Format export opencode — `OpencodeInjector` format structuré [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY], prêt à concaténer au prompt système | 2 | A FAIRE
+| US-9.10 | CompositeContextBuilder — agrège EAGER/LAZY + RAG pgvector + Graphify(placeholder), token budget 40/30/20/10 | 3 | A FAIRE
+| US-9.11 | Format export opencode — `OpencodeInjector` format structuré [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY], prêt à concaténer au prompt système | 2 | A FAIRE
 |===
 
 === Phase 4 — Intégration
 
 |===
 | US | Description | pts | Statut
-| US-9.11 | Tâche Gradle `augmentOpencode` — pipeline complet walk→index→query→format, output `/tmp/opencode-context.txt` | 3 | A FAIRE
-| US-9.12 | Benchmark pertinence — 10 questions métier, deepseek-v4-pro avec/sans vecteur composite, rapport AsciiDoc auto-généré | 3 | A FAIRE
-| US-9.13 | Ségrégation Vision/Opinion déléguée au LLM — prompt engineering dans le vecteur composite, le LLM assume la responsabilité de classifier avant dilution et publication blog cheroliv.com | 2 | A FAIRE
+| US-9.12 | Tâche Gradle `augmentOpencode` — pipeline complet walk→index→query→format, output `/tmp/opencode-context.txt` | 3 | A FAIRE
+| US-9.13 | Benchmark pertinence — 10 questions métier, deepseek-v4-pro avec/sans vecteur composite, rapport AsciiDoc auto-généré | 3 | A FAIRE
+| US-9.14 | Ségrégation Vision/Opinion déléguée au LLM — prompt engineering dans le vecteur composite, le LLM assume la responsabilité de classifier avant dilution et publication blog cheroliv.com | 2 | A FAIRE
 |===
 
-*Total* : 30 pts, 13 US, complexité max 3 pts/US.
+*Total* : 30 pts, 14 US, complexité max 3 pts/US. (US-9.1, US-9.2, US-9.3 = ✅ TERMINE)
 
 == EPIC 10 : Instrumentation Gradle du Pattern STIMULUS — Cascade Dilution/Enrichissement Automatique
 

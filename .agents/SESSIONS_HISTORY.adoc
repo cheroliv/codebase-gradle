@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 005 | 2026-05-07 | bugfix | US-9.3 & US-9.4 — Dedup steps Cucumber + PgVectorTestContext singleton | 10/10
 | 004 | 2026-05-07 | feat | US-9.2 & US-9.3 — Dataset minimal + Embeddings ONNX → pgvector (pipeline complet) | 10/10
 | 003 | 2026-05-07 | chore | Migration chemins foundry/ → foundry/OSS/ dans INDEX.adoc (granularisation OSS/CSS) | -
 | 002 | 2026-05-04 | governance | Renommage gouvernance openclaw→quizz-benchmark (9 fichiers) | -

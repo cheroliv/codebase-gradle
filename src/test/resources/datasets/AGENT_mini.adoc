@@ -1,0 +1,19 @@
+= AGENT Test — Miniature
+:toc:
+
+== Projet
+Test dataset for US-9.3 WorkspaceWalker + US-9.4 adoc indexing.
+
+== Regles
+* Ne pas modifier les fichiers sans test
+* Toujours verifier avant de commit
+* La gouvernance agent est obligatoire
+
+== Stack
+Kotlin, Gradle, LangChain4j, ONNX, JUnit 5, PostgreSQL pgvector.
+
+== Architecture
+Le WorkspaceWalker scanne recursivement les repertoires.
+Il filtre automatiquement build/, .git/, .gradle/, node_modules/.
+Chaque fichier trouve est represente par un WorkspaceFile avec
+les metadonnees : fileName, filePath, fileSize, extension.

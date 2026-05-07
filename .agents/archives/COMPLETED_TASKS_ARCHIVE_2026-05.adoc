@@ -9,5 +9,6 @@
 | 2026-05-03 (nuit) | 001 | chore | PICTURE_ME_ROLLIN_EPIC9 dilue dans configuration/.agents/AGENT_GOVERNANCE.adoc (2 nouvelles sections : Pattern Baby-Step/TestContainer + Delegation Vision/Opinion)
 | 2026-05-03 | 000 | EPIC 1 | Gouvernance agent migree depuis quizz-benchmark-gradle. .agents/ cree, AGENT.adoc adapte, BACKLOG enrichi 8→13 EPICs
 |===
+| 2026-05-07 | 005 | US-9.3+9.4 | Bug fix : dedup 7 steps Cucumber entre DatasetEmbeddingSteps et WorkspaceWalkerSteps via PgVectorTestContext singleton. Etat partage (conteneur, model, fileChunks, topResults). 5/5 scenarios PASS. WorkspaceWalker 6 fichiers (.kt+.adoc). Query multi-type : top-1 adoc pour FR, top-1 kt pour technique.
 | 2026-05-04 | 002 | governance | Renommage openclaw-codingame → quizz-benchmark-gradle (gouvernance) |
 | 2026-05-07 | 003 | chore | Migration chemins foundry/ → foundry/OSS/ dans INDEX.adoc — granularisation OSS/CSS |

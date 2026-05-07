@@ -1,9 +1,10 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : US-9.1 ✅ + US-9.2 ✅ + US-9.3 ✅ — 3 scenarios Cucumber (8+12+2=22 steps) ALL PASS
+_Statut_ : US-9.1 ✅ + US-9.2 ✅ + US-9.3 ✅ + US-9.4 ✅ — 5 scenarios Cucumber ALL PASS
 
 |===
 | Session | Fichiers testes | Couverture | Notes
+| 005 | `PgVectorTestContext.kt` + `DatasetEmbeddingSteps.kt` + `WorkspaceWalkerSteps.kt` (Cucumber) | 2 scenarios PASS | WorkspaceWalker 6 fichiers (.kt+.adoc) + query multi-type top-1 adoc/kt
 | 004 | `DatasetEmbeddingSteps.kt` (Cucumber) | 1 scenario PASS (12 steps) | Pipeline complet : chunk 4 .kt → 6 chunks → documents+chunks FK → embed 384d → similarity search
 | 001 | `PgVectorContainerSteps.kt` (Cucumber) | 2 scenarios PASS | PostgreSQLContainer pgvector/pgvector:pg17, ephemeral, auto-cleanup
 |===
@@ -12,25 +13,31 @@ _Statut_ : US-9.1 ✅ + US-9.2 ✅ + US-9.3 ✅ — 3 scenarios Cucumber (8+12+2
 
 === codebase-gradle (src/test/kotlin/codebase/scenarios/)
 
+- `PgVectorTestContext.kt` : singleton partageant conteneur pgvector, modele ONNX,
+  fileChunks, topResults, et methodes de chunking (splitIntoSentenceLevelChunks,
+  estimateTokenCount)
 - `PgVectorContainerSteps.kt` : demarrage/arret conteneur pgvector + verification
   extension vector + creation table vector(384)
-- `DatasetEmbeddingSteps.kt` : chunking phrase-level (~512 tokens), creation
-  tables documents+chunks avec FK, embedding AllMiniLmL6V2 via ONNX (384d),
-  recherche similarite cosinus pgvector (`<=>`). Conteneur partage via companion object.
+- `DatasetEmbeddingSteps.kt` : steps canon partages (container start, tokenize,
+  insert documents+chunks avec FK, compute embeddings ONNX 384d, query cosine
+  similarity `<=>` avec JOIN d.file_name)
+- `WorkspaceWalkerSteps.kt` : steps specifiques (walk directory, extension check,
+  verification type adoc vs kt dans topResults)
+- `WorkspaceWalker.kt` : classe walker recursif filtrant build/.git/.gradle/node_modules
 - `CucumberTestRunner.kt` : @Suite JUnit Platform, cucumber engine, features dans
   `src/test/features/`
 - `TestCleanupExtension.kt` : nettoyage containers orphelins + /tmp/gradle-test-*
 
 === Resources Test
 
-- `src/test/resources/datasets/` : 4 fichiers .kt (UserDataClass, StringExtensions,
-  TaskRepository, HttpClientService)
+- `src/test/resources/datasets/` : 6 fichiers (4 .kt + 2 .adoc)
 
 === Features Cucumber
 
 - `9_1_pgvector_container.feature` : 2 scenarios (start + stop)
 - `9_2_3_dataset_embeddings.feature` : 1 scenario (full pipeline 12 steps)
+- `9_3_4_workspace_walker_adoc.feature` : 2 scenarios (walker discovery + index multi-type)
 
 == Prochaine etape
 
-US-9.3 (WorkspaceWalker) + US-9.4 (Indexation adoc → pgvector)
+US-9.5 (Indexation Kotlin/Java avec metadata package/class/repo) + US-9.6 (Indexation YAML/JSON configs)

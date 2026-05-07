@@ -1,60 +1,59 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 3
+= PROMPT_REPRISE — Codebase Gradle — Session 4
 
-> **Statut** : Session 2 ✅ — US-9.2 & US-9.3 TERMINE
-> **Mission** : US-9.3 (WorkspaceWalker) + US-9.4 (Indexation adoc → pgvector)
+> **Statut** : Session 3 ✅ — US-9.3 WorkspaceWalker + US-9.4 Indexation adoc TERMINE
+> **Mission** : US-9.5 (Indexation code Kotlin) + US-9.6 (Indexation YAML/JSON configs)
 
 '''
-== Session 2 (US-9.2 + US-9.3) — Resume
+== Session 3 (US-9.3 + US-9.4) — Resume
 
 **Date** : 2026-05-07
-**Resultat** : ✅ Pipeline chunking → embedding → pgvector operationnel. 1 scenario
-Cucumber (full pipeline) PASS avec 12 steps.
-- 4 fichiers .kt dans `src/test/resources/datasets/`
-- Chunking phrase-level ~512 tokens, overlap 50 → 6 chunks
-- Tables `documents` + `chunks` avec FK, embedding vector(384)
-- AllMiniLmL6V2 via ONNX Runtime (langchain4j), 384d
-- Recherche semantique : "find all tasks from the database" → top-1 TaskRepository (0.40 similarity)
+**Resultat** : ✅ Bug fix : 7 steps Cucumber en doublon corriges via `PgVectorTestContext`
+singleton. 5/5 scenarios PASS. WorkspaceWalker decouvre 6 fichiers (.kt + .adoc),
+pipeline complet walk→tokenize→insert→embed→query operationnel multi-type.
+Top-1 adoc pour query FR, top-1 kt pour query technique. Chunking phrase-level
+partage via singleton, zéro duplication.
 
-**Aucune dependance ajoutee** (tout etait deja dans build.gradle.kts/libs.versions.toml)
+**Fichiers cles** :
+- `src/test/kotlin/codebase/scenarios/PgVectorTestContext.kt` — etat partage
+- `src/test/kotlin/codebase/scenarios/DatasetEmbeddingSteps.kt` — steps canon
+- `src/test/kotlin/codebase/scenarios/WorkspaceWalkerSteps.kt` — steps specifiques
 
-**Archive** : `.agents/sessions/004-us92-93-dataset-embeddings.adoc`
+**Archive** : `.agents/sessions/005-us93-94-dedup.adoc`
 
 '''
-== Session 3 — Priorites
+== Session 4 — Priorites
 
 === Objectif principal
 
-**US-9.3 — Walk recusif type (`WorkspaceWalker`)**
-- Scanner `src/test/resources/datasets/` → `List<WorkspaceFile>`
-- Filter automatique : build/ .git/ .gradle/ node_modules/
-- Metadata : file_name, file_path, file_size, extension, repo_name
-- Test Cucumber : walk sur le dataset → au moins 4 files .kt trouves
+**US-9.5 — Indexation code source Kotlin/Java → pgvector**
+- Etendre `DatasetEmbeddingSteps` pour gerer les metadonnees package/class/repo
+- Ajouter colonnes `package_name`, `class_name`, `repo_name` a `documents`
+- Feature Cucumber : index + query avec filtre par package
+- Valider que `findByPackage("codebase.repository")` retourne TaskRepository.kt
 
 === Second objectif
 
-**US-9.4 — Indexation adoc → pgvector** (si temps)
-- Creer quelques fichiers .adoc dans le dataset
-- Appliquer le pipeline chunks + embeddings aux .adoc
-- Reutiliser DatasetEmbeddingSteps existant, etendre pour gerer .adoc + .kt
+**US-9.6 — Indexation YAML/JSON configs → pgvector** (si temps)
+- Pre-anonymisation via `CodebaseYmlAnonymizer` avant embedding
+- Feature Cucumber : verification zero secret dans pgvector apres indexation
+- Reutiliser `PgVectorTestContext` existant
 
 === Criteres d'Acceptation
 
-- [ ] `WorkspaceWalker` scanne `datasets/` → `List<WorkspaceFile>` (skip .git/.gradle/build)
-- [ ] Feature Cucumber : walk + index + query sur fichiers multi-types (.kt + .adoc)
-- [ ] Pas de regression sur les tests existants (3 scenarios Cucumber, 24 verify*)
+- [ ] Documents table etendue avec metadonnees package/class/repo
+- [ ] Feature Cucumber US-9.5 : index + query filtree par metadata
+- [ ] Aucune regression sur les 5 scenarios existants
+- [ ] Package name et class name persistes dans pgvector
 
 '''
 == Couverture Tests
 
 |===
 | Feature | Etat
-| `verifyCodebaseToAnonymizedYaml` | ✅ 7 cases
-| `verifyReadMeToAnonymizedYaml` | ✅ 7 cases
-| `verifySliderToAnonymizedYaml` | ✅ 5 cases
-| `verifySiteToAnonymizedYaml` | ✅ 5 cases
 | EPIC 9.1 — pgvector container (Cucumber) | ✅ 2 scenarios
 | US-9.2+9.3 — Dataset + Embeddings (Cucumber) | ✅ 1 scenario (12 steps)
-| US-9.3 — WorkspaceWalker (Cucumber) | ❌ 0 scenarios
+| US-9.3+9.4 — WorkspaceWalker + adoc (Cucumber) | ✅ 2 scenarios
+| US-9.5 — Indexation Kotlin/Java metadata | ❌ 0 scenarios
 |===
 
 '''
@@ -64,7 +63,8 @@ Cucumber (full pipeline) PASS avec 12 steps.
 - ❌ Pas de tests en fin de session
 - ✅ Procedure de fin de session 6 etapes obligatoires
 - ✅ Pattern Baby-Step : max 3 pts par US, test d'infra avant code metier
-- ✅ Cucumber en anglais (pas de Gherkin FR)
+- ✅ Cucumber en anglais
+- ✅ Etat partage via `PgVectorTestContext` (pas de duplication)
 
 ---
-**Session 2** ✅ — **Session 3** 🚀
+**Session 3** ✅ — **Session 4** 🚀
