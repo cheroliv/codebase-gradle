@@ -18,6 +18,15 @@ JDK 23 force via gradle.properties. Tache `cucumberTest` operationnelle.
 **Archive** : `.agents/sessions/001-us91-pgvector-container.adoc`
 
 '''
+== Session 003 — Migration chemins OSS/CSS (inter-session chore)
+
+**Date** : 2026-05-07
+**Type** : chore
+**Resultat** : ✅ INDEX.adoc — remplacement `foundry/` → `foundry/OSS/` pour granularisation OSS/CSS.
+Migration transverse sur 9 repos (codebase, quizz-benchmark, jhipster, magic_stick, bakery, codex, saas-deploy, plantuml, planner).
+Commit + push sur chaque repo.
+
+'''
 == Session 2 — Priorites
 
 === Objectif principal

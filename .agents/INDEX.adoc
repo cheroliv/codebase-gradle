@@ -7,6 +7,7 @@ _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 _Derniere mise a jour_ : 2026-05-03 (nuit)
 _Audit gouvernance_ : 2026-05-03 ✅ (gouvernance migree depuis quizz-benchmark-gradle, .agents/ cree)
 _Session en cours_ : 2 — US-9.2 dataset test minimal
+_Session inter-session_ : 003 (chore migration chemins foundry/ → foundry/OSS/ dans INDEX.adoc)
 _Session terminee_ : 001 (US-9.1 pgvector container + dilution stimulus)
 
 '''
@@ -70,13 +71,14 @@ _Session terminee_ : 001 (US-9.1 pgvector container + dilution stimulus)
 
 |===
 | Projet | Chemin | Sessions | Derniere maj
-| plantuml-gradle | `foundry/plantuml-gradle/plantuml-plugin/` | ~138 | 2026-05-01
-| magic_stick | `foundry/magic_stick/` | 64+ | 2026-04
-| cheroliv.com | `foundry/cheroliv.com/` | ~18 | 2026-04
-| bakery-gradle | `foundry/bakery-gradle/bakery-plugin/` | ~13+ | 2026-04
-| jhipster-gradle-plugins | `foundry/jhipster-gradle-plugins/` | 6 | 2026-04
-| newpipe-gradle | `foundry/newpipe-gradle/newpipe-plugin/` | ~11 | 2026-04
-| codebase-gradle | `foundry/codebase-gradle/` | 0 (migre) | 2026-05-03
-| notebook-gradle | `foundry/notebook-gradle/` | 0 (bootstrap) | 2026-05-05
+| plantuml-gradle | `foundry/OSS/plantuml-gradle/plantuml-plugin/` | ~138 | 2026-05-01
+| magic_stick | `foundry/OSS/magic_stick/` | 64+ | 2026-04
+| cheroliv.com | `foundry/OSS/cheroliv.com/` | ~18 | 2026-04
+| bakery-gradle | `foundry/OSS/bakery-gradle/bakery-plugin/` | ~13+ | 2026-04
+| jhipster-gradle-plugins | `foundry/OSS/jhipster-gradle-plugins/` | 6 | 2026-04
+| newpipe-gradle | `foundry/OSS/newpipe-gradle/newpipe-plugin/` | ~11 | 2026-04
+| codebase-gradle | `foundry/OSS/codebase-gradle/` | 0 (migre) | 2026-05-03
+| notebook-gradle | `foundry/OSS/notebook-gradle/` | 0 (bootstrap) | 2026-05-05
 |===
 | 002 | 2026-05-04 | governance | renommage openclaw→quizz-benchmark | —
+| 003 | 2026-05-07 | chore | Migration chemins foundry/ → foundry/OSS/ (granularisation OSS/CSS) | —

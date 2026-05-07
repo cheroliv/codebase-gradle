@@ -8,3 +8,4 @@
 | 2026-05-03 | 000 | EPIC 1 | Gouvernance agent migree depuis quizz-benchmark-gradle. .agents/ cree, AGENT.adoc adapte, BACKLOG enrichi 8→13 EPICs
 |===
 | 2026-05-04 | 002 | governance | Renommage openclaw-codingame → quizz-benchmark-gradle (gouvernance) |
+| 2026-05-07 | 003 | chore | Migration chemins foundry/ → foundry/OSS/ dans INDEX.adoc — granularisation OSS/CSS |
