@@ -169,7 +169,7 @@ Le wiring expose pgvector + graph.json comme données, pas comme code.
 
 == EPIC 9 : Opencode Augmenté — Réalité Augmentée Développeur
 
-**Statut** : EN COURS
+**Statut** : EN COURS (3/13 US FAIT — 9.1, 9.2, 9.3 TERMINE)
 **Priorite** : P0
 **Pattern** : Baby-step (max 3 pts/US) + TestContainer + Doc Vivante
 
@@ -194,7 +194,7 @@ pas par `implementation` (code). Voir `AGENT_GOVERNANCE.adoc` → Règle 4bis.
 |===
 | US | Description | pts | Statut
 | US-9.1 | Container pgvector éphémère — dépendance testcontainers, step Cucumber `startPgvectorContainer()`, validation démarrage <30s | 2 | ✅ TERMINE
-| US-9.2 | Dataset de test minimal committé — 5 adoc + 2 repos Gradle miniatures dans `src/test/resources/`, structure miroir workspace, zéro PII | 2 | A FAIRE
+| US-9.2 | Dataset de test minimal — 4 fichiers .kt dans `src/test/resources/datasets/`, chunking phrase-level ~512 tokens/overlap 50, tables documents+chunks avec FK, insert pgvector | 2 | ✅ TERMINE
 |===
 
 === Phase 1 — Indexation

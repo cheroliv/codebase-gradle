@@ -1,0 +1,60 @@
+= Session 004 — US-9.2 & US-9.3 Dataset + Embeddings ONNX
+:date: 2026-05-07
+:type: feat
+:epic: EPIC 9 — Opencode Augmente
+:score: 10/10
+
+== Contexte
+US-9.1 (container pgvector Docker) etait operationnel. Les US-9.2 et US-9.3 sont
+realisees en tandem dans une meme feature Cucumber (pipeline complet).
+
+== Actions
+
+=== US-9.2 — Dataset test minimal
+4 fichiers .kt crees dans `src/test/resources/datasets/` :
+- `UserDataClass.kt` — data class, enum, extensions fonctions
+- `StringExtensions.kt` — 5 fonctions d'extension utilitaires
+- `TaskRepository.kt` — repository JDBC avec CRUD complet
+- `HttpClientService.kt` — client HTTP utilisant des coroutines
+
+=== Chunking
+- Split phrase-level (par segments de lignes non-vides)
+- Reassemblage en chunks de ~512 tokens max (estimation chars/3.5)
+- Overlap de 50 tokens entre chunks consecutifs
+- Resultat : 6 chunks pour 4 fichiers (HttpClientService:2, StringExt:1, TaskRepo:2, UserData:1)
+
+=== Schema SQL
+Tables `documents` + `chunks` avec FK `document_id` (ON DELETE CASCADE) :
+- documents: id, file_name, file_path, file_size, chunk_count, created_at
+- chunks: id, document_id, chunk_index, chunk_text, token_count, embedding vector(384), created_at
+
+=== US-9.3 — Embeddings ONNX
+- Modele `AllMiniLmL6V2EmbeddingModel` charge via langchain4j (ONNX Runtime sous-jacent)
+- Tokenisation HuggingFace tokenizers + inference ONNX → float[384]
+- 6 embeddings calcules et inseres via `UPDATE chunks SET embedding = ?::vector`
+- Verification : 0 chunks NULL, tous dimension=384 (vector_dims)
+
+=== Similarite semantique
+- Requete : "find all tasks from the database"
+- top-1: chunk_id=4, similarity=0.4001 → TaskRepository (package + imports)
+- top-2: chunk_id=5, similarity=0.3565 → TaskRepository (findByPriority method)
+- top-3: chunk_id=6, similarity=0.1237 → UserDataClass (data class)
+- Top chunk bien semantiquement lie a la recherche de taches en base
+
+== Commandes
+- `./gradlew cucumberTest` → 1 scenario (full pipeline), 12 steps, ALL PASS
+
+== Fichiers modifies/crees
+- CREATED: `src/test/resources/datasets/UserDataClass.kt`
+- CREATED: `src/test/resources/datasets/StringExtensions.kt`
+- CREATED: `src/test/resources/datasets/TaskRepository.kt`
+- CREATED: `src/test/resources/datasets/HttpClientService.kt`
+- CREATED: `src/test/features/9_2_3_dataset_embeddings.feature`
+- CREATED: `src/test/kotlin/codebase/scenarios/DatasetEmbeddingSteps.kt`
+- EDITED: Aucun fichier existant modifie (build.gradle.kts, libs.versions.toml inchanges)
+
+== Lecons
+- `knownDimension()` est protected dans AllMiniLmL6V2EmbeddingModel → utiliser `dimension()` publique
+- Cucumber cree des instances fraiches par scenario → un seul scenario unifie est plus robuste
+- L'ONNX Runtime telecharge les libs natives au premier chargement (~4s pour tokenizers)
+- La similarite cosinus pgvector (`<=>`) donne la distance → `1 - distance` = similarite

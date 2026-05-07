@@ -1,52 +1,47 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 1
+= PROMPT_REPRISE — Codebase Gradle — Session 3
 
-> **Statut** : Session 1 ✅ — US-9.1 TERMINE + Stimulus EPIC 9 dilue
-> **Mission** : Creer le dataset de test minimal (US-9.2) — prerequis a toute l'indexation
-
-'''
-== Session 1 (US-9.1 + Dilution) — Resume
-
-**Date** : 2026-05-03 (nuit)
-**Resultat** : ✅ Infrastructure pgvector operationnelle. 2/2 tests Cucumber PASS.
-EPIC 9 decompose en 13 US baby-step (max 3 pts). Pattern Baby-Step + TestContainer +
-Doc Vivante formalise dans AGENT_GOVERNANCE.adoc. Delegation Vision/Opinion confiee
-au LLM via prompt engineering.
-
-**Stack integree** : langchain4j, testcontainers, cucumber, arrow-kt, r2dbc, mapstruct.
-JDK 23 force via gradle.properties. Tache `cucumberTest` operationnelle.
-
-**Archive** : `.agents/sessions/001-us91-pgvector-container.adoc`
+> **Statut** : Session 2 ✅ — US-9.2 & US-9.3 TERMINE
+> **Mission** : US-9.3 (WorkspaceWalker) + US-9.4 (Indexation adoc → pgvector)
 
 '''
-== Session 003 — Migration chemins OSS/CSS (inter-session chore)
+== Session 2 (US-9.2 + US-9.3) — Resume
 
 **Date** : 2026-05-07
-**Type** : chore
-**Resultat** : ✅ INDEX.adoc — remplacement `foundry/` → `foundry/OSS/` pour granularisation OSS/CSS.
-Migration transverse sur 9 repos (codebase, quizz-benchmark, jhipster, magic_stick, bakery, codex, saas-deploy, plantuml, planner).
-Commit + push sur chaque repo.
+**Resultat** : ✅ Pipeline chunking → embedding → pgvector operationnel. 1 scenario
+Cucumber (full pipeline) PASS avec 12 steps.
+- 4 fichiers .kt dans `src/test/resources/datasets/`
+- Chunking phrase-level ~512 tokens, overlap 50 → 6 chunks
+- Tables `documents` + `chunks` avec FK, embedding vector(384)
+- AllMiniLmL6V2 via ONNX Runtime (langchain4j), 384d
+- Recherche semantique : "find all tasks from the database" → top-1 TaskRepository (0.40 similarity)
+
+**Aucune dependance ajoutee** (tout etait deja dans build.gradle.kts/libs.versions.toml)
+
+**Archive** : `.agents/sessions/004-us92-93-dataset-embeddings.adoc`
 
 '''
-== Session 2 — Priorites
+== Session 3 — Priorites
 
 === Objectif principal
 
-**US-9.2 — Dataset de test minimal committe**
-- Creer `src/test/resources/workspace-sample/` avec 5 fichiers adoc representatifs
-  (BACKLOG miniature, AGENT miniature, 3 fichiers code)
-- Creer 2 repos Gradle miniatures dans `__repositories-sample__/`
-- Structure miroir du vrai workspace, zero PII, committable
-- Les futures US (9.3→9.6) indexent ce dataset, pas le vrai workspace
+**US-9.3 — Walk recusif type (`WorkspaceWalker`)**
+- Scanner `src/test/resources/datasets/` → `List<WorkspaceFile>`
+- Filter automatique : build/ .git/ .gradle/ node_modules/
+- Metadata : file_name, file_path, file_size, extension, repo_name
+- Test Cucumber : walk sur le dataset → au moins 4 files .kt trouves
 
 === Second objectif
 
-Preparer le squelette de US-9.3 (`WorkspaceWalker` — walk recursif type)
+**US-9.4 — Indexation adoc → pgvector** (si temps)
+- Creer quelques fichiers .adoc dans le dataset
+- Appliquer le pipeline chunks + embeddings aux .adoc
+- Reutiliser DatasetEmbeddingSteps existant, etendre pour gerer .adoc + .kt
 
 === Criteres d'Acceptation
 
-- [ ] Dataset `workspace-sample/` : 5 adoc + 2 repos miniatures
-- [ ] Feature Cucumber validant que le dataset est lisible et indexable
-- [ ] `WorkspaceWalker` scanne le dataset → `List<WorkspaceFile>` (filter build/.git/.gradle)
+- [ ] `WorkspaceWalker` scanne `datasets/` → `List<WorkspaceFile>` (skip .git/.gradle/build)
+- [ ] Feature Cucumber : walk + index + query sur fichiers multi-types (.kt + .adoc)
+- [ ] Pas de regression sur les tests existants (3 scenarios Cucumber, 24 verify*)
 
 '''
 == Couverture Tests
@@ -58,8 +53,8 @@ Preparer le squelette de US-9.3 (`WorkspaceWalker` — walk recursif type)
 | `verifySliderToAnonymizedYaml` | ✅ 5 cases
 | `verifySiteToAnonymizedYaml` | ✅ 5 cases
 | EPIC 9.1 — pgvector container (Cucumber) | ✅ 2 scenarios
-| US-9.2 — Dataset test (Cucumber) | ❌ 0 scenarios
-| US-9.3 — WorkspaceWalker | ❌ 0 cases
+| US-9.2+9.3 — Dataset + Embeddings (Cucumber) | ✅ 1 scenario (12 steps)
+| US-9.3 — WorkspaceWalker (Cucumber) | ❌ 0 scenarios
 |===
 
 '''
@@ -72,4 +67,4 @@ Preparer le squelette de US-9.3 (`WorkspaceWalker` — walk recursif type)
 - ✅ Cucumber en anglais (pas de Gherkin FR)
 
 ---
-**Session 1** ✅ — **Session 2** 🚀
+**Session 2** ✅ — **Session 3** 🚀
