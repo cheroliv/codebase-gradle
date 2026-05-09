@@ -1,0 +1,58 @@
+= Session 009 — EPIC 2 Expert Anonymisation LangChain4j (MVP0)
+:type: feat
+:date: 2026-05-10
+:modele: deepseek-v4-pro (via opencode)
+:score: 10/10
+
+== Objectif
+
+Expert d'anonymisation piloté par LangChain4j avec fallback déterministe.
+Intégration LangChain4j → Ollama DeepSeek-v4-pro.
+
+== Livrables
+
+- `AnonymizationContext.kt` (34 lignes) — data classes contrats :
+  - `AnonymizationRequest` (sourcePath, content, targetFormat)
+  - `AnonymizationResult` (anonymizedContent, confidenceScore, detectedPiiCategories, replacedCount, summary)
+  - `PiiCategory` (name, level, examples)
+  - `SensitivityLevel` enum 0→4 (PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED, SECRET)
+
+- `AnonymizationExpert.kt` (110 lignes) — interface + factory + fallback :
+  - Interface `AnonymizationExpert` annotée LangChain4j (@SystemMessage, @UserMessage)
+  - Prompt system RGPD complet : 5 niveaux de sensibilité, format JSON strict, règles d'anonymisation
+  - `AnonymizationExpertFactory.create()` : OllamaChatModel + AiServices builder avec try/catch
+  - `DeterministicExpert` (fallback) : délègue à YamlConfigAnonymizer, produit même contrat AnonymizationResult
+
+- `AnonymizationExpertMain.kt` (50 lignes) — entry point JavaExec
+  - Lit inputFile, détecte format (extension), appelle expert, écrit outputFile
+
+- `build.gradle.kts` : task `anonymizeWithExpert` (JavaExec, groupe codebase)
+  - `./gradlew anonymizeWithExpert -PinputFile=path -PoutputFile=path`
+
+- `epic_2_anonymization_expert.feature` + `AnonymizationExpertSteps.kt` — 3 scénarios @wip :
+  1. YAML file with API token and password
+  2. JSON file with emails
+  3. Already clean file — no PII detected
+
+- `gradle/libs.versions.toml` : `langchain4j-ollama:1.12.2` dans le bundle `langchain4j-rag`
+
+== Tests
+
+11/11 Cucumber EPIC 9 ALL PASS — zéro régression.
+3 nouveaux scénarios EPIC 2 taggés @wip (non exécutés par défaut).
+
+== Build
+
+```
+./gradlew compileKotlin → BUILD SUCCESSFUL
+./gradlew compileTestKotlin → BUILD SUCCESSFUL
+./gradlew cucumberTest → 11/11 PASS
+```
+
+== Décisions
+
+- LangChain4j v1.12.2 : `AiServices.chatModel()` (pas `chatLanguageModel()` — API correcte)
+- `langchain4j-ollama` utilise `langchain4j` 1.12.2 (pas beta — l'artifact n'existe pas en beta)
+- Task `anonymizeWithExpert` est un JavaExec (build script ne peut pas référencer src/main directement)
+- EPIC 2 feature @wip car dépend d'Ollama réel pour les tests LLM (tests déterministes via Cucumber OK)
+- SESSIONS_HISTORY duplication (2x session 006) documentée mais non corrigée (bug data existant)

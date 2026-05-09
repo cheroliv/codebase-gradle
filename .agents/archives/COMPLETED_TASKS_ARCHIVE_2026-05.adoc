@@ -2,6 +2,7 @@
 
 |===
 | Date | Session | EPIC/US | Description
+| 2026-05-10 | 009 | EPIC 2 MVP0 | Expert Anonymisation LangChain4j. AnonymizationContract (context/request/result/SensitivityLevel), AnonymizationExpert interface (@SystemMessage/@UserMessage RGPD), AnonymizationExpertFactory + DeterministicExpert fallback, AnonymizationExpertMain entry point, task anonymizeWithExpert (JavaExec), langchain4j-ollama:1.12.2, 3 scenarios Cucumber @wip. 11/11 EPIC 9 PASS, 0 regression.
 | 2026-05-09 | 008 | US-9.6 | Indexation YAML/JSON configs anonymisees. YamlConfigAnonymizer (matching textuel token/key/password/secret/credential/auth). CodebaseIndexerMain etendu .yml/.yaml/.json. 3 fixtures test avec snake_case keys. 3 scenarios Cucumber. 11/11 PASS, 0 regression.
 | 2026-05-09 | 007 | US-9.5 | Indexation metadata Kotlin. KotlinMetadataExtractor (package/class/repo). VectorStore enrichi schema +3 colonnes, insertDocument params metadata, findByPackage(), DocRecord. CodebaseIndexerMain utilise extractor. 3 nouveaux scenarios Cucumber. 8/8 scenarios PASS, 0 regression.
 | 2026-05-09 | 007 | US-9.5 | DatasetEmbeddingSteps schema inline synchro metadata. Companion extractKotlinMetadata (derniere classe, fallback filename). MetadataIndexingSteps step defs (tokenize Kotlin, insert metadata, query by package, metadata check)

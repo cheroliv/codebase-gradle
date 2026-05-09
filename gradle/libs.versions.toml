@@ -25,6 +25,7 @@ jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-
 langchain4j = { module = "dev.langchain4j:langchain4j", version.ref = "langchain4j" }
 langchain4j-pgvector = { module = "dev.langchain4j:langchain4j-pgvector", version.ref = "langchain4j-beta" }
 langchain4j-minilm = { module = "dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2", version.ref = "langchain4j-beta" }
+langchain4j-ollama = { module = "dev.langchain4j:langchain4j-ollama", version.ref = "langchain4j" }
 testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
 testcontainers-junit5 = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
 cucumber-java = { module = "io.cucumber:cucumber-java", version.ref = "cucumber" }
@@ -54,6 +55,7 @@ langchain4j-rag = [
     "langchain4j",
     "langchain4j-pgvector",
     "langchain4j-minilm",
+    "langchain4j-ollama",
 ]
 r2dbc = [
     "r2dbc-postgresql",
