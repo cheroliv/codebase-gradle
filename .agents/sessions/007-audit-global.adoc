@@ -1,0 +1,39 @@
+= Session 007 — Audit Global + Vérification Socle
+:date: 2026-05-09
+
+== Contexte
+
+Session d'audit global avant lancement US-9.6 et EPIC 2 (MVP0 Expert Anonymisation).
+Vérification complète du socle technique.
+
+== Actions
+
+=== Tests Cucumber EPIC 9
+- 8/8 scenarios PASS (US-9.1 → US-9.5)
+  - US-9.1 : Container pgvector éphémère (2 scenarios)
+  - US-9.2+9.3 : Dataset + Embeddings ONNX (1 scenario, 12 steps)
+  - US-9.3+9.4 : WorkspaceWalker + adoc (2 scenarios)
+  - US-9.5 : Indexation metadata Kotlin (3 scenarios)
+
+=== Anonymizers YAML
+- `verifyCodebaseToAnonymizedYaml` : 7/7 cas PASS
+- `verifyReadMeToAnonymizedYaml` : 7/7 cas PASS
+- `verifySliderToAnonymizedYaml` : 5/5 cas PASS
+- `verifySiteToAnonymizedYaml` : 5/5 cas PASS
+
+=== Compilation
+- `./gradlew compileKotlin` : BUILD SUCCESSFUL
+
+== Résultat
+
+Socle 100% propre. Architecture double buildSrc/ + src/main/kotlin/ fonctionnelle.
+Prêt pour US-9.6 (Indexation YAML/JSON configs + anonymisation pre-embedding).
+
+== Prochaine session
+
+Session 008 — US-9.6 : Indexation configs avec anonymisation avant embedding,
+zéro secret dans pgvector, feature Cucumber US-9.6.
+
+== Score
+
+10/10 — Validation complète du socle, aucune régression.
