@@ -1,9 +1,10 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : US-9.1 ✅ + US-9.2 ✅ + US-9.3 ✅ + US-9.4 ✅ + US-9.5 ✅ — 8 scenarios Cucumber ALL PASS
+_Statut_ : US-9.1 ✅ + US-9.2 ✅ + US-9.3 ✅ + US-9.4 ✅ + US-9.5 ✅ + US-9.6 ✅ — 11 scenarios Cucumber ALL PASS
 
 |===
 | Session | Fichiers testes | Couverture | Notes
+| 008 | `ConfigIndexingSteps.kt` (Cucumber) | 3 scenarios PASS | YAML/JSON anonymization before embedding, zero secret in pgvector chunks
 | 007 | `MetadataIndexingSteps.kt` + `DatasetEmbeddingSteps.kt` (Cucumber) | 3 scenarios PASS | Extraction metadata Kotlin (package/class/repo), findByPackage, metadata-aware semantic search
 | 005 | `WorkspaceWalkerSteps.kt` + `DatasetEmbeddingSteps.kt` (Cucumber) | 2 scenarios PASS | WorkspaceWalker 6 fichiers (.kt+.adoc) + query multi-type top-1 adoc/kt
 | 004 | `DatasetEmbeddingSteps.kt` (Cucumber) | 1 scenario PASS (12 steps) | Pipeline complet : chunk 4 .kt → 6 chunks → documents+chunks FK → embed 384d → similarity search
@@ -15,14 +16,16 @@ _Statut_ : US-9.1 ✅ + US-9.2 ✅ + US-9.3 ✅ + US-9.4 ✅ + US-9.5 ✅ — 8 
 === codebase-gradle (src/main/kotlin/codebase/rag/)
 - `KotlinMetadataExtractor.kt` : extraction package_name via regex `^package\s+`, class_name via regex de dernier type (class/object/interface), fallback filename sans extension
 - `VectorStore.kt` : schema documents +3 colonnes (package_name, class_name, repo_name), insertDocument avec metadata, findByPackage(), DocRecord data class
-- `CodebaseIndexerMain.kt` : utilise KotlinMetadataExtractor pour enrichir les insertions
+- `CodebaseIndexerMain.kt` : utilise KotlinMetadataExtractor, anonymisation YAML/JSON via YamlConfigAnonymizer
+- `YamlConfigAnonymizer.kt` : anonymisation text-based YAML/JSON, matching par contenance (token/key/password/secret/credential/auth)
 
 === codebase-gradle (src/test/kotlin/codebase/scenarios/)
 - `PgVectorTestContext.kt` : singleton partageant conteneur pgvector, modele ONNX, fileChunks, topResults
 - `PgVectorContainerSteps.kt` : demarrage/arret conteneur pgvector + verification extension vector + creation table vector(384)
 - `DatasetEmbeddingSteps.kt` : steps canon partages, schema synchro metadata, companion extractKotlinMetadata
-- `WorkspaceWalkerSteps.kt` : steps walker + verification type adoc vs kt
-- `MetadataIndexingSteps.kt` : steps specifiques metadata (tokenize Kotlin, insert avec metadata, query by package, verification metadata)
+- `WorkspaceWalkerSteps.kt` : steps walker + verification type kt/adoc/yml/yaml/json
+- `MetadataIndexingSteps.kt` : steps specifiques metadata
+- `ConfigIndexingSteps.kt` : steps anonymisation YAML/JSON + verification zero secret
 - `CucumberTestRunner.kt` : @Suite JUnit Platform
 - `TestCleanupExtension.kt` : nettoyage containers orphelins
 
@@ -30,8 +33,9 @@ _Statut_ : US-9.1 ✅ + US-9.2 ✅ + US-9.3 ✅ + US-9.4 ✅ + US-9.5 ✅ — 8 
 - `9_1_pgvector_container.feature` : 2 scenarios
 - `9_2_3_dataset_embeddings.feature` : 1 scenario (12 steps)
 - `9_3_4_workspace_walker_adoc.feature` : 2 scenarios
-- `9_5_indexation_metadata.feature` : 3 scenarios (metadata extraction, findByPackage, semantic search aware)
+- `9_5_indexation_metadata.feature` : 3 scenarios
+- `9_6_indexation_yaml_json.feature` : 3 scenarios (YAML anon, JSON anon, safe config)
 
 == Prochaine etape
 
-US-9.6 (Indexation YAML/JSON configs avec anonymisation avant embedding)
+Session 9 — EPIC 2 (Expert Anonymisation LangChain4j) ou EPIC 4 (Benchmark perception spatiale LLM)

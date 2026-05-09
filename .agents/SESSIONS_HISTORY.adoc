@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 008 | 2026-05-09 | feat | US-9.6 — Indexation YAML/JSON configs anonymisées: YamlConfigAnonymizer + 3 scenarios Cucumber + 11/11 PASS | 10/10
 | 007 | 2026-05-09 | audit | Audit global + vérification socle : 8/8 Cucumber PASS, 4/4 anonymizers PASS, compile OK | 10/10
 | 006 | 2026-05-09 | feat | US-9.5 — Indexation metadata Kotlin: KotlinMetadataExtractor + VectorStore metadata + findByPackage + 3 scenarios Cucumber | 10/10
 | 006 | 2026-05-07 | feat | US-9.PROD — Bridge to Production: src/main/kotlin + VectorStore + EmbeddingPipeline + indexCodebase | 10/10

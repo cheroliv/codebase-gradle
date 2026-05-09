@@ -1,36 +1,29 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 8
+= PROMPT_REPRISE — Codebase Gradle — Session 9
 
-> **Statut** : Session 7 ✅ — Audit global + vérification socle TERMINE
-> **Mission** : US-9.6 (Indexation YAML/JSON configs anonymisees) + reprise EVENTUEL
+> **Statut** : Session 8 ✅ — US-9.6 (Indexation YAML/JSON configs) TERMINE
+> **Mission** : Reprise au backlog — EPIC 2 (Expert Anonymisation LangChain4j) ou prochaine US EPIC 9
 
 '''
-== Session 7 (Audit global) — Resume
+== Session 8 (US-9.6) — Resume
 
 **Date** : 2026-05-09
-**Resultat** : Verification complete du socle avant lancement US-9.6.
-- 8/8 Cucumber scenarios PASS (US-9.1 → US-9.5)
-- 4/4 anonymizers YAML PASS (CodebaseYmlAnonymizer, ReadmeYmlAnonymizer,
-  SliderYmlAnonymizer, SiteYmlAnonymizer)
-- Compilation `./gradlew compileKotlin` BUILD SUCCESSFUL
-- Architecture double buildSrc/ + src/main/kotlin/ stable
+**Resultat** : US-9.6 implementee et testee.
+- YamlConfigAnonymizer cree (matching textuel des cles sensibles token/key/password/secret/credential/auth)
+- CodebaseIndexerMain etendu .yml/.yaml/.json + anonymisation pre-embedding
+- 3 fixtures test YAML/JSON (dont snake_case: access_token, refresh_token, github_token, npm_token)
+- 11/11 Cucumber scenarios PASS (8 existants + 3 nouveaux US-9.6) — zero regression
+- WorkspaceWalkerSteps validExts elargi kt,adoc,yml,yaml,json
 
 '''
-== Session 8 — Priorites
+== Session 9 — Priorites
 
-=== Objectif principal
+=== Option A — EPIC 2 (Expert Anonymisation LangChain4j)
 
-**US-9.6 — Indexation YAML/JSON configs → pgvector**
-- Pre-anonymisation via CodebaseYmlAnonymizer (deja existant dans buildSrc) avant embedding
-- Feature Cucumber : verification zero secret dans pgvector apres indexation
-- Reutiliser PgVectorTestContext existant
-- Pattern Baby-Step : max 3 pts
+P0 dans le backlog INDEX.adoc. A FAIRE.
 
-=== Criteres d'Acceptation
+=== Option B — EPIC 4 (Benchmark perception spatiale LLM)
 
-- [ ] Extension Walk pour .yml/.yaml/.json
-- [ ] Anonymisation appliquee avant insertVectorStore + computeEmbedding
-- [ ] Feature Cucumber US-9.6 : verification zero secret pgvector
-- [ ] Aucune regression sur les 8 scenarios existants
+P0 dans le backlog. Mesurer seuil de tokens ou le LLM perd la notion de cercle de confiance.
 
 '''
 == Couverture Tests
@@ -42,7 +35,7 @@
 | US-9.3+9.4 — WorkspaceWalker + adoc (Cucumber) | ✅ 2 scenarios
 | US-9.PROD — Bridge to Production | ✅ Compilation OK
 | US-9.5 — Indexation Kotlin/Java metadata | ✅ 3 scenarios
-| US-9.6 — Indexation YAML/JSON configs | ❌ 0 scenarios
+| US-9.6 — Indexation YAML/JSON configs | ✅ 3 scenarios
 |===
 
 '''
@@ -53,7 +46,7 @@
 - ✅ Procedure de fin de session 6 etapes obligatoires
 - ✅ Pattern Baby-Step : max 3 pts par US
 - ✅ Cucumber en anglais
-- ✅ Etat partage via PgVectorTestContext (pas de duplication)
+- ✅ Etat partage via PgVectorTestContext
 
 ---
-**Session 7** ✅ — **Session 8** 🚀
+**Session 8** ✅ — **Session 9** 🚀

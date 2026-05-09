@@ -1,0 +1,45 @@
+= Session 008 — US-9.6 — Indexation YAML/JSON configs → pgvector
+:date: 2026-05-09
+:type: feat
+:score: 10/10
+
+== Contexte
+
+US-9.6 dans PROMPT_REPRISE : Indexation YAML/JSON configs anonymisées → pgvector.
+Critères d'acceptation : anonymisation pre-embedding, zéro secret dans pgvector.
+
+== Actions
+
+. Créé `src/main/kotlin/codebase/rag/YamlConfigAnonymizer.kt` — object utilitaires :
+  - `anonymizeYaml(text)` : identifie clés sensibles (token, key, password, secret, credential, auth) par matching textuel, remplace valeur par `***`
+  - `anonymizeJson(text)` : pattern regex sur toutes les propriétés JSON, applique le même filtre sensible
+  - `anonymize(text, extension)` : dispatche YAML/JSON
+  - `verifyNoSecrets(text)` : vérification post-anonymisation
+. Modifié `CodebaseIndexerMain.kt` :
+  - Ajouté extensions `yml/yaml/json` à la liste d'indexation
+  - Texte raw → anonymisation pour configs → chunking → insertion
+. Modifié `WorkspaceWalkerSteps.kt` : validExts élargi `kt,adoc` → `kt,adoc,yml,yaml,json`
+. Créé 3 fixtures test : `codebase_config.yml` (secrets anthropic/gemini/npm/github), `app_config.json` (tokens/snake_case), `safe_config.yml` (zéro secret)
+. Créé `src/test/features/9_6_indexation_yaml_json.feature` (3 scenarios)
+. Créé `ConfigIndexingSteps.kt` — step definitions vérifiant zéro secret résiduel dans les chunks pgvector
+
+== Commandes
+
+[source,shell]
+----
+./gradlew compileKotlin compileTestKotlin
+./gradlew cucumberTest
+----
+
+== Résultats
+
+- BUILD SUCCESSFUL
+- 11/11 Cucumber scenarios PASS :
+  - 8 scenarios existants (US-9.1 → US-9.5) — zéro régression
+  - 3 nouveaux scenarios US-9.6 (YAML anonymized, JSON anonymized, safe config no secrets)
+
+== Leçons
+
+- Matching textuel (> regex word-boundary) pour les clés sensibles — les underscores cassent `\b`
+- WorkspaceWalkerSteps cassé car fixtures JSON/YAML ajoutés au dataset — correction `validExts` nécessaire
+- GitHub token (`ghp_`) et npm token format reconnus via le fragment `token` dans la clé

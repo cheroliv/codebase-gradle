@@ -35,13 +35,13 @@ class WorkspaceWalkerSteps {
     @Then("all discovered files have valid extension metadata")
     fun `valid extension metadata`() {
         assert(discoveredFiles.isNotEmpty()) { "No files discovered" }
-        val validExts = setOf("kt", "adoc")
+        val validExts = setOf("kt", "adoc", "yml", "yaml", "json")
         for (f in discoveredFiles) {
             assert(f.extension in validExts) {
-                "Invalid extension '${f.extension}' for ${f.fileName}, expected kt or adoc"
+                "Invalid extension '${f.extension}' for ${f.fileName}"
             }
         }
-        log.info("All ${discoveredFiles.size} files have valid extension metadata (kt or adoc)")
+        log.info("All ${discoveredFiles.size} files have valid extension metadata")
     }
 
     @Then("no files from build, .git, .gradle, or node_modules are included")
