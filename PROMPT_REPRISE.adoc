@@ -1,49 +1,36 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 7
+= PROMPT_REPRISE — Codebase Gradle — Session 8
 
-> **Statut** : Session 6 ✅ — US-9.5 Indexation metadata Kotlin TERMINE
+> **Statut** : Session 7 ✅ — Audit global + vérification socle TERMINE
 > **Mission** : US-9.6 (Indexation YAML/JSON configs anonymisees) + reprise EVENTUEL
 
 '''
-== Session 6 (US-9.5) — Resume
+== Session 7 (Audit global) — Resume
 
 **Date** : 2026-05-09
-**Resultat** : Metadata Kotlin (package_name, class_name, repo_name) extraits et persistes
-dans pgvector. Cree :
-- `codebase.rag.KotlinMetadataExtractor` — extraction package/class/repo
-- Feature Cucumber US-9.5 — 3 scenarios
-- MetadataIndexingSteps step definitions
-- VectorStore enrichi avec findByPackage(), DocRecord, schema +3 colonnes
-- CodebaseIndexerMain utilise KotlinMetadataExtractor
-- DatasetEmbeddingSteps schema inline synchro + companion extractKotlinMetadata
-
-**Fichiers crees/modifies** :
-- `src/main/kotlin/codebase/rag/KotlinMetadataExtractor.kt` — NOUVEAU
-- `src/main/kotlin/codebase/rag/VectorStore.kt` — MODIFIE (schema, insertDocument, findByPackage, DocRecord)
-- `src/main/kotlin/codebase/rag/CodebaseIndexerMain.kt` — MODIFIE (metadata extraction)
-- `src/test/features/9_5_indexation_metadata.feature` — NOUVEAU
-- `src/test/kotlin/codebase/scenarios/MetadataIndexingSteps.kt` — NOUVEAU
-- `src/test/kotlin/codebase/scenarios/DatasetEmbeddingSteps.kt` — MODIFIE (schema + companion)
-
-**Tests** : 8 scenarios ✅ (5 existants + 3 nouveaux), 0 regression
-
-**Archive** : `.agents/sessions/007-us95-indexation-metadata.adoc`
+**Resultat** : Verification complete du socle avant lancement US-9.6.
+- 8/8 Cucumber scenarios PASS (US-9.1 → US-9.5)
+- 4/4 anonymizers YAML PASS (CodebaseYmlAnonymizer, ReadmeYmlAnonymizer,
+  SliderYmlAnonymizer, SiteYmlAnonymizer)
+- Compilation `./gradlew compileKotlin` BUILD SUCCESSFUL
+- Architecture double buildSrc/ + src/main/kotlin/ stable
 
 '''
-== Session 7 — Priorites
+== Session 8 — Priorites
 
 === Objectif principal
 
 **US-9.6 — Indexation YAML/JSON configs → pgvector**
-- Pre-anonymisation via CodebaseYmlAnonymizer avant embedding
+- Pre-anonymisation via CodebaseYmlAnonymizer (deja existant dans buildSrc) avant embedding
 - Feature Cucumber : verification zero secret dans pgvector apres indexation
 - Reutiliser PgVectorTestContext existant
+- Pattern Baby-Step : max 3 pts
 
 === Criteres d'Acceptation
 
-- [ ] Documents YAML/JSON indexables apres anonymisation
+- [ ] Extension Walk pour .yml/.yaml/.json
+- [ ] Anonymisation appliquee avant insertVectorStore + computeEmbedding
 - [ ] Feature Cucumber US-9.6 : verification zero secret pgvector
 - [ ] Aucune regression sur les 8 scenarios existants
-- [ ] Anonymisation appliquee avant embedding
 
 '''
 == Couverture Tests
@@ -67,7 +54,6 @@ dans pgvector. Cree :
 - ✅ Pattern Baby-Step : max 3 pts par US
 - ✅ Cucumber en anglais
 - ✅ Etat partage via PgVectorTestContext (pas de duplication)
-- ✅ Delegation a codebase.rag.* en main
 
 ---
-**Session 6** ✅ — **Session 7** 🚀
+**Session 7** ✅ — **Session 8** 🚀
