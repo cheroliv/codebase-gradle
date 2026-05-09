@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 009 | 2026-05-10 | feat | EPIC 2 MVP0 — Expert Anonymisation LangChain4j: AnonymizationExpert interface + factory + deterministic fallback + 3 scenarios Cucumber @wip | 10/10
 | 008 | 2026-05-09 | feat | US-9.6 — Indexation YAML/JSON configs anonymisées: YamlConfigAnonymizer + 3 scenarios Cucumber + 11/11 PASS | 10/10
 | 007 | 2026-05-09 | audit | Audit global + vérification socle : 8/8 Cucumber PASS, 4/4 anonymizers PASS, compile OK | 10/10
 | 006 | 2026-05-09 | feat | US-9.5 — Indexation metadata Kotlin: KotlinMetadataExtractor + VectorStore metadata + findByPackage + 3 scenarios Cucumber | 10/10

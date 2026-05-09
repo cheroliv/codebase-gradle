@@ -1025,3 +1025,18 @@ tasks.register("snapshot") {
         with(manager) { rootDir.generate(taskLogger) }
     }
 }
+
+tasks.register<JavaExec>("anonymizeWithExpert") {
+    group = "codebase"
+    description = "Anonymise un fichier via l'expert LangChain4j (EPIC-2 MVP0). Usage: ./gradlew anonymizeWithExpert -PinputFile=path -PoutputFile=path"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass = "codebase.rag.AnonymizationExpertMain"
+
+    val inputFilePath = providers.gradleProperty("inputFile")
+    val outputFilePath = providers.gradleProperty("outputFile")
+
+    args(
+        inputFilePath.orElse("src/test/resources/datasets/config.yml").get(),
+        outputFilePath.orElse("build/anonymized-output.yml").get()
+    )
+}

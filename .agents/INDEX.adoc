@@ -4,10 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-09
-_Audit gouvernance_ : 2026-05-03 ✅ (gouvernance migree depuis quizz-benchmark-gradle, .agents/ cree)
-_Session terminee_ : 008 — US-9.6 Indexation YAML/JSON configs (11/11 PASS)
-_Prochaine session_ : 009 — Reprise EPIC 2 (Expert Anonymisation LangChain4j) ou EPIC 4 (Benchmark perception spatiale)
+_Derniere mise a jour_ : 2026-05-10
+_Session terminee_ : 009 — EPIC 2 Expert Anonymisation LangChain4j (MVP0)
+_Prochaine session_ : 010 — EPIC 4 Benchmark perception spatiale LLM
 
 '''
 == REGLES ABSOLUES (resume)
@@ -23,6 +22,7 @@ _Prochaine session_ : 009 — Reprise EPIC 2 (Expert Anonymisation LangChain4j) 
 
 |===
 | # | Date | Type | Sujet | Score
+| 009 | 2026-05-10 | feat | EPIC 2 MVP0 — Expert Anonymisation LangChain4j: interface + factory + deterministic fallback + Cucumber @wip | 10/10
 | 008 | 2026-05-09 | feat | US-9.6 — Indexation YAML/JSON configs anonymisées: YamlConfigAnonymizer + 3 scenarios Cucumber + 11/11 PASS | 10/10
 | 007 | 2026-05-09 | audit | Audit global + vérification socle : 8/8 Cucumber PASS, 4/4 anonymizers PASS, compile OK | 10/10
 | 006 | 2026-05-09 | feat | US-9.5 — Indexation metadata Kotlin: KotlinMetadataExtractor + VectorStore metadata + findByPackage + 3 scenarios Cucumber | 10/10
@@ -41,7 +41,7 @@ _Prochaine session_ : 009 — Reprise EPIC 2 (Expert Anonymisation LangChain4j) 
 | EPIC | Description | Statut | Priorite
 | EPIC 1 | Initialisation gouvernance agent codebase-gradle | EN COURS | P0
 | EPIC 9 | Opencode Augmente — 14 US baby-step (US-9.1 ✅, US-9.2 ✅, US-9.3 ✅, US-9.4 ✅, US-9.5 ✅, US-9.6 ✅) | EN COURS | P0
-| EPIC 2 | Expert Anonymisation LangChain4j — MVP0 | A FAIRE | P0
+| EPIC 2 | Expert Anonymisation LangChain4j — MVP0 | MVP0 TERMINE (session 009) | P0
 | EPIC 3 | Architecture Multi-Canal Convergent | A FAIRE | P0
 | EPIC 4 | Benchmark de perception spatiale LLM | A FAIRE | P0
 | EPIC 5 | Pipeline fine-tuning experts CDA/FPA | A FAIRE | P0
@@ -84,6 +84,7 @@ _Prochaine session_ : 009 — Reprise EPIC 2 (Expert Anonymisation LangChain4j) 
 | bakery-gradle | `foundry/OSS/bakery-gradle/bakery-plugin/` | ~13+ | 2026-04
 | jhipster-gradle-plugins | `foundry/OSS/jhipster-gradle-plugins/` | 6 | 2026-04
 | newpipe-gradle | `foundry/OSS/newpipe-gradle/newpipe-plugin/` | ~11 | 2026-04
-| codebase-gradle | `foundry/OSS/codebase-gradle/` | 7 | 2026-05-09
+| codebase-gradle | `foundry/OSS/codebase-gradle/` | 9 | 2026-05-10
+| graphify-gradle | `foundry/OSS/graphify-gradle/graphify-plugin/` | 1 (bootstrap) | 2026-05-09
 | notebook-gradle | `foundry/OSS/notebook-gradle/` | 0 (bootstrap) | 2026-05-05
 |===

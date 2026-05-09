@@ -1,84 +1,79 @@
-= PROMPT_REPRISE — Session 3 — Codebase Gradle
-:jbake-status: draft
+= PROMPT_REPRISE — Session 010 — Codebase Gradle
+:author: cheroliv + opencode (deepseek-v4-pro)
+:date: 2026-05-10
+:session: 009
+:prochaine: 010
 
-== Contexte de Reprise
+[abstract]
+Amorçage pour la prochaine session opencode.
 
-Session initiale après migration depuis quizz-benchmark-gradle. Le backlog contient
-13 EPICs (1 à 13). La gouvernance agent globale (`AGENT_GOVERNANCE.adoc`) est
-à jour. Le pattern STIMULUS est formalisé.
+== Contexte de Reprise (EAGER)
 
-L'utilisateur a demandé d'ajouter à l'EPIC 13 une idée d'implantation précise
-qui doit être **picture me rollin dès l'ouverture de la prochaine session**.
+=== Ce qui a été accompli — Sessions 000→009
 
-== 🔑 Règle EAGER — Ségrégation Vision/Opinion/Stratégie (rappel de AGENT_GOVERNANCE Règle 2bis)
+- Sessions 000-001 : Gouvernance agent + US-9.1 pgvector container ✅
+- Sessions 002-006 : US-9.2→9.PROD (dataset, embeddings, dedup, prod bridge, metadata) ✅
+- Sessions 007-008 : US-9.5/9.6 (metadata Kotlin + YAML/JSON anonymized indexing) ✅
+- Session 009 : EPIC 2 MVP0 — AnonymizationExpert LangChain4j (interface + factory + fallback + Cucumber wip) ✅
 
-Le LLM EST le premier responsable de classifier chaque information avant dilution :
-- VISION → publiable (documents racine + blog cheroliv.com)
-- OPINION → CONFINÉE Cercle 0 (jamais diluée, jamais publiée)
-- STRATÉGIE → dilution restreinte (docs racine section business, PAS de blog)
-Cas ambigus → remonter à l'humain.
+EPIC 9 — 6/6 US TERMINÉES. 11/11 Cucumber PASS.
+EPIC 2 MVP0 — 3 nouveaux scénarios Cucumber @wip (déterministes).
 
-== Mission — STIMULUS : Ségrégation Vision/Opinion en Base de Données, Pas dans les Documents
-
-=== Le constat
-
-Actuellement, la classification Vision/Opinion est pensée comme un **marquage
-dans les documents** (`// @vision`, `// @opinion` en commentaires AsciiDoc, tags
-en tête de section). Ce marquage pollue le contexte — il ajoute du bruit
-dans les fichiers que le LLM lit en EAGER/LAZY.
-
-=== L'idée
-
-La classification Vision/Opinion doit être **externalisée du document**.
-Le document reste propre. La métadonnée de classification vit dans une base
-de données relationnelle (PostgreSQL) — une table `epistemic_classification`
-qui référence :
-- Le chemin du fichier (ou la section)
-- Le statut (VISION, OPINION, STRATEGIE, HYPOTHESE)
-- La date de classification
-- Le classifieur (LLM ou humain)
-- Le niveau de confiance
-
-Le `ClassificationGraph` LangGraph4j (EPIC 13) lit cette table avant de router.
-Le LLM lit le document sans aucun marquage — il interroge la table pour savoir
-ce qui est diluable.
-
-=== Questions à challenger en session 1
-
-. *Quelle granularité de référencement ?* Fichier entier ? Section ?
-  Paragraphe ? Ligne ? Un fichier peut contenir à la fois de la Vision et de
-  l'Opinion — comment granulariser ?
-
-. *Qui peuple la table ?* Le LLM (via ClassifierNode) ? L'humain ?
-  Un processus hybride (LLM propose, humain valide) ?
-
-. *Quand a lieu la classification ?* À la création du contenu ? En fin de
-  session ? Les deux ?
-
-. *Comment la table est-elle interrogée par le LLM ?* Via une recherche
-  SQL directe ? Via pgvector (similarité avec la section en cours) ?
-  Via un appel d'outil LangChain4j ?
-
-. *Est-ce que la table remplace complètement le marquage document ?* Ou
-  est-ce un cache complémentaire ? La table est la source de vérité,
-  le document n'est jamais marqué.
-
-=== Prototype d'implantation
+=== État du code source
 
 [source]
 ----
-PostgreSQL table epistemic_classification:
-  - id                  UUID
-  - file_path           TEXT     (chemin relatif workspace)
-  - section_identifier  TEXT     (titre de section, anchor AsciiDoc, ou hash du contenu)
-  - content_hash        TEXT     (SHA256 du contenu — pour détection de delta)
-  - status              ENUM     (VISION, OPINION, STRATEGIE, HYPOTHESE)
-  - classifier          ENUM     (LLM, HUMAN)
-  - confidence          FLOAT    (0.0 → 1.0)
-  - classified_at       TIMESTAMP
-  - expires_at          TIMESTAMP (NULL = permanent, sinon maturation programmée)
-  - parent_id           UUID     (auto-ref: trace la maturation Opinion → Vision)
+src/main/kotlin/codebase/rag/
+├── AnonymizationContext.kt     # EPIC 2 — data classes contrats
+├── AnonymizationExpert.kt      # EPIC 2 — interface LangChain4j + factory + deterministic fallback
+├── AnonymizationExpertMain.kt  # EPIC 2 — entry point JavaExec
+├── ChunkTokenizer.kt           # EPIC 9 — ~512 token chunks
+├── CodebaseIndexerMain.kt      # EPIC 9 — main() pour ./gradlew indexCodebase
+├── EmbeddingPipeline.kt        # EPIC 9 — ONNX AllMiniLmL6V2
+├── KotlinMetadataExtractor.kt  # EPIC 9 — package/class extraction
+├── VectorStore.kt              # EPIC 9 — pgvector JDBC CRUD
+└── YamlConfigAnonymizer.kt     # EPIC 9 — rule-based anonymization
+
+Tasks codebase:
+  run / indexCodebase / anonymizeWithExpert
+  verifyReadMeToAnonymizedYaml / verifySiteToAnonymizedYaml
+  verifySliderToAnonymizedYaml / verifyCodebaseToAnonymizedYaml
+  scaffoldCodebaseYml / snapshotCodebase
 ----
 
+Dépendance LangChain4j-ollama:1.12.2 intégrée dans le bundle langchain4j-rag.
+
+== Mission du Jour — Session 010
+
+=== Objectif prioritaire : EPIC 4 — Benchmark de perception spatiale LLM (P0)
+
+Mesurer à quel seuil de tokens le LLM perd la notion de cercle de confiance.
+Évaluer l'apport du vecteur composite (RAG pgvector + Graphify knowledge graph)
+sur la résilience du contexte long via l'expert AnonymizationExpert.
+
+Sous-tâches MVP0 :
+. Créer `PerceptionBenchmark.kt` — test de dilution spatiale :
+  - Injecter N tokens de contexte (0, 500, 1k, 2k, 4k, 8k, 16k, 32k)
+  - Question fixe : "Quel est le cercle de confiance du fichier codebase.yml ?"
+  - Mesurer accuracy par niveau de dilution
+. Injecter le vecteur composite RAG (top-5 chunks pgvector) + graphify (top-3 nœuds) :
+  - Comparer accuracy avec vs sans augmentation composite
+. Exporter rapport benchmark en AsciiDoc
+. 2-3 scénarios Cucumber (@wip)
+
+=== Objectifs secondaires
+
+- Nettoyer duplication SESSIONS_HISTORY (2x session 006)
+- `./gradlew compileKotlin compileTestKotlin` après chaque modif
+- Zéro test en fin de session sans permission
+
+== Rappel — Règles Globales (EAGER)
+
+. Règle 0 : publishToMavenLocal OBLIGATOIRE pour plugins
+. Règle 1 : Aucun commit sans permission explicite
+. Règle 1b : Backup avant modif fichier config non versionné
+. Règle 2 : Pas de ./gradlew test en fin de session sans permission
+
 [.text-right]
-*Session 002 close (2026-05-04) — renommage gouvernance openclaw→quizz-benchmark. Session 003 prête.*
+*PROMPT_REPRISE mis à jour le 10 mai 2026 — fin de session 009 (EPIC 2 MVP0).*
+*Prochaine session : 010 — EPIC 4 Benchmark perception spatiale LLM.*
