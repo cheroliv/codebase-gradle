@@ -6,8 +6,8 @@ _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
 _Derniere mise a jour_ : 2026-05-09
 _Audit gouvernance_ : 2026-05-03 ✅ (gouvernance migree depuis quizz-benchmark-gradle, .agents/ cree)
-_Session terminee_ : 007 — Audit global + vérification socle (8/8 Cucumber PASS, 4/4 anonymizers PASS)
-_Prochaine session_ : 008 — US-9.6 Indexation YAML/JSON configs
+_Session terminee_ : 008 — US-9.6 Indexation YAML/JSON configs (11/11 PASS)
+_Prochaine session_ : 009 — Reprise EPIC 2 (Expert Anonymisation LangChain4j) ou EPIC 4 (Benchmark perception spatiale)
 
 '''
 == REGLES ABSOLUES (resume)
@@ -23,6 +23,7 @@ _Prochaine session_ : 008 — US-9.6 Indexation YAML/JSON configs
 
 |===
 | # | Date | Type | Sujet | Score
+| 008 | 2026-05-09 | feat | US-9.6 — Indexation YAML/JSON configs anonymisées: YamlConfigAnonymizer + 3 scenarios Cucumber + 11/11 PASS | 10/10
 | 007 | 2026-05-09 | audit | Audit global + vérification socle : 8/8 Cucumber PASS, 4/4 anonymizers PASS, compile OK | 10/10
 | 006 | 2026-05-09 | feat | US-9.5 — Indexation metadata Kotlin: KotlinMetadataExtractor + VectorStore metadata + findByPackage + 3 scenarios Cucumber | 10/10
 | 005 | 2026-05-07 | feat | US-9.PROD — Bridge to Production: src/main/kotlin + VectorStore + EmbeddingPipeline + indexCodebase | 10/10
@@ -39,7 +40,7 @@ _Prochaine session_ : 008 — US-9.6 Indexation YAML/JSON configs
 |===
 | EPIC | Description | Statut | Priorite
 | EPIC 1 | Initialisation gouvernance agent codebase-gradle | EN COURS | P0
-| EPIC 9 | Opencode Augmente — 14 US baby-step (US-9.1 ✅, US-9.2 ✅, US-9.3 ✅, US-9.4 ✅, US-9.5 ✅) | EN COURS | P0
+| EPIC 9 | Opencode Augmente — 14 US baby-step (US-9.1 ✅, US-9.2 ✅, US-9.3 ✅, US-9.4 ✅, US-9.5 ✅, US-9.6 ✅) | EN COURS | P0
 | EPIC 2 | Expert Anonymisation LangChain4j — MVP0 | A FAIRE | P0
 | EPIC 3 | Architecture Multi-Canal Convergent | A FAIRE | P0
 | EPIC 4 | Benchmark de perception spatiale LLM | A FAIRE | P0

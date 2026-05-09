@@ -1,0 +1,23 @@
+# Safe config — no sensitive values
+# This file should be indexable without triggering secret detection
+
+general:
+  app_name: "Quizz Benchmark"
+  version: "2.1.0"
+  description: "LLM benchmark engine with multiple-choice quizz"
+
+scoring:
+  mode: "strict"
+  negative_points: false
+  time_bonus_enabled: true
+
+providers:
+  ollama:
+    base_url: "http://localhost:11434"
+    default_model: "gemma4:4b"
+  openai:
+    enabled: false
+
+logging:
+  level: "info"
+  file_output: true

@@ -11,30 +11,38 @@ fun main() {
     store.initSchema()
 
     val rootDir = System.getenv("CODEBASE_ROOT_DIR")?.let { java.io.File(it) } ?: java.io.File(".")
+    val sourceExtensions = listOf("kt", "adoc", "kts")
+    val configExtensions = listOf("yml", "yaml", "json")
+
     val walker = codebase.walker.WorkspaceWalker(rootDir)
-    val files = walker.walk().filter { it.extension in listOf("kt", "adoc", "kts") }
+    val files = walker.walk().filter { it.extension in sourceExtensions + configExtensions }
 
     println("Walking ${rootDir.absolutePath}: found ${files.size} indexable files")
 
     val metadataExtractor = KotlinMetadataExtractor(repoName = rootDir.name)
+    val anonymizer = YamlConfigAnonymizer
     var totalChunks = 0
     for (wf in files) {
         val file = java.io.File(wf.filePath)
-        val text = try {
+        val rawText = try {
             file.readText()
         } catch (e: Exception) {
             System.err.println("Cannot read ${wf.filePath}: ${e.message}")
             continue
         }
+        val text = if (wf.extension in configExtensions) {
+            anonymizer.anonymize(rawText, wf.extension)
+        } else rawText
+
         val chunks = ChunkTokenizer.splitIntoSentenceLevelChunks(text)
         val metadata = if (wf.extension == "kt") {
-            metadataExtractor.extract(wf.filePath, text)
+            metadataExtractor.extract(wf.filePath, rawText)
         } else {
             KotlinMetadata(packageName = null, className = null, repoName = rootDir.name)
         }
         store.insertDocument(wf.fileName, wf.filePath, wf.fileSize, chunks, metadata.packageName, metadata.className, metadata.repoName)
         totalChunks += chunks.size
-        println("  ${wf.fileName}: ${chunks.size} chunks${if (metadata.packageName != null) " (pkg=${metadata.packageName})" else ""}")
+        println("  ${wf.fileName}: ${chunks.size} chunks${if (metadata.packageName != null) " (pkg=${metadata.packageName})" else ""}${if (wf.extension in configExtensions) " [anonymized]" else ""}")
     }
 
     println("Total: ${files.size} documents, $totalChunks chunks")

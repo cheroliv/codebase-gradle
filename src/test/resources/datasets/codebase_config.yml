@@ -1,0 +1,50 @@
+# codebase test config — DO NOT COMMIT
+# This file contains sensitive placeholders for testing anonymization
+
+ai:
+  anthropic:
+    name: "Anthropic"
+    baseUrl: "https://api.anthropic.com"
+    accounts:
+      - name: "prod-account"
+        email: "prod@example.com"
+        keys:
+          - label: "default"
+            key: "sk-ant-api03-abc123def456ghijk789"
+            expiresAt: "2027-12-31"
+      - name: "dev-account"
+        email: "dev@example.com"
+        keys:
+          - label: "staging"
+            key: "sk-ant-stg-xyz987"
+
+  gemini:
+    name: "Gemini"
+    baseUrl: "https://generativelanguage.googleapis.com"
+    accounts:
+      - name: "main"
+        email: "gcp@example.com"
+        keys:
+          - label: "api-key"
+            key: "AIzaSyD_abc123def456ghijklmn"
+
+  ollama:
+    name: "Ollama"
+    baseUrl: "http://localhost:11434"
+    accounts:
+      - name: "local"
+        email: "local@localhost"
+        keys:
+          - label: "none"
+            key: ""
+
+  database:
+    host: "db.example.com"
+    port: 5432
+    username: "codebase_user"
+    password: "s3cr3t_db_p4ss!"
+    database: "codebase_prod"
+
+  api:
+    github_token: "ghp_abc123def456ghijklmn7890"
+    npm_token: "npm_xyz789abc"

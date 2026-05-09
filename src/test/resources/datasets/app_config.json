@@ -1,0 +1,52 @@
+{
+  "ai": {
+    "anthropic": {
+      "name": "Anthropic",
+      "baseUrl": "https://api.anthropic.com",
+      "accounts": [
+        {
+          "name": "prod",
+          "email": "prod@example.com",
+          "keys": [
+            {
+              "label": "default",
+              "key": "sk-ant-api03-json-secret-key-12345"
+            }
+          ]
+        }
+      ]
+    },
+    "gemini": {
+      "name": "Gemini",
+      "baseUrl": "https://generativelanguage.googleapis.com",
+      "accounts": [
+        {
+          "name": "main",
+          "email": "gcp@example.com",
+          "keys": [
+            {
+              "label": "api-key",
+              "key": "AIzaSyD_json_abc123def456"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "database": {
+    "host": "json-db.example.com",
+    "port": 5432,
+    "username": "json_user",
+    "password": "json_s3cr3t_p4ss",
+    "database": "json_db"
+  },
+  "tokens": {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refresh_token": "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4..."
+  },
+  "public_info": {
+    "app_name": "Codebase Gradle",
+    "version": "1.0.0",
+    "description": "No secrets here — safe to publish"
+  }
+}
