@@ -1,5 +1,8 @@
 package codebase.scenarios
 
+import codebase.rag.ChunkTokenizer
+import codebase.walker.WorkspaceFile
+import codebase.walker.WorkspaceWalker
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
 import org.slf4j.LoggerFactory
@@ -8,85 +11,85 @@ class WorkspaceWalkerSteps {
 
     private val log = LoggerFactory.getLogger(WorkspaceWalkerSteps::class.java)
     private val ctx = PgVectorTestContext
-
     private var discoveredFiles = listOf<WorkspaceFile>()
 
     @When("I walk the datasets directory with WorkspaceWalker")
-    fun `walk datasets directory`() {
-        val walker = WorkspaceWalker(java.io.File(ctx.DATASETS_DIR))
+    fun `walk datasets with WorkspaceWalker`() {
+        val dir = java.io.File("src/test/resources/datasets")
+        val walker = WorkspaceWalker(dir)
         discoveredFiles = walker.walk()
         log.info("WorkspaceWalker discovered ${discoveredFiles.size} file(s)")
         discoveredFiles.forEach { f ->
-            log.info("  ${f.fileName} (${f.extension}, ${f.fileSize} bytes)")
+            log.info("  ${f.fileName} (ext=*.${f.extension}, size=${f.fileSize}B)")
         }
     }
 
     @Then("at least {int} files are discovered")
-    fun `at least N files discovered`(min: Int) {
-        assert(discoveredFiles.size >= min) {
-            "Expected at least $min files, got ${discoveredFiles.size}"
+    fun `at least N files discovered`(minExpected: Int) {
+        assert(discoveredFiles.size >= minExpected) {
+            "Expected at least $minExpected files, got ${discoveredFiles.size}"
         }
-        log.info("${discoveredFiles.size} files discovered (min expected: $min)")
+        log.info("Discovered ${discoveredFiles.size} files (min expected: $minExpected)")
     }
 
     @Then("all discovered files have valid extension metadata")
-    fun `all files have valid extension`() {
+    fun `valid extension metadata`() {
+        assert(discoveredFiles.isNotEmpty()) { "No files discovered" }
         val validExts = setOf("kt", "adoc")
         for (f in discoveredFiles) {
             assert(f.extension in validExts) {
-                "File ${f.fileName} has unexpected extension: ${f.extension}"
+                "Invalid extension '${f.extension}' for ${f.fileName}, expected kt or adoc"
             }
         }
-        log.info("All discovered files have valid extensions (kt, adoc)")
+        log.info("All ${discoveredFiles.size} files have valid extension metadata (kt or adoc)")
     }
 
     @Then("no files from build, .git, .gradle, or node_modules are included")
-    fun `no build artifact files included`() {
-        val skipTokens = listOf("/build/", "/.git/", "/.gradle/", "/node_modules/")
-        for (f in discoveredFiles) {
-            for (token in skipTokens) {
-                assert(token !in f.filePath) {
-                    "Skipped path token '$token' found in: ${f.filePath}"
-                }
-            }
+    fun `no artifact files included`() {
+        val artifactPaths = discoveredFiles.filter { f ->
+            f.filePath.contains("/build/") || f.filePath.contains("/.git/") ||
+                f.filePath.contains("/.gradle/") || f.filePath.contains("/node_modules/")
         }
-        log.info("No build artifact files found in discovered files")
+        assert(artifactPaths.isEmpty()) {
+            "Found ${artifactPaths.size} artifact file(s) in discovered list: " +
+                artifactPaths.joinToString { it.filePath }
+        }
+        log.info("No artifact files (build/.git/.gradle/node_modules) in the discovered list")
     }
 
     @When("I tokenize all dataset files into sentence-level chunks")
-    fun `tokenize all dataset files into chunks`() {
+    fun `tokenize all files including adoc`() {
         val datasetDir = java.io.File(ctx.DATASETS_DIR)
-        val allFiles = datasetDir.listFiles { f ->
+        val files = datasetDir.listFiles { f ->
             f.isFile && (f.name.endsWith(".kt") || f.name.endsWith(".adoc"))
-        }?.sortedBy { it.name }
-            ?: throw AssertionError("No files found in ${ctx.DATASETS_DIR}")
+        }?.sortedBy { it.name } ?: throw AssertionError("No files found in ${ctx.DATASETS_DIR}")
 
         ctx.fileChunks.clear()
-        for (file in allFiles) {
+        for (file in files) {
             val text = file.readText()
-            val chunks = ctx.splitIntoSentenceLevelChunks(text)
+            val chunks = ChunkTokenizer.splitIntoSentenceLevelChunks(text)
             ctx.fileChunks[file.name] = chunks
-            log.info("${file.name}: ${chunks.size} chunk(s)")
+            log.info("${file.name}: ${chunks.size} chunk(s) produced")
         }
         val total = ctx.fileChunks.values.sumOf { it.size }
-        log.info("Total chunks: $total across ${ctx.fileChunks.size} files")
+        log.info("Total chunks across all files: $total")
     }
 
     @Then("the top result is from an AsciiDoc documentation file")
     fun `top result is from adoc file`() {
         val top = ctx.topResults.first()
         assert(top.text.contains(".adoc")) {
-            "Top result is not from adoc: ${top.text.take(150)}"
+            "Top result is not from an adoc file. Text: ${top.text.take(200)}"
         }
-        log.info("Top result verified as AsciiDoc: similarity=${"%.4f".format(top.similarity)}")
+        log.info("Top result confirmed from AsciiDoc file: similarity=${"%.4f".format(top.similarity)}")
     }
 
     @Then("the top result is from a Kotlin source file")
     fun `top result is from kt file`() {
         val top = ctx.topResults.first()
         assert(top.text.contains(".kt")) {
-            "Top result is not from kt: ${top.text.take(150)}"
+            "Top result is not from a Kotlin source file. Text: ${top.text.take(200)}"
         }
-        log.info("Top result verified as Kotlin: similarity=${"%.4f".format(top.similarity)}")
+        log.info("Top result confirmed from Kotlin source: similarity=${"%.4f".format(top.similarity)}")
     }
 }

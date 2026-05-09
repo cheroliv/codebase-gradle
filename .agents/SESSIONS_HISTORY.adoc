@@ -2,6 +2,8 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 007 | 2026-05-09 | feat | US-9.5 — Indexation metadata Kotlin: KotlinMetadataExtractor + VectorStore metadata + findByPackage + 3 scenarios Cucumber | 10/10
+| 006 | 2026-05-07 | feat | US-9.PROD — Bridge to Production: src/main/kotlin + VectorStore + EmbeddingPipeline + indexCodebase | 10/10
 | 005 | 2026-05-07 | bugfix | US-9.3 & US-9.4 — Dedup steps Cucumber + PgVectorTestContext singleton | 10/10
 | 004 | 2026-05-07 | feat | US-9.2 & US-9.3 — Dataset minimal + Embeddings ONNX → pgvector (pipeline complet) | 10/10
 | 003 | 2026-05-07 | chore | Migration chemins foundry/ → foundry/OSS/ dans INDEX.adoc (granularisation OSS/CSS) | -

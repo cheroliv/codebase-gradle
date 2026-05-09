@@ -1,43 +1,37 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : US-9.1 ✅ + US-9.2 ✅ + US-9.3 ✅ + US-9.4 ✅ — 5 scenarios Cucumber ALL PASS
+_Statut_ : US-9.1 ✅ + US-9.2 ✅ + US-9.3 ✅ + US-9.4 ✅ + US-9.5 ✅ — 8 scenarios Cucumber ALL PASS
 
 |===
 | Session | Fichiers testes | Couverture | Notes
-| 005 | `PgVectorTestContext.kt` + `DatasetEmbeddingSteps.kt` + `WorkspaceWalkerSteps.kt` (Cucumber) | 2 scenarios PASS | WorkspaceWalker 6 fichiers (.kt+.adoc) + query multi-type top-1 adoc/kt
+| 007 | `MetadataIndexingSteps.kt` + `DatasetEmbeddingSteps.kt` (Cucumber) | 3 scenarios PASS | Extraction metadata Kotlin (package/class/repo), findByPackage, metadata-aware semantic search
+| 005 | `WorkspaceWalkerSteps.kt` + `DatasetEmbeddingSteps.kt` (Cucumber) | 2 scenarios PASS | WorkspaceWalker 6 fichiers (.kt+.adoc) + query multi-type top-1 adoc/kt
 | 004 | `DatasetEmbeddingSteps.kt` (Cucumber) | 1 scenario PASS (12 steps) | Pipeline complet : chunk 4 .kt → 6 chunks → documents+chunks FK → embed 384d → similarity search
 | 001 | `PgVectorContainerSteps.kt` (Cucumber) | 2 scenarios PASS | PostgreSQLContainer pgvector/pgvector:pg17, ephemeral, auto-cleanup
 |===
 
 == Modules
 
+=== codebase-gradle (src/main/kotlin/codebase/rag/)
+- `KotlinMetadataExtractor.kt` : extraction package_name via regex `^package\s+`, class_name via regex de dernier type (class/object/interface), fallback filename sans extension
+- `VectorStore.kt` : schema documents +3 colonnes (package_name, class_name, repo_name), insertDocument avec metadata, findByPackage(), DocRecord data class
+- `CodebaseIndexerMain.kt` : utilise KotlinMetadataExtractor pour enrichir les insertions
+
 === codebase-gradle (src/test/kotlin/codebase/scenarios/)
-
-- `PgVectorTestContext.kt` : singleton partageant conteneur pgvector, modele ONNX,
-  fileChunks, topResults, et methodes de chunking (splitIntoSentenceLevelChunks,
-  estimateTokenCount)
-- `PgVectorContainerSteps.kt` : demarrage/arret conteneur pgvector + verification
-  extension vector + creation table vector(384)
-- `DatasetEmbeddingSteps.kt` : steps canon partages (container start, tokenize,
-  insert documents+chunks avec FK, compute embeddings ONNX 384d, query cosine
-  similarity `<=>` avec JOIN d.file_name)
-- `WorkspaceWalkerSteps.kt` : steps specifiques (walk directory, extension check,
-  verification type adoc vs kt dans topResults)
-- `WorkspaceWalker.kt` : classe walker recursif filtrant build/.git/.gradle/node_modules
-- `CucumberTestRunner.kt` : @Suite JUnit Platform, cucumber engine, features dans
-  `src/test/features/`
-- `TestCleanupExtension.kt` : nettoyage containers orphelins + /tmp/gradle-test-*
-
-=== Resources Test
-
-- `src/test/resources/datasets/` : 6 fichiers (4 .kt + 2 .adoc)
+- `PgVectorTestContext.kt` : singleton partageant conteneur pgvector, modele ONNX, fileChunks, topResults
+- `PgVectorContainerSteps.kt` : demarrage/arret conteneur pgvector + verification extension vector + creation table vector(384)
+- `DatasetEmbeddingSteps.kt` : steps canon partages, schema synchro metadata, companion extractKotlinMetadata
+- `WorkspaceWalkerSteps.kt` : steps walker + verification type adoc vs kt
+- `MetadataIndexingSteps.kt` : steps specifiques metadata (tokenize Kotlin, insert avec metadata, query by package, verification metadata)
+- `CucumberTestRunner.kt` : @Suite JUnit Platform
+- `TestCleanupExtension.kt` : nettoyage containers orphelins
 
 === Features Cucumber
-
-- `9_1_pgvector_container.feature` : 2 scenarios (start + stop)
-- `9_2_3_dataset_embeddings.feature` : 1 scenario (full pipeline 12 steps)
-- `9_3_4_workspace_walker_adoc.feature` : 2 scenarios (walker discovery + index multi-type)
+- `9_1_pgvector_container.feature` : 2 scenarios
+- `9_2_3_dataset_embeddings.feature` : 1 scenario (12 steps)
+- `9_3_4_workspace_walker_adoc.feature` : 2 scenarios
+- `9_5_indexation_metadata.feature` : 3 scenarios (metadata extraction, findByPackage, semantic search aware)
 
 == Prochaine etape
 
-US-9.5 (Indexation Kotlin/Java avec metadata package/class/repo) + US-9.6 (Indexation YAML/JSON configs)
+US-9.6 (Indexation YAML/JSON configs avec anonymisation avant embedding)

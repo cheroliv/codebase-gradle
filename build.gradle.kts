@@ -101,6 +101,26 @@ tasks.findByPath("run")!!.doFirst { chatbot() }
 
 fun chatbot() = println("Launch plumbery.")
 
+val pgJdbcUrlProvider = providers.gradleProperty("pgvector.jdbc.url")
+    .orElse(providers.environmentVariable("PGVECTOR_JDBC_URL"))
+    .orElse("jdbc:postgresql://localhost:5432/codebase_rag")
+val pgUserProvider = providers.gradleProperty("pgvector.user")
+    .orElse(providers.environmentVariable("PGVECTOR_USER"))
+    .orElse("codebase")
+val pgPasswordProvider = providers.gradleProperty("pgvector.password")
+    .orElse(providers.environmentVariable("PGVECTOR_PASSWORD"))
+    .orElse("codebase")
+
+tasks.register<JavaExec>("indexCodebase") {
+    group = "codebase"
+    description = "Indexes project source files into pgvector for RAG augmentation"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass = "codebase.rag.CodebaseIndexerMain"
+    environment("PGVECTOR_JDBC_URL", pgJdbcUrlProvider)
+    environment("PGVECTOR_USER", pgUserProvider)
+    environment("PGVECTOR_PASSWORD", pgPasswordProvider)
+}
+
 /**
  * Verifies via logs that ReadmePlantUmlConfig anonymization masks token, userName
  * and userEmail, and preserves all other fields.

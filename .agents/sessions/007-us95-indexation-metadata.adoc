@@ -1,0 +1,36 @@
+= Session 007 — US-9.5 Indexation metadata Kotlin
+:date: 2026-05-09
+:project: codebase-gradle
+:borough: Queens
+:epic: EPIC 9
+:score: 10/10
+
+== Résumé
+
+US-9.5 — Extraction metadata Kotlin (package_name, class_name, repo_name)
+et persistence dans pgvector. Extension du schema documents avec 3 colonnes
+metadata. Nouveau findByPackage() pour filtrage par package.
+
+== Fichiers créés
+
+- `src/main/kotlin/codebase/rag/KotlinMetadataExtractor.kt` — Extraction package/class
+- `src/test/features/9_5_indexation_metadata.feature` — 3 scénarios Cucumber
+- `src/test/kotlin/codebase/scenarios/MetadataIndexingSteps.kt` — Step defs
+
+== Fichiers modifiés
+
+- `src/main/kotlin/codebase/rag/VectorStore.kt` — schema +3 colonnes metadata, insertDocument params, findByPackage, DocRecord data class
+- `src/main/kotlin/codebase/rag/CodebaseIndexerMain.kt` — Extraction metadata via KotlinMetadataExtractor
+- `src/test/kotlin/codebase/scenarios/DatasetEmbeddingSteps.kt` — Schema inline synchro + extractKotlinMetadata companion
+
+== Résultat
+
+- 8 scénarios Cucumber ✅ (5 existants + 3 nouveaux), 0 régression
+- Compilation main + test OK
+- BUILD SUCCESSFUL
+
+== Leçons
+
+- Extraction metadata : préférer la dernière classe trouvée (fichier multi-classe)
+- Fallback sur filename sans extension quand pas de class/object/interface
+- Regex Kotlin : gérer data class, sealed class, enum class, object, interface
