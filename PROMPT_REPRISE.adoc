@@ -1,49 +1,49 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 4
+= PROMPT_REPRISE — Codebase Gradle — Session 7
 
-> **Statut** : Session 3 ✅ — US-9.3 WorkspaceWalker + US-9.4 Indexation adoc TERMINE
-> **Mission** : US-9.5 (Indexation code Kotlin) + US-9.6 (Indexation YAML/JSON configs)
-
-'''
-== Session 3 (US-9.3 + US-9.4) — Resume
-
-**Date** : 2026-05-07
-**Resultat** : ✅ Bug fix : 7 steps Cucumber en doublon corriges via `PgVectorTestContext`
-singleton. 5/5 scenarios PASS. WorkspaceWalker decouvre 6 fichiers (.kt + .adoc),
-pipeline complet walk→tokenize→insert→embed→query operationnel multi-type.
-Top-1 adoc pour query FR, top-1 kt pour query technique. Chunking phrase-level
-partage via singleton, zéro duplication.
-
-**Fichiers cles** :
-- `src/test/kotlin/codebase/scenarios/PgVectorTestContext.kt` — etat partage
-- `src/test/kotlin/codebase/scenarios/DatasetEmbeddingSteps.kt` — steps canon
-- `src/test/kotlin/codebase/scenarios/WorkspaceWalkerSteps.kt` — steps specifiques
-
-**Archive** : `.agents/sessions/005-us93-94-dedup.adoc`
+> **Statut** : Session 6 ✅ — US-9.5 Indexation metadata Kotlin TERMINE
+> **Mission** : US-9.6 (Indexation YAML/JSON configs anonymisees) + reprise EVENTUEL
 
 '''
-== Session 4 — Priorites
+== Session 6 (US-9.5) — Resume
+
+**Date** : 2026-05-09
+**Resultat** : Metadata Kotlin (package_name, class_name, repo_name) extraits et persistes
+dans pgvector. Cree :
+- `codebase.rag.KotlinMetadataExtractor` — extraction package/class/repo
+- Feature Cucumber US-9.5 — 3 scenarios
+- MetadataIndexingSteps step definitions
+- VectorStore enrichi avec findByPackage(), DocRecord, schema +3 colonnes
+- CodebaseIndexerMain utilise KotlinMetadataExtractor
+- DatasetEmbeddingSteps schema inline synchro + companion extractKotlinMetadata
+
+**Fichiers crees/modifies** :
+- `src/main/kotlin/codebase/rag/KotlinMetadataExtractor.kt` — NOUVEAU
+- `src/main/kotlin/codebase/rag/VectorStore.kt` — MODIFIE (schema, insertDocument, findByPackage, DocRecord)
+- `src/main/kotlin/codebase/rag/CodebaseIndexerMain.kt` — MODIFIE (metadata extraction)
+- `src/test/features/9_5_indexation_metadata.feature` — NOUVEAU
+- `src/test/kotlin/codebase/scenarios/MetadataIndexingSteps.kt` — NOUVEAU
+- `src/test/kotlin/codebase/scenarios/DatasetEmbeddingSteps.kt` — MODIFIE (schema + companion)
+
+**Tests** : 8 scenarios ✅ (5 existants + 3 nouveaux), 0 regression
+
+**Archive** : `.agents/sessions/007-us95-indexation-metadata.adoc`
+
+'''
+== Session 7 — Priorites
 
 === Objectif principal
 
-**US-9.5 — Indexation code source Kotlin/Java → pgvector**
-- Etendre `DatasetEmbeddingSteps` pour gerer les metadonnees package/class/repo
-- Ajouter colonnes `package_name`, `class_name`, `repo_name` a `documents`
-- Feature Cucumber : index + query avec filtre par package
-- Valider que `findByPackage("codebase.repository")` retourne TaskRepository.kt
-
-=== Second objectif
-
-**US-9.6 — Indexation YAML/JSON configs → pgvector** (si temps)
-- Pre-anonymisation via `CodebaseYmlAnonymizer` avant embedding
+**US-9.6 — Indexation YAML/JSON configs → pgvector**
+- Pre-anonymisation via CodebaseYmlAnonymizer avant embedding
 - Feature Cucumber : verification zero secret dans pgvector apres indexation
-- Reutiliser `PgVectorTestContext` existant
+- Reutiliser PgVectorTestContext existant
 
 === Criteres d'Acceptation
 
-- [ ] Documents table etendue avec metadonnees package/class/repo
-- [ ] Feature Cucumber US-9.5 : index + query filtree par metadata
-- [ ] Aucune regression sur les 5 scenarios existants
-- [ ] Package name et class name persistes dans pgvector
+- [ ] Documents YAML/JSON indexables apres anonymisation
+- [ ] Feature Cucumber US-9.6 : verification zero secret pgvector
+- [ ] Aucune regression sur les 8 scenarios existants
+- [ ] Anonymisation appliquee avant embedding
 
 '''
 == Couverture Tests
@@ -53,7 +53,9 @@ partage via singleton, zéro duplication.
 | EPIC 9.1 — pgvector container (Cucumber) | ✅ 2 scenarios
 | US-9.2+9.3 — Dataset + Embeddings (Cucumber) | ✅ 1 scenario (12 steps)
 | US-9.3+9.4 — WorkspaceWalker + adoc (Cucumber) | ✅ 2 scenarios
-| US-9.5 — Indexation Kotlin/Java metadata | ❌ 0 scenarios
+| US-9.PROD — Bridge to Production | ✅ Compilation OK
+| US-9.5 — Indexation Kotlin/Java metadata | ✅ 3 scenarios
+| US-9.6 — Indexation YAML/JSON configs | ❌ 0 scenarios
 |===
 
 '''
@@ -62,9 +64,10 @@ partage via singleton, zéro duplication.
 - ❌ Pas de commit sans permission
 - ❌ Pas de tests en fin de session
 - ✅ Procedure de fin de session 6 etapes obligatoires
-- ✅ Pattern Baby-Step : max 3 pts par US, test d'infra avant code metier
+- ✅ Pattern Baby-Step : max 3 pts par US
 - ✅ Cucumber en anglais
-- ✅ Etat partage via `PgVectorTestContext` (pas de duplication)
+- ✅ Etat partage via PgVectorTestContext (pas de duplication)
+- ✅ Delegation a codebase.rag.* en main
 
 ---
-**Session 3** ✅ — **Session 4** 🚀
+**Session 6** ✅ — **Session 7** 🚀

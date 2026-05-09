@@ -51,6 +51,9 @@ class DatasetEmbeddingSteps {
                         file_path TEXT NOT NULL,
                         file_size BIGINT NOT NULL,
                         chunk_count INTEGER NOT NULL,
+                        package_name TEXT,
+                        class_name TEXT,
+                        repo_name TEXT,
                         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
                     )
                 """.trimIndent())
@@ -74,12 +77,16 @@ class DatasetEmbeddingSteps {
 
                 val docId: Long
                 conn.prepareStatement(
-                    "INSERT INTO documents (file_name, file_path, file_size, chunk_count) VALUES (?, ?, ?, ?) RETURNING id"
+                    "INSERT INTO documents (file_name, file_path, file_size, chunk_count, package_name, class_name, repo_name) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id"
                 ).use { stmt ->
                     stmt.setString(1, fileName)
                     stmt.setString(2, file.path)
                     stmt.setLong(3, file.length())
                     stmt.setInt(4, chunksForFile.size)
+                    val (pkg, cls) = if (fileName.endsWith(".kt")) extractKotlinMetadata(file.readText(), fileName) else Pair(null, null)
+                    stmt.setString(5, pkg)
+                    stmt.setString(6, cls)
+                    stmt.setString(7, "test-dataset")
                     stmt.executeQuery().use { rs ->
                         rs.next()
                         docId = rs.getLong(1)
@@ -266,5 +273,23 @@ class DatasetEmbeddingSteps {
                 "Top text excerpt: ${top.text.take(200)}"
         }
         log.info("Top chunk verified as semantically relevant: similarity=${"%.4f".format(top.similarity)}")
+    }
+
+    companion object {
+        private val packageRegex = Regex("""^\s*package\s+([\w.]+)""", RegexOption.MULTILINE)
+        private val typeRegex = Regex("""^\s*(?:data\s+)?(?:sealed\s+)?(?:open\s+)?(?:abstract\s+)?(?:enum\s+)?(?:inner\s+)?class\s+(\w+)""", RegexOption.MULTILINE)
+        private val objectRegex = Regex("""^\s*(?:data\s+)?object\s+(\w+)""", RegexOption.MULTILINE)
+        private val interfaceRegex = Regex("""^\s*(?:fun\s+)?interface\s+(\w+)""", RegexOption.MULTILINE)
+
+        fun extractKotlinMetadata(content: String, fileName: String): Pair<String?, String?> {
+            val pkg = packageRegex.find(content)?.groupValues?.get(1)
+            val allClasses = mutableListOf<String>()
+            typeRegex.findAll(content).mapTo(allClasses) { it.groupValues[1] }
+            objectRegex.findAll(content).mapTo(allClasses) { it.groupValues[1] }
+            interfaceRegex.findAll(content).mapTo(allClasses) { it.groupValues[1] }
+            val cls = allClasses.lastOrNull()
+                ?: fileName.removeSuffix(".kt")
+            return pkg to cls
+        }
     }
 }

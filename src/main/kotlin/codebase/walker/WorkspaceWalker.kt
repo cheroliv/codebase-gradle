@@ -1,4 +1,4 @@
-package codebase.scenarios
+package codebase.walker
 
 data class WorkspaceFile(
     val fileName: String,

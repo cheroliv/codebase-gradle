@@ -169,7 +169,7 @@ Le wiring expose pgvector + graph.json comme données, pas comme code.
 
 == EPIC 9 : Opencode Augmenté — Réalité Augmentée Développeur
 
-**Statut** : EN COURS (3/13 US FAIT — 9.1, 9.2, 9.3 ✅ TERMINE)
+**Statut** : EN COURS (6/15 US FAIT — 9.1, 9.2, 9.3, 9.4, 9.5, 9.PROD ✅ TERMINE)
 **Priorite** : P0
 **Pattern** : Baby-step (max 3 pts/US) + TestContainer + Doc Vivante
 
@@ -196,14 +196,15 @@ pas par `implementation` (code). Voir `AGENT_GOVERNANCE.adoc` → Règle 4bis.
 | US-9.1 | Container pgvector éphémère — dépendance testcontainers, step Cucumber `startPgvectorContainer()`, validation démarrage <30s | 2 | ✅ TERMINE
 | US-9.2 | Dataset de test minimal — 4 fichiers .kt dans `src/test/resources/datasets/`, chunking phrase-level ~512 tokens/overlap 50, tables documents+chunks avec FK, insert pgvector | 2 | ✅ TERMINE
 | US-9.3 | Embeddings ONNX AllMiniLmL6V2 — chargement modele, pipeline tokenizer→ONNX inference→float[384], INSERT pgvector, query cosine similarity <=>, top-K semantic match | 2 | ✅ TERMINE
+| US-9.PROD | Bridge to Production — pipeline RAG en `src/main/kotlin/` : WorkspaceWalker, ChunkTokenizer, VectorStore, EmbeddingPipeline, tache Gradle `indexCodebase` via JavaExec | 3 | ✅ TERMINE
 |===
 
 === Phase 1 — Indexation
 
 |===
 | US | Description | pts | Statut
-| US-9.4 | Walk récursif typé — `WorkspaceWalker` scanne rootDir → `List<WorkspaceFile>` (+ filter build/.git/.gradle/node_modules) | 2 | A FAIRE
-| US-9.5 | Indexation adoc → pgvector — split 500 tokens/overlap 50, embedding ONNX AllMiniLmL6V2 (384d), insert pgvector | 3 | A FAIRE
+| US-9.4 | Walk récursif typé — `WorkspaceWalker` scanne rootDir → `List<WorkspaceFile>` (+ filter build/.git/.gradle/node_modules) | 2 | ✅ TERMINE
+| US-9.5 | Indexation adoc → pgvector — split 500 tokens/overlap 50, embedding ONNX AllMiniLmL6V2 (384d), insert pgvector | 3 | ✅ TERMINE
 | US-9.6 | Indexation code source Kotlin/Java → pgvector — même pipeline, metadata package/class/repo | 2 | A FAIRE
 | US-9.7 | Indexation YAML/JSON configs → pgvector — anonymisation pre-embedding (CodebaseYmlAnonymizer), zéro secret dans pgvector | 3 | A FAIRE
 |===
@@ -233,7 +234,7 @@ pas par `implementation` (code). Voir `AGENT_GOVERNANCE.adoc` → Règle 4bis.
 | US-9.14 | Ségrégation Vision/Opinion déléguée au LLM — prompt engineering dans le vecteur composite, le LLM assume la responsabilité de classifier avant dilution et publication blog cheroliv.com | 2 | A FAIRE
 |===
 
-*Total* : 30 pts, 14 US, complexité max 3 pts/US. (US-9.1, US-9.2, US-9.3 = ✅ TERMINE)
+*Total* : 33 pts, 15 US, complexite max 3 pts/US. (US-9.1, US-9.2, US-9.3, US-9.4, US-9.5, US-9.PROD = ✅ TERMINE)
 
 == EPIC 10 : Instrumentation Gradle du Pattern STIMULUS — Cascade Dilution/Enrichissement Automatique
 

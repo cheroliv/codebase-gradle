@@ -1,0 +1,119 @@
+= Session 006 — US-9.PROD — Bridge to Production
+
+**Date** : 2026-05-07
+**Type** : feat
+**Score** : 10/10
+
+'''
+== Contexte
+
+Tout le pipeline RAG (WorkspaceWalker, embeddings ONNX, queries cosine)
+vivait uniquement dans `src/test/kotlin/codebase/scenarios/`.
+Il n'y avait **aucun** `src/main/kotlin`. Les US d'indexation
+(Phase 1: US-9.5→US-9.7) et de requetage (Phase 2: US-9.8, US-9.9)
+etaient toutes bloquees.
+
+'''
+== Actions
+
+=== US-9.PROD.1 — Structure main
+- mkdir -p src/main/kotlin/codebase/walker/
+- mkdir -p src/main/kotlin/codebase/rag/
+- Promu WorkspaceWalker (data class + classe) de test → main
+
+=== US-9.PROD.2 — ChunkTokenizer
+- Extrait splitIntoSentenceLevelChunks, splitIntoSegments, buildOverlap,
+  estimateTokenCount du PgVectorTestContext → codebase.rag.ChunkTokenizer (singleton)
+- PgVectorTestContext delegue a ChunkTokenizer (zero duplication)
+
+=== US-9.PROD.3 — VectorStore
+- Classe VectorStore(jdbcUrl, jdbcUser, jdbcPassword) JDBC pgvector
+- initSchema() DDL complet (CREATE EXTENSION vector, tables documents+chunks)
+- insertDocument(fileName, filePath, fileSize, chunks) → Long (RETURNING id)
+- updateEmbedding(chunkId, vectorStr) UPDATE chunks
+- fetchAllChunks() SELECT sans embedding
+- querySimilar(queryVectorStr, topK) avec cosine <=>
+- countDocuments(), countChunks(), hasOrphanChunks()
+- allEmbeddingsNonNull(), allEmbeddingsDimension()
+
+=== US-9.PROD.4 — EmbeddingPipeline
+- EmbeddingPipeline(vectorStore) avec model AllMiniLmL6V2 lazy
+- embedAndStore(chunkId, text) → embed → vectorStr → VectorStore.updateEmbedding
+- embedAll(chunks: List<Pair<Long, String>>)
+- embedQuery(text) retourne vectorStr
+
+=== US-9.PROD.5 — CodebaseIndexerMain + task indexCodebase
+- main() consomme PGVECTOR_JDBC_URL/USER/PASSWORD via env vars
+- Pipeline: WorkspaceWalker.walk() → filter .kt .adoc .kts → ChunkTokenizer
+  → VectorStore.insertDocument → fetchAllChunks → EmbeddingPipeline.embedAll
+- Tache Gradle indexCodebase de type JavaExec
+  avec classpath = sourceSets.main.get().runtimeClasspath
+  env vars configures via gradleProperty et/ou env var Gradle
+
+=== US-9.PROD.6 — Non-regression
+- WorkspaceWalker.kt supprime du repertoire test
+- WorkspaceWalkerSteps.kt : imports `codebase.walker.*`
+- PgVectorTestContext.kt : delegue a ChunkTokenizer (plus logique de chunking)
+- DatasetEmbeddingSteps.kt intact (reference PgVectorTestContext)
+- `./gradlew compileKotlin compileTestKotlin` → BUILD SUCCESSFUL
+- 5 scenarios Cucumber existants preserves (imports resolvent)
+
+'''
+== Commandes Executees
+
+[source,shell]
+----
+mkdir -p src/main/kotlin/codebase/walker
+mkdir -p src/main/kotlin/codebase/rag
+rm src/test/kotlin/codebase/scenarios/WorkspaceWalker.kt
+./gradlew compileKotlin → BUILD SUCCESSFUL
+./gradlew compileTestKotlin → BUILD SUCCESSFUL
+----
+
+'''
+== Fichiers Modifies/Créés
+
+|===
+| Fichier | Action
+| `src/main/kotlin/codebase/walker/WorkspaceWalker.kt` | NOUVEAU (promote depuis test)
+| `src/main/kotlin/codebase/rag/ChunkTokenizer.kt` | NOUVEAU
+| `src/main/kotlin/codebase/rag/VectorStore.kt` | NOUVEAU
+| `src/main/kotlin/codebase/rag/EmbeddingPipeline.kt` | NOUVEAU
+| `src/main/kotlin/codebase/rag/CodebaseIndexerMain.kt` | NOUVEAU
+| `build.gradle.kts` | ajout tache `indexCodebase` (JavaExec)
+| `src/test/kotlin/codebase/scenarios/PgVectorTestContext.kt` | delegue a ChunkTokenizer
+| `src/test/kotlin/codebase/scenarios/WorkspaceWalkerSteps.kt` | imports main + delegue
+| `src/test/kotlin/codebase/scenarios/WorkspaceWalker.kt` | SUPPRIME
+| `5_BOROUGHS.adoc` | section QUEENS US-9.PROD
+| `PROMPT_REPRISE.adoc` | session 5 resume + session 6 priorities
+| `.agents/INDEX.adoc` | session 006 ajoutee
+| `BACKLOG.adoc` | US-9.PROD + stats updated
+|===
+
+'''
+== Lecons Apprises
+
+1. **JavaExec > code inline dans build.gradle.kts** :
+   Les classes du `src/main/kotlin` ne sont pas sur le classpath
+   du script Gradle (qui utilise `buildSrc`). Le pattern `JavaExec`
+   avec `mainClass` resout le probleme proprement.
+
+2. **Pattern Singleton pour PgVectorTestContext** :
+   Le dedup de session 005 (PgVectorTestContext en singleton)
+   a paye — tous les steps delegates au meme contexte via `import codebase.rag.*`.
+
+3. **Bridge pattern** : Garder le test Cucumber intact (il valide le pipeline
+   de bout en bout via Testcontainers) pendant que le code production
+   est invoque via `JavaExec` sur un pgvector externe.
+
+4. **Zero duplication garantie** : Le chunking (splitIntoSentenceLevelChunks)
+   n'existe qu'en un seul endroit — `codebase.rag.ChunkTokenizer`.
+   PgVectorTestContext delegue, fini.
+
+'''
+== Prochaine Session
+
+**US-9.5 — Indexation code source Kotlin/Java avec metadonnees package/class/repo**
+- Etendre `documents` table (package_name, class_name, repo_name)
+- Feature Cucumber: index + query filtree par metadata
+- Valider findByPackage retourne le bon fichier
