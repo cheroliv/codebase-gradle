@@ -1,0 +1,52 @@
+name: Anonymize With Expert
+on:
+  workflow_dispatch:
+    inputs:
+      inputFile:
+        description: 'Chemin du fichier à anonymiser'
+        required: true
+      outputFile:
+        description: 'Chemin de sortie (optionnel, déduit de inputFile sinon)'
+        required: false
+jobs:
+  anonymize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '23'
+          distribution: 'temurin'
+
+      - name: Install Ollama
+        run: curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Setup Device Key with Pool Support
+        run: |
+          mkdir -p ~/.ollama
+          echo "${{ secrets.OLLAMA_DEVICE_KEY_A }}" > ~/.ollama/id_ed25519
+          chmod 600 ~/.ollama/id_ed25519
+
+      - name: Pull Cloud Model
+        run: ollama pull deepseek-v4-pro:cloud
+
+      - name: Run Anonymize With Expert
+        run: >
+          ./gradlew anonymizeWithExpert
+          -PinputFile="${{ github.event.inputs.inputFile }}"
+          -PoutputFile="${{ github.event.inputs.outputFile }}"
+          -Pollama.pool.enabled=true
+        env:
+          OLLAMA_DEVICE_KEY_A: ${{ secrets.OLLAMA_DEVICE_KEY_A }}
+          OLLAMA_DEVICE_KEY_B: ${{ secrets.OLLAMA_DEVICE_KEY_B }}
+
+      - name: Commit Anonymized File
+        if: ${{ github.event.inputs.outputFile != '' }}
+        run: |
+          git config user.name "ci-bot"
+          git config user.email "ci-bot@cheroliv.com"
+          git add "${{ github.event.inputs.outputFile }}"
+          git commit -m "ci: anonymized ${{ github.event.inputs.inputFile }}" || true
+          git push
