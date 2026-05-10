@@ -1039,12 +1039,12 @@ tasks.register<JavaExec>("anonymizeWithExpert") {
     mainClass = "codebase.rag.AnonymizationExpertMain"
 
     val inputFilePath = providers.gradleProperty("inputFile")
+        .orElse("src/test/resources/datasets/config.yml")
     val outputFilePath = providers.gradleProperty("outputFile")
+        .map { it.ifBlank { "build/anonymized-output.yml" } }
+        .orElse("build/anonymized-output.yml")
 
-    args(
-        inputFilePath.orElse("src/test/resources/datasets/config.yml").get(),
-        outputFilePath.orElse("build/anonymized-output.yml").get()
-    )
+    args(inputFilePath.get(), outputFilePath.get())
 }
 
 /**

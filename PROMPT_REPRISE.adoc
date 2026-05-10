@@ -1,41 +1,38 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 13
+= PROMPT_REPRISE — Codebase Gradle — Session 14
 :author: cheroliv + opencode (deepseek-v4-pro:cloud)
-:date: 2026-05-10
-:session: 012
-:prochaine: 013
+:date: 2026-05-11
+:session: 013
+:prochaine: 014
 
-> **Statut** : Session 012 ✅ — EPIC 4 MVP1 RAG/Graphify câblés, RAG_ONLY exécuté (0% erreur)
-> **Mission** : Terminer exécution benchmark → mesurer impact différentiel Graphify réel
-
-'''
-== Session 12 (EPIC 4 MVP1) — Résumé
-
-**Date** : 2026-05-10
-**Résultat** : RAG/Graphify câblés dans BenchmarkRunner.
-- Bugfix CodebaseIndexerMain (`fun main()` → `object + @JvmStatic`)
-- Bugfix `JavaExec.environment(Provider<>)` → `doFirst { environment(get()) }`
-- Migration `println`/`System.err` → SLF4J (logback `runtimeOnly`)
-- Dépendance `jackson-module-kotlin` ajoutée en `implementation`
-- `GraphContext.kt` : model Jackson + `GraphContextBuilder` (load/neighborhood)
-- `GraphGeneratorMain.kt` : scan workspace → graph.json
-- Tâche `generateGraph` : 110 nodes, 225 edges
-- `BenchmarkRunner.buildContext()` : branche RAG (pgvector `querySimilar`) + Graphify (`neighborhood`)
-- RAG_ONLY exécuté : 35 classifications, 0% erreur tous seuils (10K→128K)
-- Rapports : `build/benchmark-reports/report-RAG_ONLY.{json,adoc}`
+> **Statut** : Session 013 ✅ — Bug `it.sourcePath` corrigé + CI `anonymize.yml` complet
+> **Mission** : Reprendre EPIC 4 MVP1 (RAG_GRAPHIFY_LOCAL) ou EPIC 9 Phase 2
 
 '''
-== Session 13 — Priorité
+== Session 13 — Résumé
+
+**Date** : 2026-05-11
+**Résultat** : 2 bugs corrigés, CI prêt pour exécution complète.
+- Bug `AnonymizationExpert.kt:50`: `{{it.sourcePath}}` → `{{request.sourcePath}}` (nom paramètre requis par AiServices)
+- Bug `anonymize.yml`: outputFile vide → NPE `mkdirs()` — fix shell conditionnel + `ifBlank` Gradle
+- Compilation OK, 0 secrets exposés
+
+'''
+== Session 14 — Priorité
 
 === Option A (recommandé) — Terminer EPIC 4 MVP1
 
-Exécuter RAG_GRAPHIFY_LOCAL → mesurer l'impact différentiel du canal Graphify.
+Lancer RAG_GRAPHIFY_LOCAL → mesurer impact différentiel Graphify.
 Comparer `report-RAG_ONLY.json` vs `report-RAG_GRAPHIFY_LOCAL.json`.
-Si 0% erreur persiste avec graph.json réel : confirmer que l'augmentation composite tient.
 
-=== Option B — EPIC 9 Phase 2 (US-9.8 + US-9.9)
+=== Option B — EPIC 9 Phase 2
 
 US-9.8 (Query vectorielle simple) + US-9.9 (Query filtrée par type).
-Reprise de la progression EPIC 9 baby-step.
+Reprise baby-step EPIC 9.
+
+=== Option C — Valider CI anonymize en conditions réelles
+
+Déclencher `workflow_dispatch` sur GitHub Actions avec un fichier test pour confirmer
+que le fix `it.sourcePath` tient en environnement CI.
 
 '''
 == Couverture Tests
@@ -53,17 +50,6 @@ Reprise de la progression EPIC 9 baby-step.
 |===
 
 '''
-== Fichiers modifiés (session 012)
-
-- `src/.../rag/CodebaseIndexerMain.kt` : refacto `object + @JvmStatic` + SLF4J
-- `src/.../benchmark/BenchmarkRunner.kt` : + `buildContext()` RAG/Graphify, params pgvector/graph
-- `src/.../benchmark/BenchmarkRunnerMain.kt` : passe `pgJdbcUrl`/`graphJsonPath`
-- `src/.../benchmark/GraphContext.kt` : NOUVEAU — model Jackson + `GraphContextBuilder`
-- `src/.../benchmark/GraphGeneratorMain.kt` : NOUVEAU — scanner workspace → graph.json
-- `build.gradle.kts` : `runtimeOnly(logback)`, `impl(jackson-module)`, `generateGraph`, fix `JavaExec` env
-- `build/benchmark-reports/report-RAG_ONLY.{json,adoc}` : rapports générés
-
-'''
 == Règles
 
 - ❌ Pas de commit sans permission
@@ -71,7 +57,7 @@ Reprise de la progression EPIC 9 baby-step.
 - ✅ Procédure de fin de session 6 étapes obligatoires
 - ✅ Pattern Baby-Step : max 3 pts par US
 - ✅ Cucumber en anglais
-- ✅ SLF4J + logback pour tout le logging (pas de println/System.err dans src/main/)
+- ✅ SLF4J + logback pour tout le logging
 
 ---
-**Session 12** ✅ — **Session 13** 🚀
+**Session 13** ✅ — **Session 14** 🚀
