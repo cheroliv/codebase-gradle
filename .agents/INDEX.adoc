@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
 _Derniere mise a jour_ : 2026-05-10
-_Session terminee_ : 009 — EPIC 2 Expert Anonymisation LangChain4j (MVP0)
-_Prochaine session_ : 010 — EPIC 4 Benchmark perception spatiale LLM
+_Session terminee_ : 012 — EPIC 4 MVP1 (RAG/Graphify câblés, RAG_ONLY exécuté 0% erreur)
+_Prochaine session_ : 013 — EPIC 4 MVP1 finish (RAG_GRAPHIFY_LOCAL exécution, mesure impact différentiel)
 
 '''
 == REGLES ABSOLUES (resume)
@@ -22,6 +22,9 @@ _Prochaine session_ : 010 — EPIC 4 Benchmark perception spatiale LLM
 
 |===
 | # | Date | Type | Sujet | Score
+| 012 | 2026-05-10 | feat | EPIC 4 MVP1 — Câblage RAG/Graphify réels : Bugfix CodebaseIndexerMain + JavaExec env, migration println→SLF4J, GraphContext.kt (Jackson), GraphGeneratorMain.kt, buildContext() branche pgvector+graph.json, generateGraph task, RAG_ONLY 0% erreur 128K | 10/10
+| 011 | 2026-05-10 | feat | EPIC 4 Benchmark Execution — 5 scénarios Ollama deepseek-v4-pro:cloud (0% erreur, 2 bugs corrigés) | 10/10
+| 010 | 2026-05-10 | feat | EPIC 4 MVP0 — Nettoyage duplication 006, 4 scénarios Cucumber @wip, export AsciiDoc (parser JSON minimal) | 10/10
 | 009 | 2026-05-10 | feat | EPIC 2 MVP0 — Expert Anonymisation LangChain4j: interface + factory + deterministic fallback + Cucumber @wip | 10/10
 | 008 | 2026-05-09 | feat | US-9.6 — Indexation YAML/JSON configs anonymisées: YamlConfigAnonymizer + 3 scenarios Cucumber + 11/11 PASS | 10/10
 | 007 | 2026-05-09 | audit | Audit global + vérification socle : 8/8 Cucumber PASS, 4/4 anonymizers PASS, compile OK | 10/10
@@ -43,7 +46,7 @@ _Prochaine session_ : 010 — EPIC 4 Benchmark perception spatiale LLM
 | EPIC 9 | Opencode Augmente — 14 US baby-step (US-9.1 ✅, US-9.2 ✅, US-9.3 ✅, US-9.4 ✅, US-9.5 ✅, US-9.6 ✅) | EN COURS | P0
 | EPIC 2 | Expert Anonymisation LangChain4j — MVP0 | MVP0 TERMINE (session 009) | P0
 | EPIC 3 | Architecture Multi-Canal Convergent | A FAIRE | P0
-| EPIC 4 | Benchmark de perception spatiale LLM | A FAIRE | P0
+| EPIC 4 | Benchmark de perception spatiale LLM | MVP1 EN COURS (RAG câblé, Graphify câblé, RAG_ONLY executed 0% erreur) | P0
 | EPIC 5 | Pipeline fine-tuning experts CDA/FPA | A FAIRE | P0
 | EPIC 6 | Integration ONNX — boucle qualite | A FAIRE | P1
 | EPIC 7 | Wiring LangChain4j + pgvector experts | A FAIRE | P1
@@ -84,7 +87,7 @@ _Prochaine session_ : 010 — EPIC 4 Benchmark perception spatiale LLM
 | bakery-gradle | `foundry/OSS/bakery-gradle/bakery-plugin/` | ~13+ | 2026-04
 | jhipster-gradle-plugins | `foundry/OSS/jhipster-gradle-plugins/` | 6 | 2026-04
 | newpipe-gradle | `foundry/OSS/newpipe-gradle/newpipe-plugin/` | ~11 | 2026-04
-| codebase-gradle | `foundry/OSS/codebase-gradle/` | 9 | 2026-05-10
+| codebase-gradle | `foundry/OSS/codebase-gradle/` | 11 | 2026-05-10
 | graphify-gradle | `foundry/OSS/graphify-gradle/graphify-plugin/` | 1 (bootstrap) | 2026-05-09
 | notebook-gradle | `foundry/OSS/notebook-gradle/` | 0 (bootstrap) | 2026-05-05
 |===

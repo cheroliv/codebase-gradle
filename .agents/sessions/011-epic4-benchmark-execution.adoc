@@ -1,0 +1,92 @@
+= Session 011 — EPIC 4 Exécution Benchmark 5 Scénarios (Ollama)
+:author: cheroliv + opencode (deepseek-v4-pro)
+:date: 2026-05-10
+:type: feat
+:score: 10/10
+
+== Contexte
+
+Session planifiée par INDEX.adoc. Objectif : exécuter le benchmark EPIC 4
+sur les 5 scénarios via Ollama deepseek-v4-pro:cloud, en partant du code
+MVP0 de la session 010.
+
+Ollama disponible avec deepseek-v4-pro:cloud, qwen3.5:397b-cloud et autres.
+
+== Actions
+
+=== 1. Bugfix — Template AiServices @UserMessage
+
+- Problème : `classify(ClassificationRequest)` → `{{it.documentExcerpt}}` non résolu.
+  Erreur : `Value for the variable 'it.documentExcerpt' is missing`
+- Correction dans `BenchmarkRunner.kt:54` :
+  - Changé signature `classify(@V("context") context: String, @V("documentExcerpt") documentExcerpt: String)`
+  - Ajouté import `dev.langchain4j.service.V`
+  - Adapté call site dans `BenchmarkRunner.run()` : `expert.classify(filler, sample.content)`
+
+=== 2. Bugfix — Sérialisation JSON channels
+
+- Problème : `java.util.Arrays.toString()` produisait `[RAG, Graphify]` (Java array, pas JSON valide)
+  → `NumberFormatException: For input string: "EAGER/LAZY"` dans le parser AsciiDoc
+- Correction dans `BenchmarkRunner.kt` :
+  - `scenarioChannels.joinToString(", ") { "\"$it\"" }` → JSON valide `["RAG", "Graphify"]`
+- Correctifs post-hoc pour les JSON déjà générés : python3 fix des fichiers RAG_ONLY,
+  RAG_GRAPHIFY_LOCAL, RAG_GRAPHIFY_WORKSPACE, FOUR_CHANNELS.
+
+=== 3. Optimisation timeout Ollama
+
+- Timeout augmenté de 120s → 300s (BenchmarkRunner.kt constructor) pour les appels 128K tokens.
+
+=== 4. Exécution 5 scénarios
+
+|===
+| Scénario | Canaux | Durée | Résultat
+| BASELINE | AUCUN | 8m35s | 0% erreur (7/7 à tous les seuils)
+| RAG_ONLY | RAG | 6m36s | 0% erreur (7/7 à tous les seuils)
+| RAG_GRAPHIFY_LOCAL | RAG + Graphify | 6m06s | 0% erreur (7/7 à tous les seuils)
+| RAG_GRAPHIFY_WORKSPACE | RAG + Graphify | 7m43s | 0% erreur (7/7 à tous les seuils)
+| FOUR_CHANNELS | EAGER/LAZY + RAG + Graphify + Ressources | 7m24s | 0% erreur (7/7 à tous les seuils)
+|===
+
+Tous les appels Ollama deepseek-v4-pro:cloud ont classifié correctement
+les 7 documents de test à chaque seuil (10K, 30K, 60K, 100K, 128K tokens).
+
+=== 5. Rapports exportés
+
+Tous les rapports `.adoc` et `.json` dans `build/benchmark-reports/` :
+- report-BASELINE.{json,adoc}
+- report-RAG_ONLY.{json,adoc}
+- report-RAG_GRAPHIFY_LOCAL.{json,adoc}
+- report-RAG_GRAPHIFY_WORKSPACE.{json,adoc}
+- report-FOUR_CHANNELS.{json,adoc}
+
+== Commandes exécutées
+
+[source,shell]
+----
+./gradlew compileKotlin                                    # PASS
+./gradlew runBenchmark -Pscenario=BASELINE                 # 8m35s ✅
+./gradlew runBenchmark -Pscenario=RAG_ONLY                 # 6m36s ✅
+./gradlew runBenchmark -Pscenario=RAG_GRAPHIFY_LOCAL        # 6m06s ✅
+./gradlew runBenchmark -Pscenario=RAG_GRAPHIFY_WORKSPACE    # 7m43s ✅
+./gradlew runBenchmark -Pscenario=FOUR_CHANNELS             # 7m24s ✅ (export post-hoc)
+./gradlew exportBenchmarkReport -Pscenario=FOUR_CHANNELS    # OK
+----
+
+== Résultats
+
+- Compilation : OK (main + buildSrc)
+- Benchmark : 5 scénarios × 5 seuils × 7 échantillons = 175 classifications, 0 erreur
+- Bugs corrigés : 2 (template AiServices @V, JSON serialization Java array)
+- Secrets : aucun dans le code
+- deepseek-v4-pro:cloud ne montre aucune perte de perception spatiale jusqu'à 128K tokens
+  avec le protocole actuel (7 fixtures, remplissage technique)
+
+== Leçons
+
+- LangChain4j AiServices multi-paramètres nécessite @V pour nommer chaque variable
+- java.util.Arrays.toString() n'est pas un sérialiseur JSON
+- Les longs contextes 128K tokens nécessitent timeout Ollama ≥ 300s
+- Les 5 scénarios ont le même code path pour MVP (RAG/Graphify non câblés)
+  → pas de mesure différentielle réelle. À cabler dans session 012.
+- deepseek-v4-pro:cloud est très robuste sur la classification cercle de confiance
+  même à 128K tokens de contexte filler. Les fixtures sont peut-être trop "évidentes".

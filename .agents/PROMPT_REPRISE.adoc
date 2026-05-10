@@ -1,79 +1,76 @@
-= PROMPT_REPRISE — Session 010 — Codebase Gradle
-:author: cheroliv + opencode (deepseek-v4-pro)
+= PROMPT_REPRISE — Session 013 — Codebase Gradle
+:author: cheroliv + opencode (deepseek-v4-pro:cloud)
 :date: 2026-05-10
-:session: 009
-:prochaine: 010
+:session: 012
+:prochaine: 013
 
 [abstract]
-Amorçage pour la prochaine session opencode.
+Amorçage pour la prochaine session opencode. Session 013 — Benchmark RAG+Graphify réel.
 
 == Contexte de Reprise (EAGER)
 
-=== Ce qui a été accompli — Sessions 000→009
+=== Ce qui a été accompli — Sessions 000→012
 
-- Sessions 000-001 : Gouvernance agent + US-9.1 pgvector container ✅
-- Sessions 002-006 : US-9.2→9.PROD (dataset, embeddings, dedup, prod bridge, metadata) ✅
-- Sessions 007-008 : US-9.5/9.6 (metadata Kotlin + YAML/JSON anonymized indexing) ✅
-- Session 009 : EPIC 2 MVP0 — AnonymizationExpert LangChain4j (interface + factory + fallback + Cucumber wip) ✅
+- Sessions 000-008 : EPIC 9 — 6/6 US TERMINÉES, 11/11 Cucumber PASS, EPIC 2 MVP0 ✅
+- Session 009 : EPIC 2 MVP0 — AnonymizationExpert LangChain4j ✅
+- Session 010 : EPIC 4 MVP0 — Infra benchmark (data classes, runner, expert IA, fixtures, export) ✅
+- Session 011 : EPIC 4 Execution — 5 scénarios exécutés (175 classifications, 0% erreur, filler statique) ✅
+- Session 012 : EPIC 4 MVP1 — Câblage RAG/Graphify réels ✅
 
-EPIC 9 — 6/6 US TERMINÉES. 11/11 Cucumber PASS.
-EPIC 2 MVP0 — 3 nouveaux scénarios Cucumber @wip (déterministes).
-
-=== État du code source
+=== État du code source — benchmark (post-session 012)
 
 [source]
 ----
-src/main/kotlin/codebase/rag/
-├── AnonymizationContext.kt     # EPIC 2 — data classes contrats
-├── AnonymizationExpert.kt      # EPIC 2 — interface LangChain4j + factory + deterministic fallback
-├── AnonymizationExpertMain.kt  # EPIC 2 — entry point JavaExec
-├── ChunkTokenizer.kt           # EPIC 9 — ~512 token chunks
-├── CodebaseIndexerMain.kt      # EPIC 9 — main() pour ./gradlew indexCodebase
-├── EmbeddingPipeline.kt        # EPIC 9 — ONNX AllMiniLmL6V2
-├── KotlinMetadataExtractor.kt  # EPIC 9 — package/class extraction
-├── VectorStore.kt              # EPIC 9 — pgvector JDBC CRUD
-└── YamlConfigAnonymizer.kt     # EPIC 9 — rule-based anonymization
+src/main/kotlin/codebase/benchmark/
+├── BenchmarkRunner.kt          # Runner + buildContext(RAG/Graphify) + pgvector params
+├── BenchmarkRunnerMain.kt      # Entry point, passe pgJdbcUrl + graphJsonPath
+├── BenchmarkReportExporter.kt  # Export JSON→AsciiDoc (parser JSON minimal)
+├── BenchmarkReportExportMain.kt # Entry point exportBenchmarkReport
+├── GraphContext.kt             # GraphModel/GraphNode/GraphEdge Jackson + GraphContextBuilder
+└── GraphGeneratorMain.kt       # Scanner workspace → graph.json
+
+buildSrc/src/main/kotlin/benchmark/
+└── benchmark.kt                # Data classes + BenchmarkProtocol + BenchmarkConfig
 
 Tasks codebase:
-  run / indexCodebase / anonymizeWithExpert
-  verifyReadMeToAnonymizedYaml / verifySiteToAnonymizedYaml
-  verifySliderToAnonymizedYaml / verifyCodebaseToAnonymizedYaml
-  scaffoldCodebaseYml / snapshotCodebase
+  indexCodebase / runBenchmark / generateGraph / exportBenchmarkReport
+  anonymizeWithExpert / benchmarkProtocol / snapshot / scaffoldCodebaseYml
 ----
 
-Dépendance LangChain4j-ollama:1.12.2 intégrée dans le bundle langchain4j-rag.
+=== État des 6 Boroughs (rappel workspace)
 
-== Mission du Jour — Session 010
+[cols="1,2,3,5", options="header"]
+|===
+| Borough | Projet | DAG | Statut
+| Manhattan | planner-gradle | N2 | ✅ Session 003 TERMINÉ
+| Brooklyn | codex-gradle | N2 | ✅ Session 006 CDX-1c TERMINÉ
+| Queens | codebase-gradle | N1 | 🔴 Session 012 EPIC 4 MVP1 (RAG_ONLY 0% erreur)
+| The Bronx | quizz-benchmark | N2* | ✅ Session 005 TERMINÉ
+| Staten Island | magic-stick doc | N2 data | 🟡 CI/CD bloqué
+| New Jersey | engine | N3 | ✅ Session 003 TERMINÉ
+| CSS | payment-scaffold | hors DAG | 🔴 Session 001
+|===
 
-=== Objectif prioritaire : EPIC 4 — Benchmark de perception spatiale LLM (P0)
+== Mission du Jour — Session 013
 
-Mesurer à quel seuil de tokens le LLM perd la notion de cercle de confiance.
-Évaluer l'apport du vecteur composite (RAG pgvector + Graphify knowledge graph)
-sur la résilience du contexte long via l'expert AnonymizationExpert.
+=== Objectif prioritaire : Terminer EPIC 4 MVP1
 
-Sous-tâches MVP0 :
-. Créer `PerceptionBenchmark.kt` — test de dilution spatiale :
-  - Injecter N tokens de contexte (0, 500, 1k, 2k, 4k, 8k, 16k, 32k)
-  - Question fixe : "Quel est le cercle de confiance du fichier codebase.yml ?"
-  - Mesurer accuracy par niveau de dilution
-. Injecter le vecteur composite RAG (top-5 chunks pgvector) + graphify (top-3 nœuds) :
-  - Comparer accuracy avec vs sans augmentation composite
-. Exporter rapport benchmark en AsciiDoc
-. 2-3 scénarios Cucumber (@wip)
+. Exécuter `./gradlew runBenchmark -Pscenario=RAG_GRAPHIFY_LOCAL`
+. Comparer `report-RAG_ONLY.json` vs `report-RAG_GRAPHIFY_LOCAL.json`
+. Mesurer l'impact différentiel du canal Graphify (graph.json réel vs filler)
 
-=== Objectifs secondaires
+=== Objectif secondaire
 
-- Nettoyer duplication SESSIONS_HISTORY (2x session 006)
-- `./gradlew compileKotlin compileTestKotlin` après chaque modif
-- Zéro test en fin de session sans permission
+. Si 0% erreur persiste : le vecteur composite tient avec contexte réel → documenter
+. Si erreurs apparaissent : analyser si Graphify brouille ou enrichit la classification
 
 == Rappel — Règles Globales (EAGER)
 
-. Règle 0 : publishToMavenLocal OBLIGATOIRE pour plugins
+. Règle 0 : SLF4J + logback pour tout logging dans src/main/ (pas de println/System.err)
 . Règle 1 : Aucun commit sans permission explicite
 . Règle 1b : Backup avant modif fichier config non versionné
 . Règle 2 : Pas de ./gradlew test en fin de session sans permission
 
 [.text-right]
-*PROMPT_REPRISE mis à jour le 10 mai 2026 — fin de session 009 (EPIC 2 MVP0).*
-*Prochaine session : 010 — EPIC 4 Benchmark perception spatiale LLM.*
+*PROMPT_REPRISE mis à jour le 10 mai 2026 — fin de session 012 (EPIC 4 MVP1 RAG/Graphify câblés).*
+*Prochaine session : 013 — RAG_GRAPHIFY_LOCAL exécution + comparaison impact différentiel.*

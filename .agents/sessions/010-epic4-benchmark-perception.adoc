@@ -1,0 +1,64 @@
+= Session 010 — EPIC 4 Benchmark perception spatiale LLM
+:author: cheroliv + opencode (deepseek-v4-pro)
+:date: 2026-05-10
+:type: feat
+:score: 10/10
+
+== Contexte
+
+Reprise post-crash système. Session amorcée via le PROMPT_REPRISE workspace
+(Queens Session 008 → codebase-gradle PROMPT_REPRISE Session 010).
+
+== Actions
+
+=== 1. Nettoyage duplication SESSIONS_HISTORY
+- Problème : session 006 apparaissait en double (US-9.PROD du 2026-05-07 + US-9.5 du 2026-05-09)
+- Correction : fusion des deux entrées en une seule session 005, réalignement numérotation 005→000
+- Fichier : `.agents/SESSIONS_HISTORY.adoc`
+
+=== 2. Scénarios Cucumber @wip EPIC 4
+- Feature : `src/test/features/epic_4_benchmark_perception.feature` (4 scénarios)
+  - Validation config seuils de tokens (10K, 30K, 60K, 100K, 128K)
+  - Validation 5 scénarios incrémentaux (BASELINE → FOUR_CHANNELS)
+  - Calcul taux d'erreur (0 crossing → 0.0, 25/100 → 0.25)
+- Steps : `src/test/kotlin/codebase/scenarios/BenchmarkProtocolSteps.kt`
+  - Indépendant de buildSrc (classes benchmark.* en buildSrc, inaccessibles depuis src/test)
+  - Valeurs de référence dupliquées dans les steps pour validation sans couplage
+
+=== 3. Export rapport AsciiDoc
+- `BenchmarkReportExporter.kt` : parser JSON minimal sans dépendance externe
+  - Fonctions privées : parseObject/parseString/parseValue/skipWhitespace
+  - Convertit le JSON du BenchmarkRunner en rapport AsciiDoc structuré
+  - Sections : cercles de confiance, résultats par seuil, franchissements, métrique clé, échantillons
+- `BenchmarkReportExportMain.kt` : entry point JavaExec pour conversion JSON→adoc
+- Tâche Gradle `exportBenchmarkReport` : `./gradlew exportBenchmarkReport -Pscenario=BASELINE`
+- Test validé avec rapport synthétique : 137 lignes, 5 seuils, progression 0%→71.4% d'erreur
+
+=== 4. Code survivant au crash (préexistant, non modifié)
+- `buildSrc/.../benchmark/benchmark.kt` : data classes + BenchmarkProtocol (160 lignes)
+- `src/.../benchmark/BenchmarkRunner.kt` : runner + SpatialPerceptionExpert + ContextFiller + fixtures (275 lignes)
+- `src/.../benchmark/BenchmarkRunnerMain.kt` : entry point runBenchmark (31 lignes → étendu avec export adoc)
+
+== Commandes exécutées
+
+[source,shell]
+----
+./gradlew compileKotlin compileTestKotlin   # PASS
+./gradlew benchmarkProtocol                 # OK — affichage protocole
+./gradlew exportBenchmarkReport             # OK — rapport .adoc généré
+----
+
+== Résultats
+
+- Compilation : OK (Kotlin main + test)
+- SESSIONS_HISTORY : nettoyée, zéro duplication
+- Cucumber EPIC 4 : 4 scénarios @wip prêts
+- Export AsciiDoc : fonctionnel (parser JSON minimal, zéro dépendance)
+- Secrets : aucun dans le code source (TOKEN_MASK, ghp_xxx = placeholders de test uniquement)
+
+== Leçons
+
+- Les classes buildSrc ne sont pas accessibles depuis src/test — les steps Cucumber
+  doivent être autonomes ou dupliquer les valeurs de référence.
+- Un parser JSON minimal en Kotlin pur évite la dépendance à Jackson dans src/main.
+- La reprise post-crash est fluide quand PROMPT_REPRISE et INDEX sont à jour.

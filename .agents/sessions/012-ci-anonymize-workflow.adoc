@@ -1,0 +1,29 @@
+= Session 012 — Palier 1 DESIGN_CI_LLM_POOL_ROTATION : Workflow CI anonymizeWithExpert
+:author: cheroliv + opencode (deepseek-v4-pro)
+:date: 2026-05-10
+:type: feat+ci
+:score: 8/10
+
+== Objectif
+Créer `.github/workflows/anonymize.yml` dans codebase-gradle pour déporter `anonymizeWithExpert`
+vers GitHub Actions sans freeze local.
+
+== Livrables
+- `.github/workflows/anonymize.yml` : workflow_dispatch avec inputFile + outputFile
+- Secret `OLLAMA_DEVICE_KEY_A` configuré sur le repo GitHub
+- Workflow CI valide jusqu'au pull du modèle ✅
+- Utilisation de gradle/actions/setup-gradle@v4 (gradle-wrapper.jar absent du repo via .gitignore)
+- Suppression automatique de org.gradle.java.home local invalide
+
+== Blocages résiduels
+- Bug applicatif `AnonymizationExpertMain.kt:41` : `java.lang.IllegalArgumentException: Value for the variable 'it.sourcePath' is missing`
+- Le workflow CI est correct, l'erreur est dans le code métier (à corriger en session 013)
+
+== Décisions clés
+- Même pattern install.sh + stop systemd + serve manuel que planner-gradle
+- gradle.properties override nécessaire (java.home local pointant vers sdkman)
+- 6 commits de debug avant stabilisation du pipeline CI
+
+== Fichiers créés/modifiés
+- .github/workflows/anonymize.yml (créé, 6 révisions)
+- Secrets GitHub configurés : OLLAMA_DEVICE_KEY_A

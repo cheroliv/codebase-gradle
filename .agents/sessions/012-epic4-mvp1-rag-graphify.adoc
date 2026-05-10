@@ -1,0 +1,88 @@
+= Session 012 — EPIC 4 MVP1 (Câblage RAG/Graphify réels)
+:date: 2026-05-10
+:score: 10/10
+
+== Contexte
+
+Session 011 avait exécuté 5 scénarios benchmark avec 0% erreur (Ollama deepseek-v4-pro:cloud),
+mais tous les scénarios partageaient le même code path — RAG/Graphify non câblés, filler technique
+statique identique pour tous les canaux.
+
+== Objectif
+
+Câbler les canaux réels dans le benchmark :
+- RAG_ONLY : injection réelle de chunks pgvector via `VectorStore.querySimilar()`
+- GRAPHIFY : injection réelle de `graph.json` via `GraphContextBuilder`
+- Mesurer l'impact différentiel
+
+== Actions
+
+=== Bugfixes préalables
+. `CodebaseIndexerMain.kt` : `fun main()` → `object + @JvmStatic` (class name mismatch)
+. `build.gradle.kts` : `JavaExec.environment()` → `doFirst { environment(get()) }` (Provider non résolu)
+. Dépendance Jackson `jackson-module-kotlin` absente de `implementation` → ajoutée
+. `println`/`System.err` → SLF4J + logback-classic en `runtimeOnly` (pattern des autres plugins foundry)
+
+=== Infrastructure
+. Démarré conteneur pgvector Docker (pgvector/pgvector:pg17, port 5432)
+. Indexé 50 documents, 311 chunks dans pgvector via `indexCodebase`
+. Créé `GraphGeneratorMain` + tâche `generateGraph` → 110 nodes, 225 edges → `build/graph.json`
+
+=== Nouveaux fichiers
+. `src/.../benchmark/GraphContext.kt` :
+  Data classes Jackson `GraphModel`/`GraphNode`/`GraphEdge` +
+  `GraphContextBuilder` : `load(graphFile)` + `neighborhood(model, nodeId)`
+. `src/.../benchmark/GraphGeneratorMain.kt` :
+  Walk récursif workspace (exclude .git/build/.gradle/node_modules/.kotlin/...),
+  extraction imports Kotlin, détection repo git. Export JSON pretty-printer.
+
+=== Refacto BenchmarkRunner
+. Constructeur enrichi : `pgJdbcUrl`, `pgUser`, `pgPassword`, `graphJsonPath`
+. `buildContext()` branche selon `scenarioChannels` :
+  - BASELINE (empty) : filler 100% technique
+  - RAG : `embeddingPipeline.embedQuery("cercles de confiance...")` →
+    `vectorStore.querySimilar(vec, topK=10)` → top chunks dans contexte.
+  - Graphify : `graphModel.neighborhood(nodeId)` → nœuds/arêtes proches.
+  - Budget tokens : filler ajusté (targetTokens si baseline, targetTokens/2 sinon),
+    RAG ≤ targetTokens/3 cap.
+. `BenchmarkRunnerMain` lit `PGVECTOR_*` et `GRAPH_JSON_PATH` depuis env vars.
+
+=== Tâches Gradle
+. `runBenchmark` : injecte `PGVECTOR_JDBC_URL`/`PGVECTOR_USER`/`PGVECTOR_PASSWORD` via `doFirst`
+. `generateGraph` (nouvelle) : `JavaExec → GraphGeneratorMain`, output `build/graph.json`
+
+== Résultats
+
+. BASELINE (partiel, timeout 600s) : compilation OK, pipeline OK
+. RAG_ONLY : 35 classifications deepseek-v4-pro:cloud, 0% erreur à tous les seuils (10K→128K)
+  avec injection réelle de chunks pgvector.
+  Rapport: `build/benchmark-reports/report-RAG_ONLY.{json,adoc}`
+
+== Fichiers modifiés
+
+|===
+| Fichier | Changement
+| `src/.../rag/CodebaseIndexerMain.kt` | `fun main()` → `object + @JvmStatic`, SLF4J
+| `src/.../benchmark/BenchmarkRunner.kt` | + `buildContext()` RAG/Graphify, params pgvector/graph
+| `src/.../benchmark/BenchmarkRunnerMain.kt` | Passe `pgJdbcUrl`/`graphJsonPath`
+| `src/.../benchmark/GraphContext.kt` | Nouveau — model + parser Jackson
+| `src/.../benchmark/GraphGeneratorMain.kt` | Nouveau — scanner workspace → graph.json
+| `build.gradle.kts` | `runtimeOnly(logback)`, `impl(jackson-module)`, `generateGraph`, fix `JavaExec` env
+|===
+
+== Leçons
+
+. Le `ContextFiller` original générait 408K chars pour 100K tokens — filler 3x trop lourd.
+  Correction : budget tokens basé sur `targetTokens` comme estimé, pas comme limite.
+. `JavaExec.environment(Provider<>)` ne résout pas le Provider → `doFirst { environment(get()) }` requis.
+. Le pattern SLF4J des autres plugins foundry (newpipe-gradle, bakery-gradle) :
+  `LoggerFactory.getLogger(Class::class.java)` comme `private val log`.
+. `logback-classic` en `runtimeOnly` (pas `testRuntimeOnly`) quand le JavaExec est dans `main`.
+
+== Prochaine session
+
+Option A (recommandé) : Terminer l'exécution — lancer RAG_GRAPHIFY_LOCAL pour mesurer
+l'impact différentiel Graphify (graph.json réel, pas placeholder).
+Comparer `report-RAG_ONLY.json` vs `report-RAG_GRAPHIFY_LOCAL.json`.
+
+Option B : EPIC 9 Phase 2 — US-9.8 (Query vectorielle simple) + US-9.9 (Query filtrée).

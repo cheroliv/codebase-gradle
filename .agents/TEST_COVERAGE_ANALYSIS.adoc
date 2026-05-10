@@ -1,9 +1,13 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : US-9.1 ✅ + US-9.2 ✅ + US-9.3 ✅ + US-9.4 ✅ + US-9.5 ✅ + US-9.6 ✅ — 11 scenarios Cucumber ALL PASS
+_Statut_ : 15 scenarios Cucumber (11 EPIC 9 PASS + 4 EPIC 2/4 @wip) + benchmark RAG_ONLY Ollama live exécuté
 
 |===
 | Session | Fichiers testes | Couverture | Notes
+| 012 | `BenchmarkRunner.kt` (Ollama live) + `GraphContext.kt` | RAG_ONLY exécuté | 35 classifications deepseek-v4-pro:cloud avec pgvector réel, 0% erreur 128K. GraphContext + GraphGeneratorMain testés (110 nodes, 225 edges).
+| 011 | `BenchmarkRunner.kt` (Ollama live) | 5 scénarios exécutés | 175 classifications deepseek-v4-pro:cloud, 0% erreur. Bugfix AiServices @V + JSON serialization.
+| 010 | `BenchmarkProtocolSteps.kt` (Cucumber) | 4 scenarios @wip | Validation protocole EPIC 4 : seuils tokens, 5 scenarios incrementaux, calcul taux d'erreur
+| 009 | `AnonymizationExpertSteps.kt` (Cucumber) | 3 scenarios @wip | EPIC 2 MVP0 — AnonymizationExpert deterministe (fallback sans LLM)
 | 008 | `ConfigIndexingSteps.kt` (Cucumber) | 3 scenarios PASS | YAML/JSON anonymization before embedding, zero secret in pgvector chunks
 | 007 | `MetadataIndexingSteps.kt` + `DatasetEmbeddingSteps.kt` (Cucumber) | 3 scenarios PASS | Extraction metadata Kotlin (package/class/repo), findByPackage, metadata-aware semantic search
 | 005 | `WorkspaceWalkerSteps.kt` + `DatasetEmbeddingSteps.kt` (Cucumber) | 2 scenarios PASS | WorkspaceWalker 6 fichiers (.kt+.adoc) + query multi-type top-1 adoc/kt
@@ -12,6 +16,17 @@ _Statut_ : US-9.1 ✅ + US-9.2 ✅ + US-9.3 ✅ + US-9.4 ✅ + US-9.5 ✅ + US-9
 |===
 
 == Modules
+
+=== codebase-gradle (src/main/kotlin/codebase/benchmark/)
+- `BenchmarkRunner.kt` : runner + `buildContext()` RAG/Graphify + pgvector + SpatialPerceptionExpert LangChain4j + ContextFiller + BenchmarkFixtures
+- `BenchmarkRunnerMain.kt` : entry point runBenchmark (passe pgJdbcUrl + graphJsonPath)
+- `BenchmarkReportExporter.kt` : export JSON→AsciiDoc (parser JSON minimal, 0 dépendance externe)
+- `BenchmarkReportExportMain.kt` : entry point exportBenchmarkReport
+- `GraphContext.kt` : GraphModel/GraphNode/GraphEdge Jackson + GraphContextBuilder (load/neighborhood)
+- `GraphGeneratorMain.kt` : scanner workspace → graph.json
+
+=== codebase-gradle (buildSrc/.../benchmark/)
+- `benchmark.kt` : data classes (TokenThreshold, BenchmarkScenario, BoundaryCrossingEvent, SpatialPerceptionResult, BenchmarkReport, BenchmarkConfig) + BenchmarkProtocol (160 lignes)
 
 === codebase-gradle (src/main/kotlin/codebase/rag/)
 - `KotlinMetadataExtractor.kt` : extraction package_name via regex `^package\s+`, class_name via regex de dernier type (class/object/interface), fallback filename sans extension
@@ -38,4 +53,4 @@ _Statut_ : US-9.1 ✅ + US-9.2 ✅ + US-9.3 ✅ + US-9.4 ✅ + US-9.5 ✅ + US-9
 
 == Prochaine etape
 
-Session 9 — EPIC 2 (Expert Anonymisation LangChain4j) ou EPIC 4 (Benchmark perception spatiale LLM)
+Session 013 — Exécuter RAG_GRAPHIFY_LOCAL, mesurer impact différentiel Graphify vs RAG_ONLY.

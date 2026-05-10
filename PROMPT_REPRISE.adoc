@@ -1,29 +1,41 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 9
+= PROMPT_REPRISE — Codebase Gradle — Session 13
+:author: cheroliv + opencode (deepseek-v4-pro:cloud)
+:date: 2026-05-10
+:session: 012
+:prochaine: 013
 
-> **Statut** : Session 8 ✅ — US-9.6 (Indexation YAML/JSON configs) TERMINE
-> **Mission** : Reprise au backlog — EPIC 2 (Expert Anonymisation LangChain4j) ou prochaine US EPIC 9
-
-'''
-== Session 8 (US-9.6) — Resume
-
-**Date** : 2026-05-09
-**Resultat** : US-9.6 implementee et testee.
-- YamlConfigAnonymizer cree (matching textuel des cles sensibles token/key/password/secret/credential/auth)
-- CodebaseIndexerMain etendu .yml/.yaml/.json + anonymisation pre-embedding
-- 3 fixtures test YAML/JSON (dont snake_case: access_token, refresh_token, github_token, npm_token)
-- 11/11 Cucumber scenarios PASS (8 existants + 3 nouveaux US-9.6) — zero regression
-- WorkspaceWalkerSteps validExts elargi kt,adoc,yml,yaml,json
+> **Statut** : Session 012 ✅ — EPIC 4 MVP1 RAG/Graphify câblés, RAG_ONLY exécuté (0% erreur)
+> **Mission** : Terminer exécution benchmark → mesurer impact différentiel Graphify réel
 
 '''
-== Session 9 — Priorites
+== Session 12 (EPIC 4 MVP1) — Résumé
 
-=== Option A — EPIC 2 (Expert Anonymisation LangChain4j)
+**Date** : 2026-05-10
+**Résultat** : RAG/Graphify câblés dans BenchmarkRunner.
+- Bugfix CodebaseIndexerMain (`fun main()` → `object + @JvmStatic`)
+- Bugfix `JavaExec.environment(Provider<>)` → `doFirst { environment(get()) }`
+- Migration `println`/`System.err` → SLF4J (logback `runtimeOnly`)
+- Dépendance `jackson-module-kotlin` ajoutée en `implementation`
+- `GraphContext.kt` : model Jackson + `GraphContextBuilder` (load/neighborhood)
+- `GraphGeneratorMain.kt` : scan workspace → graph.json
+- Tâche `generateGraph` : 110 nodes, 225 edges
+- `BenchmarkRunner.buildContext()` : branche RAG (pgvector `querySimilar`) + Graphify (`neighborhood`)
+- RAG_ONLY exécuté : 35 classifications, 0% erreur tous seuils (10K→128K)
+- Rapports : `build/benchmark-reports/report-RAG_ONLY.{json,adoc}`
 
-P0 dans le backlog INDEX.adoc. A FAIRE.
+'''
+== Session 13 — Priorité
 
-=== Option B — EPIC 4 (Benchmark perception spatiale LLM)
+=== Option A (recommandé) — Terminer EPIC 4 MVP1
 
-P0 dans le backlog. Mesurer seuil de tokens ou le LLM perd la notion de cercle de confiance.
+Exécuter RAG_GRAPHIFY_LOCAL → mesurer l'impact différentiel du canal Graphify.
+Comparer `report-RAG_ONLY.json` vs `report-RAG_GRAPHIFY_LOCAL.json`.
+Si 0% erreur persiste avec graph.json réel : confirmer que l'augmentation composite tient.
+
+=== Option B — EPIC 9 Phase 2 (US-9.8 + US-9.9)
+
+US-9.8 (Query vectorielle simple) + US-9.9 (Query filtrée par type).
+Reprise de la progression EPIC 9 baby-step.
 
 '''
 == Couverture Tests
@@ -36,17 +48,30 @@ P0 dans le backlog. Mesurer seuil de tokens ou le LLM perd la notion de cercle d
 | US-9.PROD — Bridge to Production | ✅ Compilation OK
 | US-9.5 — Indexation Kotlin/Java metadata | ✅ 3 scenarios
 | US-9.6 — Indexation YAML/JSON configs | ✅ 3 scenarios
+| EPIC 4 — Benchmark perception spatiale | ✅ 4 scenarios Cucumber @wip + RAG_ONLY Ollama live
+| EPIC 2 — Expert Anonymisation | ✅ 3 scenarios Cucumber @wip
 |===
 
 '''
-== Regles
+== Fichiers modifiés (session 012)
+
+- `src/.../rag/CodebaseIndexerMain.kt` : refacto `object + @JvmStatic` + SLF4J
+- `src/.../benchmark/BenchmarkRunner.kt` : + `buildContext()` RAG/Graphify, params pgvector/graph
+- `src/.../benchmark/BenchmarkRunnerMain.kt` : passe `pgJdbcUrl`/`graphJsonPath`
+- `src/.../benchmark/GraphContext.kt` : NOUVEAU — model Jackson + `GraphContextBuilder`
+- `src/.../benchmark/GraphGeneratorMain.kt` : NOUVEAU — scanner workspace → graph.json
+- `build.gradle.kts` : `runtimeOnly(logback)`, `impl(jackson-module)`, `generateGraph`, fix `JavaExec` env
+- `build/benchmark-reports/report-RAG_ONLY.{json,adoc}` : rapports générés
+
+'''
+== Règles
 
 - ❌ Pas de commit sans permission
 - ❌ Pas de tests en fin de session
-- ✅ Procedure de fin de session 6 etapes obligatoires
+- ✅ Procédure de fin de session 6 étapes obligatoires
 - ✅ Pattern Baby-Step : max 3 pts par US
 - ✅ Cucumber en anglais
-- ✅ Etat partage via PgVectorTestContext
+- ✅ SLF4J + logback pour tout le logging (pas de println/System.err dans src/main/)
 
 ---
-**Session 8** ✅ — **Session 9** 🚀
+**Session 12** ✅ — **Session 13** 🚀
