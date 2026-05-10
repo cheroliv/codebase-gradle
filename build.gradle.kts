@@ -129,7 +129,7 @@ tasks.register<JavaExec>("indexCodebase") {
 
 tasks.register<JavaExec>("queryCodebase") {
     group = "codebase"
-    description = "Queries pgvector for semantically relevant chunks. Usage: ./gradlew queryCodebase -Pquery=\"your question\" -PtopK=10"
+    description = "Queries pgvector for semantically relevant chunks. Usage: ./gradlew queryCodebase -Pquery=\"your question\" -PtopK=10 -PfileType=kt"
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass = "codebase.rag.VectorQueryMain"
 
@@ -139,6 +139,10 @@ tasks.register<JavaExec>("queryCodebase") {
     val topKProvider = providers.gradleProperty("topK")
         .map { it.toIntOrNull() ?: 10 }
         .orElse(10)
+    val fileTypeProvider = providers.gradleProperty("fileType")
+        .map { it.ifBlank { "" } }
+        .orElse(providers.environmentVariable("FILE_TYPE"))
+        .orElse("")
 
     doFirst {
         environment("PGVECTOR_JDBC_URL", pgJdbcUrlProvider.get())
@@ -146,7 +150,7 @@ tasks.register<JavaExec>("queryCodebase") {
         environment("PGVECTOR_PASSWORD", pgPasswordProvider.get())
     }
 
-    args(queryProvider.get(), topKProvider.get().toString())
+    args(queryProvider.get(), topKProvider.get().toString(), fileTypeProvider.get())
 }
 
 /**

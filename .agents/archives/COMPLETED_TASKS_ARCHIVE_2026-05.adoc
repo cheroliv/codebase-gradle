@@ -2,6 +2,7 @@
 
 |===
 | Date | Session | EPIC/US | Description
+| 2026-05-11 | 016 | US-9.9 | Filtered query by fileType: VectorStore.querySimilar() + fileExtension LIKE SQL filter, VectorQueryService.query() + fileType param, VectorQueryMain 3ème arg, task queryCodebase + fileTypeProvider. 3 scenarios Cucumber: adoc only → documentation top, kt only → source code top, yml only → config top. FilteredQuerySteps.kt: filtered query + YAML assertion.
 | 2026-05-11 | 015 | US-9.8 | VectorQueryService wraps EmbeddingPipeline.embedQuery() + VectorStore.querySimilar(). RelevantChunk data class with fileName regex extraction. VectorQueryMain CLI (query + topK args, SLF4J). Tâche Gradle queryCodebase (JavaExec, -Pquery -PtopK). 2 scenarios Cucumber: top-K ordering + topK param respected. VectorQuerySteps convert RelevantChunk → ctx.topResults.
 | 2026-05-11 | 014 | US-9.7 | Batch validation non-regression: 3 scenarios Cucumber — Full batch pipeline 9 fichiers (.kt, .yml, .json, .adoc) tokenize/store/embed/query, cross-type semantic query "HTTP client configuration" → top result Kotlin, metadata integrity zéro secret ghp_ dans stored chunks. BatchValidationSteps.kt: step definitions réutilisant extractKotlinMetadata.
 | 2026-05-11 | 013 | A1 | Bugfix `it.sourcePath` → `request.sourcePath` dans AnonymizationExpert.kt @UserMessage (paramètre `request` non résolu par AiServices, cause `IllegalArgumentException`). CI `anonymize.yml` complet : outputFile conditionnel shell (`[ -n ... ]`) + `ifBlank` Gradle → suppression NPE `mkdirs()` sur chaîne vide. Compilation OK, 0 secrets.

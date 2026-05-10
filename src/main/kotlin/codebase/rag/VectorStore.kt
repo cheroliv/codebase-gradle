@@ -106,20 +106,26 @@ class VectorStore(
         return records
     }
 
-    fun querySimilar(queryVectorStr: String, topK: Int = 5): List<QueryResult> {
+    fun querySimilar(queryVectorStr: String, topK: Int = 5, fileExtension: String? = null): List<QueryResult> {
         connection().use { conn ->
+            val extFilter = if (fileExtension != null) "AND d.file_name LIKE ?" else ""
             conn.prepareStatement("""
                 SELECT c.id, c.chunk_text, d.file_name,
                        1 - (c.embedding <=> ?::vector) AS similarity
                 FROM chunks c
                 JOIN documents d ON c.document_id = d.id
                 WHERE c.embedding IS NOT NULL
+                $extFilter
                 ORDER BY c.embedding <=> ?::vector
                 LIMIT ?
             """.trimIndent()).use { stmt ->
-                stmt.setString(1, queryVectorStr)
-                stmt.setString(2, queryVectorStr)
-                stmt.setInt(3, topK)
+                var idx = 1
+                stmt.setString(idx++, queryVectorStr)
+                if (fileExtension != null) {
+                    stmt.setString(idx++, "%.${fileExtension}")
+                }
+                stmt.setString(idx++, queryVectorStr)
+                stmt.setInt(idx, topK)
                 return stmt.executeQuery().use { rs ->
                     val results = mutableListOf<QueryResult>()
                     while (rs.next()) {

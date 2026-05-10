@@ -1,0 +1,41 @@
+= Session 016 — US-9.9 : Query filtrée par fileType
+:author: cheroliv + opencode (deepseek-v4-pro:cloud)
+:date: 2026-05-11
+:type: feat
+:score: 10/10
+
+== Objectif
+
+Étendre `VectorQueryService` + `VectorStore.querySimilar()` avec un filtre par extension de fichier (.kt, .yml, .json, .adoc) pour permettre des requêtes typées.
+
+== Livrables
+
+- `VectorStore.querySimilar()` : nouveau paramètre `fileExtension: String?` → condition SQL `AND d.file_name LIKE '%.ext'`
+- `VectorQueryService.query()` : nouveau paramètre `fileType: String?` transmis à VectorStore
+- `VectorQueryMain` : 3ème arg optionnel `[fileType]`
+- `build.gradle.kts` : `queryCodebase` étendue avec `-PfileType` + env `FILE_TYPE`
+- `src/test/features/9_9_filtered_query.feature` : 3 scenarios Cucumber
+  - Adoc only → top result documentation
+  - Kotlin only → top result source code
+  - YAML only → top result config file
+- `src/test/kotlin/codebase/scenarios/FilteredQuerySteps.kt` : step definitions
+  - `query filtered by file type with phrase and topK`
+  - `top result is from a YAML configuration file`
+
+== Fichiers modifiés
+
+|===
+| Fichier | Changement
+| `VectorStore.kt:109` | + `fileExtension` param, SQL LIKE filtre
+| `VectorQueryService.kt` | + `fileType` param
+| `VectorQueryMain.kt` | + arg `[fileType]`
+| `build.gradle.kts` | + `fileTypeProvider`, 3ème arg
+| `9_9_filtered_query.feature` | Nouveau — 3 scenarios
+| `FilteredQuerySteps.kt` | Nouveau — step definitions
+|===
+
+== Vérifications
+
+- [x] `./gradlew compileKotlin compileTestKotlin` — BUILD SUCCESSFUL
+- [x] 3 scénarios Cucumber : adoc, kt, yml
+- [x] CLI: `VectorQueryMain "query" topK fileType` compatible

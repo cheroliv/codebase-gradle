@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 016 | 2026-05-11 | feat | US-9.9 Filtered query : VectorStore + fileType LIKE SQL, 3 scenarios (adoc/kt/yml) — EPIC 9 Phase 2 complète | 10/10
 | 015 | 2026-05-11 | feat | US-9.8 VectorQueryService + queryCodebase : VectorQueryMain + gradle task + 2 scenarios Cucumber | 10/10
 | 014 | 2026-05-11 | feat | US-9.7 Validation batch : 3 scenarios Cucumber (9 fichiers, cross-type query, secret integrity) | 10/10
 | 013 | 2026-05-11 | bugfix+ci | A1: Fix `it.sourcePath` → `request.sourcePath` dans AnonymizationExpert.kt + CI `anonymize.yml` complet | 10/10
