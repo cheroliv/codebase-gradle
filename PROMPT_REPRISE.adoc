@@ -1,38 +1,35 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 14
+= PROMPT_REPRISE — Codebase Gradle — Session 15
 :author: cheroliv + opencode (deepseek-v4-pro:cloud)
 :date: 2026-05-11
-:session: 013
-:prochaine: 014
+:session: 014
+:prochaine: 015
 
-> **Statut** : Session 013 ✅ — Bug `it.sourcePath` corrigé + CI `anonymize.yml` complet
-> **Mission** : Reprendre EPIC 4 MVP1 (RAG_GRAPHIFY_LOCAL) ou EPIC 9 Phase 2
+> **Statut** : Session 014 ✅ — US-9.7 Validation batch (3 scenarios Cucumber)
+> **Mission** : US-9.8 — VectorQueryService + Gradle task queryCodebase
 
 '''
-== Session 13 — Résumé
+== Session 14 — Résumé
 
 **Date** : 2026-05-11
-**Résultat** : 2 bugs corrigés, CI prêt pour exécution complète.
-- Bug `AnonymizationExpert.kt:50`: `{{it.sourcePath}}` → `{{request.sourcePath}}` (nom paramètre requis par AiServices)
-- Bug `anonymize.yml`: outputFile vide → NPE `mkdirs()` — fix shell conditionnel + `ifBlank` Gradle
-- Compilation OK, 0 secrets exposés
+**Résultat** : US-9.7 terminée — 3 scénarios de validation batch.
+- `9_7_batch_validation.feature` : full pipeline 9 fichiers, cross-type query, integrity check
+- `BatchValidationSteps.kt` : step definitions réutilisant extractKotlinMetadata + ctx.topResults
+- Compilation main + test OK
 
 '''
-== Session 14 — Priorité
+== Session 15 — Priorité
 
-=== Option A (recommandé) — Terminer EPIC 4 MVP1
+=== US-9.8 — Query vectorielle simple (2 pts)
 
-Lancer RAG_GRAPHIFY_LOCAL → mesurer impact différentiel Graphify.
-Comparer `report-RAG_ONLY.json` vs `report-RAG_GRAPHIFY_LOCAL.json`.
+Créer `VectorQueryService` :
+- `query(text: String, topK: Int)` → appelle `EmbeddingPipeline.embedQuery()` + `VectorStore.querySimilar()`
+- `RelevantChunk` data class dans `src/main/kotlin/codebase/rag/`
+- Tâche Gradle `queryCodebase` via JavaExec
 
-=== Option B — EPIC 9 Phase 2
+=== US-9.9 — Query filtrée par type (1 pt, dépend US-9.8)
 
-US-9.8 (Query vectorielle simple) + US-9.9 (Query filtrée par type).
-Reprise baby-step EPIC 9.
-
-=== Option C — Valider CI anonymize en conditions réelles
-
-Déclencher `workflow_dispatch` sur GitHub Actions avec un fichier test pour confirmer
-que le fix `it.sourcePath` tient en environnement CI.
+Extension de VectorQueryService avec `fileType: String?` paramètre optionnel
+(.kt, .yml, .json, .adoc) + filtre dans la requête SQL.
 
 '''
 == Couverture Tests
@@ -45,7 +42,8 @@ que le fix `it.sourcePath` tient en environnement CI.
 | US-9.PROD — Bridge to Production | ✅ Compilation OK
 | US-9.5 — Indexation Kotlin/Java metadata | ✅ 3 scenarios
 | US-9.6 — Indexation YAML/JSON configs | ✅ 3 scenarios
-| EPIC 4 — Benchmark perception spatiale | ✅ 4 scenarios Cucumber @wip + RAG_ONLY Ollama live
+| US-9.7 — Batch validation | ✅ 3 scenarios
+| EPIC 4 — Benchmark perception spatiale | ✅ 4 scenarios Cucumber @wip + RAG_ONLY live
 | EPIC 2 — Expert Anonymisation | ✅ 3 scenarios Cucumber @wip
 |===
 
@@ -60,4 +58,4 @@ que le fix `it.sourcePath` tient en environnement CI.
 - ✅ SLF4J + logback pour tout le logging
 
 ---
-**Session 13** ✅ — **Session 14** 🚀
+**Session 14** ✅ — **Session 15** 🚀

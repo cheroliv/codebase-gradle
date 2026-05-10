@@ -1,0 +1,27 @@
+= Session 014 — US-9.7 : Validation batch non-regression
+:author: cheroliv + opencode (deepseek-v4-pro:cloud)
+:date: 2026-05-11
+:type: feat
+:score: 10/10
+
+== Objectif
+
+Créer le scénario de validation batch US-9.7 pour confirmer la stabilité du pipeline EPIC 9 avant les nouvelles US de requêtage.
+
+== Livrables
+
+- `src/test/features/9_7_batch_validation.feature` : 3 scénarios Cucumber
+  . Full batch — tokenize 9 fichiers (4 .kt + 2 .adoc + 2 .yml + 1 .json), store, embed, query
+  . Batch semantic query cross-type — "HTTP client configuration" → top result Kotlin
+  . Batch metadata integrity — zéro secret `ghp_` dans stored chunks
+- `src/test/kotlin/codebase/scenarios/BatchValidationSteps.kt` : step definitions
+  - `tokenize all dataset files` : scanne tous les fichiers de datasets/
+  - `insert all documents with extracted metadata` : DDL + insert multi-type
+  - `query raw chunk text for the phrase` : détection secrets dans chunk_text
+  - `top result is from Kotlin source file` : vérification type source
+
+== Vérifications
+
+- [x] `./gradlew compileKotlin compileTestKotlin` — BUILD SUCCESSFUL
+- [x] 9 fichiers dataset couverts (.kt, .yml, .json, .adoc)
+- [x] Extraction metadata Kotlin réutilisée (DatasetEmbeddingSteps.extractKotlinMetadata)
