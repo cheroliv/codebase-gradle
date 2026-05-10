@@ -14,20 +14,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Override local java.home
+        run: sed -i '/org.gradle.java.home/d' gradle.properties
 
-      - name: Install Ollama
-        run: curl -fsSL https://ollama.com/install.sh | sh
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '23'
+          distribution: 'temurin'
 
-      - name: Setup Device Key with Pool Support
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.4.1'
+
+      - name: Install Ollama Binary
+        run: |
+          curl -L https://ollama.com/download/ollama-linux-amd64.tgz -o /tmp/ollama.tgz
+          tar xzf /tmp/ollama.tgz -C /tmp
+          sudo mv /tmp/ollama /usr/local/bin/
+          sudo mv /tmp/lib/ollama /usr/local/lib/ollama
+
+      - name: Setup Device Key
         run: |
           mkdir -p ~/.ollama
           echo "${{ secrets.OLLAMA_DEVICE_KEY_A }}" > ~/.ollama/id_ed25519
           chmod 600 ~/.ollama/id_ed25519
 
-      - name: Start Ollama Server
-        run: ollama serve &>/dev/null &
+      - name: Start Ollama Serve
+        run: |
+          OLLAMA_HOST=0.0.0.0:11434 ollama serve &>/tmp/ollama.log &
+          for i in $(seq 1 30); do
+            if curl -s http://localhost:11434/api/version >/dev/null 2>&1; then
+              echo "Ollama ready"
+              break
+            fi
+            sleep 1
+          done
 
       - name: Pull Cloud Model
         run: ollama pull deepseek-v4-pro:cloud
@@ -37,7 +58,6 @@ jobs:
           gradle anonymizeWithExpert
           -PinputFile="${{ github.event.inputs.inputFile }}"
           -PoutputFile="${{ github.event.inputs.outputFile }}"
-          -Pollama.pool.enabled=true
         env:
           OLLAMA_DEVICE_KEY_A: ${{ secrets.OLLAMA_DEVICE_KEY_A }}
           OLLAMA_DEVICE_KEY_B: ${{ secrets.OLLAMA_DEVICE_KEY_B }}
