@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
 _Derniere mise a jour_ : 2026-05-11
-_Session terminee_ : 014 — US-9.7 Validation batch (3 scenarios)
-_Prochaine session_ : 015 — US-9.8 VectorQueryService + Gradle task queryCodebase
+_Session terminee_ : 015 — US-9.8 VectorQueryService + Gradle task queryCodebase
+_Prochaine session_ : 016 — US-9.9 Query filtrée par fileType
 
 '''
 == REGLES ABSOLUES (resume)
@@ -22,6 +22,7 @@ _Prochaine session_ : 015 — US-9.8 VectorQueryService + Gradle task queryCodeb
 
 |===
 | # | Date | Type | Sujet | Score
+| 015 | 2026-05-11 | feat | US-9.8 VectorQueryService + Gradle task queryCodebase + 2 scenarios Cucumber | 10/10
 | 014 | 2026-05-11 | feat | US-9.7 Validation batch : 3 scenarios (full pipeline 9 fichiers, cross-type query, secret integrity) | 10/10
 | 013 | 2026-05-11 | bugfix+ci | A1: Fix `it.sourcePath` → `request.sourcePath` dans AnonymizationExpert.kt + CI `anonymize.yml` complet (outputFile vide géré) | 10/10
 | 012 | 2026-05-10 | feat+ci | CI anonymizeWithExpert : workflow_dispatch + OLLAMA_DEVICE_KEY_A + serve manuel, pipeline OK (bug métier restant) | 8/10
