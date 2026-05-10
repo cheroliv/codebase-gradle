@@ -1,35 +1,33 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 15
+= PROMPT_REPRISE — Codebase Gradle — Session 16
 :author: cheroliv + opencode (deepseek-v4-pro:cloud)
 :date: 2026-05-11
-:session: 014
-:prochaine: 015
+:session: 015
+:prochaine: 016
 
-> **Statut** : Session 014 ✅ — US-9.7 Validation batch (3 scenarios Cucumber)
-> **Mission** : US-9.8 — VectorQueryService + Gradle task queryCodebase
+> **Statut** : Session 015 ✅ — US-9.8 VectorQueryService + queryCodebase
+> **Mission** : US-9.9 — Query filtrée par fileType
 
 '''
-== Session 14 — Résumé
+== Session 15 — Résumé
 
 **Date** : 2026-05-11
-**Résultat** : US-9.7 terminée — 3 scénarios de validation batch.
-- `9_7_batch_validation.feature` : full pipeline 9 fichiers, cross-type query, integrity check
-- `BatchValidationSteps.kt` : step definitions réutilisant extractKotlinMetadata + ctx.topResults
-- Compilation main + test OK
+**Résultat** : US-9.8 terminée — VectorQueryService + VectorQueryMain + tâche queryCodebase.
+- `VectorQueryService.kt` : query(text, topK) → embed → querySimilar → RelevantChunk (avec fileName extrait)
+- `VectorQueryMain.kt` : CLI entry point SLF4J
+- `build.gradle.kts` : tâche `queryCodebase` (-Pquery / -PtopK)
+- `9_8_vector_query.feature` : 2 scenarios (top-K ordering, topK param)
+- `VectorQuerySteps.kt` : step definitions + convert → ctx.topResults
+- Compilation OK
 
 '''
-== Session 15 — Priorité
+== Session 16 — Priorité
 
-=== US-9.8 — Query vectorielle simple (2 pts)
+=== US-9.9 — Query filtrée par type (1 pt)
 
-Créer `VectorQueryService` :
-- `query(text: String, topK: Int)` → appelle `EmbeddingPipeline.embedQuery()` + `VectorStore.querySimilar()`
-- `RelevantChunk` data class dans `src/main/kotlin/codebase/rag/`
-- Tâche Gradle `queryCodebase` via JavaExec
-
-=== US-9.9 — Query filtrée par type (1 pt, dépend US-9.8)
-
-Extension de VectorQueryService avec `fileType: String?` paramètre optionnel
-(.kt, .yml, .json, .adoc) + filtre dans la requête SQL.
+Extension de VectorQueryService.query() avec `fileType: String?` :
+- Filtre SQL par extension (`d.file_name LIKE '%.kt'` etc.)
+- Scénarios Cucumber : query Adoc only → top result adoc, query Kotlin only → top result kt
+- Tâche Gradle `queryCodebase` étendue avec -PfileType
 
 '''
 == Couverture Tests
@@ -43,6 +41,7 @@ Extension de VectorQueryService avec `fileType: String?` paramètre optionnel
 | US-9.5 — Indexation Kotlin/Java metadata | ✅ 3 scenarios
 | US-9.6 — Indexation YAML/JSON configs | ✅ 3 scenarios
 | US-9.7 — Batch validation | ✅ 3 scenarios
+| US-9.8 — Vector query service | ✅ 2 scenarios
 | EPIC 4 — Benchmark perception spatiale | ✅ 4 scenarios Cucumber @wip + RAG_ONLY live
 | EPIC 2 — Expert Anonymisation | ✅ 3 scenarios Cucumber @wip
 |===
@@ -58,4 +57,4 @@ Extension de VectorQueryService avec `fileType: String?` paramètre optionnel
 - ✅ SLF4J + logback pour tout le logging
 
 ---
-**Session 14** ✅ — **Session 15** 🚀
+**Session 15** ✅ — **Session 16** 🚀

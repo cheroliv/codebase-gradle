@@ -127,6 +127,28 @@ tasks.register<JavaExec>("indexCodebase") {
     }
 }
 
+tasks.register<JavaExec>("queryCodebase") {
+    group = "codebase"
+    description = "Queries pgvector for semantically relevant chunks. Usage: ./gradlew queryCodebase -Pquery=\"your question\" -PtopK=10"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass = "codebase.rag.VectorQueryMain"
+
+    val queryProvider = providers.gradleProperty("query")
+        .orElse(providers.environmentVariable("VECTOR_QUERY"))
+        .orElse("")
+    val topKProvider = providers.gradleProperty("topK")
+        .map { it.toIntOrNull() ?: 10 }
+        .orElse(10)
+
+    doFirst {
+        environment("PGVECTOR_JDBC_URL", pgJdbcUrlProvider.get())
+        environment("PGVECTOR_USER", pgUserProvider.get())
+        environment("PGVECTOR_PASSWORD", pgPasswordProvider.get())
+    }
+
+    args(queryProvider.get(), topKProvider.get().toString())
+}
+
 /**
  * Verifies via logs that ReadmePlantUmlConfig anonymization masks token, userName
  * and userEmail, and preserves all other fields.

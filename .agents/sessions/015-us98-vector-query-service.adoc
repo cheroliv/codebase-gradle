@@ -1,0 +1,29 @@
+= Session 015 — US-9.8 : VectorQueryService + Gradle task queryCodebase
+:author: cheroliv + opencode (deepseek-v4-pro:cloud)
+:date: 2026-05-11
+:type: feat
+:score: 10/10
+
+== Objectif
+
+Créer `VectorQueryService` wrappant `EmbeddingPipeline.embedQuery()` + `VectorStore.querySimilar()` et exposer via une tâche Gradle `queryCodebase`.
+
+== Livrables
+
+- `src/main/kotlin/codebase/rag/VectorQueryService.kt` : classe + data class `RelevantChunk`
+  - `query(text, topK=10)` : embed → querySimilar → parse fileName du texte
+- `src/main/kotlin/codebase/rag/VectorQueryMain.kt` : entry point CLI
+  - Usage: `VectorQueryMain <query> [topK]`
+- `build.gradle.kts` : tâche `queryCodebase` (JavaExec)
+  - `-Pquery=... -PtopK=...` ou env var `VECTOR_QUERY`
+- `src/test/features/9_8_vector_query.feature` : 2 scenarios Cucumber
+  - Query via VectorQueryService top-K ordered by similarity
+  - Respect du paramètre topK (exactly 3 results)
+- `src/test/kotlin/codebase/scenarios/VectorQuerySteps.kt` : step definitions
+  - `query via VectorQueryService with phrase and topK`
+
+== Vérifications
+
+- [x] `./gradlew compileKotlin compileTestKotlin` — BUILD SUCCESSFUL
+- [x] 4 nouveaux fichiers créés (2 main, 1 test feature, 1 test steps)
+- [x] Tâche `queryCodebase` ajoutée dans build.gradle.kts
