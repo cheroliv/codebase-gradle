@@ -14,11 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: '23'
-          distribution: 'temurin'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Install Ollama
         run: curl -fsSL https://ollama.com/install.sh | sh
@@ -37,7 +34,7 @@ jobs:
 
       - name: Run Anonymize With Expert
         run: >
-          ./gradlew anonymizeWithExpert
+          gradle anonymizeWithExpert
           -PinputFile="${{ github.event.inputs.inputFile }}"
           -PoutputFile="${{ github.event.inputs.outputFile }}"
           -Pollama.pool.enabled=true
