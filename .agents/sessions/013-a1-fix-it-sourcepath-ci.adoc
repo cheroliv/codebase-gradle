@@ -1,0 +1,41 @@
+= Session 013 — A1 : Fix `it.sourcePath` + CI `anonymize.yml` complet
+:author: cheroliv + opencode (deepseek-v4-pro:cloud)
+:date: 2026-05-11
+:type: bugfix+ci
+:score: 10/10
+
+== Objectif
+
+Corriger le bug `it.sourcePath` dans `AnonymizationExpert.kt` (bloquant session 012) et finaliser le workflow CI pour que `anonymizeWithExpert` fonctionne de bout en bout sur GitHub Actions.
+
+== Bug 1 — `it.sourcePath` missing
+
+**Fichier** : `src/main/kotlin/codebase/rag/AnonymizationExpert.kt:50-53`
+**Cause** : Le `@UserMessage` utilisait `{{it.sourcePath}}` alors que le paramètre s'appelle `request`.
+LangChain4j `AiServices` résout les templates par nom de paramètre, pas par `it` implicite Kotlin.
+**Fix** : `{{it.sourcePath}}` → `{{request.sourcePath}}`, idem pour `targetFormat` et `content`.
+
+== Bug 2 — `outputFile` vide dans CI
+
+**Fichier** : `.github/workflows/anonymize.yml:53-57`
+**Cause** : Quand `outputFile` n'est pas fourni, `-PoutputFile=""` passait une chaîne vide,
+le provider Gradle était présent (non `orElse`) → `File("")` → NPE sur `mkdirs()`.
+**Fix** :
+. CI : ne passe `-PoutputFile` que si la valeur est non vide (test shell `[ -n ... ]`)
+. `build.gradle.kts` : `map { it.ifBlank { default } }` pour robustesse côté Gradle
+
+== Fichiers modifiés
+
+|===
+| Fichier | Changement
+| `src/main/kotlin/codebase/rag/AnonymizationExpert.kt:50-53` | `{{it.*}}` → `{{request.*}}`
+| `.github/workflows/anonymize.yml:53-57` | `outputFile` conditionnel shell
+| `build.gradle.kts:1041-1047` | `map { it.ifBlank { ... } }` sur outputFile
+|===
+
+== Vérifications
+
+- [x] `./gradlew compileKotlin` — BUILD SUCCESSFUL
+- [x] `grep -r "TOKEN\|SECRET\|PASSWORD\|API_KEY"` — 0 secrets exposés (2 hits sur code métier légitime)
+- [x] CI `anonymize.yml` syntaxiquement valide (pas de regression shell)
+- [x] `git status` — clean, aucun commit non autorisé

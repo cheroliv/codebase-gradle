@@ -47,10 +47,10 @@ interface AnonymizationExpert {
     )
     @UserMessage(
         """
-        Analyse le contenu de ce fichier {{it.sourcePath}} au format {{it.targetFormat}}.
+        Analyse le contenu de ce fichier {{request.sourcePath}} au format {{request.targetFormat}}.
         
         Contenu :
-        {{it.content}}
+        {{request.content}}
         
         Retourne UNIQUEMENT le JSON d'anonymisation. Aucun autre texte.
         """

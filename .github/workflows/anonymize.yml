@@ -51,10 +51,12 @@ jobs:
         run: ollama pull deepseek-v4-pro:cloud
 
       - name: Run Anonymize With Expert
-        run: >
-          gradle anonymizeWithExpert
-          -PinputFile="${{ github.event.inputs.inputFile }}"
-          -PoutputFile="${{ github.event.inputs.outputFile }}"
+        run: |
+          EXTRA=""
+          if [ -n "${{ github.event.inputs.outputFile }}" ]; then
+            EXTRA="-PoutputFile=${{ github.event.inputs.outputFile }}"
+          fi
+          gradle anonymizeWithExpert -PinputFile="${{ github.event.inputs.inputFile }}" $EXTRA
         env:
           OLLAMA_DEVICE_KEY_A: ${{ secrets.OLLAMA_DEVICE_KEY_A }}
           OLLAMA_DEVICE_KEY_B: ${{ secrets.OLLAMA_DEVICE_KEY_B }}
