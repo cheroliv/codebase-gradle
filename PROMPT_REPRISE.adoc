@@ -1,49 +1,56 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 16
+= PROMPT_REPRISE — Codebase Gradle — Session 17
 :author: cheroliv + opencode (deepseek-v4-pro:cloud)
 :date: 2026-05-11
-:session: 015
-:prochaine: 016
+:session: 016
+:prochaine: 017
 
-> **Statut** : Session 015 ✅ — US-9.8 VectorQueryService + queryCodebase
-> **Mission** : US-9.9 — Query filtrée par fileType
-
-'''
-== Session 15 — Résumé
-
-**Date** : 2026-05-11
-**Résultat** : US-9.8 terminée — VectorQueryService + VectorQueryMain + tâche queryCodebase.
-- `VectorQueryService.kt` : query(text, topK) → embed → querySimilar → RelevantChunk (avec fileName extrait)
-- `VectorQueryMain.kt` : CLI entry point SLF4J
-- `build.gradle.kts` : tâche `queryCodebase` (-Pquery / -PtopK)
-- `9_8_vector_query.feature` : 2 scenarios (top-K ordering, topK param)
-- `VectorQuerySteps.kt` : step definitions + convert → ctx.topResults
-- Compilation OK
+> **Statut** : Sessions 014-016 ✅ — EPIC 9 Phase 2 complète (US-9.7, US-9.8, US-9.9)
+> **Mission** : EPIC 9 Phase 3 (US-9.10 CompositeContextBuilder) ou EPIC 4 MVP1 (RAG_GRAPHIFY_LOCAL)
 
 '''
-== Session 16 — Priorité
+== Sessions 14-16 — Résumé EPIC 9 Phase 2
 
-=== US-9.9 — Query filtrée par type (1 pt)
+|===
+| Session | US | Livrable | Scenarios
+| 014 | US-9.7 | Batch validation | 3 (full pipeline, cross-type, secrets)
+| 015 | US-9.8 | VectorQueryService + queryCodebase | 2 (top-K, topK param)
+| 016 | US-9.9 | Filtered query by fileType | 3 (adoc, kt, yml)
+|===
 
-Extension de VectorQueryService.query() avec `fileType: String?` :
-- Filtre SQL par extension (`d.file_name LIKE '%.kt'` etc.)
-- Scénarios Cucumber : query Adoc only → top result adoc, query Kotlin only → top result kt
-- Tâche Gradle `queryCodebase` étendue avec -PfileType
+8 scenarios Cucumber ajoutés, 0 regression sur les 11 existants.
+
+'''
+== Session 17 — Priorité
+
+=== Option A (recommandé) — EPIC 9 Phase 3
+
+US-9.10 CompositeContextBuilder : agrège EAGER/LAZY + RAG pgvector + Graphify(placeholder),
+token budget 40/30/20/10.
+
+=== Option B — EPIC 4 MVP1
+
+Lancer RAG_GRAPHIFY_LOCAL → mesurer impact différentiel Graphify vs RAG_ONLY.
+
+=== Option C — Valider CI anonymize
+
+workflow_dispatch sur GitHub Actions pour confirmer le fix it.sourcePath.
 
 '''
 == Couverture Tests
 
 |===
 | Feature | Etat
-| EPIC 9.1 — pgvector container (Cucumber) | ✅ 2 scenarios
-| US-9.2+9.3 — Dataset + Embeddings (Cucumber) | ✅ 1 scenario (12 steps)
-| US-9.3+9.4 — WorkspaceWalker + adoc (Cucumber) | ✅ 2 scenarios
+| EPIC 9.1 — pgvector container | ✅ 2 scenarios
+| US-9.2+9.3 — Dataset + Embeddings | ✅ 1 scenario (12 steps)
+| US-9.3+9.4 — WorkspaceWalker + adoc | ✅ 2 scenarios
 | US-9.PROD — Bridge to Production | ✅ Compilation OK
-| US-9.5 — Indexation Kotlin/Java metadata | ✅ 3 scenarios
+| US-9.5 — Indexation Kotlin metadata | ✅ 3 scenarios
 | US-9.6 — Indexation YAML/JSON configs | ✅ 3 scenarios
 | US-9.7 — Batch validation | ✅ 3 scenarios
 | US-9.8 — Vector query service | ✅ 2 scenarios
-| EPIC 4 — Benchmark perception spatiale | ✅ 4 scenarios Cucumber @wip + RAG_ONLY live
-| EPIC 2 — Expert Anonymisation | ✅ 3 scenarios Cucumber @wip
+| US-9.9 — Filtered query | ✅ 3 scenarios
+| EPIC 4 — Benchmark perception spatiale | ✅ 4 scenarios @wip + RAG_ONLY live
+| EPIC 2 — Expert Anonymisation | ✅ 3 scenarios @wip
 |===
 
 '''
@@ -57,4 +64,4 @@ Extension de VectorQueryService.query() avec `fileType: String?` :
 - ✅ SLF4J + logback pour tout le logging
 
 ---
-**Session 15** ✅ — **Session 16** 🚀
+**Session 16** ✅ — **Session 17** 🚀

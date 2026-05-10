@@ -16,9 +16,9 @@ class VectorQueryService(
 ) {
     private val fileNameRegex = Regex("""^\((.+?)\) """)
 
-    fun query(text: String, topK: Int = 10): List<RelevantChunk> {
+    fun query(text: String, topK: Int = 10, fileType: String? = null): List<RelevantChunk> {
         val vectorStr = embeddingPipeline.embedQuery(text)
-        val results = vectorStore.querySimilar(vectorStr, topK)
+        val results = vectorStore.querySimilar(vectorStr, topK, fileType)
         return results.map { r ->
             val match = fileNameRegex.find(r.text)
             RelevantChunk(
