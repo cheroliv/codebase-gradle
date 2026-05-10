@@ -29,6 +29,9 @@ jobs:
           echo "${{ secrets.OLLAMA_DEVICE_KEY_A }}" > ~/.ollama/id_ed25519
           chmod 600 ~/.ollama/id_ed25519
 
+      - name: Start Ollama Server
+        run: ollama serve &>/dev/null &
+
       - name: Pull Cloud Model
         run: ollama pull deepseek-v4-pro:cloud
 
