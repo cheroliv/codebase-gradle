@@ -2,15 +2,17 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 012 | 2026-05-10 | feat | EPIC 4 MVP1 — Câblage RAG/Graphify réels: Bugfix CodebaseIndexerMain + JavaExec env, SLF4J, GraphContext+GraphGeneratorMain, buildContext() pgvector+graph.json, generateGraph task, RAG_ONLY 0% erreur 128K | 10/10
+| 011 | 2026-05-10 | feat | EPIC 4 Benchmark Execution — 5 scénarios Ollama (0% erreur, 2 bugs corrigés) | 10/10
+| 010 | 2026-05-10 | feat | EPIC 4 MVP0 — Benchmark perception spatiale: nettoyage duplication 006, 4 scénarios Cucumber @wip, export AsciiDoc (parser JSON minimal) | 10/10
 | 009 | 2026-05-10 | feat | EPIC 2 MVP0 — Expert Anonymisation LangChain4j: AnonymizationExpert interface + factory + deterministic fallback + 3 scenarios Cucumber @wip | 10/10
 | 008 | 2026-05-09 | feat | US-9.6 — Indexation YAML/JSON configs anonymisées: YamlConfigAnonymizer + 3 scenarios Cucumber + 11/11 PASS | 10/10
 | 007 | 2026-05-09 | audit | Audit global + vérification socle : 8/8 Cucumber PASS, 4/4 anonymizers PASS, compile OK | 10/10
 | 006 | 2026-05-09 | feat | US-9.5 — Indexation metadata Kotlin: KotlinMetadataExtractor + VectorStore metadata + findByPackage + 3 scenarios Cucumber | 10/10
-| 006 | 2026-05-07 | feat | US-9.PROD — Bridge to Production: src/main/kotlin + VectorStore + EmbeddingPipeline + indexCodebase | 10/10
-| 005 | 2026-05-07 | bugfix | US-9.3 & US-9.4 — Dedup steps Cucumber + PgVectorTestContext singleton | 10/10
-| 004 | 2026-05-07 | feat | US-9.2 & US-9.3 — Dataset minimal + Embeddings ONNX → pgvector (pipeline complet) | 10/10
-| 003 | 2026-05-07 | chore | Migration chemins foundry/ → foundry/OSS/ dans INDEX.adoc (granularisation OSS/CSS) | -
-| 002 | 2026-05-04 | governance | Renommage gouvernance openclaw→quizz-benchmark (9 fichiers) | -
-| 001 | 2026-05-03 (nuit) | feat+chore | US-9.1 pgvector container + dilution stimulus EPIC9 dans AGENT_GOVERNANCE | 8/10
-| 000 | 2026-05-03 | init | Migration gouvernance agent depuis quizz-benchmark-gradle | -
+| 005 | 2026-05-07 | feat | US-9.PROD — Bridge to Production: src/main/kotlin + VectorStore + EmbeddingPipeline + indexCodebase | 10/10
+| 004 | 2026-05-07 | bugfix | US-9.3 & US-9.4 — Dedup steps Cucumber + PgVectorTestContext singleton | 10/10
+| 003 | 2026-05-07 | feat | US-9.2 & US-9.3 — Dataset minimal + Embeddings ONNX → pgvector (pipeline complet) | 10/10
+| 002 | 2026-05-07 | chore | Migration chemins foundry/ → foundry/OSS/ dans INDEX.adoc (granularisation OSS/CSS) | -
+| 001 | 2026-05-04 | governance | Renommage gouvernance openclaw→quizz-benchmark (9 fichiers) | -
+| 000 | 2026-05-03 | init | Migration gouvernance agent depuis quizz-benchmark-gradle + US-9.1 pgvector container | -
 |===

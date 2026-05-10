@@ -1,4 +1,5 @@
 // build.gradle.kts
+import benchmark.*
 import codebase.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
@@ -52,12 +53,14 @@ dependencies {
     implementation(libs.bundles.langchain4j.rag)
     implementation(libs.bundles.r2dbc)
     implementation(libs.bundles.arrow)
+    implementation(libs.jackson.module.kotlin)
     implementation(libs.testcontainers.postgresql)
     implementation(libs.mapstruct)
     annotationProcessor(libs.mapstruct.processor)
 
     testImplementation(kotlin("test-junit5"))
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    runtimeOnly(libs.logback.classic)
     testRuntimeOnly(libs.logback.classic)
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.testcontainers.junit5)
@@ -116,9 +119,12 @@ tasks.register<JavaExec>("indexCodebase") {
     description = "Indexes project source files into pgvector for RAG augmentation"
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass = "codebase.rag.CodebaseIndexerMain"
-    environment("PGVECTOR_JDBC_URL", pgJdbcUrlProvider)
-    environment("PGVECTOR_USER", pgUserProvider)
-    environment("PGVECTOR_PASSWORD", pgPasswordProvider)
+
+    doFirst {
+        environment("PGVECTOR_JDBC_URL", pgJdbcUrlProvider.get())
+        environment("PGVECTOR_USER", pgUserProvider.get())
+        environment("PGVECTOR_PASSWORD", pgPasswordProvider.get())
+    }
 }
 
 /**
@@ -1039,4 +1045,97 @@ tasks.register<JavaExec>("anonymizeWithExpert") {
         inputFilePath.orElse("src/test/resources/datasets/config.yml").get(),
         outputFilePath.orElse("build/anonymized-output.yml").get()
     )
+}
+
+/**
+ * Imprime le protocole de mesure EPIC 4 — Benchmark de perception spatiale LLM.
+ * Usage : ./gradlew benchmarkProtocol
+ *
+ * Affiche la grille des seuils de tokens, les 5 scénarios à couverture incrémentale,
+ * les 5 cercles de confiance et la métrique clé (taux d'erreur de classification).
+ */
+tasks.register("benchmarkProtocol") {
+    group = "codebase"
+    description = "Displays EPIC 4 measurement protocol: thresholds, scenarios, circles, metric"
+
+    doLast {
+        val cfg = BenchmarkConfig()
+
+        logger.lifecycle("")
+        logger.lifecycle("═══ EPIC 4 — Benchmark de perception spatiale LLM ═══")
+        logger.lifecycle("")
+
+        logger.lifecycle("── Cercles de confiance ──")
+        BenchmarkProtocol.CIRCLE_LABELS.forEach { (circle, label) ->
+            logger.lifecycle("  $label")
+        }
+
+        logger.lifecycle("")
+        logger.lifecycle("── Seuils de tokens testés ──")
+        cfg.thresholds.forEach { t ->
+            logger.lifecycle("  ${t.label} — ${t.size} tokens")
+        }
+
+        logger.lifecycle("")
+        logger.lifecycle("── Scénarios (couverture incrémentale) ──")
+        cfg.scenarios.forEach { s ->
+            val channels = if (s.channels.isEmpty()) "(baseline brute, zéro canal)"
+            else s.channels.joinToString(" + ")
+            logger.lifecycle("  ${s.id} | $channels | ${s.description}")
+        }
+
+        logger.lifecycle("")
+        logger.lifecycle("── Métrique clé ──")
+        logger.lifecycle("  Taux d'erreur de classification par cercle =")
+        logger.lifecycle("  BoundaryCrossingEvents / TotalSamples")
+        logger.lifecycle("")
+        logger.lifecycle("── Output : build/benchmark-reports/")
+        logger.lifecycle("")
+    }
+}
+
+/**
+ * Exécute le benchmark de perception spatiale pour un scénario donné.
+ * Usage : ./gradlew runBenchmark -Pscenario=BASELINE|RAG_ONLY|RAG_GRAPHIFY_LOCAL|RAG_GRAPHIFY_WORKSPACE|FOUR_CHANNELS
+ */
+tasks.register<JavaExec>("runBenchmark") {
+    group = "codebase"
+    description = "Runs EPIC 4 spatial perception benchmark for a given scenario (default: BASELINE)"
+
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass = "codebase.benchmark.BenchmarkRunnerMain"
+
+    doFirst {
+        environment("PGVECTOR_JDBC_URL", pgJdbcUrlProvider.get())
+        environment("PGVECTOR_USER", pgUserProvider.get())
+        environment("PGVECTOR_PASSWORD", pgPasswordProvider.get())
+    }
+
+    val scenario = providers.gradleProperty("scenario").orElse("BASELINE")
+    args(scenario.get())
+}
+
+tasks.register<JavaExec>("generateGraph") {
+    group = "codebase"
+    description = "Generates graph.json knowledge graph of the workspace"
+
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass = "codebase.benchmark.GraphGeneratorMain"
+
+    val outputFile = providers.gradleProperty("graphOutput").orElse("build/graph.json")
+    args(outputFile.get())
+}
+
+tasks.register<JavaExec>("exportBenchmarkReport") {
+    group = "codebase"
+    description = "Converts an existing benchmark JSON report to AsciiDoc (default: build/benchmark-reports/report-BASELINE.json)"
+
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass = "codebase.benchmark.BenchmarkReportExportMain"
+
+    val scenario = providers.gradleProperty("scenario").orElse("BASELINE")
+    val inputFile = providers.gradleProperty("inputFile")
+        .orElse("build/benchmark-reports/report-${scenario.get()}.json")
+
+    args(scenario.get(), inputFile.get())
 }

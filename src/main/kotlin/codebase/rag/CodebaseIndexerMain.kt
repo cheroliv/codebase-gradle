@@ -1,59 +1,68 @@
 package codebase.rag
 
-fun main() {
-    val jdbcUrl = System.getenv("PGVECTOR_JDBC_URL") ?: "jdbc:postgresql://localhost:5432/codebase_rag"
-    val user = System.getenv("PGVECTOR_USER") ?: "codebase"
-    val password = System.getenv("PGVECTOR_PASSWORD") ?: "codebase"
+import codebase.walker.WorkspaceWalker
+import org.slf4j.LoggerFactory
 
-    println("indexCodebase — connecting to pgvector at ${jdbcUrl.replace(Regex("password=.*"), "password=***")}")
+object CodebaseIndexerMain {
+    private val log = LoggerFactory.getLogger(CodebaseIndexerMain::class.java)
 
-    val store = VectorStore(jdbcUrl, user, password)
-    store.initSchema()
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val jdbcUrl = System.getenv("PGVECTOR_JDBC_URL") ?: "jdbc:postgresql://localhost:5432/codebase_rag"
+        val user = System.getenv("PGVECTOR_USER") ?: "codebase"
+        val password = System.getenv("PGVECTOR_PASSWORD") ?: "codebase"
 
-    val rootDir = System.getenv("CODEBASE_ROOT_DIR")?.let { java.io.File(it) } ?: java.io.File(".")
-    val sourceExtensions = listOf("kt", "adoc", "kts")
-    val configExtensions = listOf("yml", "yaml", "json")
+        log.info("Connecting to pgvector at ${jdbcUrl.replace(Regex("password=.*"), "password=***")}")
 
-    val walker = codebase.walker.WorkspaceWalker(rootDir)
-    val files = walker.walk().filter { it.extension in sourceExtensions + configExtensions }
+        val store = VectorStore(jdbcUrl, user, password)
+        store.initSchema()
 
-    println("Walking ${rootDir.absolutePath}: found ${files.size} indexable files")
+        val rootDir = System.getenv("CODEBASE_ROOT_DIR")?.let { java.io.File(it) } ?: java.io.File(".")
+        val sourceExtensions = listOf("kt", "adoc", "kts")
+        val configExtensions = listOf("yml", "yaml", "json")
 
-    val metadataExtractor = KotlinMetadataExtractor(repoName = rootDir.name)
-    val anonymizer = YamlConfigAnonymizer
-    var totalChunks = 0
-    for (wf in files) {
-        val file = java.io.File(wf.filePath)
-        val rawText = try {
-            file.readText()
-        } catch (e: Exception) {
-            System.err.println("Cannot read ${wf.filePath}: ${e.message}")
-            continue
+        val walker = WorkspaceWalker(rootDir)
+        val files = walker.walk().filter { it.extension in sourceExtensions + configExtensions }
+
+        log.info("Walking {}: found {} indexable files", rootDir.absolutePath, files.size)
+
+        val metadataExtractor = KotlinMetadataExtractor(repoName = rootDir.name)
+        var totalChunks = 0
+        for (wf in files) {
+            val file = java.io.File(wf.filePath)
+            val rawText = try {
+                file.readText()
+            } catch (e: Exception) {
+                log.error("Cannot read {}: {}", wf.filePath, e.message)
+                continue
+            }
+            val text = if (wf.extension in configExtensions) {
+                YamlConfigAnonymizer.anonymize(rawText, wf.extension)
+            } else rawText
+
+            val chunks = ChunkTokenizer.splitIntoSentenceLevelChunks(text)
+            val metadata = if (wf.extension == "kt") {
+                metadataExtractor.extract(wf.filePath, rawText)
+            } else {
+                KotlinMetadata(packageName = null, className = null, repoName = rootDir.name)
+            }
+            store.insertDocument(wf.fileName, wf.filePath, wf.fileSize, chunks, metadata.packageName, metadata.className, metadata.repoName)
+            totalChunks += chunks.size
+            log.info("  {}: {} chunks{}{}", wf.fileName, chunks.size,
+                if (metadata.packageName != null) " (pkg=${metadata.packageName})" else "",
+                if (wf.extension in configExtensions) " [anonymized]" else "")
         }
-        val text = if (wf.extension in configExtensions) {
-            anonymizer.anonymize(rawText, wf.extension)
-        } else rawText
 
-        val chunks = ChunkTokenizer.splitIntoSentenceLevelChunks(text)
-        val metadata = if (wf.extension == "kt") {
-            metadataExtractor.extract(wf.filePath, rawText)
-        } else {
-            KotlinMetadata(packageName = null, className = null, repoName = rootDir.name)
+        log.info("Total: {} documents, {} chunks", files.size, totalChunks)
+
+        if (totalChunks > 0) {
+            val allRecords = store.fetchAllChunks()
+            log.info("Computing embeddings for {} chunks via ONNX AllMiniLmL6V2...", allRecords.size)
+            val pipeline = EmbeddingPipeline(store)
+            pipeline.embedAll(allRecords)
+            log.info("Embeddings computed and stored")
         }
-        store.insertDocument(wf.fileName, wf.filePath, wf.fileSize, chunks, metadata.packageName, metadata.className, metadata.repoName)
-        totalChunks += chunks.size
-        println("  ${wf.fileName}: ${chunks.size} chunks${if (metadata.packageName != null) " (pkg=${metadata.packageName})" else ""}${if (wf.extension in configExtensions) " [anonymized]" else ""}")
+
+        log.info("indexCodebase complete — {} documents, {} chunks indexed", store.countDocuments(), store.countChunks())
     }
-
-    println("Total: ${files.size} documents, $totalChunks chunks")
-
-    if (totalChunks > 0) {
-        val allRecords = store.fetchAllChunks()
-        println("Computing embeddings for ${allRecords.size} chunks via ONNX AllMiniLmL6V2...")
-        val pipeline = EmbeddingPipeline(store)
-        pipeline.embedAll(allRecords)
-        println("Embeddings computed and stored")
-    }
-
-    println("indexCodebase complete — ${store.countDocuments()} documents, ${store.countChunks()} chunks indexed")
 }
