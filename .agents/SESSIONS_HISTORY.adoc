@@ -2,7 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
-| 012 | 2026-05-10 | feat | EPIC 4 MVP1 — Câblage RAG/Graphify réels: Bugfix CodebaseIndexerMain + JavaExec env, SLF4J, GraphContext+GraphGeneratorMain, buildContext() pgvector+graph.json, generateGraph task, RAG_ONLY 0% erreur 128K | 10/10
+| 012 | 2026-05-10 | feat+ci | CI anonymizeWithExpert : workflow_dispatch + OLLAMA_DEVICE_KEY_A + serve manuel, pipeline CI OK | 8/10
 | 011 | 2026-05-10 | feat | EPIC 4 Benchmark Execution — 5 scénarios Ollama (0% erreur, 2 bugs corrigés) | 10/10
 | 010 | 2026-05-10 | feat | EPIC 4 MVP0 — Benchmark perception spatiale: nettoyage duplication 006, 4 scénarios Cucumber @wip, export AsciiDoc (parser JSON minimal) | 10/10
 | 009 | 2026-05-10 | feat | EPIC 2 MVP0 — Expert Anonymisation LangChain4j: AnonymizationExpert interface + factory + deterministic fallback + 3 scenarios Cucumber @wip | 10/10
