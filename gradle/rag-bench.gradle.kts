@@ -140,6 +140,15 @@ project.tasks.register<JavaExec>("benchmarkPertinence") {
     args(outputDir.get())
 }
 
+project.tasks.register<JavaExec>("classifyVisionOpinion") {
+    group = "codebase"
+    description = "US-9.14 Classifies 10 test sections as VISION or OPINION via LLM prompt engineering"
+    classpath = runtime
+    mainClass = "codebase.rag.VisionOpinionClassifierMain"
+    val outputDir = project.providers.gradleProperty("outputDir").orElse("build/vision-opinion-reports")
+    args(outputDir.get())
+}
+
 project.tasks.register("benchmarkProtocol") {
     group = "codebase"
     description = "Displays EPIC 4 measurement protocol"
