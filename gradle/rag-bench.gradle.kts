@@ -126,6 +126,20 @@ project.tasks.register<JavaExec>("augmentOpencode") {
     args(ragQuestion.get())
 }
 
+project.tasks.register<JavaExec>("benchmarkPertinence") {
+    group = "codebase"
+    description = "US-9.13 Benchmarks pertinence des reponses LLM avec/sans vecteur composite (gate MVP0)"
+    classpath = runtime
+    mainClass = "codebase.rag.PertinenceBenchmarkMain"
+    doFirst {
+        environment("PGVECTOR_JDBC_URL", pgUrl.get())
+        environment("PGVECTOR_USER", pgUser.get())
+        environment("PGVECTOR_PASSWORD", pgPass.get())
+    }
+    val outputDir = project.providers.gradleProperty("outputDir").orElse("build/pertinence-reports")
+    args(outputDir.get())
+}
+
 project.tasks.register("benchmarkProtocol") {
     group = "codebase"
     description = "Displays EPIC 4 measurement protocol"
