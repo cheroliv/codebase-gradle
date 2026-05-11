@@ -34,6 +34,7 @@ class CompositeContextSteps {
 
         val builder = CompositeContextBuilder(workspaceRoot, store, pipeline, config)
         composite = builder.build(question)
+        CompositeContextHolder.set(composite!!)
 
         log.info("CompositeContext built: EAGER={} chars, RAG={} chars, Graphify={} chars",
             composite!!.eagerSection.length, composite!!.ragSection.length, composite!!.graphifySection.length)

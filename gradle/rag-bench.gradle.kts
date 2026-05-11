@@ -96,6 +96,36 @@ project.tasks.register<JavaExec>("augmentContext") {
     args(ragQuestion.get())
 }
 
+project.tasks.register<JavaExec>("injectOpencode") {
+    group = "codebase"
+    description = "Injects composite context with [REGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY] headers into /tmp/opencode-context.txt"
+    classpath = runtime
+    mainClass = "codebase.rag.OpencodeInjectorMain"
+    doFirst {
+        environment("PGVECTOR_JDBC_URL", pgUrl.get())
+        environment("PGVECTOR_USER", pgUser.get())
+        environment("PGVECTOR_PASSWORD", pgPass.get())
+    }
+    val ragQuestion = project.providers.gradleProperty("ragQuestion")
+        .orElse("architecture du workspace")
+    args(ragQuestion.get())
+}
+
+project.tasks.register<JavaExec>("augmentOpencode") {
+    group = "codebase"
+    description = "Full pipeline: walk→index→query→format→/tmp/opencode-context.txt for opencode augmentation"
+    classpath = runtime
+    mainClass = "codebase.rag.AugmentOpencodeMain"
+    doFirst {
+        environment("PGVECTOR_JDBC_URL", pgUrl.get())
+        environment("PGVECTOR_USER", pgUser.get())
+        environment("PGVECTOR_PASSWORD", pgPass.get())
+    }
+    val ragQuestion = project.providers.gradleProperty("ragQuestion")
+        .orElse("architecture du workspace")
+    args(ragQuestion.get())
+}
+
 project.tasks.register("benchmarkProtocol") {
     group = "codebase"
     description = "Displays EPIC 4 measurement protocol"

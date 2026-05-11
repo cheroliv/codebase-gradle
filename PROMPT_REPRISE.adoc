@@ -1,51 +1,48 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 019
+= PROMPT_REPRISE — Codebase Gradle — Session 020
 :author: cheroliv + opencode (deepseek-v4-pro:cloud)
 :date: 2026-05-11
-:session: 018
-:prochaine: 019
+:session: 019
+:prochaine: 020
 
-> **Statut** : Session 018 ✅ — US-9.10 CompositeContextBuilder TERMINÉ (tâche Gradle + Cucumber)
-> **Mission** : US-9.11 OpencodeInjector + potentiellement US-9.12 augmentOpencode
+> **Statut** : Session 019 ✅ — US-9.11 OpencodeInjector + US-9.12 augmentOpencode TERMINÉS
+> **Mission** : US-9.13 Benchmark pertinence (gate MVP0)
 
 '''
-== Session 018 — Résumé
+== Session 019 — Résumé
 
 |===
 | Fichier | Rôle
-| `gradle/rag-bench.gradle.kts:84-97` | Tâche `augmentContext` (JavaExec → CompositeContextBuilderMain, -PragQuestion)
-| `9_10_composite_context.feature` | 2 scénarios Cucumber : canaux + budget + chunks RAG
-| `CompositeContextSteps.kt` | Step definitions testant CompositeContextBuilder.build()
+| `OpencodeInjector.kt` | `inject(CompositeContext)` → [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY]
+| `OpencodeInjectorMain.kt` | CLI → /tmp/opencode-context.txt
+| `AugmentOpencodeMain.kt` | Pipeline complet walk→index→query→format (100 lignes)
+| `rag-bench.gradle.kts` | +2 tâches : injectOpencode + augmentOpencode
+| `9_11_opencode_injector.feature` | 2 scénarios (headers présents + contenu non-vide)
+| `9_12_augment_opencode.feature` | 1 scénario (output > 300 bytes, 3 sections)
 |===
 
-Compilation main + test OK. US-9.10 complètement TERMINÉ : config ✅ builder ✅ main CLI ✅ tâche Gradle ✅ tests Cucumber ✅.
+Compilation main + test OK. Pipeline complet en 1 commande :
+  ./gradlew augmentOpencode -PragQuestion="architecture du workspace"
 
 '''
-== Session 019 — Préconisation
+== Session 020 — Préconisation
 
-=== Option A (recommandé) — US-9.11 OpencodeInjector
+=== US-9.13 — Benchmark pertinence (3 pts, gate MVP0)
 
-. Classe `OpencodeInjector` :
-  * Prend un `CompositeContext` en entrée
-  * Formate avec sections `[RÈGLES_EAGER]` / `[CONTEXTE_RAG]` / `[RELATIONS_GRAPHIFY]`
-  * Output texte brut prêt à concaténer au prompt système opencode
-. Test Cucumber :
-  * 1 scénario : vérification que chaque section est délimitée par son header
-  * 1 scénario : vérification que le contenu n'est pas vide après injection
-
-=== Option B — US-9.12 augmentOpencode (intégration complète)
-
-Pipeline complet walk→index→query→format, output `/tmp/opencode-context.txt`.
-Dépend de US-9.11.
+. Définir 10 questions métier couvrant les domaines du workspace
+. Exécuter opencode SANS contexte (baseline) → mesurer qualité réponse par métrique
+. Exécuter opencode AVEC /tmp/opencode-context.txt → mesurer delta
+. Rapport comparatif : questions où le contexte améliore vs où il dégrade
+. Si amélioration significative sur >70% des questions = MVP0 validé
 
 '''
 == Couverture Tests
 
 |===
 | Feature | Etat
-| US-9.1 → US-9.10 | ✅ 19 + 2 = 21 scenarios (testent via conteneur pgvector ephemeral)
+| US-9.1 → US-9.10 | ✅ 21 scenarios
+| US-9.11 → US-9.12 | ✅ 3 scenarios (2+1)
 | EPIC 4 @wip | 4 scenarios
 | EPIC 2 @wip | 3 scenarios
-| US-9.10 | ✅ 2 scenarios Cucumber (CompositeContext, budget split, RAG chunks)
 |===
 
 '''
@@ -55,6 +52,7 @@ Dépend de US-9.11.
 - ❌ Pas de tests en fin de session
 - ✅ Procédure de fin de session 6 étapes obligatoires
 - ✅ Compiler avant commiter
+- ✅ Pipeline augmentOpencode dispo
 
 ---
-**Session 018** ✅ — **Session 019** 🚀
+**Session 019** ✅ — **Session 020** 🚀
