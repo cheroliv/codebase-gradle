@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
 _Derniere mise a jour_ : 2026-05-11
-_Session terminee_ : 019 — US-9.11 OpencodeInjector + US-9.12 augmentOpencode TERMINES (pipeline walk→index→query→format→/tmp/opencode-context.txt)
-_Prochaine session_ : 020 — US-9.13 Benchmark pertinence (gate MVP0)
+_Session terminee_ : 020 — US-9.13 Pertinence Benchmark TERMINE (10 questions metier, baseline vs augmented, report AsciiDoc, gate MVP0 >70%)
+_Prochaine session_ : 021 — US-9.14 Segregation Vision/Opinion (2 pts, derniere US EPIC 9)
 
 '''
 == REGLES ABSOLUES (resume)
@@ -22,6 +22,7 @@ _Prochaine session_ : 020 — US-9.13 Benchmark pertinence (gate MVP0)
 
 |===
 | # | Date | Type | Sujet | Score
+| 020 | 2026-05-11 | feat | US-9.13 Pertinence Benchmark — 10 questions metier, baseline vs augmented, report AsciiDoc, gate MVP0 >70% | 10/10
 | 019 | 2026-05-11 | feat | US-9.11 OpencodeInjector + US-9.12 augmentOpencode — pipeline walk→index→query→format→/tmp/opencode-context.txt (5 pts) | 10/10
 | 018 | 2026-05-11 | feat | US-9.10 CompositeContextBuilder FINALISE — tache Gradle augmentContext (JavaExec, -PragQuestion) + 2 scenarios Cucumber | 10/10
 | 017 | 2026-05-11 | feat | US-9.10 CompositeContextBuilder — config 40/30/20/10, builder EAGER+RAG+Graphify, main CLI | 8/10
@@ -50,7 +51,7 @@ _Prochaine session_ : 020 — US-9.13 Benchmark pertinence (gate MVP0)
 |===
 | EPIC | Description | Statut | Priorite
 | EPIC 1 | Initialisation gouvernance agent codebase-gradle | EN COURS | P0
-| EPIC 9 | Opencode Augmente — 14 US baby-step (US-9.1 ✅, US-9.2 ✅, US-9.3 ✅, US-9.4 ✅, US-9.5 ✅, US-9.6 ✅, US-9.7 ✅, US-9.8 ✅, US-9.9 ✅, US-9.10 ✅, US-9.11 ✅, US-9.12 ✅) | EN COURS (12/14 US DONE — reste US-9.13 + US-9.14) | P0
+| EPIC 9 | Opencode Augmente — 14 US baby-step (US-9.1 ✅, US-9.2 ✅, US-9.3 ✅, US-9.4 ✅, US-9.5 ✅, US-9.6 ✅, US-9.7 ✅, US-9.8 ✅, US-9.9 ✅, US-9.10 ✅, US-9.11 ✅, US-9.12 ✅, US-9.13 ✅) | EN COURS (13/14 US DONE — reste US-9.14) | P0
 | EPIC 2 | Expert Anonymisation LangChain4j — MVP0 | MVP0 TERMINE (session 009) | P0
 | EPIC 3 | Architecture Multi-Canal Convergent | A FAIRE | P0
 | EPIC 4 | Benchmark de perception spatiale LLM | MVP1 EN COURS (RAG câblé, Graphify câblé, RAG_ONLY executed 0% erreur) | P0
@@ -94,7 +95,7 @@ _Prochaine session_ : 020 — US-9.13 Benchmark pertinence (gate MVP0)
 | bakery-gradle | `foundry/OSS/bakery-gradle/bakery-plugin/` | ~13+ | 2026-04
 | jhipster-gradle-plugins | `foundry/OSS/jhipster-gradle-plugins/` | 6 | 2026-04
 | newpipe-gradle | `foundry/OSS/newpipe-gradle/newpipe-plugin/` | ~11 | 2026-04
-| codebase-gradle | `foundry/OSS/codebase-gradle/` | 19 | 2026-05-11
+| codebase-gradle | `foundry/OSS/codebase-gradle/` | 20 | 2026-05-11
 | graphify-gradle | `foundry/OSS/graphify-gradle/graphify-plugin/` | 1 (bootstrap) | 2026-05-09
 | notebook-gradle | `foundry/OSS/notebook-gradle/` | 0 (bootstrap) | 2026-05-05
 |===

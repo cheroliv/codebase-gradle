@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 020 | 2026-05-11 | feat | US-9.13 Pertinence Benchmark : 10 questions metier en 10 domaines, PertinenceBenchmarkRunner baseline vs augmented via Ollama deepseek-v4-pro, PertinenceReportExporter JSON + AsciiDoc, tache Gradle benchmarkPertinence, 5 scenarios Cucumber | 10/10
 | 019 | 2026-05-11 | feat | US-9.11 OpencodeInjector + US-9.12 augmentOpencode : OpencodeInjector (format [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY]), AugmentOpencodeMain (pipeline walk→index→query→format→/tmp/opencode-context.txt), 2 taches Gradle injectOpencode + augmentOpencode, 3 scenarios Cucumber (2+1) | 10/10
 | 018 | 2026-05-11 | feat | US-9.10 CompositeContextBuilder FINALISE : tache Gradle augmentContext + 2 scenarios Cucumber (canaux + budget + chunks RAG) | 10/10
 | 017 | 2026-05-11 | feat | US-9.10 CompositeContextBuilder (partiel) : config token budget 40/30/20/10, builder EAGER+RAG+Graphify, main CLI avec StdoutFormatter | 8/10
