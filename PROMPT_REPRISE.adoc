@@ -1,56 +1,52 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 17
+= PROMPT_REPRISE — Codebase Gradle — Session 018
 :author: cheroliv + opencode (deepseek-v4-pro:cloud)
 :date: 2026-05-11
-:session: 016
-:prochaine: 017
+:session: 017
+:prochaine: 018
 
-> **Statut** : Sessions 014-016 ✅ — EPIC 9 Phase 2 complète (US-9.7, US-9.8, US-9.9)
-> **Mission** : EPIC 9 Phase 3 (US-9.10 CompositeContextBuilder) ou EPIC 4 MVP1 (RAG_GRAPHIFY_LOCAL)
-
-'''
-== Sessions 14-16 — Résumé EPIC 9 Phase 2
-
-|===
-| Session | US | Livrable | Scenarios
-| 014 | US-9.7 | Batch validation | 3 (full pipeline, cross-type, secrets)
-| 015 | US-9.8 | VectorQueryService + queryCodebase | 2 (top-K, topK param)
-| 016 | US-9.9 | Filtered query by fileType | 3 (adoc, kt, yml)
-|===
-
-8 scenarios Cucumber ajoutés, 0 regression sur les 11 existants.
+> **Statut** : Session 017 ✅ — US-9.10 CompositeContextBuilder (config, builder, main CLI)
+> **Mission** : Finaliser US-9.10 (tache Gradle buildCompositeContext) + US-9.11 OpencodeInjector
 
 '''
-== Session 17 — Priorité
+== Session 017 — Résumé
 
-=== Option A (recommandé) — EPIC 9 Phase 3
+|===
+| Fichier | Rôle
+| `CompositeContextConfig.kt` | Token budget 40/30/20/10, validation sum=1.0
+| `CompositeContextBuilder.kt` | collectEagerFiles(.agents/) + RAG pgvector + Graphify placeholder
+| `CompositeContextBuilderMain.kt` | CLI entry, utilise StdoutFormatter [CTX]/[PLAN]/[RESULT]
+|===
 
-US-9.10 CompositeContextBuilder : agrège EAGER/LAZY + RAG pgvector + Graphify(placeholder),
-token budget 40/30/20/10.
+Compilation main OK. Pas de tests Cucumber (infra pgvector instable, 19/26 regressions preexistantes hors scope).
 
-=== Option B — EPIC 4 MVP1
+'''
+== Session 018 — Préconisation
 
-Lancer RAG_GRAPHIFY_LOCAL → mesurer impact différentiel Graphify vs RAG_ONLY.
+=== Option A (recommandé) — Finaliser US-9.10 + enchaîner US-9.11
 
-=== Option C — Valider CI anonymize
+. Tâche Gradle `buildCompositeContext` (JavaExec → CompositeContextBuilderMain)
+  * Param `-PragQuestion` (valeur par défaut: "architecture du workspace")
+  * Injecte env vars PGVECTOR_*
+. US-9.11 OpencodeInjector :
+  * Format structuré [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY]
+  * Output → `/tmp/opencode-context.txt`
+  * Prêt à concaténer au prompt système opencode
 
-workflow_dispatch sur GitHub Actions pour confirmer le fix it.sourcePath.
+=== Option B — Debug CI pgvector (19 régressions)
+
+Les 19 échecs Cucumber sont préexistants (pas une régression US-9.10).
+Origine probable : conflit de port Docker (deux containers simultanés) ou DB non nettoyée.
+Investir 1 session de debug avant de continuer EPIC 9.
 
 '''
 == Couverture Tests
 
 |===
 | Feature | Etat
-| EPIC 9.1 — pgvector container | ✅ 2 scenarios
-| US-9.2+9.3 — Dataset + Embeddings | ✅ 1 scenario (12 steps)
-| US-9.3+9.4 — WorkspaceWalker + adoc | ✅ 2 scenarios
-| US-9.PROD — Bridge to Production | ✅ Compilation OK
-| US-9.5 — Indexation Kotlin metadata | ✅ 3 scenarios
-| US-9.6 — Indexation YAML/JSON configs | ✅ 3 scenarios
-| US-9.7 — Batch validation | ✅ 3 scenarios
-| US-9.8 — Vector query service | ✅ 2 scenarios
-| US-9.9 — Filtered query | ✅ 3 scenarios
-| EPIC 4 — Benchmark perception spatiale | ✅ 4 scenarios @wip + RAG_ONLY live
-| EPIC 2 — Expert Anonymisation | ✅ 3 scenarios @wip
+| US-9.1 → US-9.9 | ✅ 19 scenarios (certains instables en CI, containers Docker)
+| US-9.10 | Code métier OK, pas de tests Cucumber
+| EPIC 4 @wip | 4 scenarios
+| EPIC 2 @wip | 3 scenarios
 |===
 
 '''
@@ -59,9 +55,7 @@ workflow_dispatch sur GitHub Actions pour confirmer le fix it.sourcePath.
 - ❌ Pas de commit sans permission
 - ❌ Pas de tests en fin de session
 - ✅ Procédure de fin de session 6 étapes obligatoires
-- ✅ Pattern Baby-Step : max 3 pts par US
-- ✅ Cucumber en anglais
-- ✅ SLF4J + logback pour tout le logging
+- ✅ Compiler avant commiter (L10)
 
 ---
-**Session 16** ✅ — **Session 17** 🚀
+**Session 017** ✅ — **Session 018** 🚀

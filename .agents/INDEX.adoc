@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
 _Derniere mise a jour_ : 2026-05-11
-_Session terminee_ : 016 — US-9.9 Query filtrée par fileType (EPIC 9 Phase 2 complète)
-_Prochaine session_ : 017 — EPIC 9 Phase 3 (US-9.10) ou EPIC 4 MVP1 (RAG_GRAPHIFY_LOCAL)
+_Session terminee_ : 017 — US-9.10 CompositeContextBuilder (partiel — config, builder, main)
+_Prochaine session_ : 018 — US-9.10 finalisation (tache Gradle buildCompositeContext) + US-9.11 OpencodeInjector
 
 '''
 == REGLES ABSOLUES (resume)
@@ -22,7 +22,8 @@ _Prochaine session_ : 017 — EPIC 9 Phase 3 (US-9.10) ou EPIC 4 MVP1 (RAG_GRAPH
 
 |===
 | # | Date | Type | Sujet | Score
-| 016 | 2026-05-11 | feat | US-9.9 Query filtrée par fileType : VectorStore LIKE SQL + VectorQueryService fileType param + 3 scenarios Cucumber | 10/10
+| 017 | 2026-05-11 | feat | US-9.10 CompositeContextBuilder — config 40/30/20/10, builder EAGER+RAG+Graphify, main CLI | 8/10
+| 016 | 2026-05-11 | feat | US-9.9 Filtered query : fileType LIKE SQL + 3 scenarios | 10/10
 | 015 | 2026-05-11 | feat | US-9.8 VectorQueryService + Gradle task queryCodebase + 2 scenarios Cucumber | 10/10
 | 014 | 2026-05-11 | feat | US-9.7 Validation batch : 3 scenarios (full pipeline 9 fichiers, cross-type query, secret integrity) | 10/10
 | 013 | 2026-05-11 | bugfix+ci | A1: Fix `it.sourcePath` → `request.sourcePath` dans AnonymizationExpert.kt + CI `anonymize.yml` complet (outputFile vide géré) | 10/10

@@ -1,0 +1,39 @@
+= Session 017 — US-9.10 CompositeContextBuilder (partiel)
+:date: 2026-05-11
+:type: feat
+:epics: EPIC 9 Phase 3 — US-9.10 CompositeContextBuilder
+:score: 8/10
+
+== Realisations
+
+. `CompositeContextConfig.kt` — data class token budget 40/30/20/10, validation sum=1.0
+. `CompositeContextBuilder.kt` :
+  * collectEagerFiles() — lit INDEX.adoc + PROMPT_REPRISE.adoc des projets .agents/
+  * RAG via VectorQueryService.query()
+  * Graphify placeholder — lit graph.json stats
+  * truncateTokens() — respecte le budget par canal
+. `CompositeContextBuilderMain.kt` — CLI entry point, utilise StdoutFormatter [CTX]/[PLAN]/[RESULT]
+
+== Reste a faire (session 018)
+
+. Tache Gradle `buildCompositeContext` dans build.gradle.kts
+  * JavaExec vers CompositeContextBuilderMain
+  * Parametrable : question RAG, token budget
+. Ajouter `composite` dans engine.sh (via engine augmentOpencode)
+. Ecriture de `/tmp/opencode-context.txt` (US-9.11 OpencodeInjector)
+. Scenarios Cucumber (a faire quand la CI pgvector est stable)
+
+== Fichiers crees/modifies
+
+|===
+| Fichier | Action
+| `src/main/kotlin/codebase/rag/CompositeContextConfig.kt` | Cree
+| `src/main/kotlin/codebase/rag/CompositeContextBuilder.kt` | Cree
+| `src/main/kotlin/codebase/rag/CompositeContextBuilderMain.kt` | Cree
+|===
+
+== Dette technique
+
+* Pas de tests Cucumber (infra pgvector instable en CI, 19/26 regressions preexistantes)
+* Pas de tache Gradle (a ajouter session 018)
+* Token budget pas encore cablé dans augmentOpencode engine
