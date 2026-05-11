@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 018 | 2026-05-11 | feat | US-9.10 CompositeContextBuilder FINALISE : tache Gradle augmentContext + 2 scenarios Cucumber (canaux + budget + chunks RAG) | 10/10
 | 017 | 2026-05-11 | feat | US-9.10 CompositeContextBuilder (partiel) : config token budget 40/30/20/10, builder EAGER+RAG+Graphify, main CLI avec StdoutFormatter | 8/10
 | 016 | 2026-05-11 | feat | US-9.9 Filtered query : VectorStore + fileType LIKE SQL, 3 scenarios (adoc/kt/yml) — EPIC 9 Phase 2 complète | 10/10
 | 015 | 2026-05-11 | feat | US-9.8 VectorQueryService + queryCodebase : VectorQueryMain + gradle task + 2 scenarios Cucumber | 10/10

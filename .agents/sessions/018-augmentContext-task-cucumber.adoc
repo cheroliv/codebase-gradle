@@ -1,0 +1,61 @@
+= Session 018 — US-9.10 Finalisation (tâche Gradle augmentContext + Cucumber)
+
+:author: cheroliv + opencode (deepseek-v4-pro:cloud)
+:date: 2026-05-11
+:session: 018
+:toc:
+
+== Contexte
+US-9.10 restait partielle après la session 017 : CompositeContextConfig, CompositeContextBuilder,
+CompositeContextBuilderMain compilés mais pas de tâche Gradle ni tests Cucumber.
+Mission : câbler `augmentContext` + 2 scénarios Cucumber.
+
+== Actions
+
+=== 1. Tâche Gradle augmentContext
+- Fichier : `gradle/rag-bench.gradle.kts:84-97`
+- Type : `JavaExec` → `codebase.rag.CompositeContextBuilderMain`
+- Paramètre : `-PragQuestion` (défaut `"architecture du workspace"`)
+- Env vars : PGVECTOR_JDBC_URL, PGVECTOR_USER, PGVECTOR_PASSWORD injectées via `doFirst`
+- Group : `codebase`
+
+=== 2. Feature Cucumber
+- Fichier : `src/test/features/9_10_composite_context.feature`
+- 2 scénarios :
+  * Tous les canaux peuplés + vérification budget 40/30/20/10 split en tokens
+  * Section RAG contient ≥3 chunks avec scores similarity dans [0.0, 1.0]
+- Background : pgvector container running + indexation datasets + embeddings
+
+=== 3. Step Definitions
+- Fichier : `src/test/kotlin/codebase/scenarios/CompositeContextSteps.kt`
+- Classe : `CompositeContextSteps` (67 lignes)
+- Utilise `CompositeContextBuilder.build(question)` programmatiquement
+- Vérifie EAGER/RAG/Graphify sections, token budgets, similarity scores
+
+== Commandes
+
+[source,shell]
+----
+./gradlew augmentContext -PragQuestion="architecture du workspace"
+./gradlew augmentContext -PragQuestion="HTTP client configuration"
+./gradlew compileKotlin compileTestKotlin  # BUILD SUCCESSFUL
+----
+
+== Résultats
+- Compilation main + test : ✅ BUILD SUCCESSFUL
+- Tâche `augmentContext` enregistrée dans le groupe `codebase`
+- 2 scénarios Cucumber prêts pour `./gradlew cucumberTest` (nécessite pgvector container)
+- 0 secret, 0 regression
+
+== Fichiers modifiés
+|===
+| Fichier | Action
+| `gradle/rag-bench.gradle.kts` | Edit : ajout task augmentContext (lignes 84-97)
+| `src/test/features/9_10_composite_context.feature` | New (26 lignes)
+| `src/test/kotlin/codebase/scenarios/CompositeContextSteps.kt` | New (83 lignes)
+|===
+
+== Leçons
+- Pattern `JavaExec` + `doFirst` + env vars déjà bien établi (indexCodebase, queryCodebase, runBenchmark)
+- Le context Cucumber utilise PgVectorTestContext partagé (pattern éprouvé depuis US-9.2)
+- La tâche Gradle accepte un seul arg (ragQuestion) passé via `args(ragQuestion.get())`

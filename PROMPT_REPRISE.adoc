@@ -1,52 +1,51 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 018
+= PROMPT_REPRISE — Codebase Gradle — Session 019
 :author: cheroliv + opencode (deepseek-v4-pro:cloud)
 :date: 2026-05-11
-:session: 017
-:prochaine: 018
+:session: 018
+:prochaine: 019
 
-> **Statut** : Session 017 ✅ — US-9.10 CompositeContextBuilder (config, builder, main CLI)
-> **Mission** : Finaliser US-9.10 (tache Gradle buildCompositeContext) + US-9.11 OpencodeInjector
+> **Statut** : Session 018 ✅ — US-9.10 CompositeContextBuilder TERMINÉ (tâche Gradle + Cucumber)
+> **Mission** : US-9.11 OpencodeInjector + potentiellement US-9.12 augmentOpencode
 
 '''
-== Session 017 — Résumé
+== Session 018 — Résumé
 
 |===
 | Fichier | Rôle
-| `CompositeContextConfig.kt` | Token budget 40/30/20/10, validation sum=1.0
-| `CompositeContextBuilder.kt` | collectEagerFiles(.agents/) + RAG pgvector + Graphify placeholder
-| `CompositeContextBuilderMain.kt` | CLI entry, utilise StdoutFormatter [CTX]/[PLAN]/[RESULT]
+| `gradle/rag-bench.gradle.kts:84-97` | Tâche `augmentContext` (JavaExec → CompositeContextBuilderMain, -PragQuestion)
+| `9_10_composite_context.feature` | 2 scénarios Cucumber : canaux + budget + chunks RAG
+| `CompositeContextSteps.kt` | Step definitions testant CompositeContextBuilder.build()
 |===
 
-Compilation main OK. Pas de tests Cucumber (infra pgvector instable, 19/26 regressions preexistantes hors scope).
+Compilation main + test OK. US-9.10 complètement TERMINÉ : config ✅ builder ✅ main CLI ✅ tâche Gradle ✅ tests Cucumber ✅.
 
 '''
-== Session 018 — Préconisation
+== Session 019 — Préconisation
 
-=== Option A (recommandé) — Finaliser US-9.10 + enchaîner US-9.11
+=== Option A (recommandé) — US-9.11 OpencodeInjector
 
-. Tâche Gradle `buildCompositeContext` (JavaExec → CompositeContextBuilderMain)
-  * Param `-PragQuestion` (valeur par défaut: "architecture du workspace")
-  * Injecte env vars PGVECTOR_*
-. US-9.11 OpencodeInjector :
-  * Format structuré [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY]
-  * Output → `/tmp/opencode-context.txt`
-  * Prêt à concaténer au prompt système opencode
+. Classe `OpencodeInjector` :
+  * Prend un `CompositeContext` en entrée
+  * Formate avec sections `[RÈGLES_EAGER]` / `[CONTEXTE_RAG]` / `[RELATIONS_GRAPHIFY]`
+  * Output texte brut prêt à concaténer au prompt système opencode
+. Test Cucumber :
+  * 1 scénario : vérification que chaque section est délimitée par son header
+  * 1 scénario : vérification que le contenu n'est pas vide après injection
 
-=== Option B — Debug CI pgvector (19 régressions)
+=== Option B — US-9.12 augmentOpencode (intégration complète)
 
-Les 19 échecs Cucumber sont préexistants (pas une régression US-9.10).
-Origine probable : conflit de port Docker (deux containers simultanés) ou DB non nettoyée.
-Investir 1 session de debug avant de continuer EPIC 9.
+Pipeline complet walk→index→query→format, output `/tmp/opencode-context.txt`.
+Dépend de US-9.11.
 
 '''
 == Couverture Tests
 
 |===
 | Feature | Etat
-| US-9.1 → US-9.9 | ✅ 19 scenarios (certains instables en CI, containers Docker)
-| US-9.10 | Code métier OK, pas de tests Cucumber
+| US-9.1 → US-9.10 | ✅ 19 + 2 = 21 scenarios (testent via conteneur pgvector ephemeral)
 | EPIC 4 @wip | 4 scenarios
 | EPIC 2 @wip | 3 scenarios
+| US-9.10 | ✅ 2 scenarios Cucumber (CompositeContext, budget split, RAG chunks)
 |===
 
 '''
@@ -55,7 +54,7 @@ Investir 1 session de debug avant de continuer EPIC 9.
 - ❌ Pas de commit sans permission
 - ❌ Pas de tests en fin de session
 - ✅ Procédure de fin de session 6 étapes obligatoires
-- ✅ Compiler avant commiter (L10)
+- ✅ Compiler avant commiter
 
 ---
-**Session 017** ✅ — **Session 018** 🚀
+**Session 018** ✅ — **Session 019** 🚀
