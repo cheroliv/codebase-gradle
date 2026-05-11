@@ -1,70 +1,61 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : 25 scenarios Cucumber (21 EPIC 9 + 4 EPIC 2/4 @wip) + benchmark RAG_ONLY Ollama live exécuté
+_Statut_ : 28 scenarios Cucumber (24 EPIC 9 + 4 EPIC 2/4 @wip) + benchmark RAG_ONLY Ollama live exécuté
 
 |===
 | Session | Fichiers testes | Couverture | Notes
-| 018 | `CompositeContextBuilder.kt` + `CompositeContextSteps.kt` (Cucumber) | 2 scenarios PASS | US-9.10 — CompositeContext: EAGER+RAG+Graphify sections populated, token budget 8000 split 3200/2400/1600/800, RAG chunks ≥3 with valid similarity scores
+| 019 | `OpencodeInjector.kt` + `OpencodeInjectorSteps.kt` (Cucumber) | 2 scenarios PASS | US-9.11 — Headers [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY] présents, contenu non-vide après chaque header
+| 019 | `AugmentOpencodeMain.kt` + `AugmentOpencodeSteps.kt` (Cucumber) | 1 scenario PASS | US-9.12 — Pipeline complet produit /tmp/opencode-context-test.txt > 300 bytes avec les 3 sections
+| 018 | `CompositeContextBuilder.kt` + `CompositeContextSteps.kt` (Cucumber) | 2 scenarios PASS | US-9.10 — CompositeContext: EAGER+RAG+Graphify sections populated, token budget 8000 split 3200/2400/1600/800, RAG chunks >=3 with valid similarity scores
 | 016 | `VectorQueryService.kt` + `FilteredQuerySteps.kt` (Cucumber) | 3 scenarios PASS | US-9.9 — Query filtrée par fileType: VectorStore LIKE SQL filter, adoc/kt/yml verified
 | 015 | `VectorQueryService.kt` + `VectorQuerySteps.kt` (Cucumber) | 2 scenarios PASS | US-9.8 — VectorQueryService top-K ordering + topK param respecté
 | 014 | `BatchValidationSteps.kt` (Cucumber) | 3 scenarios PASS | US-9.7 — Full batch 9 fichiers 4 types, cross-type query, secret integrity
-| 012 | `BenchmarkRunner.kt` (Ollama live) + `GraphContext.kt` | RAG_ONLY exécuté | 35 classifications deepseek-v4-pro:cloud avec pgvector réel, 0% erreur 128K. GraphContext + GraphGeneratorMain testés (110 nodes, 225 edges).
-| 011 | `BenchmarkRunner.kt` (Ollama live) | 5 scénarios exécutés | 175 classifications deepseek-v4-pro:cloud, 0% erreur. Bugfix AiServices @V + JSON serialization.
-| 010 | `BenchmarkProtocolSteps.kt` (Cucumber) | 4 scenarios @wip | Validation protocole EPIC 4 : seuils tokens, 5 scenarios incrementaux, calcul taux d'erreur
-| 009 | `AnonymizationExpertSteps.kt` (Cucumber) | 3 scenarios @wip | EPIC 2 MVP0 — AnonymizationExpert deterministe (fallback sans LLM)
-| 008 | `ConfigIndexingSteps.kt` (Cucumber) | 3 scenarios PASS | YAML/JSON anonymization before embedding, zero secret in pgvector chunks
-| 007 | `MetadataIndexingSteps.kt` + `DatasetEmbeddingSteps.kt` (Cucumber) | 3 scenarios PASS | Extraction metadata Kotlin (package/class/repo), findByPackage, metadata-aware semantic search
-| 005 | `WorkspaceWalkerSteps.kt` + `DatasetEmbeddingSteps.kt` (Cucumber) | 2 scenarios PASS | WorkspaceWalker 6 fichiers (.kt+.adoc) + query multi-type top-1 adoc/kt
-| 004 | `DatasetEmbeddingSteps.kt` (Cucumber) | 1 scenario PASS (12 steps) | Pipeline complet : chunk 4 .kt → 6 chunks → documents+chunks FK → embed 384d → similarity search
-| 001 | `PgVectorContainerSteps.kt` (Cucumber) | 2 scenarios PASS | PostgreSQLContainer pgvector/pgvector:pg17, ephemeral, auto-cleanup
+| 012 | `BenchmarkRunner.kt` (Ollama live) + `GraphContext.kt` | RAG_ONLY exécuté | 35 classifications deepseek-v4-pro:cloud avec pgvector réel, 0% erreur 128K
+| 011 | `BenchmarkRunner.kt` (Ollama live) | 5 scénarios exécutés | 175 classifications deepseek-v4-pro:cloud, 0% erreur
+| 010 | `BenchmarkProtocolSteps.kt` (Cucumber) | 4 scenarios @wip | Validation protocole EPIC 4
+| 009 | `AnonymizationExpertSteps.kt` (Cucumber) | 3 scenarios @wip | EPIC 2 MVP0
+| 008 | `ConfigIndexingSteps.kt` (Cucumber) | 3 scenarios PASS | YAML/JSON anonymization
+| 007 | `MetadataIndexingSteps.kt` + `DatasetEmbeddingSteps.kt` (Cucumber) | 3 scenarios PASS | Extraction metadata Kotlin
+| 005 | `WorkspaceWalkerSteps.kt` + `DatasetEmbeddingSteps.kt` (Cucumber) | 2 scenarios PASS | WorkspaceWalker 6 fichiers
+| 004 | `DatasetEmbeddingSteps.kt` (Cucumber) | 1 scenario PASS (12 steps) | Pipeline complet chunk→embed→search
+| 001 | `PgVectorContainerSteps.kt` (Cucumber) | 2 scenarios PASS | PostgreSQLContainer pgvector/pgvector:pg17
 |===
 
 == Modules
 
-=== codebase-gradle (src/main/kotlin/codebase/benchmark/)
-- `BenchmarkRunner.kt` : runner + `buildContext()` RAG/Graphify + pgvector + SpatialPerceptionExpert LangChain4j + ContextFiller + BenchmarkFixtures
-- `BenchmarkRunnerMain.kt` : entry point runBenchmark (passe pgJdbcUrl + graphJsonPath)
-- `BenchmarkReportExporter.kt` : export JSON→AsciiDoc (parser JSON minimal, 0 dépendance externe)
-- `BenchmarkReportExportMain.kt` : entry point exportBenchmarkReport
-- `GraphContext.kt` : GraphModel/GraphNode/GraphEdge Jackson + GraphContextBuilder (load/neighborhood)
-- `GraphGeneratorMain.kt` : scanner workspace → graph.json
-
-=== codebase-gradle (buildSrc/.../benchmark/)
-- `benchmark.kt` : data classes (TokenThreshold, BenchmarkScenario, BoundaryCrossingEvent, SpatialPerceptionResult, BenchmarkReport, BenchmarkConfig) + BenchmarkProtocol (160 lignes)
-
 === codebase-gradle (src/main/kotlin/codebase/rag/)
-- `VectorStore.kt` : schema documents +3 colonnes, insertDocument avec metadata, `querySimilar(topK, fileExtension)` filtered, findByPackage(), DocRecord/QueryResult data class
-- `VectorQueryService.kt` : query(text, topK, fileType) → embedQuery + querySimilar → RelevantChunk (fileName regex)
-- `VectorQueryMain.kt` : CLI entry point (query topK fileType args), SLF4J
-- `CodebaseIndexerMain.kt` : utilise KotlinMetadataExtractor, anonymisation YAML/JSON via YamlConfigAnonymizer
-- `EmbeddingPipeline.kt` : embedQuery() + embedAndStore() + embedAll() via AllMiniLmL6V2
+- `OpencodeInjector.kt` : inject(CompositeContext) → [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY], injectToFile()
+- `AugmentOpencodeMain.kt` : pipeline complet walk→index→query→format→/tmp/opencode-context.txt (100 lignes)
+- `CompositeContextBuilder.kt` : collectEagerFiles + VectorQueryService + Graphify stats, truncateTokens
+- `CompositeContextBuilderMain.kt` : CLI entry augmentContext
+- `CompositeContextConfig.kt` : token budget 8000, 40/30/20/10 split
+- `VectorStore.kt` : schema documents + metadata, insertDocument, querySimilar, findByPackage
+- `VectorQueryService.kt` : query(text, topK, fileType) → embedQuery + querySimilar → RelevantChunk
+- `VectorQueryMain.kt` : CLI entry queryCodebase
+- `CodebaseIndexerMain.kt` : walk + tokenize + embed via ONNX
+- `EmbeddingPipeline.kt` : embedQuery/embedAndStore/embedAll via AllMiniLmL6V2
 - `KotlinMetadataExtractor.kt` : extraction package_name/class_name/repo_name
-- `YamlConfigAnonymizer.kt` : anonymisation text-based YAML/JSON, matching par contenance
+- `YamlConfigAnonymizer.kt` : anonymisation text-based YAML/JSON
 
 === codebase-gradle (src/test/kotlin/codebase/scenarios/)
-- `PgVectorTestContext.kt` : singleton partageant conteneur pgvector, modele ONNX, fileChunks, topResults
-- `PgVectorContainerSteps.kt` : demarrage/arret conteneur pgvector + verification extension vector + creation table vector(384)
-- `DatasetEmbeddingSteps.kt` : steps canon partages, schema synchro metadata, companion extractKotlinMetadata
-- `WorkspaceWalkerSteps.kt` : steps walker + verification type kt/adoc/yml/yaml/json
-- `MetadataIndexingSteps.kt` : steps specifiques metadata
-- `ConfigIndexingSteps.kt` : steps anonymisation YAML/JSON + verification zero secret
-- `BatchValidationSteps.kt` : steps batch multi-type (tokenize all, insert all with metadata, raw chunk check)
-- `VectorQuerySteps.kt` : steps query via VectorQueryService + conversion RelevantChunk → topResults
-- `FilteredQuerySteps.kt` : steps filtered query by file type + YAML assertion
-- `CucumberTestRunner.kt` : @Suite JUnit Platform
-- `TestCleanupExtension.kt` : nettoyage containers orphelins
+- `OpencodeInjectorSteps.kt` : steps inject + header check + content check + CompositeContextHolder
+- `AugmentOpencodeSteps.kt` : steps writeToFile + exists + contains + largerThan
+- `CompositeContextSteps.kt` : steps build + sections + budget + chunks + similarity scores
+- `PgVectorTestContext.kt` : singleton conteneur pgvector
 
 === Features Cucumber
-- `9_1_pgvector_container.feature` : 2 scenarios
-- `9_2_3_dataset_embeddings.feature` : 1 scenario (12 steps)
-- `9_3_4_workspace_walker_adoc.feature` : 2 scenarios
-- `9_5_indexation_metadata.feature` : 3 scenarios
-- `9_6_indexation_yaml_json.feature` : 3 scenarios (YAML anon, JSON anon, safe config)
-
-- `9_7_batch_validation.feature` : 3 scenarios
-- `9_8_vector_query.feature` : 2 scenarios
+- `9_12_augment_opencode.feature` : 1 scenario (US-9.12)
+- `9_11_opencode_injector.feature` : 2 scenarios (US-9.11)
+- `9_10_composite_context.feature` : 2 scenarios (US-9.10)
 - `9_9_filtered_query.feature` : 3 scenarios
+- `9_8_vector_query.feature` : 2 scenarios
+- `9_7_batch_validation.feature` : 3 scenarios
+- `9_6_indexation_yaml_json.feature` : 3 scenarios
+- `9_5_indexation_metadata.feature` : 3 scenarios
+- `9_3_4_workspace_walker_adoc.feature` : 2 scenarios
+- `9_2_3_dataset_embeddings.feature` : 1 scenario
+- `9_1_pgvector_container.feature` : 2 scenarios
 
 == Prochaine etape
 
-Session 019 — US-9.11 OpencodeInjector : format structuré [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY] prêt à concaténer au prompt système.
+Session 020 — US-9.13 Benchmark pertinence : 10 questions avec/sans contexte, gate MVP0.

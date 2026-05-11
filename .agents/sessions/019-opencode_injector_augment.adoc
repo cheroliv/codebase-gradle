@@ -1,0 +1,83 @@
+= Session 019 — US-9.11 OpencodeInjector + US-9.12 augmentOpencode
+:date: 2026-05-11
+:type: feat
+:score: 10/10
+
+== Contexte
+
+Session suivant 018 (US-9.10 CompositeContextBuilder FINALISE).
+Mission : US-9.11 (2 pts) + US-9.12 (3 pts) en une session.
+
+== Actions
+
+=== US-9.11 — OpencodeInjector (2 pts) ✅
+
+. `OpencodeInjector.kt` — Classe avec `inject(CompositeContext)` → formate en 3 sections :
+  - `[RÈGLES_EAGER]` → eagerSection (gouvernance boroughs)
+  - `[CONTEXTE_RAG]` → ragSection (résultats sémantiques pgvector cosine)
+  - `[RELATIONS_GRAPHIFY]` → graphifySection (graphe dépendances)
+  + `injectToFile(context, outputFile)` pour écriture disque
+
+. `OpencodeInjectorMain.kt` — CLI entry point : CompositeContextBuilder.build() → OpencodeInjector.injectToFile() → `/tmp/opencode-context.txt`
+
+. `gradle/rag-bench.gradle.kts` — Tâche Gradle `injectOpencode` (JavaExec → OpencodeInjectorMain, -PragQuestion)
+
+. `9_11_opencode_injector.feature` — 2 scénarios :
+  - Les 3 headers [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY] sont présents
+  - Chaque section a au moins 1 ligne de contenu non vide après son header
+
+. `OpencodeInjectorSteps.kt` — Step definitions (83 lignes) + `CompositeContextHolder` singleton partagé avec CompositeContextSteps. `lastInjected` en companion object pour AugmentOpencodeSteps.
+
+. `CompositeContextSteps.kt` — Modification : ajout `CompositeContextHolder.set(composite!!)` après `builder.build()`
+
+=== US-9.12 — augmentOpencode (3 pts) ✅
+
+. `AugmentOpencodeMain.kt` — Pipeline complet (100 lignes) :
+  - initSchema → countDocuments → si 0 : indexWorkspace (walk + tokenize + embed)
+  - CompositeContextBuilder.build(ragQuestion)
+  - OpencodeInjector.injectToFile() → `/tmp/opencode-context.txt`
+  - StdoutFormatter resultats synthétiques
+
+. `gradle/rag-bench.gradle.kts` — Tâche Gradle `augmentOpencode` (JavaExec → AugmentOpencodeMain, -PragQuestion)
+
+. `9_12_augment_opencode.feature` — 1 scénario :
+  - Pipeline complet produit `/tmp/opencode-context-test.txt` > 300 bytes avec les 3 sections
+
+. `AugmentOpencodeSteps.kt` — Step definitions (58 lignes) : écriture fichier, vérification existence/contenu/taille
+
+== Résultat
+
+- Compilation main ✅ + test ✅
+- 3 nouvelles tâches Gradle : `augmentContext` (US-9.10), `injectOpencode` (US-9.11), `augmentOpencode` (US-9.12)
+- 6 fichiers créés, 3 fichiers modifiés
+- 5 pts livrés en 1 session
+
+Pipeline complet en une commande :
+  ./gradlew augmentOpencode -PragQuestion="architecture du workspace"
+
+== Fichiers Créés
+
+|===
+| Fichier | Rôle
+| `src/main/kotlin/codebase/rag/OpencodeInjector.kt` | Injection composite → headers [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY]
+| `src/main/kotlin/codebase/rag/OpencodeInjectorMain.kt` | CLI entry → /tmp/opencode-context.txt
+| `src/main/kotlin/codebase/rag/AugmentOpencodeMain.kt` | Pipeline complet walk→index→query→format
+| `src/test/features/9_11_opencode_injector.feature` | 2 scenarios Cucumber US-9.11
+| `src/test/features/9_12_augment_opencode.feature` | 1 scenario Cucumber US-9.12
+| `src/test/kotlin/codebase/scenarios/OpencodeInjectorSteps.kt` | Step definitions US-9.11
+| `src/test/kotlin/codebase/scenarios/AugmentOpencodeSteps.kt` | Step definitions US-9.12
+|===
+
+== Fichiers Modifiés
+
+|===
+| Fichier | Modification
+| `gradle/rag-bench.gradle.kts` | +2 tâches : injectOpencode + augmentOpencode
+| `src/test/kotlin/codebase/scenarios/CompositeContextSteps.kt` | +1 ligne : CompositeContextHolder.set()
+|===
+
+== Prochaine session (020)
+
+US-9.13 — Benchmark pertinence (3 pts) : 10 questions avec/sans contexte, mesure seuil dégradation spatiale. Gate de validation MVP0 globale.
+
+(End of file - total 88 lines)
