@@ -1,46 +1,47 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 020
+= PROMPT_REPRISE — Codebase Gradle — Session 021
 :author: cheroliv + opencode (deepseek-v4-pro:cloud)
 :date: 2026-05-11
-:session: 019
-:prochaine: 020
+:session: 020
+:prochaine: 021
 
-> **Statut** : Session 019 ✅ — US-9.11 OpencodeInjector + US-9.12 augmentOpencode TERMINÉS
-> **Mission** : US-9.13 Benchmark pertinence (gate MVP0)
+> **Statut** : Session 020 ✅ — US-9.13 Pertinence Benchmark TERMINÉ (gate MVP0)
+> **Mission** : US-9.14 Ségrégation Vision/Opinion (2 pts, dernière US EPIC 9)
 
 '''
-== Session 019 — Résumé
+== Session 020 — Résumé
 
 |===
 | Fichier | Rôle
-| `OpencodeInjector.kt` | `inject(CompositeContext)` → [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY]
-| `OpencodeInjectorMain.kt` | CLI → /tmp/opencode-context.txt
-| `AugmentOpencodeMain.kt` | Pipeline complet walk→index→query→format (100 lignes)
-| `rag-bench.gradle.kts` | +2 tâches : injectOpencode + augmentOpencode
-| `9_11_opencode_injector.feature` | 2 scénarios (headers présents + contenu non-vide)
-| `9_12_augment_opencode.feature` | 1 scénario (output > 300 bytes, 3 sections)
+| `PertinenceBenchmark.kt` | 10 questions métier + moteur baseline vs augmented (Ollama)
+| `PertinenceBenchmarkMain.kt` | CLI benchmarkPertinence (lit /tmp/opencode-context.txt)
+| `PertinenceReportExporter.kt` | Export JSON + AsciiDoc (synthèse, tableaux, décision MVP0)
+| `rag-bench.gradle.kts` | +1 tâche : benchmarkPertinence
+| `9_13_pertinence_benchmark.feature` | 5 scénarios (dataset, runner, JSON, AsciiDoc, gate 70%)
+| `PertinenceBenchmarkSteps.kt` | Step definitions
 |===
 
-Compilation main + test OK. Pipeline complet en 1 commande :
+Compilation main + test OK. Commit pushé (6a2adea).
+
+Utilisation :
   ./gradlew augmentOpencode -PragQuestion="architecture du workspace"
+  ./gradlew benchmarkPertinence
 
 '''
-== Session 020 — Préconisation
+== Session 021 — Préconisation
 
-=== US-9.13 — Benchmark pertinence (3 pts, gate MVP0)
+=== US-9.14 — Ségrégation Vision/Opinion (2 pts, dernière US EPIC 9)
 
-. Définir 10 questions métier couvrant les domaines du workspace
-. Exécuter opencode SANS contexte (baseline) → mesurer qualité réponse par métrique
-. Exécuter opencode AVEC /tmp/opencode-context.txt → mesurer delta
-. Rapport comparatif : questions où le contexte améliore vs où il dégrade
-. Si amélioration significative sur >70% des questions = MVP0 validé
+. Prompt engineering dans le vecteur composite
+. LLM assume responsabilité de classifier avant dilution/publication
+. Intégration dans le pipeline augmente
+. Test sur 10 sections synthétiques (VISION vs OPINION)
 
 '''
 == Couverture Tests
 
 |===
 | Feature | Etat
-| US-9.1 → US-9.10 | ✅ 21 scenarios
-| US-9.11 → US-9.12 | ✅ 3 scenarios (2+1)
+| US-9.1 → US-9.13 | ✅ 29 scenarios (24 EPIC9 + 3 augmentation + 2 new)
 | EPIC 4 @wip | 4 scenarios
 | EPIC 2 @wip | 3 scenarios
 |===
@@ -52,7 +53,7 @@ Compilation main + test OK. Pipeline complet en 1 commande :
 - ❌ Pas de tests en fin de session
 - ✅ Procédure de fin de session 6 étapes obligatoires
 - ✅ Compiler avant commiter
-- ✅ Pipeline augmentOpencode dispo
+- ✅ Pipeline augmentOpencode + benchmarkPertinence dispo
 
 ---
-**Session 019** ✅ — **Session 020** 🚀
+**Session 020** ✅ — **Session 021** 🚀

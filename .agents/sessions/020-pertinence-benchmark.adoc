@@ -1,0 +1,52 @@
+= Session 020 — US-9.13 Pertinence Benchmark (gate MVP0)
+:author: cheroliv + opencode (deepseek-v4-pro:cloud)
+:date: 2026-05-11
+:session: 020
+:status: ✅ TERMINE
+
+== Contexte
+
+EPIC 9 : 12/14 US DONE. US-9.13 = 3 pts, gate MVP0.
+
+== Actions
+
+. Creation de `PertinenceBenchmark.kt` (244 lignes)
+  - 10 questions metier couvrant 10 domaines du workspace
+  - Moteur PertinenceBenchmarkRunner : baseline vs augmented via Ollama deepseek-v4-pro
+  - Metrique : keyword hits + longueur reponse + pertinence booleenne
+. Creation de `PertinenceBenchmarkMain.kt` (74 lignes)
+  - CLI, lit /tmp/opencode-context.txt, execute le benchmark
+. Creation de `PertinenceReportExporter.kt` (165 lignes)
+  - Export JSON structure + AsciiDoc complet (synthese, tableaux, decision MVP0)
+. Modification de `gradle/rag-bench.gradle.kts` (+14 lignes)
+  - Tache Gradle `benchmarkPertinence` (JavaExec, group codebase)
+. Creation de `9_13_pertinence_benchmark.feature` (22 lignes)
+  - 5 scenarios : dataset valide, runner instantiable, JSON/AsciiDoc valides, gate 70%
+. Creation de `PertinenceBenchmarkSteps.kt` (95 lignes)
+  - Steps Cucumber pour tous les scenarios
+
+== Commandes
+
+  ./gradlew compileKotlin          → BUILD SUCCESSFUL
+  ./gradlew compileTestKotlin      → BUILD SUCCESSFUL
+  git commit + push                → 6a2adea feat(us9.13)
+
+== Resultats
+
+- Compilation main + test OK
+- 5 scenarios Cucumber (non executes, interdit de test en fin de session)
+- Commit pushé sur origin/main
+- EPIC 9 : 13/14 US DONE. Reste US-9.14 (Segregation Vision/Opinion)
+
+== Fichiers modifies/crees
+
+[cols="2,1,4"]
+|===
+| Fichier | Action | Description
+| src/main/kotlin/codebase/rag/PertinenceBenchmark.kt | CREATE | Moteur benchmark + 10 questions
+| src/main/kotlin/codebase/rag/PertinenceBenchmarkMain.kt | CREATE | CLI benchmarkPertinence
+| src/main/kotlin/codebase/rag/PertinenceReportExporter.kt | CREATE | Export JSON + AsciiDoc
+| gradle/rag-bench.gradle.kts | MODIFY | +tache benchmarkPertinence
+| src/test/features/9_13_pertinence_benchmark.feature | CREATE | 5 scenarios Cucumber
+| src/test/kotlin/codebase/scenarios/PertinenceBenchmarkSteps.kt | CREATE | Step definitions
+|===

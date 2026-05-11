@@ -1,9 +1,10 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : 28 scenarios Cucumber (24 EPIC 9 + 4 EPIC 2/4 @wip) + benchmark RAG_ONLY Ollama live exécuté
+_Statut_ : 33 scenarios Cucumber (29 EPIC 9 + 4 EPIC 2/4 @wip) + benchmark RAG_ONLY Ollama live exécuté
 
 |===
 | Session | Fichiers testes | Couverture | Notes
+| 020 | `PertinenceBenchmark.kt` + `PertinenceBenchmarkSteps.kt` (Cucumber) | 5 scenarios PASS | US-9.13 — 10 questions dataset valide, runner instantiable, JSON/AsciiDoc exports valides, gate MVP0 70%
 | 019 | `OpencodeInjector.kt` + `OpencodeInjectorSteps.kt` (Cucumber) | 2 scenarios PASS | US-9.11 — Headers [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY] présents, contenu non-vide après chaque header
 | 019 | `AugmentOpencodeMain.kt` + `AugmentOpencodeSteps.kt` (Cucumber) | 1 scenario PASS | US-9.12 — Pipeline complet produit /tmp/opencode-context-test.txt > 300 bytes avec les 3 sections
 | 018 | `CompositeContextBuilder.kt` + `CompositeContextSteps.kt` (Cucumber) | 2 scenarios PASS | US-9.10 — CompositeContext: EAGER+RAG+Graphify sections populated, token budget 8000 split 3200/2400/1600/800, RAG chunks >=3 with valid similarity scores
@@ -24,6 +25,9 @@ _Statut_ : 28 scenarios Cucumber (24 EPIC 9 + 4 EPIC 2/4 @wip) + benchmark RAG_O
 == Modules
 
 === codebase-gradle (src/main/kotlin/codebase/rag/)
+- `PertinenceBenchmark.kt` : 10 questions metier + PertinenceBenchmarkRunner baseline vs augmented (Ollama)
+- `PertinenceBenchmarkMain.kt` : CLI entry benchmarkPertinence
+- `PertinenceReportExporter.kt` : export JSON + AsciiDoc (synthèse, tableaux, décision MVP0)
 - `OpencodeInjector.kt` : inject(CompositeContext) → [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY], injectToFile()
 - `AugmentOpencodeMain.kt` : pipeline complet walk→index→query→format→/tmp/opencode-context.txt (100 lignes)
 - `CompositeContextBuilder.kt` : collectEagerFiles + VectorQueryService + Graphify stats, truncateTokens
@@ -38,12 +42,14 @@ _Statut_ : 28 scenarios Cucumber (24 EPIC 9 + 4 EPIC 2/4 @wip) + benchmark RAG_O
 - `YamlConfigAnonymizer.kt` : anonymisation text-based YAML/JSON
 
 === codebase-gradle (src/test/kotlin/codebase/scenarios/)
+- `PertinenceBenchmarkSteps.kt` : steps loadQuestions + count + domain + keywords + length + runner + JSON + AsciiDoc + MVP0 gate
 - `OpencodeInjectorSteps.kt` : steps inject + header check + content check + CompositeContextHolder
 - `AugmentOpencodeSteps.kt` : steps writeToFile + exists + contains + largerThan
 - `CompositeContextSteps.kt` : steps build + sections + budget + chunks + similarity scores
 - `PgVectorTestContext.kt` : singleton conteneur pgvector
 
 === Features Cucumber
+- `9_13_pertinence_benchmark.feature` : 5 scenarios (US-9.13)
 - `9_12_augment_opencode.feature` : 1 scenario (US-9.12)
 - `9_11_opencode_injector.feature` : 2 scenarios (US-9.11)
 - `9_10_composite_context.feature` : 2 scenarios (US-9.10)
@@ -58,4 +64,4 @@ _Statut_ : 28 scenarios Cucumber (24 EPIC 9 + 4 EPIC 2/4 @wip) + benchmark RAG_O
 
 == Prochaine etape
 
-Session 020 — US-9.13 Benchmark pertinence : 10 questions avec/sans contexte, gate MVP0.
+Session 021 — US-9.14 Segregation Vision/Opinion : prompt engineering, classifier, integration pipeline augmente.
