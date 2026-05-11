@@ -1,9 +1,10 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : 23 scenarios Cucumber (19 EPIC 9 + 4 EPIC 2/4 @wip) + benchmark RAG_ONLY Ollama live exécuté
+_Statut_ : 25 scenarios Cucumber (21 EPIC 9 + 4 EPIC 2/4 @wip) + benchmark RAG_ONLY Ollama live exécuté
 
 |===
 | Session | Fichiers testes | Couverture | Notes
+| 018 | `CompositeContextBuilder.kt` + `CompositeContextSteps.kt` (Cucumber) | 2 scenarios PASS | US-9.10 — CompositeContext: EAGER+RAG+Graphify sections populated, token budget 8000 split 3200/2400/1600/800, RAG chunks ≥3 with valid similarity scores
 | 016 | `VectorQueryService.kt` + `FilteredQuerySteps.kt` (Cucumber) | 3 scenarios PASS | US-9.9 — Query filtrée par fileType: VectorStore LIKE SQL filter, adoc/kt/yml verified
 | 015 | `VectorQueryService.kt` + `VectorQuerySteps.kt` (Cucumber) | 2 scenarios PASS | US-9.8 — VectorQueryService top-K ordering + topK param respecté
 | 014 | `BatchValidationSteps.kt` (Cucumber) | 3 scenarios PASS | US-9.7 — Full batch 9 fichiers 4 types, cross-type query, secret integrity
@@ -66,4 +67,4 @@ _Statut_ : 23 scenarios Cucumber (19 EPIC 9 + 4 EPIC 2/4 @wip) + benchmark RAG_O
 
 == Prochaine etape
 
-Session 017 — EPIC 9 Phase 3 (US-9.10 CompositeContextBuilder) ou EPIC 4 MVP1 (RAG_GRAPHIFY_LOCAL).
+Session 019 — US-9.11 OpencodeInjector : format structuré [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY] prêt à concaténer au prompt système.

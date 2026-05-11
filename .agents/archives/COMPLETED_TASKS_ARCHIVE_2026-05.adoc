@@ -2,6 +2,7 @@
 
 |===
 | Date | Session | EPIC/US | Description
+| 2026-05-11 | 018 | EPIC 9 Phase 3 | US-9.10 CompositeContextBuilder FINALISE : tâche Gradle augmentContext (JavaExec → CompositeContextBuilderMain, -PragQuestion, env vars PGVECTOR_*) dans gradle/rag-bench.gradle.kts:84-97 + 2 scenarios Cucumber (tous canaux peuplés, budget split 3200/2400/1600/800 tokens, RAG chunks ≥3 avec scores similarity [0.0,1.0]) + step definitions CompositeContextSteps.kt (83 lignes). Compilation main + test OK. US-9.10 complètement TERMINÉ.
 | 2026-05-11 | 017 | EPIC 9 Phase 3 | US-9.10 CompositeContextBuilder (partiel) : CompositeContextConfig (token budget 40/30/20/10 avec validation sum=1.0), CompositeContextBuilder (collectEagerFiles via .agents/INDEX+PROMPT_REPRISE, RAG via VectorQueryService, Graphify placeholder graph.json stats, truncateTokens budget), CompositeContextBuilderMain (CLI entry avec StdoutFormatter [CTX]/[PLAN]/[RESULT]). Reste : tache Gradle buildCompositeContext + US-9.11 OpencodeInjector.
 | 2026-05-11 | 016 | US-9.9 | Filtered query by fileType: VectorStore.querySimilar() + fileExtension LIKE SQL filter
 | 2026-05-11 | 015 | US-9.8 | VectorQueryService wraps EmbeddingPipeline.embedQuery() + VectorStore.querySimilar(). RelevantChunk data class with fileName regex extraction. VectorQueryMain CLI (query + topK args, SLF4J). Tâche Gradle queryCodebase (JavaExec, -Pquery -PtopK). 2 scenarios Cucumber: top-K ordering + topK param respected. VectorQuerySteps convert RelevantChunk → ctx.topResults.

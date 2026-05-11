@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
 _Derniere mise a jour_ : 2026-05-11
-_Session terminee_ : 017 — US-9.10 CompositeContextBuilder (partiel — config, builder, main)
-_Prochaine session_ : 018 — US-9.10 finalisation (tache Gradle buildCompositeContext) + US-9.11 OpencodeInjector
+_Session terminee_ : 018 — US-9.10 CompositeContextBuilder TERMINE (tache Gradle augmentContext + Cucumber 2 scenarios)
+_Prochaine session_ : 019 — US-9.11 OpencodeInjector + US-9.12 augmentOpencode
 
 '''
 == REGLES ABSOLUES (resume)
@@ -22,6 +22,7 @@ _Prochaine session_ : 018 — US-9.10 finalisation (tache Gradle buildCompositeC
 
 |===
 | # | Date | Type | Sujet | Score
+| 018 | 2026-05-11 | feat | US-9.10 CompositeContextBuilder FINALISE — tache Gradle augmentContext (JavaExec, -PragQuestion) + 2 scenarios Cucumber | 10/10
 | 017 | 2026-05-11 | feat | US-9.10 CompositeContextBuilder — config 40/30/20/10, builder EAGER+RAG+Graphify, main CLI | 8/10
 | 016 | 2026-05-11 | feat | US-9.9 Filtered query : fileType LIKE SQL + 3 scenarios | 10/10
 | 015 | 2026-05-11 | feat | US-9.8 VectorQueryService + Gradle task queryCodebase + 2 scenarios Cucumber | 10/10
@@ -92,7 +93,7 @@ _Prochaine session_ : 018 — US-9.10 finalisation (tache Gradle buildCompositeC
 | bakery-gradle | `foundry/OSS/bakery-gradle/bakery-plugin/` | ~13+ | 2026-04
 | jhipster-gradle-plugins | `foundry/OSS/jhipster-gradle-plugins/` | 6 | 2026-04
 | newpipe-gradle | `foundry/OSS/newpipe-gradle/newpipe-plugin/` | ~11 | 2026-04
-| codebase-gradle | `foundry/OSS/codebase-gradle/` | 11 | 2026-05-10
+| codebase-gradle | `foundry/OSS/codebase-gradle/` | 18 | 2026-05-11
 | graphify-gradle | `foundry/OSS/graphify-gradle/graphify-plugin/` | 1 (bootstrap) | 2026-05-09
 | notebook-gradle | `foundry/OSS/notebook-gradle/` | 0 (bootstrap) | 2026-05-05
 |===
