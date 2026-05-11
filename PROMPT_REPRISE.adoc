@@ -1,49 +1,49 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 021
+= PROMPT_REPRISE — Codebase Gradle — Session 022
 :author: cheroliv + opencode (deepseek-v4-pro:cloud)
 :date: 2026-05-11
-:session: 020
-:prochaine: 021
+:session: 021
+:prochaine: 022
 
-> **Statut** : Session 020 ✅ — US-9.13 Pertinence Benchmark TERMINÉ (gate MVP0)
-> **Mission** : US-9.14 Ségrégation Vision/Opinion (2 pts, dernière US EPIC 9)
-
-'''
-== Session 020 — Résumé
-
-|===
-| Fichier | Rôle
-| `PertinenceBenchmark.kt` | 10 questions métier + moteur baseline vs augmented (Ollama)
-| `PertinenceBenchmarkMain.kt` | CLI benchmarkPertinence (lit /tmp/opencode-context.txt)
-| `PertinenceReportExporter.kt` | Export JSON + AsciiDoc (synthèse, tableaux, décision MVP0)
-| `rag-bench.gradle.kts` | +1 tâche : benchmarkPertinence
-| `9_13_pertinence_benchmark.feature` | 5 scénarios (dataset, runner, JSON, AsciiDoc, gate 70%)
-| `PertinenceBenchmarkSteps.kt` | Step definitions
-|===
-
-Compilation main + test OK. Commit pushé (6a2adea).
-
-Utilisation :
-  ./gradlew augmentOpencode -PragQuestion="architecture du workspace"
-  ./gradlew benchmarkPertinence
+> **Statut** : Session 021 ✅ — US-9.14 Ségrégation Vision/Opinion TERMINÉ
+> **Mission** : EPIC 9 TERMINÉ (15/15 US). Prochaine étape : EPIC 10 (STIMULUS cascade) ou EPIC 4 (Benchmark MVP1).
 
 '''
-== Session 021 — Préconisation
+== Session 021 — Résumé
 
-=== US-9.14 — Ségrégation Vision/Opinion (2 pts, dernière US EPIC 9)
-
-. Prompt engineering dans le vecteur composite
-. LLM assume responsabilité de classifier avant dilution/publication
-. Intégration dans le pipeline augmente
-. Test sur 10 sections synthétiques (VISION vs OPINION)
+- `VisionOpinionClassifier.kt` : prompt engineering SystemMessage, 10 sections test (5 VISION + 5 OPINION)
+- `VisionOpinionClassifierMain.kt` : CLI + export JSON/AsciiDoc, gate 80% précision
+- `gradle/rag-bench.gradle.kts` : +1 tâche `classifyVisionOpinion`
+- `9_14_vision_opinion.feature` : 5 scénarios Cucumber
+- `VisionOpinionClassifierSteps.kt` : step definitions (130 lignes)
+- Compilation main + test OK
 
 '''
-== Couverture Tests
+== Session 022 — Préconisation
 
+=== Option A : EPIC 10 STIMULUS Cascade (P0)
+
+. Brain dump → classification automatique VISION/OPINION (réutilise US-9.14)
+. Routing vers document racine approprié (WORKSPACE_VISION.adoc, WHAT_THE_GAMES_BEEN_MISSING.adoc, etc.)
+. Archivage horodaté + traçabilité
+. Pipeline `./gradlew diluteBrainDump -Pdump="..."`
+
+=== Option B : EPIC 4 Benchmark MVP1 (P0)
+
+. Finaliser le pipeline multi-canal (RAG_ONLY, RAG_GRAPHIFY_LOCAL, RAG_GRAPHIFY_WORKSPACE, FOUR_CHANNELS)
+. Comparer les 4 canaux sur 128K tokens
+. Rapport de comparaison AsciiDoc
+. Gate MVP1 : RAG_GRAPHIFY_WORKSPACE < 5% erreur
+
+'''
+== État EPICs
+
+[cols="2,3"]
 |===
-| Feature | Etat
-| US-9.1 → US-9.13 | ✅ 29 scenarios (24 EPIC9 + 3 augmentation + 2 new)
-| EPIC 4 @wip | 4 scenarios
-| EPIC 2 @wip | 3 scenarios
+| EPIC 9 | TERMINÉ (15/15 US) ✅
+| EPIC 2 | MVP0 TERMINÉ
+| EPIC 4 | MVP1 EN COURS (RAG câblé, Graphify câblé)
+| EPIC 10 | A FAIRE (P0)
+| EPIC 13 | A FAIRE (LangGraph4j Classifieur Vision/Opinion — suite logique US-9.14)
 |===
 
 '''
@@ -51,9 +51,7 @@ Utilisation :
 
 - ❌ Pas de commit sans permission
 - ❌ Pas de tests en fin de session
-- ✅ Procédure de fin de session 6 étapes obligatoires
-- ✅ Compiler avant commiter
-- ✅ Pipeline augmentOpencode + benchmarkPertinence dispo
+- ✅ Pipeline augmentOpencode + benchmarkPertinence + classifyVisionOpinion disponibles
 
 ---
-**Session 020** ✅ — **Session 021** 🚀
+**Session 021** ✅ — **Session 022** 🚀

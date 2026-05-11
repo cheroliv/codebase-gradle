@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 021 | 2026-05-11 | feat | US-9.14 Segregation Vision/Opinion : prompt engineering VisionOpinionClassifier (SystemMessage 6 criteres VISION + 6 criteres OPINION), 10 sections synthetiques TestSections (5 VISION: DAG, cercles, STIMULUS, codebase role, composite context + 5 OPINION: preference modele, langage, speculation Rust, critique complexite, speculation ONNX), VisionOpinionClassifierMain CLI + exports JSON/AsciiDoc, tache Gradle classifyVisionOpinion, 5 scenarios Cucumber, gate 80% precision | 10/10
 | 020 | 2026-05-11 | feat | US-9.13 Pertinence Benchmark : 10 questions metier en 10 domaines, PertinenceBenchmarkRunner baseline vs augmented via Ollama deepseek-v4-pro, PertinenceReportExporter JSON + AsciiDoc, tache Gradle benchmarkPertinence, 5 scenarios Cucumber | 10/10
 | 019 | 2026-05-11 | feat | US-9.11 OpencodeInjector + US-9.12 augmentOpencode : OpencodeInjector (format [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY]), AugmentOpencodeMain (pipeline walk→index→query→format→/tmp/opencode-context.txt), 2 taches Gradle injectOpencode + augmentOpencode, 3 scenarios Cucumber (2+1) | 10/10
 | 018 | 2026-05-11 | feat | US-9.10 CompositeContextBuilder FINALISE : tache Gradle augmentContext + 2 scenarios Cucumber (canaux + budget + chunks RAG) | 10/10
