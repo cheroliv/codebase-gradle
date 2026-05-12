@@ -11,7 +11,7 @@ Il est destiné à être le document de référence pour les futures sessions ag
 sur ce projet.
 
 **Projet liés** : `bakery-gradle`, `plantuml-gradle`, `slider-gradle`,
-`readme-gradle`, `magic_stick`, `edster`
+`readme-gradle`, `magic-stick`, `edster`
 
 **Documents de référence** :
 `/home/cheroliv/workspace/WHAT_THE_GAMES_BEEN_MISSING.adoc` (v10),
