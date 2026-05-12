@@ -29,6 +29,8 @@ object BenchmarkComparisonMain {
         val projectRoot = System.getenv("CODEBASE_PROJECT_ROOT") ?: System.getProperty("user.dir")
         val pgCfg = PgVectorConfig.fromEnv()
         val graphJsonPath = System.getenv("GRAPH_JSON_PATH") ?: "build/graph.json"
+        val baseUrl = System.getenv("OLLAMA_BASE_URL") ?: "http://localhost:11434"
+        val modelName = System.getenv("OLLAMA_MODEL") ?: "deepseek-v4-pro:cloud"
 
         val outputDir = File("build/benchmark-reports")
         outputDir.mkdirs()
@@ -41,6 +43,7 @@ object BenchmarkComparisonMain {
             log.info("Running scenario: {} (channels: {})", scenarioId, channelConfig.channels)
 
             val runner = BenchmarkRunner(
+                baseUrl = baseUrl, modelName = modelName,
                 pgJdbcUrl = pgCfg.jdbcUrl, pgUser = pgCfg.user, pgPassword = pgCfg.password,
                 graphJsonPath = channelConfig.graphPath ?: graphJsonPath,
                 scopeFilter = channelConfig.scopeFilter
@@ -61,7 +64,7 @@ object BenchmarkComparisonMain {
             )
         }
 
-        val comparisonAdoc = generateComparisonAsciiDoc(records)
+        val comparisonAdoc = generateComparisonAsciiDoc(records, modelName)
         val adocFile = File(outputDir, "comparison-report.adoc")
         adocFile.writeText(comparisonAdoc)
         log.info("Comparison report: {}", adocFile.absolutePath)
@@ -84,7 +87,7 @@ object BenchmarkComparisonMain {
         }
     }
 
-    private fun generateComparisonAsciiDoc(records: List<ScenarioRecord>): String {
+    private fun generateComparisonAsciiDoc(records: List<ScenarioRecord>, modelName: String): String {
         val sb = StringBuilder()
 
         sb.appendLine("= EPIC 4 — Comparaison Multi-Canal Benchmark Perception Spatiale")
@@ -92,7 +95,7 @@ object BenchmarkComparisonMain {
         sb.appendLine(":icons: font")
         sb.appendLine(":sectnums:")
         sb.appendLine(":report-date: ${Instant.now()}")
-        sb.appendLine(":model: deepseek-v4-pro:cloud")
+        sb.appendLine(":model: $modelName")
         sb.appendLine()
 
         sb.appendLine("[abstract]")

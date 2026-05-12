@@ -9,6 +9,7 @@ object StdoutFormatter {
     fun ctx(content: String) = section(Tag.CTX, content)
     fun plan(content: String) = section(Tag.PLAN, content)
     fun result(content: String) = section(Tag.RESULT, content)
+    fun error(content: String) = section(Tag.ERROR, content)
 
     fun log(ctx: String, plan: String, result: String) {
         ctx(ctx)
@@ -34,6 +35,7 @@ object StdoutFormatter {
             val CTX = Tag("CTX")
             val PLAN = Tag("PLAN")
             val RESULT = Tag("RESULT")
+            val ERROR = Tag("ERROR")
         }
     }
 }

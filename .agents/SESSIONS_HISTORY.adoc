@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 025 | 2026-05-12 | feat | EPIC 10 STIMULUS Cascade TERMINE (10/10 sous-taches) : DilutionExecutor (injection automatique + backup + dryRun + trace), StimulusDetector (scan workspace/*.adoc + stale > 2j + exports), StimulusDetectorMain CLI, detectStimuli + detectStaleStimuli Gradle tasks, StdoutFormatter.error()+Tag.ERROR, useJUnitPlatform() fix, StimulusCascade integration dilutionResults(), tests 8/8 PASS JUnit5 | 10/10
 | 023 | 2026-05-12 | chore | EPIC D — Uniformisation build : Java 23→24, Kotlin 2.3.20, suppression buildscript{}, kotlinx.serialization BenchmarkReportExporter, PgVectorConfig.fromEnv() | 10/10
 | 022 | 2026-05-12 | feat | EPIC 10 STIMULUS Cascade MVP1 (StimulusCascade 280l, routeur LLM 4 docs, archive horodatee, diluteBrainDump) + EPIC 4 Benchmark MVP1 (4 canaux reels EAGER/LAZY+RAG+Graphify+Ressources, scope LOCAL/WORKSPACE, BenchmarkComparisonMain, runComparisonBenchmark, comparaison AsciiDoc, gate <5%) | 10/10
 | 021 | 2026-05-11 | feat | US-9.14 Segregation Vision/Opinion : prompt engineering VisionOpinionClassifier (SystemMessage 6 criteres VISION + 6 criteres OPINION), 10 sections synthetiques TestSections (5 VISION: DAG, cercles, STIMULUS, codebase role, composite context + 5 OPINION: preference modele, langage, speculation Rust, critique complexite, speculation ONNX), VisionOpinionClassifierMain CLI + exports JSON/AsciiDoc, tache Gradle classifyVisionOpinion, 5 scenarios Cucumber, gate 80% precision | 10/10
@@ -26,4 +27,5 @@
 | 002 | 2026-05-07 | chore | Migration chemins foundry/ → foundry/OSS/ dans INDEX.adoc (granularisation OSS/CSS) | -
 | 001 | 2026-05-04 | governance | Renommage gouvernance openclaw→quizz-benchmark (9 fichiers) | -
 | 000 | 2026-05-03 | init | Migration gouvernance agent depuis quizz-benchmark-gradle + US-9.1 pgvector container | -
-|===| 024 | 2026-05-12 | review | Code Review Globale — Audit passif | 10/10
+| 024 | 2026-05-12 | review | Code Review Globale — Audit passif | 10/10
+|===

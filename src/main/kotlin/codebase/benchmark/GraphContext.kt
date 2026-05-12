@@ -1,10 +1,12 @@
 package codebase.benchmark
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.io.File
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class GraphNode(
     val id: String,
     val label: String,
@@ -13,6 +15,7 @@ data class GraphNode(
     val metadata: Map<String, Any> = emptyMap()
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class GraphEdge(
     val source: String,
     val target: String,
@@ -20,6 +23,7 @@ data class GraphEdge(
     val label: String? = null
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class GraphModel(
     val nodes: List<GraphNode> = emptyList(),
     val edges: List<GraphEdge> = emptyList()

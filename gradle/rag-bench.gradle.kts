@@ -56,6 +56,14 @@ project.tasks.register<JavaExec>("runBenchmark") {
         environment("PGVECTOR_JDBC_URL", pgUrl.get())
         environment("PGVECTOR_USER", pgUser.get())
         environment("PGVECTOR_PASSWORD", pgPass.get())
+        val ollamaBaseUrl = project.providers.gradleProperty("ollamaBaseUrl")
+            .orElse(project.providers.environmentVariable("OLLAMA_BASE_URL"))
+            .orElse("http://localhost:11434")
+        val ollamaModel = project.providers.gradleProperty("ollamaModel")
+            .orElse(project.providers.environmentVariable("OLLAMA_MODEL"))
+            .orElse("deepseek-v4-pro:cloud")
+        environment("OLLAMA_BASE_URL", ollamaBaseUrl.get())
+        environment("OLLAMA_MODEL", ollamaModel.get())
     }
     val scenario = project.providers.gradleProperty("scenario").orElse("BASELINE")
     args(scenario.get())
@@ -70,6 +78,14 @@ project.tasks.register<JavaExec>("runComparisonBenchmark") {
         environment("PGVECTOR_JDBC_URL", pgUrl.get())
         environment("PGVECTOR_USER", pgUser.get())
         environment("PGVECTOR_PASSWORD", pgPass.get())
+        val ollamaBaseUrl = project.providers.gradleProperty("ollamaBaseUrl")
+            .orElse(project.providers.environmentVariable("OLLAMA_BASE_URL"))
+            .orElse("http://localhost:11434")
+        val ollamaModel = project.providers.gradleProperty("ollamaModel")
+            .orElse(project.providers.environmentVariable("OLLAMA_MODEL"))
+            .orElse("deepseek-v4-pro:cloud")
+        environment("OLLAMA_BASE_URL", ollamaBaseUrl.get())
+        environment("OLLAMA_MODEL", ollamaModel.get())
     }
 }
 
@@ -163,7 +179,7 @@ project.tasks.register<JavaExec>("classifyVisionOpinion") {
 
 project.tasks.register<JavaExec>("diluteBrainDump") {
     group = "codebase"
-    description = "EPIC 10 STIMULUS cascade: brain dump → VISION/OPINION classification → routing → archiving"
+    description = "EPIC 10 STIMULUS cascade: brain dump → VISION/OPINION classification → routing → dilution (injection) → archiving"
     classpath = runtime
     mainClass = "codebase.rag.StimulusCascadeMain"
     val dump = project.providers.gradleProperty("dump").orElse("")
@@ -172,6 +188,30 @@ project.tasks.register<JavaExec>("diluteBrainDump") {
         .orElse("")
     val outputDir = project.providers.gradleProperty("outputDir").orElse("build/stimulus-reports")
     args(dump.get(), workspaceRoot.get(), outputDir.get())
+}
+
+project.tasks.register<JavaExec>("detectStimuli") {
+    group = "codebase"
+    description = "EPIC 10 STIMULUS: scanne workspace/*.adoc, détecte les stimuli actifs non encore dilués"
+    classpath = runtime
+    mainClass = "codebase.rag.StimulusDetectorMain"
+    val workspaceRoot = project.providers.gradleProperty("workspaceRoot")
+        .orElse(project.providers.environmentVariable("WORKSPACE_ROOT"))
+        .orElse("")
+    val outputDir = project.providers.gradleProperty("outputDir").orElse("build/stimulus-reports")
+    args(workspaceRoot.get(), outputDir.get())
+}
+
+project.tasks.register<JavaExec>("detectStaleStimuli") {
+    group = "codebase"
+    description = "EPIC 10 STIMULUS: alerte sur les stimuli actifs > 2j sans dilution (anti-pattern)"
+    classpath = runtime
+    mainClass = "codebase.rag.StimulusDetectorMain"
+    val workspaceRoot = project.providers.gradleProperty("workspaceRoot")
+        .orElse(project.providers.environmentVariable("WORKSPACE_ROOT"))
+        .orElse("")
+    val outputDir = project.providers.gradleProperty("outputDir").orElse("build/stimulus-reports")
+    args(workspaceRoot.get(), outputDir.get(), "--stale-only")
 }
 
 project.tasks.register("benchmarkProtocol") {

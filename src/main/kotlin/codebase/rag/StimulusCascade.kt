@@ -58,6 +58,11 @@ class StimulusCascade(
     private val classifier: VisionOpinionClassifier = VisionOpinionClassifier(baseUrl, modelName, timeoutSeconds)
     private val workspaceDir: File = if (workspaceRoot.isBlank()) File(".") else File(workspaceRoot)
     private val tsFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmm")
+    private val dilutor: DilutionExecutor = DilutionExecutor(
+        workspaceRoot = workspaceRoot.ifBlank { "." },
+        dryRun = dryRun
+    )
+    private val dilutionResults = mutableListOf<DilutionResult>()
 
     private val routingSystemPrompt = """
 Tu es un routeur de contenu du workspace. Ta mission est de determiner dans quel document racine du workspace une section de contenu doit etre integree.
@@ -119,7 +124,7 @@ Pour le contenu fourni, reponds UNIQUEMENT au format JSON (sans texte avant ni a
 
                     StdoutFormatter.ctx("  Cible : ${target.targetDocument.path} → ${target.suggestedSection}")
 
-                    DilutionRecord(
+                    val rec = DilutionRecord(
                         sectionId = section.id,
                         sectionTitle = section.title,
                         content = section.content,
@@ -129,6 +134,18 @@ Pour le contenu fourni, reponds UNIQUEMENT au format JSON (sans texte avant ni a
                         classificationRationale = result.rationale,
                         timestamp = timestamp
                     )
+
+                    StdoutFormatter.plan("  Injection dans ${target.targetDocument.path}...")
+                    val dilResult = dilutor.execute(rec)
+                    dilutionResults.add(dilResult)
+
+                    if (dilResult.success) {
+                        StdoutFormatter.result("  ✅ Dilué dans ${dilResult.documentPath} (backup: ${dilResult.backupPath ?: "DRY RUN"})")
+                    } else {
+                        StdoutFormatter.error("  ❌ Echec dilution: ${dilResult.error}")
+                    }
+
+                    rec
                 }
                 ContentClassification.OPINION -> {
                     opinionCount++
@@ -404,6 +421,8 @@ Contenu : ${section.content.take(2000)}
 
         return sb.toString()
     }
+
+    fun dilutionResults(): List<DilutionResult> = dilutionResults.toList()
 
     private fun sha256(input: String): String {
         val md = MessageDigest.getInstance("SHA-256")

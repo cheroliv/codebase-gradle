@@ -70,6 +70,7 @@ val cucumberTest = tasks.register<Test>("cucumberTest") {
 }
 
 tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
     jvmArgs("-XX:+EnableDynamicAgentLoading")
 }
 
