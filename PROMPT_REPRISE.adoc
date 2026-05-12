@@ -1,25 +1,24 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 026
+= PROMPT_REPRISE — Codebase Gradle — Session 027
 :author: cheroliv + opencode (deepseek-v4-pro:cloud)
-:date: 2026-05-12
-:session: 026
-:previous: 025
+:date: 2026-05-13
+:session: 027
+:previous: 026
 
-> **Statut** : Session 025 ✅ — EPIC 10 STIMULUS Cascade TERMINÉ (10/10 sous-tâches, 8/8 PASS)
-> **Mission** : Pipeline STIMULUS complet (brain dump → classify → route → inject → archive).
-
-'''
-== Session 025 — Résumé
-
-- DilutionExecutor (243 lignes) : injection automatique sections VISION dans documents racine
-- StimulusDetector (205 lignes) : scanner workspace/*.adoc, détection stimuli actifs + stale
-- StimulusDetectorMain (55 lignes) : CLI entry point detectStimuli/detectStaleStimuli
-- 3 tâches Gradle : diluteBrainDump + detectStimuli + detectStaleStimuli
-- StdoutFormatter.error() + Tag.ERROR
-- Tests JUnit5 : 8/8 PASS (DilutionExecutor + StimulusDetector + DRY RUN + OPINION reject)
-- build.gradle.kts : useJUnitPlatform() dans tasks.withType<Test>
+> **Statut** : Session 026 ✅ — Benchmark EPIC 4 avec deepseek-v4-flash:cloud + Graphify réel
+> **Mission** : 0% erreur 175 classifications, gate MVP1 PASS, benchmark-output/ protégé de clean.
 
 '''
-== Session 026 — Préconisation
+== Session 026 — Résumé
+
+- Pull `deepseek-v4-flash:cloud` sur instance B Docker (`:11435`)
+- OLLAMA_BASE_URL / OLLAMA_MODEL configurables via env vars (tous les runners)
+- Fix `@JsonIgnoreProperties(ignoreUnknown = true)` sur GraphNode/GraphEdge/GraphModel
+  → office/graph.json (21174 nodes, 22286 edges) chargé sans erreur
+- Output déplacé `build/benchmark-reports/` → `benchmark-output/` + .gitignore
+- 5 scénarios × 7 échantillons × 5 seuils = 175 classifications, 37 minutes, 0% erreur
+
+'''
+== Session 027 — Préconisation
 
 === Option A (Recommandé) : EPIC 5 Pipeline fine-tuning experts CDA/FPA (P0)
 
@@ -40,8 +39,8 @@
 [cols="2,3"]
 |===
 | EPIC 9 | TERMINÉ ✅ (15/15 US)
-| EPIC 10 | TERMINÉ ✅ (10/10 sous-tâches, session 025)
-| EPIC 4 | TERMINÉ (MVP1, 4 canaux réels)
+| EPIC 10 | TERMINÉ ✅ (10/10 sous-tâches)
+| EPIC 4 | TERMINÉ ✅ (MVP1, 0% erreur flash + Graphify réel)
 | EPIC 2 | MVP0 TERMINÉ
 | EPIC 5 | A FAIRE (P0) — Fine-tuning experts CDA/FPA
 | EPIC 13 | A FAIRE (P1) — LangGraph4j Classifieur Vision/Opinion
@@ -53,9 +52,6 @@
 
 - ❌ Pas de commit sans permission
 - ❌ Pas de tests en fin de session
-- ✅ Pipeline STIMULUS complet opérationnel
-- ✅ diluteBrainDump, detectStimuli, detectStaleStimuli disponibles
-
-[.text-right]
-*PROMPT_REPRISE mis à jour le 12 mai 2026 — Fin session 025 (EPIC 10 STIMULUS Cascade).*
-*Prochaine session : 026 — EPIC 5 Fine-tuning ou EPIC 13 LangGraph4j.*
+- ✅ benchmark-output/ protégé de `./gradlew clean` (.gitignore)
+- ✅ OLLAMA_BASE_URL / OLLAMA_MODEL / GRAPH_JSON_PATH configurables
+- ✅ deepseek-v4-flash:cloud disponible sur instance B `:11435`

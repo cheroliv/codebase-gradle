@@ -6,7 +6,7 @@ object BenchmarkReportExportMain {
     @JvmStatic
     fun main(args: Array<String>) {
         val scenarioId = if (args.isNotEmpty()) args[0] else "BASELINE"
-        val inputPath = if (args.size > 1) args[1] else "build/benchmark-reports/report-$scenarioId.json"
+        val inputPath = if (args.size > 1) args[1] else "benchmark-output/report-$scenarioId.json"
 
         val inputFile = File(inputPath)
         if (!inputFile.exists()) {
