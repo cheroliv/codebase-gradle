@@ -1,8 +1,8 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 023
+= PROMPT_REPRISE — Codebase Gradle — Session 025
 :author: cheroliv + opencode (deepseek-v4-pro:cloud)
 :date: 2026-05-12
-:session: 022
-:prochaine: 023
+:session: 024
+:prochaine: 025
 
 > **Statut** : Session 022 ✅ — EPIC 4 Benchmark MVP1 TERMINÉ
 > **Mission** : Pipeline multi-canal finalisé (4 canaux réels, scope LOCAL/WORKSPACE différencié, comparaison AsciiDoc prête).

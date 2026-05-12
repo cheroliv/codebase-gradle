@@ -26,4 +26,4 @@
 | 002 | 2026-05-07 | chore | Migration chemins foundry/ → foundry/OSS/ dans INDEX.adoc (granularisation OSS/CSS) | -
 | 001 | 2026-05-04 | governance | Renommage gouvernance openclaw→quizz-benchmark (9 fichiers) | -
 | 000 | 2026-05-03 | init | Migration gouvernance agent depuis quizz-benchmark-gradle + US-9.1 pgvector container | -
-|===
+|===| 024 | 2026-05-12 | review | Code Review Globale — Audit passif | 10/10
