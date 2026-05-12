@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
 _Derniere mise a jour_ : 2026-05-12
-_Session terminee_ : 024 — Code Review Globale (audit passif)
-_Prochaine session_ : 025 — EPIC 10 STIMULUS Cascade ou EPIC 5 fine-tuning CDA/FPA
+_Session terminee_ : 025 — EPIC 10 STIMULUS Cascade TERMINE (10/10 sous-taches, 8/8 PASS JUnit5)
+_Prochaine session_ : 026 — EPIC 5 Fine-tuning CDA/FPA ou EPIC 13 LangGraph4j
 
 '''
 == REGLES ABSOLUES (resume)
@@ -22,6 +22,7 @@ _Prochaine session_ : 025 — EPIC 10 STIMULUS Cascade ou EPIC 5 fine-tuning CDA
 
 |===
 | # | Date | Type | Sujet | Score
+| 025 | 2026-05-12 | feat | EPIC 10 STIMULUS Cascade — DilutionExecutor (injection auto + backup + dryRun), StimulusDetector (scan workspace/*.adoc + stale > 2j), detectStimuli + detectStaleStimuli Gradle tasks, StdoutFormatter.error(), 8/8 JUnit5 PASS | 10/10
 | 022 | 2026-05-12 | feat | EPIC 4 Benchmark MVP1 — Pipeline multi-canal finalisé (4 canaux réels, scope LOCAL/WORKSPACE, comparaison AsciiDoc, runComparisonBenchmark, gate <5%) | 10/10
 | 021 | 2026-05-11 | feat | US-9.14 Segregation Vision/Opinion — prompt engineering, classifier VisionOpinionClassifier, 10 sections test (5 VISION + 5 OPINION), gate 80%, 5 scenarios Cucumber | 10/10
 | 020 | 2026-05-11 | feat | US-9.13 Pertinence Benchmark — 10 questions metier, baseline vs augmented, report AsciiDoc, gate MVP0 >70% | 10/10
@@ -61,7 +62,7 @@ _Prochaine session_ : 025 — EPIC 10 STIMULUS Cascade ou EPIC 5 fine-tuning CDA
 | EPIC 6 | Integration ONNX — boucle qualite | A FAIRE | P1
 | EPIC 7 | Wiring LangChain4j + pgvector experts | A FAIRE | P1
 | EPIC 8 | Exposer experts via Ollama (consommation plugins) | A FAIRE | P2
-| EPIC 10 | Instrumentation STIMULUS — cascade automatique | EN COURS — MVP1 (6/10 sous-tâches, session 022) | P0
+| EPIC 10 | Instrumentation STIMULUS — cascade automatique | TERMINE (10/10 sous-taches, session 025) | P0
 | EPIC 11 | LangGraph4j — chaines de pensees | A FAIRE | P1
 | EPIC 12 | Dilution Article de Blog automatique | A FAIRE | P1
 | EPIC 13 | LangGraph4j Classifieur Vision/Opinion | A FAIRE | P1

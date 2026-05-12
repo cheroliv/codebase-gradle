@@ -1,0 +1,81 @@
+= Rapport de Session — EPIC 10 STIMULUS Cascade MVP2
+:author: cheroliv + opencode (deepseek-v4-pro:cloud)
+:date: 2026-05-12
+:session: 025
+:epic: EPIC 10
+:score: 10/10
+
+== Resume
+
+Completion des 4 sous-taches restantes de l'EPIC 10 STIMULUS (DilutionExecutor, StimulusDetector, detectStaleStimuli, tests).
+Le pipeline est desormais complet : brain dump -> classification -> routage -> injection dans documents racine -> archivage.
+8/8 tests JUnit5 PASS.
+
+== Ce qui a ete fait
+
+=== DilutionExecutor (nouveau fichier : src/main/kotlin/codebase/rag/DilutionExecutor.kt)
+- Injection automatique de sections VISION dans les 4 documents racine
+- Backup de securite avant chaque modification (`*.bak.yyyyMMdd_HHmmss`)
+- Support dryRun : pas de modification reelle du fichier
+- Table de tracabilite "Stimuli dilues dans ce document" mise a jour automatiquement
+- Rejet des sections OPINION avec message d'erreur explicite
+- Gestion section existante (injection apres heading) ou creation nouvelle section
+- Metadonnees de dilution injectees (date, classification, confiance, rationale)
+
+=== StimulusDetector (nouveau fichier : src/main/kotlin/codebase/rag/StimulusDetector.kt)
+- Scan workspace/*.adoc, exclusion des 8 documents EAGER/racine
+- Detection des stimuli non encore dilues via lecture des tables de tracabilite
+- Detection stale : age > 2 jours sans dilution = anti-pattern
+- Exports AsciiDoc + JSON structures
+- collectDilutedStimulusNames() : parsing des 4 documents racine
+
+=== StimulusDetectorMain (nouveau fichier : src/main/kotlin/codebase/rag/StimulusDetectorMain.kt)
+- CLI entry point pour detectStimuli et detectStaleStimuli
+- Support --stale-only, exit code 1 si stimuli stale
+
+=== Taches Gradle
+- detectStimuli (JavaExec -> StimulusDetectorMain) : scan actif + rapports
+- detectStaleStimuli (JavaExec -> StimulusDetectorMain --stale-only) : alerte anti-pattern
+- mise a jour description diluteBrainDump : "dilution (injection)"
+
+=== Modifications existantes
+- StdoutFormatter.kt : +fun error() +Tag.ERROR
+- StimulusCascade.kt : integration DilutionExecutor, dilutionResults()
+- build.gradle.kts : useJUnitPlatform() dans tasks.withType<Test>
+- graphify-gradle/ : correction publishing.repositories Sonatype OSSRH (heritage cross-project)
+
+=== Tests (src/test/kotlin/codebase/scenarios/StimulusCascadeTest.kt)
+- S1 : DilutionExecutor injecte section + backup + contenu verifie
+- S2 : Backup + preservation contenu original + section inseree
+- S3 : DRY RUN preserve contenu intact (egalite stricte)
+- S4 : StimulusDetector detecte 4 stimuli actifs + rapport AsciiDoc
+- S5 : Exclusion stimuli dilues (STIMULUS_01 excluded, 02+03 actifs)
+- S6 : Detection stale > 2 jours (OLD stale, RECENT non)
+- S7 : Rejet section OPINION
+- S8 : Erreur fichier cible absent
+- 8/8 PASS (JUnit5 standalone, zero dependance pgvector/Docker)
+
+== Ce qui n'a PAS ete fait
+
+- Pas de modif des 39 tests Cucumber existants (pgvector absent en local)
+- Le Cucumber feature file epic_10_stimulus_cascade.feature cree mais non active
+  (incompatibilite glue avec accents francais dans les step definitions existantes)
+- Pas de commit
+
+== Bilan
+
+|===
+| Metrique | Valeur
+| EPIC 10 | TERMINE (10/10 sous-taches)
+| DilutionExecutor | 243 lignes, injection + backup + dryRun + trace
+| StimulusDetector | 205 lignes, scan + stale + exports
+| StimulusDetectorMain | 55 lignes, CLI
+| Tests | 8/8 PASS JUnit5
+| Taches Gradle | diluteBrainDump + detectStimuli + detectStaleStimuli
+| Compilation | OK (main + test)
+| Pipeline complet | brain dump -> classify -> route -> inject -> archive
+|===
+
+== Prochaine session (026)
+
+EPIC 5 (Pipeline fine-tuning CDA/FPA P0) ou EPIC 13 (LangGraph4j Classifieur Vision/Opinion P1).
