@@ -93,8 +93,8 @@ object BenchmarkReportExporter {
         sb.appendLine("| C0 | Workspace racine (hors-CVS) — Vision, strategie, brain dump")
         sb.appendLine("| C1 | configuration/ — Secrets, tokens, credentials (non versionne)")
         sb.appendLine("| C2 | office/ — Donnees privees, cours, datasets (cercle 2)")
-        sb.appendLine("| C3 | foundry/CSS/ — Code source closed-source (licence proprietaire)")
-        sb.appendLine("| C4 | foundry/OSS/ — Code open source (Apache 2.0, public)")
+        sb.appendLine("| C3 | foundry/private/ — Code source closed-source (licence proprietaire)")
+        sb.appendLine("| C4 | foundry/public/ — Code open source (Apache 2.0, public)")
         sb.appendLine("|===")
         sb.appendLine()
 
@@ -150,9 +150,9 @@ object BenchmarkReportExporter {
         sb.appendLine("| C1-tokens | C1 | configuration/codebase.yml")
         sb.appendLine("| C2-pedagogie | C2 | office/metiers/FPA/SPG_A2SP.adoc")
         sb.appendLine("| C2-livre | C2 | office/books-collection/kotlin-in-action.pdf")
-        sb.appendLine("| C3-closed | C3 | foundry/CSS/proprietary-algo/")
-        sb.appendLine("| C4-plugin | C4 | foundry/OSS/plantuml-gradle/")
-        sb.appendLine("| C4-readme | C4 | foundry/OSS/codebase-gradle/build.gradle.kts")
+        sb.appendLine("| C3-closed | C3 | foundry/private/proprietary-algo/")
+        sb.appendLine("| C4-plugin | C4 | foundry/public/plantuml-gradle/")
+        sb.appendLine("| C4-readme | C4 | foundry/public/codebase-gradle/build.gradle.kts")
         sb.appendLine("|===")
 
         return sb.toString()

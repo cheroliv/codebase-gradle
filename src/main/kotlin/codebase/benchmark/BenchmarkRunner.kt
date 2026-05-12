@@ -30,9 +30,9 @@ interface SpatialPerceptionExpert {
                      Contient des clés API, mots de passe, variables d'environnement.
         - CERCLE 2 : office/ (données privées, cercle 2). Documents métier, cours, datasets.
                      Contient du contenu pédagogique, des données de formation, des livres.
-        - CERCLE 3 : foundry/CSS/ (licence propriétaire). Code source closed-source.
+        - CERCLE 3 : foundry/private/ (licence propriétaire). Code source closed-source.
                      Contient du code payant, des algorithmes propriétaires.
-        - CERCLE 4 : foundry/OSS/ (Apache 2.0, public). Code open source, documentation publique.
+        - CERCLE 4 : foundry/public/ (Apache 2.0, public). Code open source, documentation publique.
                      Contient des plugins Gradle, de la doc technique publique.
 
         Format de réponse OBLIGATOIRE — JSON strict, aucun texte avant ou après :
@@ -136,7 +136,7 @@ object BenchmarkFixtures {
             "C3-closed",
             3,
             """
-            foundry/CSS/proprietary-algo/ — Code source closed-source, licence commerciale.
+            foundry/private/proprietary-algo/ — Code source closed-source, licence commerciale.
             Algorithme de matching propriétaire pour apprenants-formateurs.
             Utilise un graphe bipartite pondéré avec heuristique brevetée (dépôt INPI n°2026-XXXXX).
             Licence : commerciale, redistribution interdite. Tarif : 2500€/an/licence.
@@ -146,7 +146,7 @@ object BenchmarkFixtures {
             "C4-plugin",
             4,
             """
-            foundry/OSS/plantuml-gradle/ — Plugin Gradle open source pour génération de diagrammes.
+            foundry/public/plantuml-gradle/ — Plugin Gradle open source pour génération de diagrammes.
             Licence Apache 2.0 (SPDX: Apache-2.0).
             Utilise LangChain4j + Ollama pour générer des diagrammes PlantUML via RAG.
             Tests : 138 sessions agent, Cucumber BDD, JUnit 5, TestContainers.
@@ -161,7 +161,7 @@ object BenchmarkFixtures {
             plugins { kotlin("jvm") version "2.1.0" }
             dependencies { implementation("dev.langchain4j:langchain4j:1.12.2") }
             tasks.register("verifyReadMeToAnonymizedYaml") { ... }
-            Licence : Apache 2.0 — tout le code dans foundry/OSS/ est public.
+            Licence : Apache 2.0 — tout le code dans foundry/public/ est public.
             """.trimIndent()
         ),
         SampleDocument(
@@ -245,7 +245,7 @@ object ContextFiller {
         var remaining = targetTokens - (sb.length / 4)
         while (remaining > 0) {
             sb.appendLine("ARCHITECTURE DAG N0→N1→N2→N3 : graphify-gradle (N0) → codebase-gradle (N1) → plantuml-gradle (N2) → site/javelit (N3)")
-            sb.appendLine("CERCLES DE CONFIANCE : C0 (workspace) → C1 (config/) → C2 (office/) → C3 (foundry/CSS/) → C4 (foundry/OSS/)")
+            sb.appendLine("CERCLES DE CONFIANCE : C0 (workspace) → C1 (config/) → C2 (office/) → C3 (foundry/private/) → C4 (foundry/public/)")
             remaining -= 80
         }
         return sb.toString()
@@ -411,13 +411,13 @@ class BenchmarkRunner(
             sb.appendLine("=== Graphify Context (knowledge graph) ===")
             val samplePath = when (sample.id) {
                 "C0-strategie" -> "WORKSPACE_AS_PRODUCT.adoc"
-                "C4-plugin" -> "foundry/OSS/plantuml-gradle"
-                "C4-readme" -> "foundry/OSS/codebase-gradle"
+                "C4-plugin" -> "foundry/public/plantuml-gradle"
+                "C4-readme" -> "foundry/public/codebase-gradle"
                 else -> ""
             }
             if (samplePath.isNotEmpty()) {
                 val filteredModel = if (scopeFilter == "project") {
-                    val projectNodes = graphModel.nodes.filter { it.id.startsWith("foundry/OSS/codebase-gradle") }
+                    val projectNodes = graphModel.nodes.filter { it.id.startsWith("foundry/public/codebase-gradle") }
                     val projectIds = projectNodes.map { it.id }.toSet()
                     val projectEdges = graphModel.edges.filter { it.source in projectIds || it.target in projectIds }
                     GraphModel(nodes = projectNodes, edges = projectEdges)
@@ -430,7 +430,7 @@ class BenchmarkRunner(
                 graphTokens = neighborhood.length / 4
             } else {
                 val filteredModel = if (scopeFilter == "project")
-                    GraphModel(nodes = graphModel.nodes.filter { it.id.startsWith("foundry/OSS/codebase-gradle") }, edges = emptyList())
+                    GraphModel(nodes = graphModel.nodes.filter { it.id.startsWith("foundry/public/codebase-gradle") }, edges = emptyList())
                 else graphModel
                 sb.appendLine("Graph summary: ${filteredModel.nodes.size} nodes, ${filteredModel.edges.size} edges")
                 val topDirs = filteredModel.nodes.filter { it.type == "directory" }.take(6)
