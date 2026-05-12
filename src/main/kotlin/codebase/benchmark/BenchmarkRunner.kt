@@ -216,6 +216,66 @@ object ContextFiller {
 
     fun fillerForThreshold(targetTokens: Int): String =
         technicalDocumentationParagraph(targetTokens)
+
+    fun eagerLazyContext(targetTokens: Int): String {
+        val sb = StringBuilder()
+        sb.appendLine("REGLES ABSOLUES (EAGER) :")
+        sb.appendLine("  - REGLE 0 : publishToMavenLocal OBLIGATOIRE après modif source")
+        sb.appendLine("  - REGLE 1 : AUCUN commit sans permission explicite")
+        sb.appendLine("  - REGLE 1b : backup obligatoire avant modif fichier non versionné")
+        sb.appendLine("  - REGLE 2 : PAS de tests en fin de session sans permission")
+        sb.appendLine("CONVENTIONS EAGER/LAZY :")
+        sb.appendLine("  - EAGER : chargé automatiquement à l'ouverture de session (AGENT.adoc, INDEX.adoc, PROMPT_REPRISE.adoc)")
+        sb.appendLine("  - LAZY : chargé à la demande uniquement (VISION_ORCHESTRATION_LLM.adoc, BACKLOG.adoc)")
+        sb.appendLine("  - COLD : jamais chargé automatiquement (encyclopedies/, backup/)")
+        sb.appendLine("HISTORIQUE SESSIONS :")
+        sb.appendLine("  021 US-9.14 Vision/Opinion classifier ✅")
+        sb.appendLine("  020 US-9.13 Pertinence benchmark gate 70% ✅")
+        sb.appendLine("  019 US-9.11 + US-9.12 OpencodeInjector walk→index→query ✅")
+        sb.appendLine("  018 US-9.10 CompositeContextBuilder ✅")
+        sb.appendLine("  017 US-9.10 config 40/30/20/10 builder ✅")
+        sb.appendLine("  016 US-9.9 Filtered query SQL ✅")
+        sb.appendLine("  015 US-9.8 VectorQueryService ✅")
+        sb.appendLine("  014 US-9.7 Validation batch 9 fichiers ✅")
+        sb.appendLine("  013 A1 CI anonymize.yml ✅")
+        sb.appendLine("  012 EPIC 4 RAG câblé pgvector ✅")
+        sb.appendLine("  011 EPIC 4 5 scénarios 0% erreur ✅")
+        sb.appendLine("  010 EPIC 4 MVP0 nettoyage ✅")
+        sb.appendLine()
+        var remaining = targetTokens - (sb.length / 4)
+        while (remaining > 0) {
+            sb.appendLine("ARCHITECTURE DAG N0→N1→N2→N3 : graphify-gradle (N0) → codebase-gradle (N1) → plantuml-gradle (N2) → site/javelit (N3)")
+            sb.appendLine("CERCLES DE CONFIANCE : C0 (workspace) → C1 (config/) → C2 (office/) → C3 (foundry/CSS/) → C4 (foundry/OSS/)")
+            remaining -= 80
+        }
+        return sb.toString()
+    }
+
+    fun ressourcesContext(targetTokens: Int): String {
+        val sb = StringBuilder()
+        sb.appendLine("CORPUS METIER — office/metiers/ :")
+        sb.appendLine("  - FPA/SPG_A2SP.adoc : Support Pédagogique Groupé, module A2SP (conception formation)")
+        sb.appendLine("  - CDA/RNCP_*.adoc : Référentiels RNCP Concepteur Développeur d'Applications")
+        sb.appendLine("  - Taxonomie Bloom : niveaux 1-6 appliqués aux séquences pédagogiques")
+        sb.appendLine("  - Critères Qualiopi : 7 indicateurs pour certification qualité formation")
+        sb.appendLine("DATASETS TECHNIQUES — office/books-collection/ :")
+        sb.appendLine("  - kotlin-in-action.pdf : types nullables, data classes, sealed classes, coroutines")
+        sb.appendLine("  - effective-java.pdf : patterns immutabilité, builder, factory, singleton")
+        sb.appendLine("  - clean-code.pdf : principes SOLID, nommage, fonctions courtes, commentaires")
+        sb.appendLine("  - design-patterns-gof.pdf : 23 patterns GoF classés création/structure/comportement")
+        sb.appendLine("CORPUS FORMATION — office/data-engineering/ :")
+        sb.appendLine("  - Cours LangChain4j : AiServices, ChatModel, EmbeddingModel, Tool Calling")
+        sb.appendLine("  - Cours pgvector : IVFFlat, HNSW, similarité cosinus, top-K retrieval")
+        sb.appendLine("  - Cours ONNX Runtime : inférence locale, modèles HuggingFace, export ONNX")
+        sb.appendLine("  - Cours Gradle Plugins : convention plugins, precompiled script, extension DSL")
+        sb.appendLine()
+        var remaining = targetTokens - (sb.length / 4)
+        while (remaining > 0) {
+            sb.appendLine("RESSOURCE PEDAGOGIQUE : Module formation RNCP niveau 6 (Bac+3/4), 12 apprenants, blended learning 70% distanciel 30% présentiel.")
+            remaining -= 30
+        }
+        return sb.toString()
+    }
 }
 
 /**
@@ -229,7 +289,8 @@ class BenchmarkRunner(
     private val pgJdbcUrl: String? = null,
     private val pgUser: String? = null,
     private val pgPassword: String? = null,
-    private val graphJsonPath: String? = null
+    private val graphJsonPath: String? = null,
+    private val scopeFilter: String? = null
 ) {
     private val log = LoggerFactory.getLogger(BenchmarkRunner::class.java)
 
@@ -307,20 +368,36 @@ class BenchmarkRunner(
         graphModel: GraphModel?
     ): String {
         val isBaseline = channels.isEmpty()
+        val channelCount = channels.size.coerceAtLeast(1)
+        val budgetPerChannel = targetTokens / channelCount
+
         val sb = StringBuilder()
 
+        var eagerTokens = 0
         var ragTokens = 0
         var graphTokens = 0
-        val fillerBudget = if (isBaseline) targetTokens else targetTokens / 2
+        var ressourcesTokens = 0
+
+        if (channels.contains("EAGER/LAZY")) {
+            sb.appendLine("=== EAGER/LAZY Context (règles + historique) ===")
+            val eagerBudget = budgetPerChannel
+            sb.appendLine(ContextFiller.eagerLazyContext(eagerBudget))
+            sb.appendLine()
+            eagerTokens = eagerBudget
+        }
 
         if (channels.contains("RAG") && vectorStore != null && embeddingPipeline != null) {
             sb.appendLine("=== RAG Context (pgvector) ===")
             try {
-                val queryVec = embeddingPipeline.embedQuery("cercles de confiance workspace foundry office configuration")
+                val queryText = if (scopeFilter == "project")
+                    "codebase benchmark gradle plugin opencode augmentation"
+                else
+                    "cercles de confiance workspace foundry office configuration"
+                val queryVec = embeddingPipeline.embedQuery(queryText)
                 val results = vectorStore.querySimilar(queryVec, topK = 10)
                 for (r in results) {
                     val chunkTokens = r.text.length / 4
-                    if (ragTokens + chunkTokens > targetTokens / 3) break
+                    if (ragTokens + chunkTokens > budgetPerChannel) break
                     sb.appendLine("[${String.format("%.2f", r.similarity)}] ${r.text}")
                     sb.appendLine()
                     ragTokens += chunkTokens
@@ -339,19 +416,42 @@ class BenchmarkRunner(
                 else -> ""
             }
             if (samplePath.isNotEmpty()) {
-                val neighborhood = GraphContextBuilder.neighborhood(graphModel, samplePath)
+                val filteredModel = if (scopeFilter == "project") {
+                    val projectNodes = graphModel.nodes.filter { it.id.startsWith("foundry/OSS/codebase-gradle") }
+                    val projectIds = projectNodes.map { it.id }.toSet()
+                    val projectEdges = graphModel.edges.filter { it.source in projectIds || it.target in projectIds }
+                    GraphModel(nodes = projectNodes, edges = projectEdges)
+                } else {
+                    graphModel
+                }
+                val neighborhood = GraphContextBuilder.neighborhood(filteredModel, samplePath)
                 sb.append(neighborhood)
                 sb.appendLine()
                 graphTokens = neighborhood.length / 4
             } else {
-                sb.appendLine("Graph summary: ${graphModel.nodes.size} nodes, ${graphModel.edges.size} edges")
-                val topDirs = graphModel.nodes.filter { it.type == "directory" }.take(6)
+                val filteredModel = if (scopeFilter == "project")
+                    GraphModel(nodes = graphModel.nodes.filter { it.id.startsWith("foundry/OSS/codebase-gradle") }, edges = emptyList())
+                else graphModel
+                sb.appendLine("Graph summary: ${filteredModel.nodes.size} nodes, ${filteredModel.edges.size} edges")
+                val topDirs = filteredModel.nodes.filter { it.type == "directory" }.take(6)
                 for (d in topDirs) sb.appendLine("  - ${d.label} [${d.id}]")
             }
         }
 
-        val remaining = (fillerBudget - ragTokens - graphTokens).coerceAtLeast(500)
-        sb.append(ContextFiller.fillerForThreshold(remaining))
+        if (channels.contains("Ressources")) {
+            sb.appendLine("=== Ressources Context (documents métier + corpus) ===")
+            val ressourcesBudget = budgetPerChannel
+            sb.appendLine(ContextFiller.ressourcesContext(ressourcesBudget))
+            sb.appendLine()
+            ressourcesTokens = ressourcesBudget
+        }
+
+        val fillerRemaining = if (isBaseline) targetTokens else 0
+        val usedTokens = eagerTokens + ragTokens + graphTokens + ressourcesTokens
+        if (fillerRemaining > 0 || usedTokens < targetTokens / 2) {
+            val remaining = (targetTokens / 2 - usedTokens).coerceAtLeast(500)
+            sb.append(ContextFiller.fillerForThreshold(remaining))
+        }
 
         return sb.toString()
     }

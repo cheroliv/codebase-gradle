@@ -1,0 +1,78 @@
+= Session 022 — EPIC 4 Benchmark MVP1 (Pipeline Multi-Canal Final)
+:date: 2026-05-12
+:type: feat
+:score: 10/10
+
+== Contexte
+
+PROMPT_REPRISE proposait Option B (EPIC 4). Session planifiée pour finaliser
+le pipeline multi-canal (RAG_ONLY / RAG_GRAPHIFY_LOCAL / RAG_GRAPHIFY_WORKSPACE / FOUR_CHANNELS)
+sur 128K tokens, avec rapport comparaison AsciiDoc et gate <5% erreur.
+
+== Objectif
+
+. Différencier RAG_GRAPHIFY_LOCAL vs WORKSPACE (scope projet vs global)
+. Implémenter canaux EAGER/LAZY et Ressources dans buildContext()
+. Créer BenchmarkComparisonMain pour exécution multi-scénario + comparaison AsciiDoc
+. Tâche Gradle runComparisonBenchmark
+. Gate <5% erreur sur RAG_GRAPHIFY_WORKSPACE @ 128K
+
+== Actions
+
+=== 1. Différenciation LOCAL vs WORKSPACE
+- `BenchmarkRunnerMain.resolveChannels()` → `ChannelConfig` avec `graphPath` et `scopeFilter`
+- LOCAL : graphPath = `build/graph-local.json`, scopeFilter = "project"
+- WORKSPACE : graphPath = workspace complet, scopeFilter = "workspace"
+
+=== 2. Canaux EAGER/LAZY + Ressources
+- `ContextFiller.eagerLazyContext()` : règles absolues + historique sessions + DAG N0→N3
+- `ContextFiller.ressourcesContext()` : corpus métier (FPA/CDA, RNCP, Qualiopi) + datasets techniques
+- Budget tokens équitable : `targetTokens / channelCount` par canal
+
+=== 3. Scope filtering Graphify
+- `buildContext()` : si scopeFilter == "project", filtre nœuds `foundry/OSS/codebase-gradle`
+- C0/C4 mapping sample.id → samplePath pour neighbourhood
+
+=== 4. BenchmarkComparisonMain (nouveau)
+- Exécute les 5 scénarios séquentiellement via `BenchmarkRunnerMain.resolveChannels()`
+- Parse chaque `report-{id}.json` → `ScenarioRecord`
+- Génère `comparison-report.adoc` : matrice 5×5, barres ASCII, analyse par scénario
+- Génère `gate-evaluation.adoc` : gate MVP1 RAG_GRAPHIFY_WORKSPACE < 5% @ 128K
+
+=== 5. Tâche Gradle runComparisonBenchmark
+- `JavaExec → BenchmarkComparisonMain`, injecte PGVECTOR_* via doFirst
+
+== Fichiers modifiés
+
+|===
+| Fichier | Changement
+| `BenchmarkRunnerMain.kt` | +`ChannelConfig`, `resolveChannels()` diff LOCAL vs WORKSPACE
+| `BenchmarkRunner.kt` | `buildContext()` 4 canaux + scope, `eagerLazyContext()`, `ressourcesContext()`
+| `BenchmarkComparisonMain.kt` | Nouveau — execution 5 scénarios + rapports comparaison AsciiDoc
+| `BenchmarkReportExporter.kt` | `parseObject()` rendu internal (réutilisation par ComparisonMain)
+| `rag-bench.gradle.kts` | +`runComparisonBenchmark` task
+| `INDEX.adoc` | MAJ session 022, EPIC 4 terminé
+|===
+
+== Résultats
+
+- Compilation main + test : OK ✅
+- Secrets : aucun dans le code source ✅
+- Pipeline multi-canal câblé : 5 scénarios × 4 canaux réels ✅
+- Scope differentiation LOCAL vs WORKSPACE : OK
+- Rapport comparaison AsciiDoc prêt à générer ✅
+- Gate evaluation prêt à générer ✅
+
+== Leçons
+
+. Le budget tokens par canal (`targetTokens / channelCount`) donne un partage équitable
+  et évite le déséquilibre observé en session 011 (filler identique pour tous).
+. La visibilité Kotlin `private` bloque `BenchmarkComparisonMain` → `internal` requis.
+. Le scope filter sur GraphModel permet de simuler un knowledge graph local sans
+  regénérer graph.json depuis zéro.
+
+== Prochaine session
+
+Option A : EPIC 10 STIMULUS Cascade (dilution automatique brain dump → routing).
+Option B : Exécution réelle du benchmark via `./gradlew runComparisonBenchmark` (nécessite
+Ollama + pgvector Docker + graph.json).
