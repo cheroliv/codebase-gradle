@@ -147,8 +147,8 @@ object BenchmarkProtocol {
         0 to "C0 — Racine workspace (hors-CVS)",
         1 to "C1 — configuration/ (secrets, non versionné)",
         2 to "C2 — office/ (données privées, cercle 2)",
-        3 to "C3 — foundry/CSS/ (licence propriétaire)",
-        4 to "C4 — foundry/OSS/ (Apache 2.0, public)"
+        3 to "C3 — foundry/private/ (licence propriétaire)",
+        4 to "C4 — foundry/public/ (Apache 2.0, public)"
     )
 
     fun defaultConfig(): BenchmarkConfig = BenchmarkConfig()

@@ -43,7 +43,7 @@ class CompositeContextBuilder(
 
     private fun collectEagerFiles(): String {
         val sb = StringBuilder()
-        val ossDir = workspaceRoot.resolve("foundry/OSS")
+        val ossDir = workspaceRoot.resolve("foundry/public")
         if (!ossDir.isDirectory) return ""
 
         ossDir.listFiles { f -> f.isDirectory }?.sortedBy { it.name }?.forEach { projectDir ->
