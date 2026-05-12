@@ -10,9 +10,7 @@ object AugmentOpencodeMain {
     @JvmStatic
     fun main(args: Array<String>) {
         val ragQuestion = if (args.isNotEmpty()) args[0] else "architecture du workspace"
-        val jdbcUrl = System.getenv("PGVECTOR_JDBC_URL") ?: "jdbc:postgresql://localhost:5432/codebase_rag"
-        val user = System.getenv("PGVECTOR_USER") ?: "codebase"
-        val password = System.getenv("PGVECTOR_PASSWORD") ?: "codebase"
+        val cfg = PgVectorConfig.fromEnv()
         val workspaceRoot = System.getenv("CODEBASE_ROOT_DIR")?.let { File(it) }
             ?: File(".").absoluteFile.parentFile.parentFile
         val outputFile = File("/tmp/opencode-context.txt")
@@ -20,7 +18,7 @@ object AugmentOpencodeMain {
         StdoutFormatter.banner("Augment Opencode — US-9.12 (Pipeline complet)")
         StdoutFormatter.ctx("RAG question: $ragQuestion")
 
-        val store = VectorStore(jdbcUrl, user, password)
+        val store = cfg.toVectorStore()
         store.initSchema()
 
         val existingDocCount = store.countDocuments()

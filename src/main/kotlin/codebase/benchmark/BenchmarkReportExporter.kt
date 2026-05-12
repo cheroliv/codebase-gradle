@@ -1,37 +1,63 @@
 package codebase.benchmark
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import java.time.Instant
+
+@Serializable
+data class BenchmarkReport(
+    val scenario: String = "",
+    val channels: List<String> = emptyList(),
+    val summary: String = "",
+    val results: List<ThresholdData> = emptyList()
+)
+
+@Serializable
+data class ThresholdData(
+    val threshold: String = "",
+    val totalSamples: Int = 0,
+    val errorRate: Double = 0.0,
+    val boundaryCrossings: List<CrossingData> = emptyList()
+)
+
+@Serializable
+data class CrossingData(
+    val documentId: String = "",
+    val expectedCircle: Int = 0,
+    val actualCircle: Int = 0,
+    val confidenceScore: Double = 0.0,
+    val excerpt: String = ""
+)
+
+data class Crossing(val documentId: String, val expectedCircle: Int, val actualCircle: Int, val confidenceScore: Double)
+data class ThresholdResult(val threshold: String, val totalSamples: Int, val errorRate: Double, val crossings: List<Crossing>)
 
 object BenchmarkReportExporter {
 
-    data class Crossing(val documentId: String, val expectedCircle: Int, val actualCircle: Int, val confidenceScore: Double)
-    data class ThresholdResult(val threshold: String, val totalSamples: Int, val errorRate: Double, val crossings: List<Crossing>)
-    internal fun parseObject(json: String): Map<String, Any> = parseObjectImpl(json)
+    private val json = Json { ignoreUnknownKeys = true }
+
+    internal fun parseObject(jsonString: String): BenchmarkReport =
+        json.decodeFromString<BenchmarkReport>(jsonString)
 
     fun exportAsciiDoc(jsonReport: String, scenarioId: String): String {
-        val root = parseObjectImpl(jsonReport.trim())
+        val root = json.decodeFromString<BenchmarkReport>(jsonReport.trim())
 
-        val scenarioName = root["scenario"] as? String ?: scenarioId
-        val channels = (root["channels"] as? List<*>)?.filterIsInstance<String>() ?: emptyList()
-        val summary = root["summary"] as? String ?: ""
-        val rawResults = root["results"] as? List<*> ?: emptyList<Nothing>()
-
-        val results = rawResults.mapNotNull { elem ->
-            val obj = elem as? Map<*, *> ?: return@mapNotNull null
-            val threshold = obj["threshold"] as? String ?: "?"
-            val totalSamples = (obj["totalSamples"] as? Number)?.toInt() ?: 0
-            val errorRate = (obj["errorRate"] as? Number)?.toDouble() ?: 0.0
-            val rawCrossings = obj["boundaryCrossings"] as? List<*> ?: emptyList<Nothing>()
-            val crossings = rawCrossings.mapNotNull { c ->
-                val co = c as? Map<*, *> ?: return@mapNotNull null
-                Crossing(
-                    documentId = co["documentId"] as? String ?: "?",
-                    expectedCircle = (co["expectedCircle"] as? Number)?.toInt() ?: 0,
-                    actualCircle = (co["actualCircle"] as? Number)?.toInt() ?: 0,
-                    confidenceScore = (co["confidenceScore"] as? Number)?.toDouble() ?: 0.0
-                )
-            }
-            ThresholdResult(threshold, totalSamples, errorRate, crossings)
+        val scenarioName = root.scenario.ifEmpty { scenarioId }
+        val channels = root.channels
+        val results = root.results.map { thresholdData ->
+            ThresholdResult(
+                threshold = thresholdData.threshold,
+                totalSamples = thresholdData.totalSamples,
+                errorRate = thresholdData.errorRate,
+                crossings = thresholdData.boundaryCrossings.map { crossing ->
+                    Crossing(
+                        documentId = crossing.documentId,
+                        expectedCircle = crossing.expectedCircle,
+                        actualCircle = crossing.actualCircle,
+                        confidenceScore = crossing.confidenceScore
+                    )
+                }
+            )
         }
 
         val sb = StringBuilder()
@@ -45,7 +71,7 @@ object BenchmarkReportExporter {
         sb.appendLine()
         sb.appendLine("[abstract]")
         sb.appendLine("--")
-        sb.appendLine(summary)
+        sb.appendLine(root.summary)
         sb.appendLine("--")
         sb.appendLine()
 
@@ -130,109 +156,5 @@ object BenchmarkReportExporter {
         sb.appendLine("|===")
 
         return sb.toString()
-    }
-
-    // ── Minimal JSON parser (no external dependencies) ──
-
-    private fun parseObjectImpl(json: String): Map<String, Any> {
-        val map = mutableMapOf<String, Any>()
-        var pos = 1
-        while (pos < json.length && json[pos] != '}') {
-            pos = skipWhitespace(json, pos)
-            if (pos >= json.length || json[pos] == '}') break
-            val key = parseString(json, pos)
-            pos = skipWhitespace(json, key.second)
-            check(json[pos] == ':') { "Expected ':' at $pos" }
-            pos = skipWhitespace(json, pos + 1)
-            val value = parseValue(json, pos)
-            map[key.first] = value.first
-            pos = skipWhitespace(json, value.second)
-            if (pos < json.length && json[pos] == ',') pos++
-        }
-        return map
-    }
-
-    private fun parseString(json: String, start: Int): Pair<String, Int> {
-        check(json[start] == '"') { "Expected '\"' at $start" }
-        val sb = StringBuilder()
-        var pos = start + 1
-        while (pos < json.length && json[pos] != '"') {
-            if (json[pos] == '\\') {
-                pos++
-                if (pos < json.length) {
-                    when (json[pos]) {
-                        '"' -> sb.append('"')
-                        '\\' -> sb.append('\\')
-                        'n' -> sb.append('\n')
-                        else -> sb.append(json[pos])
-                    }
-                    pos++
-                }
-            } else {
-                sb.append(json[pos])
-                pos++
-            }
-        }
-        check(pos < json.length && json[pos] == '"') { "Unterminated string at $pos" }
-        return Pair(sb.toString(), pos + 1)
-    }
-
-    private fun parseValue(json: String, start: Int): Pair<Any, Int> {
-        val pos = skipWhitespace(json, start)
-        return when {
-            json[pos] == '"' -> parseString(json, pos)
-            json[pos] == '{' -> {
-                var depth = 1
-                var end = pos + 1
-                while (end < json.length && depth > 0) {
-                    when (json[end]) {
-                        '{' -> depth++
-                        '}' -> depth--
-                    }
-                    end++
-                }
-                val inner = json.substring(pos, end)
-                Pair(parseObjectImpl(inner), end)
-            }
-            json[pos] == '[' -> {
-                val list = mutableListOf<Any>()
-                var end = pos + 1
-                end = skipWhitespace(json, end)
-                if (json[end] == ']') {
-                    Pair(list, end + 1)
-                } else {
-                    while (end < json.length && json[end] != ']') {
-                        val elem = parseValue(json, end)
-                        list.add(elem.first)
-                        end = skipWhitespace(json, elem.second)
-                        if (end < json.length && json[end] == ',') end = skipWhitespace(json, end + 1)
-                    }
-                    Pair(list, end + 1)
-                }
-            }
-            else -> {
-                val sb = StringBuilder()
-                var end = pos
-                while (end < json.length && json[end] !in ",}] \t\n\r") {
-                    sb.append(json[end])
-                    end++
-                }
-                val token = sb.toString()
-                when {
-                    token == "null" -> Pair("", end)
-                    token == "true" -> Pair(true, end)
-                    token == "false" -> Pair(false, end)
-                    token.contains('.') || token.contains('E') || token.contains('e') -> Pair(token.toDouble(), end)
-                    token.isEmpty() -> Pair(0, end)
-                    else -> Pair(token.toIntOrNull() ?: token, end)
-                }
-            }
-        }
-    }
-
-    private fun skipWhitespace(json: String, start: Int): Int {
-        var pos = start
-        while (pos < json.length && json[pos] in " \t\n\r") pos++
-        return pos
     }
 }

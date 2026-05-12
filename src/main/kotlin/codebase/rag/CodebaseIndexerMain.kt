@@ -8,13 +8,11 @@ object CodebaseIndexerMain {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val jdbcUrl = System.getenv("PGVECTOR_JDBC_URL") ?: "jdbc:postgresql://localhost:5432/codebase_rag"
-        val user = System.getenv("PGVECTOR_USER") ?: "codebase"
-        val password = System.getenv("PGVECTOR_PASSWORD") ?: "codebase"
+        val cfg = PgVectorConfig.fromEnv()
 
-        log.info("Connecting to pgvector at ${jdbcUrl.replace(Regex("password=.*"), "password=***")}")
+        log.info("Connecting to pgvector at ${cfg.jdbcUrl.replace(Regex("password=.*"), "password=***")}")
 
-        val store = VectorStore(jdbcUrl, user, password)
+        val store = cfg.toVectorStore()
         store.initSchema()
 
         val rootDir = System.getenv("CODEBASE_ROOT_DIR")?.let { java.io.File(it) } ?: java.io.File(".")

@@ -1,19 +1,9 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 import java.time.Duration
 
-buildscript {
-    repositories { mavenCentral() }
-    dependencies {
-        classpath("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.21.2")
-        classpath("com.fasterxml.jackson.module:jackson-module-kotlin:2.21.2")
-        classpath("jakarta.validation:jakarta.validation-api:3.1.0")
-        classpath("org.hibernate.validator:hibernate-validator:8.0.1.Final")
-        classpath("org.glassfish.expressly:expressly:5.0.0")
-    }
-}
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    kotlin("plugin.serialization") version "2.3.20"
     application
 }
 
@@ -27,13 +17,13 @@ application.mainClass = "chatbot.ChatbotFrame"
 kotlin {
     compilerOptions {
         freeCompilerArgs.add("-Xjvm-default=all")
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_23)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_24)
     }
 }
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(23))
+        languageVersion.set(JavaLanguageVersion.of(24))
     }
 }
 
@@ -42,6 +32,7 @@ dependencies {
     implementation(libs.bundles.r2dbc)
     implementation(libs.bundles.arrow)
     implementation(libs.jackson.module.kotlin)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.testcontainers.postgresql)
     implementation(libs.mapstruct)
     annotationProcessor(libs.mapstruct.processor)

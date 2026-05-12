@@ -1,5 +1,6 @@
 package codebase.benchmark
 
+import codebase.rag.PgVectorConfig
 import org.slf4j.LoggerFactory
 import java.io.File
 
@@ -10,9 +11,7 @@ object BenchmarkRunnerMain {
     fun main(args: Array<String>) {
         val scenarioId = if (args.isNotEmpty()) args[0] else "BASELINE"
 
-        val pgJdbcUrl = System.getenv("PGVECTOR_JDBC_URL") ?: "jdbc:postgresql://localhost:5432/codebase_rag"
-        val pgUser = System.getenv("PGVECTOR_USER") ?: "codebase"
-        val pgPassword = System.getenv("PGVECTOR_PASSWORD") ?: "codebase"
+        val pgCfg = PgVectorConfig.fromEnv()
         val graphJsonPath = System.getenv("GRAPH_JSON_PATH") ?: "build/graph.json"
         val projectRoot = System.getenv("CODEBASE_PROJECT_ROOT") ?: System.getProperty("user.dir")
 
@@ -22,7 +21,7 @@ object BenchmarkRunnerMain {
         outputDir.mkdirs()
 
         val runner = BenchmarkRunner(
-            pgJdbcUrl = pgJdbcUrl, pgUser = pgUser, pgPassword = pgPassword,
+            pgJdbcUrl = pgCfg.jdbcUrl, pgUser = pgCfg.user, pgPassword = pgCfg.password,
             graphJsonPath = channelConfig.graphPath ?: graphJsonPath,
             scopeFilter = channelConfig.scopeFilter
         )

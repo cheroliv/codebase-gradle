@@ -1,6 +1,7 @@
 package codebase.benchmark
 
 import codebase.benchmark.BenchmarkRunnerMain.ChannelConfig
+import codebase.rag.PgVectorConfig
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.Instant
@@ -26,9 +27,7 @@ object BenchmarkComparisonMain {
     @JvmStatic
     fun main(args: Array<String>) {
         val projectRoot = System.getenv("CODEBASE_PROJECT_ROOT") ?: System.getProperty("user.dir")
-        val pgJdbcUrl = System.getenv("PGVECTOR_JDBC_URL") ?: "jdbc:postgresql://localhost:5432/codebase_rag"
-        val pgUser = System.getenv("PGVECTOR_USER") ?: "codebase"
-        val pgPassword = System.getenv("PGVECTOR_PASSWORD") ?: "codebase"
+        val pgCfg = PgVectorConfig.fromEnv()
         val graphJsonPath = System.getenv("GRAPH_JSON_PATH") ?: "build/graph.json"
 
         val outputDir = File("build/benchmark-reports")
@@ -42,7 +41,7 @@ object BenchmarkComparisonMain {
             log.info("Running scenario: {} (channels: {})", scenarioId, channelConfig.channels)
 
             val runner = BenchmarkRunner(
-                pgJdbcUrl = pgJdbcUrl, pgUser = pgUser, pgPassword = pgPassword,
+                pgJdbcUrl = pgCfg.jdbcUrl, pgUser = pgCfg.user, pgPassword = pgCfg.password,
                 graphJsonPath = channelConfig.graphPath ?: graphJsonPath,
                 scopeFilter = channelConfig.scopeFilter
             )
@@ -74,16 +73,14 @@ object BenchmarkComparisonMain {
     }
 
     private fun parseThresholdResults(reportJson: String): List<ThresholdRecord> {
-        val root = BenchmarkReportExporter.parseObject(reportJson.trim())
-        val rawResults = root["results"] as? List<*> ?: return emptyList()
-        return rawResults.mapNotNull { elem ->
-            val obj = elem as? Map<*, *> ?: return@mapNotNull null
-            val threshold = obj["threshold"] as? String ?: "?"
-            val totalSamples = (obj["totalSamples"] as? Number)?.toInt() ?: 0
-            val errorRate = (obj["errorRate"] as? Number)?.toDouble() ?: 0.0
-            val crossings = obj["boundaryCrossings"] as? List<*> ?: emptyList<Nothing>()
-            val errorCount = crossings.size
-            ThresholdRecord(threshold, errorRate, totalSamples, errorCount)
+        val report = BenchmarkReportExporter.parseObject(reportJson.trim())
+        return report.results.map { thresholdData ->
+            ThresholdRecord(
+                threshold = thresholdData.threshold,
+                totalSamples = thresholdData.totalSamples,
+                errorRate = thresholdData.errorRate,
+                errorCount = thresholdData.boundaryCrossings.size
+            )
         }
     }
 

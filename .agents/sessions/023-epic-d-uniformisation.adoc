@@ -1,0 +1,36 @@
+= Session 023 — EPIC D (UNI-2, UNI-3, UNI-4, UNI-5) : Uniformisation Build codebase-gradle
+:author: cheroliv + opencode (deepseek-v4-pro)
+:date: 2026-05-12
+
+[abstract]
+4 US d'uniformisation build appliquées à codebase-gradle dans le cadre d'EPIC D.
+
+== US réalisées
+
+|===
+| US | Changement
+
+| UNI-1
+| Java 23→24 (jvmTarget, toolchain, gradle.properties), Kotlin 2.1.0→2.3.20
+
+| UNI-3
+| Suppression `buildscript{ jackson+yaml+jakarta+hibernate+expressly }` — redondant avec buildSrc/
+
+| UNI-4
+| `BenchmarkReportExporter` : parsing JSON manuel (237 lignes) → kotlinx.serialization (`@Serializable BenchmarkReport/ThresholdData/CrossingData`)
+| `BenchmarkComparisonMain`: `parseThresholdResults()` → typé via `BenchmarkReportExporter.parseObject()`
+| Ajout `kotlinx-serialization-json` 1.7.3 au version catalog + plugin serialization
+
+| UNI-5
+| Nouveau `codebase/rag/PgVectorConfig.kt` : `fromEnv()` + `toVectorStore()`
+| 7 main() classes refactorisées : BenchmarkRunnerMain, BenchmarkComparisonMain, CodebaseIndexerMain,
+  VectorQueryMain, AugmentOpencodeMain, OpencodeInjectorMain, CompositeContextBuilderMain
+
+| UNI-6
+| .editorconfig racine créé (appliqué au workspace)
+|===
+
+== Build
+
+- compileKotlin ✅
+- compileTestKotlin ✅
