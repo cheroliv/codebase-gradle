@@ -238,7 +238,7 @@ pas par `implementation` (code). Voir `AGENT_GOVERNANCE.adoc` → Règle 4bis.
 
 == EPIC 10 : Instrumentation Gradle du Pattern STIMULUS — Cascade Dilution/Enrichissement Automatique
 
-**Statut** : A FAIRE
+**Statut** : EN COURS (MVP1 — Session 022)
 **Priorite** : P0
 
 *Pourquoi* : Le pattern STIMULUS (formalise dans `AGENT_GOVERNANCE.adoc`) est aujourd'hui
@@ -247,25 +247,20 @@ Gradle typee** qui automatise la cascade : detection des stimuli actifs → mapp
 documents cibles → dilution organique → archivage vision-archive/ → suppression.
 La meme tache sera invocable par le LLM, par opencode, ou par la CI/CD.
 
-*Dépend de* : EPIC 9 (opencode augmente — le vecteur composite donne au LLM la capacite
-de mapper automatiquement le contenu du stimulus vers les documents cibles)
+*Depend de* : EPIC 9 (US-9.14 VisionOpinionClassifier — reutilise pour la classification)
 
 === Sous-tâches
 
-* [ ] Definir la data class `StimulusFile` : path, date, sections, maturite, mapping cibles
-* [ ] Implementer `StimulusDetector` : scanne `workspace/*.adoc`, detecte les stimuli
-  actifs via heuristiques (titre evocateur, metadonnees de date/contexte, signature de brain dump)
-* [ ] Implementer `DilutionMapper` : pour chaque section du stimulus, determine le document
-  cible et la section exacte d'insertion (WORKSPACE_AS_PRODUCT, WORKSPACE_VISION, WHAT_THE_GAMES_BEEN_MISSING, AGENT_GOVERNANCE)
-* [ ] Implementer `DilutionExecutor` : ouvre le document cible, insere le contenu
-  en respectant style/ton/numerotation, met a jour les metadonnees de pied
-* [ ] Implementer `StimulusArchiver` : snapshot dans `configuration/vision-archive/$DATE/`
-  + suppression du stimulus
-* [ ] Tache Gradle `diluteStimuli` : chaine complete → detection → mapping → dilution → archivage → suppression
-* [ ] Tache Gradle `detectStaleStimuli` : alerte si un stimulus survit > 2 sessions
-  sans dilution (anti-pattern)
-* [ ] Tests : 3 stimuli synthetiques → verification d'integrite post-dilution
-  (pas de redondance, pas de contradiction, pas de perte)
+* [x] Definir les data classes `DilutionTarget`, `DilutionRecord`, `StimulusCascadeReport` (session 022)
+* [x] Implementer `StimulusCascade` : orchestrateur pipeline → parse sections → classify VISION/OPINION → route vers doc cible → archive horodatee (session 022)
+* [x] Router LLM `routeSection()` : SystemMessage specialise pour les 4 documents racines (WORKSPACE_VISION, WORKSPACE_AS_PRODUCT, WHAT_THE_GAMES_BEEN_MISSING, WORKSPACE_ORGANIZATION) (session 022)
+* [x] Implementer `StimulusArchiver` : snapshot dans `configuration/vision-archive/$DATE_stimulus-dilution/` (brain-dump-original.adoc + cascade-report.json + cascade-report.adoc) (session 022)
+* [x] `StimulusCascadeMain` : CLI entry point, supporte dump texte direct ou fichier, --dry-run (session 022)
+* [x] Tache Gradle `diluteBrainDump` : `./gradlew diluteBrainDump -Pdump="..." -PworkspaceRoot=/home/cheroliv/workspace` (session 022)
+* [ ] Implementer `StimulusDetector` : scanne `workspace/*.adoc`, detecte les stimuli actifs via heuristiques
+* [ ] Implementer `DilutionExecutor` : ouvre le document cible, insere le contenu en respectant style/ton/numerotation, met a jour les metadonnees de pied
+* [ ] Tache Gradle `detectStaleStimuli` : alerte si un stimulus survit > 2 sessions sans dilution (anti-pattern)
+* [ ] Tests : 3 stimuli synthetiques → verification d'integrite post-dilution (pas de redondance, pas de contradiction, pas de perte)
 
 == EPIC 11 : LangGraph4j — Chaines de Pensees Structurees pour le Dispatcher LLM
 

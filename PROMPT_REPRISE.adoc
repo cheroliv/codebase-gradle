@@ -1,49 +1,50 @@
-= PROMPT_REPRISE — Codebase Gradle — Session 022
+= PROMPT_REPRISE — Codebase Gradle — Session 023
 :author: cheroliv + opencode (deepseek-v4-pro:cloud)
-:date: 2026-05-11
-:session: 021
-:prochaine: 022
+:date: 2026-05-12
+:session: 022
+:prochaine: 023
 
-> **Statut** : Session 021 ✅ — US-9.14 Ségrégation Vision/Opinion TERMINÉ
-> **Mission** : EPIC 9 TERMINÉ (15/15 US). Prochaine étape : EPIC 10 (STIMULUS cascade) ou EPIC 4 (Benchmark MVP1).
+> **Statut** : Session 022 ✅ — EPIC 4 Benchmark MVP1 TERMINÉ
+> **Mission** : Pipeline multi-canal finalisé (4 canaux réels, scope LOCAL/WORKSPACE différencié, comparaison AsciiDoc prête).
 
 '''
-== Session 021 — Résumé
+== Session 022 — Résumé
 
-- `VisionOpinionClassifier.kt` : prompt engineering SystemMessage, 10 sections test (5 VISION + 5 OPINION)
-- `VisionOpinionClassifierMain.kt` : CLI + export JSON/AsciiDoc, gate 80% précision
-- `gradle/rag-bench.gradle.kts` : +1 tâche `classifyVisionOpinion`
-- `9_14_vision_opinion.feature` : 5 scénarios Cucumber
-- `VisionOpinionClassifierSteps.kt` : step definitions (130 lignes)
+- `BenchmarkRunnerMain` : `ChannelConfig` + `resolveChannels()` diff LOCAL vs WORKSPACE (scopeFilter)
+- `BenchmarkRunner.buildContext()` : 4 canaux (EAGER/LAZY + RAG + Graphify + Ressources) + budget tokens équitable
+- `ContextFiller` : +`eagerLazyContext()` (règles + historique) + `ressourcesContext()` (corpus métier + datasets)
+- `BenchmarkComparisonMain` : **Nouveau** — run 5 scénarios → `comparison-report.adoc` + `gate-evaluation.adoc`
+- `rag-bench.gradle.kts` : +tâche `runComparisonBenchmark`
 - Compilation main + test OK
 
 '''
-== Session 022 — Préconisation
+== Session 023 — Préconisation
 
-=== Option A : EPIC 10 STIMULUS Cascade (P0)
+=== Option A (Recommandé) : EPIC 10 STIMULUS Cascade (P0)
 
-. Brain dump → classification automatique VISION/OPINION (réutilise US-9.14)
-. Routing vers document racine approprié (WORKSPACE_VISION.adoc, WHAT_THE_GAMES_BEEN_MISSING.adoc, etc.)
+. Brain dump → classification Vision/Opinion (réutilise US-9.14)
+. Routing vers document racine approprié
 . Archivage horodaté + traçabilité
 . Pipeline `./gradlew diluteBrainDump -Pdump="..."`
 
-=== Option B : EPIC 4 Benchmark MVP1 (P0)
+=== Option B : Exécution réelle benchmark
 
-. Finaliser le pipeline multi-canal (RAG_ONLY, RAG_GRAPHIFY_LOCAL, RAG_GRAPHIFY_WORKSPACE, FOUR_CHANNELS)
-. Comparer les 4 canaux sur 128K tokens
-. Rapport de comparaison AsciiDoc
-. Gate MVP1 : RAG_GRAPHIFY_WORKSPACE < 5% erreur
+. `./gradlew runComparisonBenchmark` (nécessite Ollama + pgvector Docker + graph.json)
+. Analyse des 5 rapports → gate MVP1 < 5% erreur
+
+=== Option C : EPIC 5 Pipeline fine-tuning experts CDA/FPA
 
 '''
 == État EPICs
 
 [cols="2,3"]
 |===
+| EPIC 4 | TERMINÉ ✅ (MVP1, 4 canaux réels, comparaison AsciiDoc)
 | EPIC 9 | TERMINÉ (15/15 US) ✅
 | EPIC 2 | MVP0 TERMINÉ
-| EPIC 4 | MVP1 EN COURS (RAG câblé, Graphify câblé)
-| EPIC 10 | A FAIRE (P0)
-| EPIC 13 | A FAIRE (LangGraph4j Classifieur Vision/Opinion — suite logique US-9.14)
+| EPIC 10 | A FAIRE (P0) — STIMULUS Cascade
+| EPIC 13 | A FAIRE — LangGraph4j Classifieur Vision/Opinion (suite US-9.14)
+| EPIC 5 | A FAIRE — Fine-tuning experts CDA/FPA
 |===
 
 '''
@@ -51,7 +52,5 @@
 
 - ❌ Pas de commit sans permission
 - ❌ Pas de tests en fin de session
+- ✅ Tâche runComparisonBenchmark disponible
 - ✅ Pipeline augmentOpencode + benchmarkPertinence + classifyVisionOpinion disponibles
-
----
-**Session 021** ✅ — **Session 022** 🚀

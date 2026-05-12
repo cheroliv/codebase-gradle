@@ -1,0 +1,87 @@
+= Session 022 — EPIC 10 STIMULUS Cascade MVP1
+:author: cheroliv + opencode (deepseek-v4-pro:cloud)
+:date: 2026-05-12
+:session: 022
+:epic: EPIC 10
+
+== Contexte
+
+Session 021 avait terminé l'EPIC 9 (15/15 US) avec US-9.14 VisionOpinionClassifier.
+Session 022 lance l'EPIC 10 STIMULUS Cascade.
+
+== Actions Réalisées
+
+=== StimulusCascade.kt (280 lignes) — Orchestrateur du Pipeline
+
+- `TargetDocument` enum : 4 documents racines (WORKSPACE_VISION, WORKSPACE_AS_PRODUCT, WHAT_THE_GAMES_BEEN_MISSING, WORKSPACE_ORGANIZATION)
+- `DilutionTarget` : document cible + section suggérée + rationale
+- `DilutionRecord` : section classifiée avec target optionnel (null si OPINION)
+- `StimulusCascadeReport` : agrégat du pipeline complet
+- `StimulusCascade` classe :
+  - `execute(brainDump)` → parse AsciiDoc headings → classify VISION/OPINION (réutilise US-9.14) → route vers doc cible (SystemMessage spécialisé) → archive horodatée
+  - `routeSection()` : LLM Ollama avec prompt routing 4 documents racines
+  - `archiveReport()` : snapshot dans `configuration/vision-archive/$DATE_stimulus-dilution/` (brain-dump-original.adoc + cascade-report.json + cascade-report.adoc)
+  - `exportCascadeJson()` / `exportCascadeAsciiDoc()` : exports structurés
+  - Support `dryRun` pour test sans écriture disque
+
+=== StimulusCascadeMain.kt (72 lignes) — CLI Entry Point
+
+- Usage : `diluteBrainDump <brain-dump-text-or-file> [workspaceRoot] [outputDir] [--dry-run]`
+- Supporte dump texte direct ou chemin de fichier
+- Configuration via `OLLAMA_BASE_URL`, `PERTINENCE_MODEL`, `WORKSPACE_ROOT`
+- Export JSON + AsciiDoc dans `build/stimulus-reports/`
+- StdoutFormatter pour sortie CLI structurée
+
+=== Tâche Gradle diluteBrainDump (rag-bench.gradle.kts)
+
+```shell
+./gradlew diluteBrainDump -Pdump="contenu brain dump ou chemin de fichier" -PworkspaceRoot=/home/cheroliv/workspace
+```
+
+- `JavaExec` avec `group = "codebase"`
+- `-Pdump` pour contenu ou fichier, `-PworkspaceRoot` pour racine workspace, `-PoutputDir` pour dossier output
+
+=== Mise à jour BACKLOG.adoc
+
+- EPIC 10 marqué EN COURS, 6/10 sous-tâches checkées ✅
+- Reste : StimulusDetector, DilutionExecutor, detectStaleStimuli, tests
+
+== Architecture du Pipeline
+
+----
+Brain Dump (texte ou .adoc)
+    │
+    ▼
+parseSections() — détection headings == .+
+    │
+    ▼
+classify() — US-9.14 VisionOpinionClassifier (Ollama deepseek-v4-pro)
+    │
+    ├── VISION → routeSection() → LLM routing (SystemMessage 4 docs racines)
+    │           → DilutionTarget (document + section + rationale)
+    │
+    └── OPINION → confinement (dilutionTarget = null)
+    │
+    ▼
+archiveReport() → configuration/vision-archive/$DATE_stimulus-dilution/
+    ├── brain-dump-original.adoc
+    ├── cascade-report.json
+    └── cascade-report.adoc
+    │
+    ▼
+exports → build/stimulus-reports/
+    ├── stimulus-cascade.json
+    └── stimulus-cascade.adoc
+----
+
+== Résultats
+
+- Compilation `./gradlew compileKotlin` OK (BUILD SUCCESSFUL in 32s)
+- Aucun secret dans le code source (vérification grep OK)
+- EPIC 10 MVP1 : pipeline classification + routing + archivage opérationnel
+- N1 pur — ne modifie aucun contrat d'interface N2/N3 (DilutionExecutor = injection dans docs racines reste à faire)
+
+== Prochaine Session (023)
+
+Option A : EPIC 10 suite — DilutionExecutor (injection doc racine) + StimulusDetector
+Option B : EPIC 4 Benchmark MVP1 finalisation (4 canaux, rapport comparaison)

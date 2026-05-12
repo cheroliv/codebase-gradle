@@ -6,9 +6,10 @@ object BenchmarkReportExporter {
 
     data class Crossing(val documentId: String, val expectedCircle: Int, val actualCircle: Int, val confidenceScore: Double)
     data class ThresholdResult(val threshold: String, val totalSamples: Int, val errorRate: Double, val crossings: List<Crossing>)
+    internal fun parseObject(json: String): Map<String, Any> = parseObjectImpl(json)
 
     fun exportAsciiDoc(jsonReport: String, scenarioId: String): String {
-        val root = parseObject(jsonReport.trim())
+        val root = parseObjectImpl(jsonReport.trim())
 
         val scenarioName = root["scenario"] as? String ?: scenarioId
         val channels = (root["channels"] as? List<*>)?.filterIsInstance<String>() ?: emptyList()
@@ -133,7 +134,7 @@ object BenchmarkReportExporter {
 
     // ── Minimal JSON parser (no external dependencies) ──
 
-    private fun parseObject(json: String): Map<String, Any> {
+    private fun parseObjectImpl(json: String): Map<String, Any> {
         val map = mutableMapOf<String, Any>()
         var pos = 1
         while (pos < json.length && json[pos] != '}') {
@@ -191,7 +192,7 @@ object BenchmarkReportExporter {
                     end++
                 }
                 val inner = json.substring(pos, end)
-                Pair(parseObject(inner), end)
+                Pair(parseObjectImpl(inner), end)
             }
             json[pos] == '[' -> {
                 val list = mutableListOf<Any>()

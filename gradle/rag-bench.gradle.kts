@@ -61,6 +61,18 @@ project.tasks.register<JavaExec>("runBenchmark") {
     args(scenario.get())
 }
 
+project.tasks.register<JavaExec>("runComparisonBenchmark") {
+    group = "codebase"
+    description = "Runs all 5 EPIC 4 scenarios and generates comparison AsciiDoc report + gate evaluation"
+    classpath = runtime
+    mainClass = "codebase.benchmark.BenchmarkComparisonMain"
+    doFirst {
+        environment("PGVECTOR_JDBC_URL", pgUrl.get())
+        environment("PGVECTOR_USER", pgUser.get())
+        environment("PGVECTOR_PASSWORD", pgPass.get())
+    }
+}
+
 project.tasks.register<JavaExec>("generateGraph") {
     group = "codebase"
     description = "Generates graph.json knowledge graph of the workspace"
@@ -147,6 +159,19 @@ project.tasks.register<JavaExec>("classifyVisionOpinion") {
     mainClass = "codebase.rag.VisionOpinionClassifierMain"
     val outputDir = project.providers.gradleProperty("outputDir").orElse("build/vision-opinion-reports")
     args(outputDir.get())
+}
+
+project.tasks.register<JavaExec>("diluteBrainDump") {
+    group = "codebase"
+    description = "EPIC 10 STIMULUS cascade: brain dump → VISION/OPINION classification → routing → archiving"
+    classpath = runtime
+    mainClass = "codebase.rag.StimulusCascadeMain"
+    val dump = project.providers.gradleProperty("dump").orElse("")
+    val workspaceRoot = project.providers.gradleProperty("workspaceRoot")
+        .orElse(project.providers.environmentVariable("WORKSPACE_ROOT"))
+        .orElse("")
+    val outputDir = project.providers.gradleProperty("outputDir").orElse("build/stimulus-reports")
+    args(dump.get(), workspaceRoot.get(), outputDir.get())
 }
 
 project.tasks.register("benchmarkProtocol") {
