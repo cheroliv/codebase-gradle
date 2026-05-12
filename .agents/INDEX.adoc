@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
 _Derniere mise a jour_ : 2026-05-12
-_Session terminee_ : 022 — EPIC 4 Benchmark MVP1 + EPIC 10 STIMULUS Cascade MVP1
-_Prochaine session_ : 023 — Execution reelle benchmark ou DilutionExecutor EPIC 10 suite
+_Session terminee_ : 024 — Code Review Globale (audit passif)
+_Prochaine session_ : 025 — EPIC 10 STIMULUS Cascade ou EPIC 5 fine-tuning CDA/FPA
 
 '''
 == REGLES ABSOLUES (resume)

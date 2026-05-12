@@ -1,0 +1,22 @@
+= Session 024 — Code Review Globale (audit passif)
+:date: 2026-05-12
+:type: review
+:score: audit
+
+== Contexte
+
+Code review globale des 8 boroughs. Codebase-gradle audité en lecture seule.
+EPIC 9 TERMINÉ (15/15 US). Le projet le plus avancé du DAG en termes de
+fonctionnalités : RAG, anonymisation, Cucumber BDD 15/15 PASS.
+
+== Problèmes identifiés (documentés dans GLOBAL_CODE_REVIEW.adoc)
+- PGVector connection string dupliquée x4
+- BenchmarkReportExporter parser JSON minimaliste 101 lignes
+- org.gradle.java.home hardcodé dans gradle.properties
+- buildscript{} deprecated
+
+== Points forts
+- Score santé : 3.0/5
+- Structure impeccable : rag/benchmark/walker + main classes séparées
+- 15 Cucumber scenarios PASS
+- Masquage de password dans les logs
