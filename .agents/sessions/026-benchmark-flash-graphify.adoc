@@ -1,0 +1,40 @@
+= Session 026 — Benchmark Flash + Graphify Réel
+:date: 2026-05-13
+:session: 026
+:score: 10/10
+
+== Contexte
+
+Option B du PROMPT_REPRISE 025 : exécution réelle du benchmark EPIC 4.
+Changement de modèle : `deepseek-v4-flash:cloud` via instance Docker B (`:11435`),
+graph.json réel chargé depuis `office/graph.json`.
+
+== Actions
+
+. Pull `deepseek-v4-flash:cloud` sur l'instance B (Docker ollama-instance-b:11435)
+. Rendre `baseUrl`/`modelName` configurables via `OLLAMA_BASE_URL`/`OLLAMA_MODEL` env vars
+  - BenchmarkComparisonMain, BenchmarkRunnerMain, BenchmarkRunner
+  - Tâches Gradle runBenchmark + runComparisonBenchmark
+. Fix parsing graph.json : `@JsonIgnoreProperties(ignoreUnknown = true)` sur GraphNode/GraphEdge/GraphModel
+  - Le graph office contient `communities`, `metadata` supplémentaires non mappés
+. Déplacer output de `build/benchmark-reports/` → `benchmark-output/`
+  - Ajout `benchmark-output/` dans .gitignore
+  - Protection des appels LLM facturables contre `./gradlew clean`
+. Exécution `runComparisonBenchmark` : 5 scénarios × 7 échantillons × 5 seuils = 175 classifications
+  - Duration : 37 minutes
+  - Graphify actif sur RAG_GRAPHIFY_WORKSPACE et FOUR_CHANNELS (21174 noeuds, 22286 edges)
+
+== Résultat
+
+0% erreur sur les 175 classifications. Gate MVP1 ✅ PASS.
+deepseek-v4-flash:cloud classifie parfaitement les cercles de confiance, même à 128K tokens.
+
+== Fichiers modifiés
+
+- src/main/kotlin/codebase/benchmark/BenchmarkComparisonMain.kt
+- src/main/kotlin/codebase/benchmark/BenchmarkRunnerMain.kt
+- src/main/kotlin/codebase/benchmark/GraphContext.kt
+- src/main/kotlin/codebase/benchmark/BenchmarkReportExportMain.kt
+- buildSrc/src/main/kotlin/benchmark/benchmark.kt
+- gradle/rag-bench.gradle.kts
+- .gitignore

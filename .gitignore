@@ -4,6 +4,9 @@
 # Ignore Gradle build output directory
 build
 
+# Benchmark reports (contiennent des appels LLM facturables)
+benchmark-output/
+
 # Ignore Kotlin plugin data
 .kotlin
 

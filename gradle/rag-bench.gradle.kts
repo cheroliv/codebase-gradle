@@ -105,7 +105,7 @@ project.tasks.register<JavaExec>("exportBenchmarkReport") {
     mainClass = "codebase.benchmark.BenchmarkReportExportMain"
     val scenario = project.providers.gradleProperty("scenario").orElse("BASELINE")
     val inputFile = project.providers.gradleProperty("inputFile")
-        .orElse("build/benchmark-reports/report-${scenario.get()}.json")
+        .orElse("benchmark-output/report-${scenario.get()}.json")
     args(scenario.get(), inputFile.get())
 }
 
@@ -226,6 +226,6 @@ project.tasks.register("benchmarkProtocol") {
             val channels = if (s.channels.isEmpty()) "(baseline brute, zéro canal)" else s.channels.joinToString(" + ")
             println("  ${s.id} | $channels | ${s.description}")
         }
-        println("── Output : build/benchmark-reports/")
+        println("── Output : benchmark-output/")
     }
 }

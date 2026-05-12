@@ -32,7 +32,7 @@ object BenchmarkComparisonMain {
         val baseUrl = System.getenv("OLLAMA_BASE_URL") ?: "http://localhost:11434"
         val modelName = System.getenv("OLLAMA_MODEL") ?: "deepseek-v4-pro:cloud"
 
-        val outputDir = File("build/benchmark-reports")
+        val outputDir = File("benchmark-output")
         outputDir.mkdirs()
 
         val records = mutableListOf<ScenarioRecord>()

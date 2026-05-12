@@ -123,7 +123,7 @@ data class BenchmarkConfig(
             listOf("EAGER/LAZY", "RAG", "Graphify", "Ressources")
         )
     ),
-    val outputDir: String = "build/benchmark-reports"
+    val outputDir: String = "benchmark-output"
 )
 
 /**

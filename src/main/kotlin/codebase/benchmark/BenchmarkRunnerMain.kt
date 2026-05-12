@@ -19,7 +19,7 @@ object BenchmarkRunnerMain {
 
         val channelConfig = resolveChannels(scenarioId, projectRoot)
 
-        val outputDir = File("build/benchmark-reports")
+        val outputDir = File("benchmark-output")
         outputDir.mkdirs()
 
         val runner = BenchmarkRunner(
