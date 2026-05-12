@@ -15,11 +15,9 @@ object VectorQueryMain {
         val query = args[0]
         val topK = if (args.size >= 2) args[1].toIntOrNull() ?: 10 else 10
         val fileType = if (args.size >= 3) args[2].takeIf { it.isNotBlank() } else null
-        val jdbcUrl = System.getenv("PGVECTOR_JDBC_URL") ?: "jdbc:postgresql://localhost:5432/codebase_rag"
-        val user = System.getenv("PGVECTOR_USER") ?: "codebase"
-        val password = System.getenv("PGVECTOR_PASSWORD") ?: "codebase"
+        val cfg = PgVectorConfig.fromEnv()
 
-        val store = VectorStore(jdbcUrl, user, password)
+        val store = cfg.toVectorStore()
         val pipeline = EmbeddingPipeline(store)
         val service = VectorQueryService(store, pipeline)
 

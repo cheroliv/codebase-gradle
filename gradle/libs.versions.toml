@@ -1,7 +1,8 @@
 # gradle/libs.versions.toml
 
 [versions]
-kotlin = "2.1.0"
+kotlin = "2.3.20"
+kotlinx-serial = "1.7.3"
 jackson = "2.21.2"
 readme = "0.0.1"
 langchain4j = "1.14.1"
@@ -41,6 +42,7 @@ r2dbc-pool = { module = "io.r2dbc:r2dbc-pool", version.ref = "r2dbc-pool" }
 r2dbc-spi = { module = "io.r2dbc:r2dbc-spi", version.ref = "r2dbc-spi" }
 mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
 mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serial" }
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
 
