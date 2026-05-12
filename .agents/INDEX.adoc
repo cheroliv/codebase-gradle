@@ -92,7 +92,7 @@ _Prochaine session_ : 025 — EPIC 10 STIMULUS Cascade ou EPIC 5 fine-tuning CDA
 |===
 | Projet | Chemin | Sessions | Derniere maj
 | plantuml-gradle | `foundry/OSS/plantuml-gradle/plantuml-plugin/` | ~138 | 2026-05-01
-| magic_stick | `foundry/OSS/magic_stick/` | 64+ | 2026-04
+| magic-stick | `foundry/OSS/magic-stick/` | 64+ | 2026-04
 | cheroliv.com | `foundry/OSS/cheroliv.com/` | ~18 | 2026-04
 | bakery-gradle | `foundry/OSS/bakery-gradle/bakery-plugin/` | ~13+ | 2026-04
 | jhipster-gradle-plugins | `foundry/OSS/jhipster-gradle-plugins/` | 6 | 2026-04

@@ -63,7 +63,7 @@ object PertinenceQuestions {
             "Q7-plugins",
             "Liste les plugins Gradle gouvernes dans le workspace et leur niveau DAG respectif.",
             "Ecosysteme",
-            listOf("plantuml", "bakery", "slider", "codebase", "graphify", "readme", "magic_stick"),
+            listOf("plantuml", "bakery", "slider", "codebase", "graphify", "readme", "magic-stick"),
             120
         ),
         PertinenceQuestion(
