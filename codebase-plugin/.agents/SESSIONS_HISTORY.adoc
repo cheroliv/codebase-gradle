@@ -1,0 +1,34 @@
+= Sessions History — Codebase Gradle
+
+|===
+| # | Date | Type | Sujet | Score
+| 028 | 2026-05-14 | architecture | Split architecture racine consommateur + codebase-plugin independant, publishToMavenLocal OK, article 0124 | 10/10
+| 027 | 2026-05-14 | infra | CI Template .github/workflows/test.yml deploye, build OK | 10/10
+| 026 | 2026-05-13 | feat | Benchmark Flash + Graphify : pull deepseek-v4-flash:cloud instance B Docker, OLLAMA_BASE_URL/MODEL env vars configurables, fix @JsonIgnoreProperties sur GraphModel (office/graph.json 21174n/22286e), output benchmark-output/ protégé .gitignore, 5 scenarios×7 echantillons×5 seuils=175 classifications, 0% erreur 128K, gate MVP1 PASS, 37min | 10/10
+| 025 | 2026-05-12 | feat | EPIC 10 STIMULUS Cascade TERMINE (10/10 sous-taches) : DilutionExecutor (injection automatique + backup + dryRun + trace), StimulusDetector (scan workspace/*.adoc + stale > 2j + exports), StimulusDetectorMain CLI, detectStimuli + detectStaleStimuli Gradle tasks, StdoutFormatter.error()+Tag.ERROR, useJUnitPlatform() fix, StimulusCascade integration dilutionResults(), tests 8/8 PASS JUnit5 | 10/10
+| 023 | 2026-05-12 | chore | EPIC D — Uniformisation build : Java 23→24, Kotlin 2.3.20, suppression buildscript{}, kotlinx.serialization BenchmarkReportExporter, PgVectorConfig.fromEnv() | 10/10
+| 022 | 2026-05-12 | feat | EPIC 10 STIMULUS Cascade MVP1 (StimulusCascade 280l, routeur LLM 4 docs, archive horodatee, diluteBrainDump) + EPIC 4 Benchmark MVP1 (4 canaux reels EAGER/LAZY+RAG+Graphify+Ressources, scope LOCAL/WORKSPACE, BenchmarkComparisonMain, runComparisonBenchmark, comparaison AsciiDoc, gate <5%) | 10/10
+| 021 | 2026-05-11 | feat | US-9.14 Segregation Vision/Opinion : prompt engineering VisionOpinionClassifier (SystemMessage 6 criteres VISION + 6 criteres OPINION), 10 sections synthetiques TestSections (5 VISION: DAG, cercles, STIMULUS, codebase role, composite context + 5 OPINION: preference modele, langage, speculation Rust, critique complexite, speculation ONNX), VisionOpinionClassifierMain CLI + exports JSON/AsciiDoc, tache Gradle classifyVisionOpinion, 5 scenarios Cucumber, gate 80% precision | 10/10
+| 020 | 2026-05-11 | feat | US-9.13 Pertinence Benchmark : 10 questions metier en 10 domaines, PertinenceBenchmarkRunner baseline vs augmented via Ollama deepseek-v4-pro, PertinenceReportExporter JSON + AsciiDoc, tache Gradle benchmarkPertinence, 5 scenarios Cucumber | 10/10
+| 019 | 2026-05-11 | feat | US-9.11 OpencodeInjector + US-9.12 augmentOpencode : OpencodeInjector (format [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY]), AugmentOpencodeMain (pipeline walk→index→query→format→/tmp/opencode-context.txt), 2 taches Gradle injectOpencode + augmentOpencode, 3 scenarios Cucumber (2+1) | 10/10
+| 018 | 2026-05-11 | feat | US-9.10 CompositeContextBuilder FINALISE : tache Gradle augmentContext + 2 scenarios Cucumber (canaux + budget + chunks RAG) | 10/10
+| 017 | 2026-05-11 | feat | US-9.10 CompositeContextBuilder (partiel) : config token budget 40/30/20/10, builder EAGER+RAG+Graphify, main CLI avec StdoutFormatter | 8/10
+| 016 | 2026-05-11 | feat | US-9.9 Filtered query : VectorStore + fileType LIKE SQL, 3 scenarios (adoc/kt/yml) — EPIC 9 Phase 2 complète | 10/10
+| 015 | 2026-05-11 | feat | US-9.8 VectorQueryService + queryCodebase : VectorQueryMain + gradle task + 2 scenarios Cucumber | 10/10
+| 014 | 2026-05-11 | feat | US-9.7 Validation batch : 3 scenarios Cucumber (9 fichiers, cross-type query, secret integrity) | 10/10
+| 013 | 2026-05-11 | bugfix+ci | A1: Fix `it.sourcePath` → `request.sourcePath` dans AnonymizationExpert.kt + CI `anonymize.yml` complet | 10/10
+| 012 | 2026-05-10 | feat+ci | CI anonymizeWithExpert : workflow_dispatch + OLLAMA_DEVICE_KEY_A + serve manuel, pipeline CI OK | 8/10
+| 011 | 2026-05-10 | feat | EPIC 4 Benchmark Execution — 5 scénarios Ollama (0% erreur, 2 bugs corrigés) | 10/10
+| 010 | 2026-05-10 | feat | EPIC 4 MVP0 — Benchmark perception spatiale: nettoyage duplication 006, 4 scénarios Cucumber @wip, export AsciiDoc (parser JSON minimal) | 10/10
+| 009 | 2026-05-10 | feat | EPIC 2 MVP0 — Expert Anonymisation LangChain4j: AnonymizationExpert interface + factory + deterministic fallback + 3 scenarios Cucumber @wip | 10/10
+| 008 | 2026-05-09 | feat | US-9.6 — Indexation YAML/JSON configs anonymisées: YamlConfigAnonymizer + 3 scenarios Cucumber + 11/11 PASS | 10/10
+| 007 | 2026-05-09 | audit | Audit global + vérification socle : 8/8 Cucumber PASS, 4/4 anonymizers PASS, compile OK | 10/10
+| 006 | 2026-05-09 | feat | US-9.5 — Indexation metadata Kotlin: KotlinMetadataExtractor + VectorStore metadata + findByPackage + 3 scenarios Cucumber | 10/10
+| 005 | 2026-05-07 | feat | US-9.PROD — Bridge to Production: src/main/kotlin + VectorStore + EmbeddingPipeline + indexCodebase | 10/10
+| 004 | 2026-05-07 | bugfix | US-9.3 & US-9.4 — Dedup steps Cucumber + PgVectorTestContext singleton | 10/10
+| 003 | 2026-05-07 | feat | US-9.2 & US-9.3 — Dataset minimal + Embeddings ONNX → pgvector (pipeline complet) | 10/10
+| 002 | 2026-05-07 | chore | Migration chemins foundry/ → foundry/OSS/ dans INDEX.adoc (granularisation OSS/CSS) | -
+| 001 | 2026-05-04 | governance | Renommage gouvernance openclaw→quizz-benchmark (9 fichiers) | -
+| 000 | 2026-05-03 | init | Migration gouvernance agent depuis quizz-benchmark-gradle + US-9.1 pgvector container | -
+| 024 | 2026-05-12 | review | Code Review Globale — Audit passif | 10/10
+|===

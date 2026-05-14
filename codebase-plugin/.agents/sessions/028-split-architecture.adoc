@@ -1,0 +1,70 @@
+= 028-split-architecture — Rapport de Session 028
+:session: 028
+:date: 2026-05-14
+:type: architecture
+:sujet: Split architecture — racine consommateur + codebase-plugin independant
+:score: 10/10
+
+== Objectif
+
+Restructurer `codebase-gradle` pour adopter l'architecture standardisee
+des plugins `foundry/public/` : racine consommateur minimal (dogfooding)
++ dossier `{name}-plugin/` autonome avec son propre Gradle Wrapper,
+settings, version catalog, sources, tests, et gouvernance `.agents/`.
+
+== Actions
+
+=== Restructuration
+
+. Suppression de `src/`, `buildSrc/`, `gradle/rag-bench.gradle.kts`,
+  `gradle/anonymization.gradle.kts` de la racine.
+. Suppression de `embeds.yml`, `opencode.json`, `libs/` de la racine.
+. Deplacement de tous les fichiers de gouvernance (`.adoc`) dans `codebase-plugin/`.
+. Creation de `codebase-plugin/` comme build Gradle independant :
+   * `settings.gradle.kts` avec `foobar-resolver-convention` 1.0.0
+   * `build.gradle.kts` complet : `java-gradle-plugin`, signing, publish
+   * `gradle/libs.versions.toml` avec 30+ dependances (langchain4j, pgvector, cucumber...)
+   * `gradlew` independant (wrapper Gradle 9.5.0)
+   * `src/main/kotlin/codebase/` : CodebasePlugin.kt, rag/, benchmark/, walker/
+   * `src/test/` : steps Cucumber + features + resources
+   * `buildSrc/` : classes utilitaires (CodebaseYmlAnonymizer, BenchmarkConfig, etc.)
+   * `.agents/` : gouvernance agent complete (INDEX, SESSIONS_HISTORY, etc.)
+   * Gouvernance `.adoc` : AGENT.adoc, PROMPT_REPRISE.adoc, BACKLOG.adoc, etc.
+
+=== Racine
+
+. `build.gradle.kts` reduit a 6 lignes : `plugins { alias(libs.plugins.codebase) }`
+   + repositories mavenLocal + mavenCentral.
+. `settings.gradle.kts` : pluginManagement + rootProject.name
+. `gradle/libs.versions.toml` : 2 entrees (version codebase-plugin + plugin alias)
+. `gradle.properties` : conserve
+
+=== Ide
+
+. `misc.xml` : project-jdk-name change de 25 a 24 (alignement foundry).
+. `gradle.xml` : externalProjectPath corrige vers racine `planner-gradle` (pas plugin/),
+   gradleJvm explicite sur 24.
+
+=== Article
+
+. Redaction de l'article 0124 sur le blog : "L'Architecture Plugin Independant
+  + Racine Consommateur — Pourquoi mes Builds Gradle Se Dedoublent"
+
+== Resultats
+
+[cols="3,2"]
+|===
+| Verification | Resultat
+| `codebase-plugin/compileKotlin` | BUILD SUCCESSFUL
+| `codebase-plugin/publishToMavenLocal` | BUILD SUCCESSFUL
+| Root `./gradlew tasks` | BUILD SUCCESSFUL (consommation du plugin OK)
+| Article 0124 | Cree dans `office/sites/cheroliv.com/jbake/content/blog/2026/`
+|===
+
+== Classification RGPD
+
+Tous les fichiers modifies sont en Cercle 4 (foundry/public, Apache 2.0) ou
+Cercle 2 (office/sites, article de blog). Aucune donnee sensible detectee.
+
+[.text-right]
+*Session 028 terminee le 14 mai 2026.*

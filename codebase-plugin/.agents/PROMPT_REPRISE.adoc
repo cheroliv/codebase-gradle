@@ -1,0 +1,36 @@
+= PROMPT_REPRISE — Session 029 — Codebase Gradle
+:author: cheroliv + opencode (deepseek-v4-pro:cloud)
+:date: 2026-05-14
+:session: 028
+:prochaine: 029
+
+[abstract]
+Amorcage session 029. Split architecture TERMINE.
+Les builds sont independants, le root consomme le plugin via mavenLocal.
+Prochaine session au choix : EPIC 5 (Fine-tuning CDA/FPA) ou EPIC 13 (LangGraph4j).
+
+== Contexte (EAGER)
+
+=== Session 028 — Split Architecture
+
+- Architecture standardisee `racine consommateur + codebase-plugin/` alignee
+  sur bakery-gradle, plantuml-gradle.
+- Plugin compile et publie en mavenLocal.
+- Root consomme le plugin proprement (6 lignes).
+- Gouvernance `.agents/` + `.adoc` migree dans `codebase-plugin/`.
+- Article 0124 publie sur le blog cheroliv.com.
+- Fix IDE : JDK 25→24, gradle.xml corrige.
+
+=== Prochaine mission (Session 029)
+
+Priorite EPIC 5 (Pipeline fine-tuning experts CDA/FPA) ou EPIC 13 (LangGraph4j).
+
+=== Rappel — Regles Workspace
+
+. DAG N1 : codebase-gradle importe N0 (graphify-gradle), jamais N2+.
+. `publishToMavenLocal` obligatoire apres toute modification du code source.
+. ZERO commit/push sans permission explicite.
+. Verification secrets avant tout commit.
+
+[.text-right]
+*Mis a jour le 14 mai 2026.*
