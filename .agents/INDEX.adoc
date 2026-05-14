@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-13
-_Session terminee_ : 026 — Benchmark Flash + Graphify Reel (0% erreur 175 classifications, gate MVP1 PASS)
-_Prochaine session_ : 027 — EPIC 5 Fine-tuning CDA/FPA ou EPIC 13 LangGraph4j
+_Derniere mise a jour_ : 2026-05-14
+_Session terminee_ : 027 — CI Template (EPIC F — engine orchestration)
+_Session en cours_ : 028 — EPIC 5 Fine-tuning CDA/FPA ou EPIC 13 LangGraph4j
 
 '''
 == REGLES ABSOLUES (resume)
@@ -22,6 +22,7 @@ _Prochaine session_ : 027 — EPIC 5 Fine-tuning CDA/FPA ou EPIC 13 LangGraph4j
 
 |===
 | # | Date | Type | Sujet | Score
+| 027 | 2026-05-14 | infra | CI Template — .github/workflows/test.yml (JDK 24, Gradle, JUnit), build OK, EPIC F cross-boroughs | 10/10
 | 026 | 2026-05-13 | feat | Benchmark Flash + Graphify — deepseek-v4-flash:cloud sur instance B, OLLAMA_BASE_URL/MODEL env vars, fix @JsonIgnoreProperties office/graph.json (21174n/22286e), benchmark-output/ (+.gitignore), 175 classifications 0% erreur, gate MVP1 PASS | 10/10
 | 025 | 2026-05-12 | feat | EPIC 10 STIMULUS Cascade — DilutionExecutor (injection auto + backup + dryRun), StimulusDetector (scan workspace/*.adoc + stale > 2j), detectStimuli + detectStaleStimuli Gradle tasks, StdoutFormatter.error(), 8/8 JUnit5 PASS | 10/10
 | 022 | 2026-05-12 | feat | EPIC 4 Benchmark MVP1 — Pipeline multi-canal finalisé (4 canaux réels, scope LOCAL/WORKSPACE, comparaison AsciiDoc, runComparisonBenchmark, gate <5%) | 10/10

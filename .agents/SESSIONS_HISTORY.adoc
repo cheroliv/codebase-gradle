@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 027 | 2026-05-14 | infra | CI Template .github/workflows/test.yml deploye, build OK | 10/10
 | 026 | 2026-05-13 | feat | Benchmark Flash + Graphify : pull deepseek-v4-flash:cloud instance B Docker, OLLAMA_BASE_URL/MODEL env vars configurables, fix @JsonIgnoreProperties sur GraphModel (office/graph.json 21174n/22286e), output benchmark-output/ protégé .gitignore, 5 scenarios×7 echantillons×5 seuils=175 classifications, 0% erreur 128K, gate MVP1 PASS, 37min | 10/10
 | 025 | 2026-05-12 | feat | EPIC 10 STIMULUS Cascade TERMINE (10/10 sous-taches) : DilutionExecutor (injection automatique + backup + dryRun + trace), StimulusDetector (scan workspace/*.adoc + stale > 2j + exports), StimulusDetectorMain CLI, detectStimuli + detectStaleStimuli Gradle tasks, StdoutFormatter.error()+Tag.ERROR, useJUnitPlatform() fix, StimulusCascade integration dilutionResults(), tests 8/8 PASS JUnit5 | 10/10
 | 023 | 2026-05-12 | chore | EPIC D — Uniformisation build : Java 23→24, Kotlin 2.3.20, suppression buildscript{}, kotlinx.serialization BenchmarkReportExporter, PgVectorConfig.fromEnv() | 10/10
