@@ -1,0 +1,109 @@
+= INDEX — Codebase Gradle
+:toc:
+
+_Regles absolues_ : voir `AGENT.adoc`
+_Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
+
+_Derniere mise a jour_ : 2026-05-14
+_Session terminee_ : 028 — Split Architecture (racine consommateur + plugin independant)
+_Session en cours_ : 029 — EPIC 5 Fine-tuning CDA/FPA ou EPIC 13 LangGraph4j
+
+'''
+== REGLES ABSOLUES (resume)
+
+=== 0. PUBLISH TO MAVEN LOCAL — OBLIGATOIRE APRES TOUTE MODIFICATION DU CODE SOURCE (non applicable : pas de plugin maven-publish)
+=== 1. COMMITS/GIT — INTERDICTION FORMELLE sans permission
+=== 1b. FICHIERS DE CONFIGURATION — REGLE ABSOLUE DE SURETE (backup avant modif)
+=== 2. TESTS EN FIN DE SESSION — INTERDICTION FORMELLE
+=== 3. PROCEDURE DE FIN DE SESSION — 6 ETAPES OBLIGATOIRES
+
+'''
+== Sessions
+
+|===
+| # | Date | Type | Sujet | Score
+| 028 | 2026-05-14 | architecture | Split architecture : racine consommateur 6 lignes + codebase-plugin autonome (gradlew, settings, libs.versions.toml, buildSrc, src, tests, .agents/), publishToMavenLocal OK, article 0124 | 10/10
+| 027 | 2026-05-14 | infra | CI Template — .github/workflows/test.yml (JDK 24, Gradle, JUnit), build OK, EPIC F cross-boroughs | 10/10
+| 026 | 2026-05-13 | feat | Benchmark Flash + Graphify — deepseek-v4-flash:cloud sur instance B, OLLAMA_BASE_URL/MODEL env vars, fix @JsonIgnoreProperties office/graph.json (21174n/22286e), benchmark-output/ (+.gitignore), 175 classifications 0% erreur, gate MVP1 PASS | 10/10
+| 025 | 2026-05-12 | feat | EPIC 10 STIMULUS Cascade — DilutionExecutor (injection auto + backup + dryRun), StimulusDetector (scan workspace/*.adoc + stale > 2j), detectStimuli + detectStaleStimuli Gradle tasks, StdoutFormatter.error(), 8/8 JUnit5 PASS | 10/10
+| 022 | 2026-05-12 | feat | EPIC 4 Benchmark MVP1 — Pipeline multi-canal finalisé (4 canaux réels, scope LOCAL/WORKSPACE, comparaison AsciiDoc, runComparisonBenchmark, gate <5%) | 10/10
+| 021 | 2026-05-11 | feat | US-9.14 Segregation Vision/Opinion — prompt engineering, classifier VisionOpinionClassifier, 10 sections test (5 VISION + 5 OPINION), gate 80%, 5 scenarios Cucumber | 10/10
+| 020 | 2026-05-11 | feat | US-9.13 Pertinence Benchmark — 10 questions metier, baseline vs augmented, report AsciiDoc, gate MVP0 >70% | 10/10
+| 019 | 2026-05-11 | feat | US-9.11 OpencodeInjector + US-9.12 augmentOpencode — pipeline walk→index→query→format→/tmp/opencode-context.txt (5 pts) | 10/10
+| 018 | 2026-05-11 | feat | US-9.10 CompositeContextBuilder FINALISE — tache Gradle augmentContext (JavaExec, -PragQuestion) + 2 scenarios Cucumber | 10/10
+| 017 | 2026-05-11 | feat | US-9.10 CompositeContextBuilder — config 40/30/20/10, builder EAGER+RAG+Graphify, main CLI | 8/10
+| 016 | 2026-05-11 | feat | US-9.9 Filtered query : fileType LIKE SQL + 3 scenarios | 10/10
+| 015 | 2026-05-11 | feat | US-9.8 VectorQueryService + Gradle task queryCodebase + 2 scenarios Cucumber | 10/10
+| 014 | 2026-05-11 | feat | US-9.7 Validation batch : 3 scenarios (full pipeline 9 fichiers, cross-type query, secret integrity) | 10/10
+| 013 | 2026-05-11 | bugfix+ci | A1: Fix `it.sourcePath` → `request.sourcePath` dans AnonymizationExpert.kt + CI `anonymize.yml` complet (outputFile vide géré) | 10/10
+| 012 | 2026-05-10 | feat+ci | CI anonymizeWithExpert : workflow_dispatch + OLLAMA_DEVICE_KEY_A + serve manuel, pipeline OK (bug métier restant) | 8/10
+| 011 | 2026-05-10 | feat | EPIC 4 Benchmark Execution — 5 scénarios Ollama deepseek-v4-pro:cloud (0% erreur, 2 bugs corrigés) | 10/10
+| 010 | 2026-05-10 | feat | EPIC 4 MVP0 — Nettoyage duplication 006, 4 scénarios Cucumber @wip, export AsciiDoc (parser JSON minimal) | 10/10
+| 009 | 2026-05-10 | feat | EPIC 2 MVP0 — Expert Anonymisation LangChain4j: interface + factory + deterministic fallback + Cucumber @wip | 10/10
+| 008 | 2026-05-09 | feat | US-9.6 — Indexation YAML/JSON configs anonymisées: YamlConfigAnonymizer + 3 scenarios Cucumber + 11/11 PASS | 10/10
+| 007 | 2026-05-09 | audit | Audit global + vérification socle : 8/8 Cucumber PASS, 4/4 anonymizers PASS, compile OK | 10/10
+| 006 | 2026-05-09 | feat | US-9.5 — Indexation metadata Kotlin: KotlinMetadataExtractor + VectorStore metadata + findByPackage + 3 scenarios Cucumber | 10/10
+| 005 | 2026-05-07 | feat | US-9.PROD — Bridge to Production: src/main/kotlin + VectorStore + EmbeddingPipeline + indexCodebase | 10/10
+| 004 | 2026-05-07 | bugfix | US-9.3 & US-9.4 — Dedup steps Cucumber + PgVectorTestContext | 10/10
+| 003 | 2026-05-07 | feat | US-9.2 & US-9.3 Dataset + Embeddings ONNX → pgvector | 10/10
+| 002 | 2026-05-07 | chore | Migration chemins foundry/ → foundry/OSS/ | -
+| 001 | 2026-05-04 | governance | Renommage openclaw→quizz-benchmark | -
+| 000 | 2026-05-03 | init | Migration gouvernance depuis quizz-benchmark-gradle + US-9.1 pgvector container | -
+|===
+
+'''
+== Roadmap — Etat Actuel
+
+|===
+| EPIC | Description | Statut | Priorite
+| EPIC 1 | Initialisation gouvernance agent codebase-gradle | EN COURS | P0
+| EPIC 9 | Opencode Augmente — 15 US baby-step (US-9.1 ✅, US-9.2 ✅, US-9.3 ✅, US-9.4 ✅, US-9.5 ✅, US-9.6 ✅, US-9.7 ✅, US-9.8 ✅, US-9.9 ✅, US-9.10 ✅, US-9.11 ✅, US-9.12 ✅, US-9.13 ✅, US-9.14 ✅, US-9.PROD ✅) | TERMINE (15/15 US DONE) | P0
+| EPIC 2 | Expert Anonymisation LangChain4j — MVP0 | MVP0 TERMINE (session 009) | P0
+| EPIC 3 | Architecture Multi-Canal Convergent | A FAIRE | P0
+| EPIC 4 | Benchmark de perception spatiale LLM | MVP1 TERMINE (session 026 : flash + Graphify reel 0% erreur) | P0
+| EPIC 5 | Pipeline fine-tuning experts CDA/FPA | A FAIRE | P0
+| EPIC 6 | Integration ONNX — boucle qualite | A FAIRE | P1
+| EPIC 7 | Wiring LangChain4j + pgvector experts | A FAIRE | P1
+| EPIC 8 | Exposer experts via Ollama (consommation plugins) | A FAIRE | P2
+| EPIC 10 | Instrumentation STIMULUS — cascade automatique | TERMINE (10/10 sous-taches, session 025) | P0
+| EPIC 11 | LangGraph4j — chaines de pensees | A FAIRE | P1
+| EPIC 12 | Dilution Article de Blog automatique | A FAIRE | P1
+| EPIC 13 | LangGraph4j Classifieur Vision/Opinion | A FAIRE | P1
+|===
+
+'''
+== Fichiers Associes
+
+|===
+| Fichier | Role | Type
+| `AGENT.adoc` | Directives completes (cercles de confiance inclus) | EAGER
+| `LAZY_EAGER_ESSENTIALS.adoc` | Principes LAZY/EAGER compacts | EAGER
+| `PROMPT_REPRISE.adoc` | Mission session en cours | EAGER
+| `VISION_ORCHESTRATION_LLM.adoc` | Vision dispatcher + experts (275 lignes) | LAZY
+| `BACKLOG.adoc` | Suivi prioritaire des taches codebase | LAZY
+| `AGENT_GOVERNANCE.adoc` (dans configuration/) | Gouvernance transverse globale | LAZY
+| `.agents/SESSIONS_HISTORY.adoc` | Historique des sessions | EAGER
+| `.agents/TEST_COVERAGE_ANALYSIS.adoc` | Analyse couverture tests | LAZY
+| `.agents/archives/COMPLETED_TASKS_ARCHIVE_*.adoc` | Archives taches | LAZY
+| `.agents/sessions/` | Archives par session | LAZY
+| `.agents/encyclopedies/` | Connaissance froide exhaustive | COLD
+| `.agents/backup/` | Vague froide distillation | FROZEN
+|===
+
+'''
+== Portefeuille — Projets Gouvernes
+
+|===
+| Projet | Chemin | Sessions | Derniere maj
+| plantuml-gradle | `foundry/OSS/plantuml-gradle/plantuml-plugin/` | ~138 | 2026-05-01
+| magic-stick | `foundry/OSS/magic-stick/` | 64+ | 2026-04
+| cheroliv.com | `foundry/OSS/cheroliv.com/` | ~18 | 2026-04
+| bakery-gradle | `foundry/OSS/bakery-gradle/bakery-plugin/` | ~13+ | 2026-04
+| jhipster-gradle-plugins | `foundry/OSS/jhipster-gradle-plugins/` | 6 | 2026-04
+| newpipe-gradle | `foundry/OSS/newpipe-gradle/newpipe-plugin/` | ~11 | 2026-04
+| codebase-gradle | `foundry/public/codebase-gradle/codebase-plugin/` | 28 | 2026-05-14
+| graphify-gradle | `foundry/OSS/graphify-gradle/graphify-plugin/` | 1 (bootstrap) | 2026-05-09
+| notebook-gradle | `foundry/OSS/notebook-gradle/` | 0 (bootstrap) | 2026-05-05
+| waiter-gradle | `foundry/OSS/waiter-gradle/` | 0 (bootstrap) | 2026-05-11
+| training-gradle | `foundry/OSS/training-gradle/` | 0 (bootstrap) | 2026-05-12
+|===

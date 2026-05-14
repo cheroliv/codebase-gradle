@@ -1,0 +1,73 @@
+[versions]
+codebase = "0.0.1"
+kotlin = "2.3.20"
+kotlinx-serial = "1.7.3"
+jackson = "2.21.2"
+langchain4j = "1.14.1"
+langchain4j-beta = "1.14.1-beta24"
+testcontainers = "1.21.4"
+cucumber = "7.34.3"
+junit-platform = "1.14.3"
+logback = "1.5.32"
+coroutines = "1.10.2"
+r2dbc-postgresql = "1.0.7.RELEASE"
+r2dbc-pool = "1.0.2.RELEASE"
+r2dbc-spi = "1.0.0.RELEASE"
+mapstruct = "1.6.3"
+arrow = "2.2.2"
+plugin-publish = "2.1.0"
+
+[libraries]
+jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+langchain4j = { module = "dev.langchain4j:langchain4j", version.ref = "langchain4j" }
+langchain4j-pgvector = { module = "dev.langchain4j:langchain4j-pgvector", version.ref = "langchain4j-beta" }
+langchain4j-minilm = { module = "dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2", version.ref = "langchain4j-beta" }
+langchain4j-ollama = { module = "dev.langchain4j:langchain4j-ollama", version.ref = "langchain4j" }
+testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
+testcontainers-junit5 = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
+cucumber-java = { module = "io.cucumber:cucumber-java", version.ref = "cucumber" }
+cucumber-junit-platform-engine = { module = "io.cucumber:cucumber-junit-platform-engine", version.ref = "cucumber" }
+cucumber-picocontainer = { module = "io.cucumber:cucumber-picocontainer", version.ref = "cucumber" }
+junit-platform-suite = { module = "org.junit.platform:junit-platform-suite", version.ref = "junit-platform" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-reactive = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactive", version.ref = "coroutines" }
+r2dbc-postgresql = { module = "org.postgresql:r2dbc-postgresql", version.ref = "r2dbc-postgresql" }
+r2dbc-pool = { module = "io.r2dbc:r2dbc-pool", version.ref = "r2dbc-pool" }
+r2dbc-spi = { module = "io.r2dbc:r2dbc-spi", version.ref = "r2dbc-spi" }
+mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
+mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serial" }
+arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
+arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
+
+[bundles]
+cucumber = [
+    "cucumber-java",
+    "cucumber-junit-platform-engine",
+    "cucumber-picocontainer",
+    "junit-platform-suite",
+]
+langchain4j-rag = [
+    "langchain4j",
+    "langchain4j-pgvector",
+    "langchain4j-minilm",
+    "langchain4j-ollama",
+]
+r2dbc = [
+    "r2dbc-postgresql",
+    "r2dbc-pool",
+    "r2dbc-spi",
+    "kotlinx-coroutines-core",
+    "kotlinx-coroutines-reactive",
+]
+arrow = [
+    "arrow-core",
+    "arrow-fx-coroutines",
+]
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+publish = { id = "com.gradle.plugin-publish", version.ref = "plugin-publish" }
+codebase = { id = "com.cheroliv.codebase", version.ref = "codebase" }

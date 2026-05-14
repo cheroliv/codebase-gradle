@@ -1,0 +1,73 @@
+= Test Coverage Analysis — Codebase Gradle
+
+_Statut_ : 34 scenarios Cucumber (30 EPIC 9 + 4 EPIC 2/4 @wip) + 8/8 JUnit5 EPIC 10 PASS
+
+|===
+| Session | Fichiers testes | Couverture | Notes
+| 025 | `DilutionExecutor.kt` + `StimulusDetector.kt` + `StimulusDetectorMain.kt` (JUnit5) | 8 tests PASS | EPIC 10 STIMULUS Cascade MVP2 — DilutionExecutor (injection+backup+dryRun+trace), StimulusDetector (scan+actif+stale+exports), DRY RUN integrity, OPINION reject, missing file error
+| 021 | `VisionOpinionClassifier.kt` + `VisionOpinionClassifierMain.kt` + `VisionOpinionClassifierSteps.kt` (Cucumber) | 5 scénarios PASS | US-9.14 — 10 sections test (5 VISION + 5 OPINION), classifier instantiable, system prompt validé (critères VISION/OPINION), JSON/AsciiDoc exports format valide, gate 80% précision
+| 020 | `PertinenceBenchmark.kt` + `PertinenceBenchmarkSteps.kt` (Cucumber) | 5 scenarios PASS | US-9.13 — 10 questions dataset valide, runner instantiable, JSON/AsciiDoc exports valides, gate MVP0 70%
+| 019 | `OpencodeInjector.kt` + `OpencodeInjectorSteps.kt` (Cucumber) | 2 scenarios PASS | US-9.11 — Headers [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY] présents, contenu non-vide après chaque header
+| 019 | `AugmentOpencodeMain.kt` + `AugmentOpencodeSteps.kt` (Cucumber) | 1 scenario PASS | US-9.12 — Pipeline complet produit /tmp/opencode-context-test.txt > 300 bytes avec les 3 sections
+| 018 | `CompositeContextBuilder.kt` + `CompositeContextSteps.kt` (Cucumber) | 2 scenarios PASS | US-9.10 — CompositeContext: EAGER+RAG+Graphify sections populated, token budget 8000 split 3200/2400/1600/800, RAG chunks >=3 with valid similarity scores
+| 016 | `VectorQueryService.kt` + `FilteredQuerySteps.kt` (Cucumber) | 3 scenarios PASS | US-9.9 — Query filtrée par fileType: VectorStore LIKE SQL filter, adoc/kt/yml verified
+| 015 | `VectorQueryService.kt` + `VectorQuerySteps.kt` (Cucumber) | 2 scenarios PASS | US-9.8 — VectorQueryService top-K ordering + topK param respecté
+| 014 | `BatchValidationSteps.kt` (Cucumber) | 3 scenarios PASS | US-9.7 — Full batch 9 fichiers 4 types, cross-type query, secret integrity
+| 012 | `BenchmarkRunner.kt` (Ollama live) + `GraphContext.kt` | RAG_ONLY exécuté | 35 classifications deepseek-v4-pro:cloud avec pgvector réel, 0% erreur 128K
+| 011 | `BenchmarkRunner.kt` (Ollama live) | 5 scénarios exécutés | 175 classifications deepseek-v4-pro:cloud, 0% erreur
+| 010 | `BenchmarkProtocolSteps.kt` (Cucumber) | 4 scenarios @wip | Validation protocole EPIC 4
+| 009 | `AnonymizationExpertSteps.kt` (Cucumber) | 3 scenarios @wip | EPIC 2 MVP0
+| 008 | `ConfigIndexingSteps.kt` (Cucumber) | 3 scenarios PASS | YAML/JSON anonymization
+| 007 | `MetadataIndexingSteps.kt` + `DatasetEmbeddingSteps.kt` (Cucumber) | 3 scenarios PASS | Extraction metadata Kotlin
+| 005 | `WorkspaceWalkerSteps.kt` + `DatasetEmbeddingSteps.kt` (Cucumber) | 2 scenarios PASS | WorkspaceWalker 6 fichiers
+| 004 | `DatasetEmbeddingSteps.kt` (Cucumber) | 1 scenario PASS (12 steps) | Pipeline complet chunk→embed→search
+| 001 | `PgVectorContainerSteps.kt` (Cucumber) | 2 scenarios PASS | PostgreSQLContainer pgvector/pgvector:pg17
+|===
+
+== Modules
+
+=== codebase-gradle (src/main/kotlin/codebase/rag/)
+- `VisionOpinionClassifier.kt` : 10 sections test (5 VISION + 5 OPINION), prompt engineering SystemMessage, classification via Ollama deepseek-v4-pro
+- `VisionOpinionClassifierMain.kt` : CLI entry classifyVisionOpinion, export JSON + AsciiDoc, gate 80% précision
+- `PertinenceBenchmark.kt` : 10 questions metier + PertinenceBenchmarkRunner baseline vs augmented (Ollama)
+- `PertinenceBenchmarkMain.kt` : CLI entry benchmarkPertinence
+- `PertinenceReportExporter.kt` : export JSON + AsciiDoc (synthèse, tableaux, décision MVP0)
+- `OpencodeInjector.kt` : inject(CompositeContext) → [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY], injectToFile()
+- `AugmentOpencodeMain.kt` : pipeline complet walk→index→query→format→/tmp/opencode-context.txt (100 lignes)
+- `CompositeContextBuilder.kt` : collectEagerFiles + VectorQueryService + Graphify stats, truncateTokens
+- `CompositeContextBuilderMain.kt` : CLI entry augmentContext
+- `CompositeContextConfig.kt` : token budget 8000, 40/30/20/10 split
+- `VectorStore.kt` : schema documents + metadata, insertDocument, querySimilar, findByPackage
+- `VectorQueryService.kt` : query(text, topK, fileType) → embedQuery + querySimilar → RelevantChunk
+- `VectorQueryMain.kt` : CLI entry queryCodebase
+- `CodebaseIndexerMain.kt` : walk + tokenize + embed via ONNX
+- `EmbeddingPipeline.kt` : embedQuery/embedAndStore/embedAll via AllMiniLmL6V2
+- `KotlinMetadataExtractor.kt` : extraction package_name/class_name/repo_name
+- `YamlConfigAnonymizer.kt` : anonymisation text-based YAML/JSON
+
+=== codebase-gradle (src/test/kotlin/codebase/scenarios/)
+- `VisionOpinionClassifierSteps.kt` : steps dataset validation + classifier instantiation + system prompt check + JSON/AsciiDoc exports + gate threshold
+- `PertinenceBenchmarkSteps.kt` : steps loadQuestions + count + domain + keywords + length + runner + JSON + AsciiDoc + MVP0 gate
+- `OpencodeInjectorSteps.kt` : steps inject + header check + content check + CompositeContextHolder
+- `AugmentOpencodeSteps.kt` : steps writeToFile + exists + contains + largerThan
+- `CompositeContextSteps.kt` : steps build + sections + budget + chunks + similarity scores
+- `PgVectorTestContext.kt` : singleton conteneur pgvector
+
+=== Features Cucumber
+- `9_14_vision_opinion.feature` : 5 scenarios (US-9.14)
+- `9_13_pertinence_benchmark.feature` : 5 scenarios (US-9.13)
+- `9_12_augment_opencode.feature` : 1 scenario (US-9.12)
+- `9_11_opencode_injector.feature` : 2 scenarios (US-9.11)
+- `9_10_composite_context.feature` : 2 scenarios (US-9.10)
+- `9_9_filtered_query.feature` : 3 scenarios
+- `9_8_vector_query.feature` : 2 scenarios
+- `9_7_batch_validation.feature` : 3 scenarios
+- `9_6_indexation_yaml_json.feature` : 3 scenarios
+- `9_5_indexation_metadata.feature` : 3 scenarios
+- `9_3_4_workspace_walker_adoc.feature` : 2 scenarios
+- `9_2_3_dataset_embeddings.feature` : 1 scenario
+- `9_1_pgvector_container.feature` : 2 scenarios
+
+== Prochaine étape
+
+Session 022 — EPIC 10 (STIMULUS Cascade) ou EPIC 4 (Benchmark MVP1 Finalisation) ou EPIC 13 (LangGraph4j Classifieur Vision/Opinion).

@@ -1,0 +1,62 @@
+= Encyclopédie LAZY/EAGER — Connaissance Thématique Exhaustive
+:jbake-status: COLD
+:last-update-label: Dernière mise à jour
+:icons: font
+:sectnums:
+
+[abstract]
+--
+**Stockage froid (COLD)** — Ce fichier n'est JAMAIS chargé automatiquement par l'agent.
+Il contient la méthodologie LAZY/EAGER exhaustive pour référence humaine et distillation.
+
+**Version compacte EAGER** : `LAZY_EAGER_ESSENTIALS.adoc` à la racine (~70 lignes).
+**Version LAZY** : `AGENT_MODUS_OPERANDI.adoc` (447 lignes) — méthodologie opérationnelle complète.
+--
+
+== Note Importante
+
+Ce fichier est le complément COLD de `AGENT_MODUS_OPERANDI.adoc` (LAZY).
+Pour la méthodologie exhaustive et les procédures complètes, consulter directement
+`AGENT_MODUS_OPERANDI.adoc`.
+
+Le contenu de cette encyclopédie est destiné à l'humain pour :
+* Référence croisée avec les autres projets Gradle du portefeuille
+* Distillation lors des rotations de backup
+* Décisions architecturales sur la gouvernance agent
+
+== Contexte des Projets Gradle — Portefeuille
+
+|===
+| Projet | Chemin | Pattern de Gouvernance
+| bakery-gradle | `/home/cheroliv/workspace/foundry/bakery-gradle/bakery-plugin` | Plugin Gradle convention-based
+| plantuml-gradle | `/home/cheroliv/workspace/foundry/plantuml-gradle/plantuml-plugin` | Plugin Gradle mature, AGENT_MODUS_OPERANDI original
+| newpipe-gradle | `/home/cheroliv/workspace/foundry/newpipe-gradle` | Plugin Gradle
+| slider-gradle | `/home/cheroliv/workspace/foundry/slider-gradle` | Plugin Gradle
+| codebase-gradle | `/home/cheroliv/workspace/foundry/codebase-gradle` | Plugin Gradle
+| readme-gradle | `/home/cheroliv/workspace/foundry/readme-gradle` | Plugin Gradle
+| jhipster-gradle-plugins | `/home/cheroliv/workspace/foundry/jhipster-gradle-plugins` | Mono-repo persistence + assistant
+| **gradle-quizz** | `/home/cheroliv/workspace/foundry/quizz-benchmark-gradle/quizz-benchmark-plugin` | Plugin Gradle quizz/benchmark
+|===
+
+_Le plugin plantuml-gradle est le projet source du modèle AGENT_MODUS_OPERANDI._
+
+== Stratégie de Gouvernance pour gradle-quizz
+
+=== Couches de Défense
+
+. **EAGER/LAZY** — structure par disponibilité (tableau de bord vs manuel)
+. **Hot/Warm/Cold** — structure par fraîcheur (10 sessions actives vs références vs backup)
+. **ESSENTIALS/encyclopédie** — structure par densité (essentiel compact vs connaissance exhaustive)
+
+=== Cycle de Vie
+
+* Sessions de 15-30 minutes
+* 1-3 fichiers modifiés par session
+* < 50 messages par session
+* Rotation backup tous les 10 sessions ou > 500 lignes EAGER cumulées
+
+---
+**Fichier créé** : 2026-04-30 +
+**Projet** : gradle-quizz (quizz-benchmark-plugin) +
+**Statut** : COLD — Jamais chargé automatiquement +
+**Version** : 1.0
