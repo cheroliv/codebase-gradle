@@ -61,7 +61,7 @@ project.tasks.register<JavaExec>("runBenchmark") {
             .orElse("http://localhost:11434")
         val ollamaModel = project.providers.gradleProperty("ollamaModel")
             .orElse(project.providers.environmentVariable("OLLAMA_MODEL"))
-            .orElse("deepseek-v4-pro:cloud")
+            .orElse("deepseek-v4-flash:cloud")
         environment("OLLAMA_BASE_URL", ollamaBaseUrl.get())
         environment("OLLAMA_MODEL", ollamaModel.get())
     }
@@ -83,7 +83,7 @@ project.tasks.register<JavaExec>("runComparisonBenchmark") {
             .orElse("http://localhost:11434")
         val ollamaModel = project.providers.gradleProperty("ollamaModel")
             .orElse(project.providers.environmentVariable("OLLAMA_MODEL"))
-            .orElse("deepseek-v4-pro:cloud")
+            .orElse("deepseek-v4-flash:cloud")
         environment("OLLAMA_BASE_URL", ollamaBaseUrl.get())
         environment("OLLAMA_MODEL", ollamaModel.get())
     }

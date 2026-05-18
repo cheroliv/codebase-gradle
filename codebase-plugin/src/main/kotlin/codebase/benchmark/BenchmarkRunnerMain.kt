@@ -15,7 +15,7 @@ object BenchmarkRunnerMain {
         val graphJsonPath = System.getenv("GRAPH_JSON_PATH") ?: "build/graph.json"
         val projectRoot = System.getenv("CODEBASE_PROJECT_ROOT") ?: System.getProperty("user.dir")
         val baseUrl = System.getenv("OLLAMA_BASE_URL") ?: "http://localhost:11434"
-        val modelName = System.getenv("OLLAMA_MODEL") ?: "deepseek-v4-pro:cloud"
+        val modelName = System.getenv("OLLAMA_MODEL") ?: "deepseek-v4-flash:cloud"
 
         val channelConfig = resolveChannels(scenarioId, projectRoot)
 

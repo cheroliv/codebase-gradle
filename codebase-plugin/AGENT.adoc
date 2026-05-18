@@ -123,7 +123,6 @@ codebase-gradle/                     # RACINE GIT (cercle 4)
 │   ├── archives/                    # Archives mensuelles
 │   ├── encyclopedies/               # Connaissance thematique froide (COLD)
 │   └── backup/                      # Vagues froides (snapshots horodates)
-├── PROMPT_REPRISE.adoc              # Mission session en cours (EAGER)
 ├── BACKLOG.adoc                     # Suivi prioritaire des taches
 ├── LAZY_EAGER_ESSENTIALS.adoc       # Principes LAZY/EAGER
 ├── AGENT.adoc                       # Directives completes (ce fichier)
@@ -133,13 +132,13 @@ codebase-gradle/                     # RACINE GIT (cercle 4)
 == Gestion du Contexte — CRITIQUE
 
 * **Que faire ensuite ?** -> **`BACKLOG.adoc`** (suivi autoritaire et prioritaire des taches/bugs)
-* **`PROMPT_REPRISE.adoc`** -> mission de la session en cours et priorites de la prochaine session
+* **Mission** -> injectee par opencode depuis `configuration/.agents/PROMPT_REPRISE.adoc`
 
 == Session Procedure
 
 === Debut de Session
 
-1. Lire `PROMPT_REPRISE.adoc` pour la mission en cours
+1. La mission est injectee par opencode — ne pas lire PROMPT_REPRISE localement
 2. Lire `.agents/INDEX.adoc` pour les regles absolues
 3. Charger les fichiers ESSENTIALS si l'EPIC est concernee
 
@@ -150,7 +149,7 @@ codebase-gradle/                     # RACINE GIT (cercle 4)
 **Procedure obligatoire en 6 etapes** :
 
 1. **Creer l'archive LAZY** : `.agents/sessions/{N}-{type}-{sujet}.adoc`
-2. **Mettre a jour PROMPT_REPRISE.adoc** — Mission N+1 (max 70 lignes)
+2. **Mettre a jour `configuration/.agents/PROMPT_REPRISE.adoc`** — Mission N+1 (max 70 lignes)
 3. **Mettre a jour SESSIONS_HISTORY.adoc** : `.agents/SESSIONS_HISTORY.adoc` — Ajouter la session terminee
 4. **Mettre a jour INDEX.adoc** : `.agents/INDEX.adoc` — Date, session en cours N+1, roadmap, portefeuille
 5. **Mettre a jour TEST_COVERAGE_ANALYSIS.adoc** (si tests modifies)
@@ -207,7 +206,7 @@ il DOIT consulter ces codebases comme reference. Ces chemins sont LAZY — ne ja
 |===
 | Fichier | Role
 
-| `PROMPT_REPRISE.adoc` | Mission session en cours (max 70 lignes)
+| `PROMPT_REPRISE` | Injecte par opencode (configuration/.agents/PROMPT_REPRISE.adoc)
 | `.agents/INDEX.adoc` | Regles absolues + sessions recentes
 | `LAZY_EAGER_ESSENTIALS.adoc` | Principes LAZY/EAGER + politique de chargement
 | `AGENT.adoc` | Ce fichier — Directives completes
@@ -233,7 +232,7 @@ il DOIT consulter ces codebases comme reference. Ces chemins sont LAZY — ne ja
 | # | Anti-pattern | Symptome | Correction
 | 1 | **Agent sans `opencode.json`** | L'agent demarre nu, pose des questions basiques deja dans AGENT.adoc | `opencode.json` doit toujours contenir `"instructions": ["AGENT.adoc"]`
 | 2 | **Trop d'agents trop tot** | Multiples agents specialises crees avant que le projet soit stable | Attendre 10+ sessions avant de splitter en agents specialises
-| 3 | **PROMPT_REPRISE fantome** | PROMPT_REPRISE existe mais n'est pas mis a jour en fin de session | L'etape 2 de la procedure de fin de session est obligatoire
+| 3 | **PROMPT_REPRISE fantome** | configuration/.agents/PROMPT_REPRISE.adoc pas mis a jour en fin de session | L'etape 2 de la procedure de fin de session est obligatoire
 | 4 | **Archive vide** | Le fichier de session cree mais sans contenu utile | Template obligatoire : contexte, actions, commandes, resultats, lecons
 | 5 | **Portefeuille fantome** | INDEX.adoc liste des projets qui ne sont plus gouvernes | Mettre a jour le portefeuille a chaque fin de session. Verifier avec `find foundry -name INDEX.adoc`
 | 6 | **Redondance cachee** | AGENT.adoc et INDEX.adoc decrivent les memes regles avec des divergences | INDEX reference AGENT, pas de duplication. Une seule source de verite.
@@ -247,6 +246,6 @@ Pour initialiser la gouvernance agent sur un projet vierge :
 . **opencode.json** — 6 lignes, `{ "instructions": ["AGENT.adoc"] }`. Toujours en premier.
 . **Dossiers** — `mkdir -p .agents/sessions/ .agents/archives/ .agents/encyclopedies/`
 . **AGENT.adoc** — fichier maitre (~200-250 lignes) : regles absolues, structure projet, conventions, cercles de confiance
-. **PROMPT_REPRISE.adoc** — mission session 1 (max 70 lignes)
+. **PROMPT_REPRISE** — mission injectee par opencode
 . **Fichiers LAZY structurants** : INDEX.adoc (EAGER dans .agents/), SESSIONS_HISTORY.adoc, TEST_COVERAGE_ANALYSIS.adoc, LAZY_EAGER_ESSENTIALS.adoc
 . **Portefeuille transverse** — ajouter le nouveau projet dans le tableau Portefeuille de TOUS les INDEX.adoc des autres projets ET dans `configuration/.agents/AGENT_GOVERNANCE.adoc`
