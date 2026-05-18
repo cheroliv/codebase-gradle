@@ -171,7 +171,7 @@ project.tasks.register("verifySiteToAnonymizedYaml") {
             SiteConfiguration(
                 bake = BakeConfiguration(srcPath = "site", destDirPath = "bake"),
                 pushPage = GitPushConfiguration(from = "bake", to = "cvs", branch = "production",
-                    message = "com.cheroliv.bakery",
+                    message = "education.cccp.bakery",
                     repo = RepositoryConfiguration(name = "pages-content/bakery",
                         repository = "https://github.com/foo/bar.git",
                         credentials = RepositoryCredentials(username = "foo",
@@ -197,7 +197,7 @@ project.tasks.register("verifySiteToAnonymizedYaml") {
         check(anon.BRANCH_MASK in yamlReal) { "FAIL case 1" }
         check("site" in yamlReal) { "FAIL case 1" }
         check("bake" in yamlReal) { "FAIL case 1" }
-        check("com.cheroliv.bakery" in yamlReal) { "FAIL case 1" }
+        check("education.cccp.bakery" in yamlReal) { "FAIL case 1" }
         check("cheroliv-maquette" in yamlReal) { "FAIL case 1" }
         check("pages-content/bakery" in yamlReal) { "FAIL case 1" }
         check("bakery-maquette" in yamlReal) { "FAIL case 1" }

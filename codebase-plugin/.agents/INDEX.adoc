@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-14
-_Session terminee_ : 028 — Split Architecture (racine consommateur + plugin independant)
-_Session en cours_ : 029 — EPIC 5 Fine-tuning CDA/FPA ou EPIC 13 LangGraph4j
+_Derniere mise a jour_ : 2026-05-19
+_Session terminee_ : 032 — EPIC K K-1 Renommage taxonomie (collectFromCodebase, collectCompositeContext, generatePlan)
+_Session en cours_ : 033 — K-02 Format pivot metadata.json → généralisation du contrat metadata.json dans tous les boroughs producteurs N2
 
 '''
 == REGLES ABSOLUES (resume)
@@ -22,6 +22,10 @@ _Session en cours_ : 029 — EPIC 5 Fine-tuning CDA/FPA ou EPIC 13 LangGraph4j
 
 |===
 | # | Date | Type | Sujet | Score
+| 032 | 2026-05-19 | refactor | EPIC K K-1 Renommage taxonomie — `prepareContext`→`collectFromCodebase`, `assembleWorkspaceContext`→`collectCompositeContext`, `planIntention`→`generatePlan` (groupes collect/generate, 6 fichiers modifiés, compile OK) | 10/10
+| 031 | 2026-05-18 | feat+deploy | Déploiement codebase-plugin sur 10 boroughs N2 (catalog TOML + mavenLocal) + Fix Jackson mismatch quizz-benchmark (2.18.2→2.19.1 + dedup) | 8/10
+| 030 | 2026-05-18 | feat+tests | Cadrage agile 7 ateliers + Tests JUnit5 PrepareContextTask (5 PASS) + assembleWorkspaceContext task | 9/10
+| 029 | 2026-05-18 | feat+architecture | Bootstrapping Pipeline Contexte Augmente per Borough : PrepareContextTask + buildScoped + CodebasePlugin.apply() non-vide + opencode.json branche + engine.sh cleanup + GCR v7. Compilation+publication OK, test codex-gradle OK | 8/10
 | 028 | 2026-05-14 | architecture | Split architecture : racine consommateur 6 lignes + codebase-plugin autonome (gradlew, settings, libs.versions.toml, buildSrc, src, tests, .agents/), publishToMavenLocal OK, article 0124 | 10/10
 | 027 | 2026-05-14 | infra | CI Template — .github/workflows/test.yml (JDK 24, Gradle, JUnit), build OK, EPIC F cross-boroughs | 10/10
 | 026 | 2026-05-13 | feat | Benchmark Flash + Graphify — deepseek-v4-flash:cloud sur instance B, OLLAMA_BASE_URL/MODEL env vars, fix @JsonIgnoreProperties office/graph.json (21174n/22286e), benchmark-output/ (+.gitignore), 175 classifications 0% erreur, gate MVP1 PASS | 10/10
@@ -69,6 +73,7 @@ _Session en cours_ : 029 — EPIC 5 Fine-tuning CDA/FPA ou EPIC 13 LangGraph4j
 | EPIC 11 | LangGraph4j — chaines de pensees | A FAIRE | P1
 | EPIC 12 | Dilution Article de Blog automatique | A FAIRE | P1
 | EPIC 13 | LangGraph4j Classifieur Vision/Opinion | A FAIRE | P1
+| EPIC K | Ontologie Workspace — Taxonomie unifiée (4 verbes, format pivot, convention over configuration) | EN COURS — K-1 terminé (renommage), K-02 format pivot à faire | P0
 |===
 
 '''

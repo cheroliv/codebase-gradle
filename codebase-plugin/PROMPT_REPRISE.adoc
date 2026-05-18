@@ -1,0 +1,33 @@
+= PROMPT_REPRISE — Mission Session 033 EPIC K
+:date: 2026-05-19
+
+== Contexte
+
+EPIC K (Ontologie Workspace) — Vague 1 walking skeleton.
+K-1 terminé (session 032) : renommage taxonomie des tâches codebase-plugin
+selon les 4 verbes (collectFromCodebase, collectCompositeContext, generatePlan).
+
+== Mission session 033
+
+K-02 — Généralisation du contrat format pivot metadata.json dans tous les
+boroughs producteurs N2 (planner, training, capsule, quizz, codex).
+
+== Tâches
+
+. Vérifier que chaque borough N2 produit un metadata.json valide en sortie
+. Valider le contrat MetadataValidator sur les outputs réels
+. engine N3 lit metadata.json par fichier (sans import direct)
+
+== État du workspace
+
+- `codebase-plugin` : compilable, K-1 ✅ (renommage terminé)
+- `planner-gradle` : compilable, generateSPG fonctionnel
+- `quizz-benchmark` : compilable
+- `training-gradle` : compil bloqué MavenLocal préexistant
+- `codex-gradle` : compil bloqué MavenLocal préexistant
+
+== Règles
+
+- ZERO commit/push/merge sans permission
+- TDD : écrire le test AVANT le code
+- Engine N3 lit metadata.json par fichier — pas d'import direct N2

@@ -22,13 +22,27 @@ class CompositeContextBuilder(
 
     fun build(ragQuestion: String): CompositeContext {
         val eagerContent = collectEagerFiles()
+        return assembleContext(eagerContent, ragQuestion)
+    }
+
+    fun buildScoped(boroughName: String, ragQuestion: String): CompositeContext {
+        val eagerContent = collectEagerForBorough(boroughName)
+        return assembleContext(eagerContent, ragQuestion)
+    }
+
+    private fun assembleContext(eagerContent: String, ragQuestion: String): CompositeContext {
         val truncatedEager = truncateTokens(eagerContent, config.eagerLazyTokens)
 
-        val ragResults = queryService.query(ragQuestion, topK = 10)
-        val ragContent = ragResults.joinToString("\n") { r ->
-            "[sim=${"%.3f".format(r.similarity)}] ${r.text.take(300)}"
+        val truncatedRag = try {
+            val ragResults = queryService.query(ragQuestion, topK = 10)
+            val ragContent = ragResults.joinToString("\n") { r ->
+                "[sim=${"%.3f".format(r.similarity)}] ${r.text.take(300)}"
+            }
+            truncateTokens(ragContent, config.ragTokens)
+        } catch (e: Exception) {
+            log.warn("RAG section unavailable (pgvector down?): {}", e.message)
+            "[RAG] pgvector indisponible — section non generee"
         }
-        val truncatedRag = truncateTokens(ragContent, config.ragTokens)
 
         val graphifyContent = loadGraphifyStats()
         val truncatedGraphify = truncateTokens(graphifyContent, config.graphifyTokens)
@@ -39,6 +53,38 @@ class CompositeContextBuilder(
             graphifySection = truncatedGraphify,
             config = config
         )
+    }
+
+    private fun collectEagerForBorough(boroughName: String): String {
+        val sb = StringBuilder()
+        val agentsDir = workspaceRoot.resolve(".agents")
+        if (!agentsDir.isDirectory) return ""
+
+        for (eagerFile in listOf("INDEX.adoc")) {
+            val file = agentsDir.resolve(eagerFile)
+            if (!file.isFile) continue
+            try {
+                val content = file.readText().take(2000)
+                sb.appendLine("--- $boroughName/$eagerFile ---")
+                sb.appendLine(content)
+                sb.appendLine()
+            } catch (e: Exception) {
+                log.warn("Cannot read ${file.absolutePath}: {}", e.message)
+            }
+        }
+
+        val promptReprise = workspaceRoot.resolve("PROMPT_REPRISE.adoc")
+        if (promptReprise.isFile) {
+            try {
+                val content = promptReprise.readText().take(2000)
+                sb.appendLine("--- $boroughName/PROMPT_REPRISE.adoc ---")
+                sb.appendLine(content)
+                sb.appendLine()
+            } catch (e: Exception) {
+                log.warn("Cannot read ${promptReprise.absolutePath}: {}", e.message)
+            }
+        }
+        return sb.toString()
     }
 
     private fun collectEagerFiles(): String {

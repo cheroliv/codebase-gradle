@@ -1,0 +1,77 @@
+= Session 031 — EPIC K Ontologie Workspace (Cadrage + Propagation)
+:date: 2026-05-18
+:type: cadrage + propagation
+:score: 10/10
+
+== Résumé
+
+Session de cadrage agile 7 ateliers pour EPIC K (Ontologie Workspace), suivie de la propagation du plan d'attaque dans les 8 documents du jardin secret.
+
+== Actions réalisées
+
+1. *Atelier cadrage agile* → `.agents/CADRAGE_EPIC_K_TAXONOMIE.adoc` (468 lignes)
+   - 7 ateliers : Vision, Personas, Zoning, Wireframe, Story Mapping, Backlog, Architecture
+   - Backlog : 11 US, 42 points
+   - Plan d'attaque : 3 vagues (walking skeleton → expansion → polish)
+
+2. *DAG calculé* → `.agents/sessions/031-dag-epic-k.adoc`
+   - Critical path : 18 pts (K02→K03→K04→K07→K10)
+   - 6 sessions effectives, ~6j (vs 11 linéaires, ~9j)
+   - Gain parallélisation : -33%
+
+3. *Vague 1 exécutée en parallèle*
+   - 031a (US-K01) : Convention nommage ×4 boroughs P0 → Manhattan ✅, Bronx ✅ (Newark/Brooklyn bloqués MavenLocal préexistant)
+   - 031b (US-K02) : Metadata.kt + Validator.kt → codebase-plugin ✅
+
+4. *TDD rattrapé*
+   - MetadataUnitTest.kt : 8/8 JUnit5 PASS
+   - MetadataValidatorUnitTest.kt : 11/11 JUnit5 PASS
+   - Feature Cucumber : `epic_k_metadata_contract.feature` + MetadataContractSteps.kt (taggué @epic_k, ignoré par suite pgvector existante)
+
+5. *Propagation dans les 8 documents racine*
+   - AGENTS.adoc ✅, WORKSPACE_ORGANIZATION.adoc ✅, WORKSPACE_AS_PRODUCT.adoc ✅
+   - BOOM_BAP.adoc ✅, WHAT_THE_GAMES_BEEN_MISSING.adoc ✅
+   - COCKPIT_VISION.adoc ✅, PLANNING_EXPERT_ONTOLOGY.adoc ✅
+   - PLAN_GLOBAL.adoc ✅ (déjà fait avant la session)
+
+6. *Gouvernance mise à jour*
+   - INDEX.adoc : sessions 028-031, EPIC K EN COURS, plan 3 vagues
+   - SESSIONS_HISTORY.adoc : entrées 028-031
+
+== Fichiers créés (codebase-plugin)
+
+- `src/main/kotlin/codebase/rag/Metadata.kt` — sealed class, 5 sous-types
+- `src/main/kotlin/codebase/rag/MetadataValidator.kt` — contrat inter-borough
+- `src/test/kotlin/codebase/rag/MetadataUnitTest.kt` — 8 tests
+- `src/test/kotlin/codebase/rag/MetadataValidatorUnitTest.kt` — 11 tests
+- `src/test/features/epic_k_metadata_contract.feature` — 9 scénarios Gherkin
+- `src/test/kotlin/codebase/scenarios/MetadataContractSteps.kt` — steps Cucumber
+
+== Fichiers modifiés (codebase-plugin)
+
+- `PlannerIntegration.kt` → +`toPlanMetadata()`
+- `PlanIntentionTask.kt` → +génération metadata.json + Validation
+
+== Fichiers modifiés (Manhattan)
+
+- `PlanningPlugin.kt` → stub remplacé par `GenerateSPGTask`
+- `GenerateSPGTask.kt` → créé (écrit spg.adoc + metadata.json)
+- `GenerateSPGTaskTest.kt` → créé (1 test JUnit5 PASS)
+
+== Inférences calculées
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Sessions totales | 6 effectives |
+| Points | 42 |
+| Critical path | 18 pts |
+| Durée estimée | ~6j |
+| Gain parallélisme | -33% |
+| Vélocité mesurée | ~23 pts/h |
+| Secrets | Zéro |
+
+== Prochaine session
+
+Poursuivre Vague 1 :
+- Session 032 : US-K03 — metadata.json pilote Manhattan (déjà fait partiellement — generateSPG compile + output valide)
+- Session 033 : US-K04 — engine vérifie metadata.json (à faire — engine validateBoroughMetadata)

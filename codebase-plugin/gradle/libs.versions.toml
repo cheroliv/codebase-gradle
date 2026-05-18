@@ -4,6 +4,7 @@ kotlin = "2.3.20"
 kotlinx-serial = "1.7.3"
 jackson = "2.21.2"
 langchain4j = "1.14.1"
+langgraph4j = "1.8.16"
 langchain4j-beta = "1.14.1-beta24"
 testcontainers = "1.21.4"
 cucumber = "7.34.3"
@@ -36,6 +37,8 @@ kotlinx-coroutines-reactive = { module = "org.jetbrains.kotlinx:kotlinx-coroutin
 r2dbc-postgresql = { module = "org.postgresql:r2dbc-postgresql", version.ref = "r2dbc-postgresql" }
 r2dbc-pool = { module = "io.r2dbc:r2dbc-pool", version.ref = "r2dbc-pool" }
 r2dbc-spi = { module = "io.r2dbc:r2dbc-spi", version.ref = "r2dbc-spi" }
+langgraph4j-core = { module = "org.bsc.langgraph4j:langgraph4j-core", version.ref = "langgraph4j" }
+langgraph4j-langchain4j = { module = "org.bsc.langgraph4j:langgraph4j-langchain4j", version.ref = "langgraph4j" }
 mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
 mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serial" }
@@ -66,8 +69,12 @@ arrow = [
     "arrow-core",
     "arrow-fx-coroutines",
 ]
+langgraph4j = [
+    "langgraph4j-core",
+    "langgraph4j-langchain4j",
+]
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 publish = { id = "com.gradle.plugin-publish", version.ref = "plugin-publish" }
-codebase = { id = "com.cheroliv.codebase", version.ref = "codebase" }
+codebase = { id = "education.cccp.codebase", version.ref = "codebase" }

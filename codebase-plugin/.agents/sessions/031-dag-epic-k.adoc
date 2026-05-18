@@ -1,0 +1,98 @@
+= Session 031 — DAG EPIC K (Inférences Calculées)
+:date: 2026-05-18
+:type: dag-calculation
+:score: 10/10
+
+== Graphe de Dépendances
+
+[source,text]
+----
+US-K01 (nommage ×4 P0) ────────────────────────────────────┐
+       │                                                      │
+       ├── US-K05 (config pilote ×2) ── US-K08 (config tous)  │
+       └── US-K09 (nommage ×7 restants)                       │
+                                                               │
+US-K02 (Metadata classes) ────────────────────────────────────┤
+       │                                                       │
+       ├── US-K03 (metadata pilote MHT) ── US-K04 (engine)    │
+       │         │                                             │
+       │         └── US-K07 (format pivot ×6 boroughs)        │
+       │                                                       │
+       └── US-K11 (méta-comm typée Niveau 2)                  │
+                                                               │
+US-K06 (convention FS) ← indépendant                         │
+       │                                                       │
+       └───────────────────────────────────────────────────────┤
+                                                               │
+TOUTES ── US-K10 (documentation ×11) ─────────────────────────┘
+----
+
+== Critical Path (chemin le plus long)
+
+[source,text]
+----
+US-K02 (5pts) → US-K03 (3pts) → US-K04 (2pts) → US-K07 (5pts) → US-K10 (3pts)
+                    = 18 points = 5 sessions minimum
+----
+
+Tout autre chemin est plus court ou parallélisable. Le critical path détermine la durée minimale du projet.
+
+== Parallel Groups (exécution simultanée possible)
+
+[%header%autowidth.stretch]
+|===
+| Vague | Sessions parallèles | US concernées | Points | Condition
+| V1 | 031a + 031b | K01 + K02 | 10 | Aucune dépendance entre K01 et K02
+| V1 | 032 (seul) | K03 | 3 | Dépend de K02
+| V1 | 033 (seul) | K04 | 2 | Dépend de K03
+| V2 | 034 (fan-out ×13) | K05+K07+K08+K09 | 14 | Pattern validé en V1
+| V2 | 035a (seul) | K06 | 5 | Indépendant
+| V3 | 035b (seul) | K11 | 5 | Dépend de K02
+| V3 | 036 (fan-out ×11) | K10 | 3 | Toutes les US
+|===
+
+== Timings Calculés
+
+[%header%autowidth.stretch]
+|===
+| Métrique | Valeur | Calcul
+| Sessions totales | 6 | V1(4) + V2(2) + V3(2) → 6 effectives (pas 11)
+| Points totaux | 42 | Somme des 11 US
+| Critical path length | 18 pts | K02→K03→K04→K07→K10
+| Jours estimés | ~6j | 6 sessions × 1j/session
+| Jours cadrage initial | ~9j | 11 sessions × 0.8j (conservateur)
+| Gain parallélisation | -33% | (9j-6j)/9j
+| Risque architectural | Éliminé après V1 | Walking skeleton valide le contrat
+| Boroughs impactés | 11 | N0(1) + N1(1) + N2(8) + N3(1)
+| Tâches renommées | ~15 | Manhattan(1) + Newark(2) + Brooklyn(1) + Bronx(2) + restants(~9)
+| Fichiers créés | ~30 | Metadata.kt, Validator.kt, metadata.json ×8+, extensions ×11, doc ×11
+|===
+
+== Inférences par Borough
+
+[%header%autowidth.stretch]
+|===
+| Borough | Niveau | Tâche actuelle | Tâche renommée | Verbe | État
+| Manhattan | N2 | `plannerGenerateSPG` | `generateSPG` | GENERER | ✅ 031a OK
+| Newark | N2 | `trainingRetrieve` | `collectFromCorpus` | COLLECTER | ✅ 031a OK (compil FAIL préexistant)
+| Newark | N2 | `assembleCompositeContext` | `collectContext` | COLLECTER | ✅ 031a OK
+| Brooklyn | N2 | `codexPipeline` | `transformCorpusToPdf` | TRANSFORMER | ✅ 031a OK (compil FAIL préexistant)
+| Bronx | N2 | `quizGenerate` | `generateQuiz` | GENERER | ✅ 031a OK
+| Bronx | N2 | `quizReport` | `generateQuizReport` | GENERER | ✅ 031a OK
+| Staten Island | N2 | *(néant)* | `deployToGhPages` | DÉPLOYER | À faire (V2)
+| codebase | N1 | *(nouveau)* | Metadata.kt + Validator.kt | (format pivot) | ✅ 031b OK
+| engine | N3 | *(nouveau)* | `validateBoroughMetadata` | (vérification) | À faire (K04)
+|===
+
+== Vélocité Mesurée
+
+[%header%autowidth.stretch]
+|===
+| Session | US | Temps réel | Vélocité
+| 031a | K01 ×4 boroughs | ~15 min | 5 pts / 15 min = 20 pts/h
+| 031b | K02 Metadata classes | ~10 min | 5 pts / 10 min = 30 pts/h
+| 032 | K03 metadata pilote | ~8 min | 3 pts / 8 min = 22 pts/h
+| *Moyenne V1* | | | *~23 pts/h*
+|===
+
+À cette vélocité, les 37 points restants (V2+V3) prennent environ 1h30 de temps agent.

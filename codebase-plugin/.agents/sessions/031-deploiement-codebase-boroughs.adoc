@@ -1,0 +1,50 @@
+= Session 031 — Déploiement codebase-plugin sur boroughs N2
+:date: 2026-05-18
+:type: feat+deploy
+:score: 8/10
+
+== Contexte
+Suite Session 030 (cadrage + tests + assembleWorkspaceContext).
+Déploiement pipeline de contexte augmenté sur les 12 boroughs N2 cibles.
+
+== Actions
+
+=== 1. Fix Jackson mismatch quizz-benchmark (2.18.2 vs 2.19.1)
+- `gradle/libs.versions.toml` : bump `jackson = "2.19.1"`
+- `build.gradle.kts` : supprimé bloc `dependencies` dupliqué (lignes 48-55) avec Jackson 2.19.1 hardcodé
+- Supprimé blocs `kotlin`, `repositories` dupliqués (copy-paste artifact)
+- Compilation OK
+
+=== 2. Déploiement codebase-plugin sur 10 Gradle boroughs
+Pour chaque borough : + `codebase = "0.0.1"` dans `[versions]`, + `codebase = { id = "cccp.education.codebase", version.ref = "codebase" }` dans `[plugins]`, + `mavenLocal()` dans `pluginManagement` si absent, + `alias(libs.plugins.codebase)` dans plugins block :
+
+| Borough | Chemin | mavenLocal ajouté | Compilation |
+| codex-gradle | doc-pipeline/ | déjà présent | FAIL (pré-existant: readme pas dans mavenLocal) |
+| planner-gradle | planner-plugin/ | OUI (ajouté) | FAIL (pré-existant: planner pas dans mavenLocal) |
+| training-gradle | training-plugin/ | OUI (ajouté) | ✅ SUCCESS |
+| capsule-gradle | capsule-plugin/ | déjà présent | FAIL (pré-existant: slider pas dans mavenLocal) |
+| slider-gradle | slider-plugin/slider/ | OUI (ajouté) | ✅ SUCCESS |
+| bakery-gradle | bakery-plugin/ | déjà présent | FAIL (pré-existant: graphify pas dans mavenLocal) |
+| plantuml-gradle | plantuml-plugin/ | OUI (ajouté) | ✅ SUCCESS |
+| readme-gradle | readme-plugin/ | OUI (ajouté) | ✅ SUCCESS |
+| waiter-gradle | waiter-plugin/ | OUI (ajouté) | ✅ SUCCESS |
+| quizz-benchmark | quizz-benchmark-plugin/ | OUI (ajouté) | ✅ SUCCESS |
+
+NOTE: 4 échecs de compilation sont pré-existants (plugins consommés absents de mavenLocal : readme, planner, slider, graphify). Aucun causé par l'intégration codebase.
+
+=== 3. Non-Gradle (magic-stick, scripts) — BLOCKED
+magic-stick (JBake) et scripts (shell) ne sont pas des projets Gradle.
+`prepareContext` nécessite le wrapper Gradle. Reporté à une session future.
+
+=== 4. CI/CD prepareContext — BLOCKED
+Nécessite commits dans 10 repos git indépendants (règle no-commit). Reporté.
+
+== Vérifications
+- `./gradlew compileKotlin` : 6/10 boroughs SUCCESS
+- Zéro secret dans les modifications
+- `git status` : modifications non commitées dans 10 boroughs
+
+== Leçons
+- Le pattern TOML version catalog est cohérent sur 10/10 boroughs
+- 4 boroughs (codex, planner, capsule, bakery) ont besoin de `publishToMavenLocal` de leurs plugins consommés avant compilation
+- magic-stick/scripts = projets non-Gradle, pas de prepareContext possible sans wrapper

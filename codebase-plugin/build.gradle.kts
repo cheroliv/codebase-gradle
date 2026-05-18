@@ -10,7 +10,7 @@ plugins {
     alias(libs.plugins.publish)
 }
 
-group = "com.cheroliv"
+group = "education.cccp"
 version = libs.plugins.codebase.get().version
 kotlin.jvmToolchain(24)
 
@@ -26,6 +26,7 @@ dependencies {
     implementation(libs.bundles.langchain4j.rag)
     implementation(libs.bundles.r2dbc)
     implementation(libs.bundles.arrow)
+    implementation(libs.bundles.langgraph4j)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.jackson.dataformat.yaml)
     implementation(libs.kotlinx.serialization.json)
@@ -110,9 +111,9 @@ publishing {
                     }
                     developers {
                         developer {
-                            id.set("cheroliv")
-                            name.set("cheroliv")
-                            email.set("cheroliv.developer@gmail.com")
+                            id.set("cccp-education")
+                            name.set("CCCP Education")
+                            email.set("cccp.education@gmail.com")
                         }
                     }
                     scm {

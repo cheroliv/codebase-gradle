@@ -1,0 +1,64 @@
+= Session 029 — Bootstrapping Pipeline Contexte Augmente per Borough
+:date: 2026-05-18
+:type: feat+architecture
+:score: 8/10
+
+== Contexte
+Suite a la revue de code globale v7 et au git init workspace-gradle, l'usager
+identifie le bottleneck : les sessions opencode chargent trop de fichiers EAGER
+par session (AGENT.adoc + INDEX.adoc + PROMPT_REPRISE.adoc par borough →
+~20k-30k tokens). Le pipeline de contexte augmente (EPIC 9 : CompositeContextBuilder
++ OpencodeInjector + augmentOpencode → /tmp/opencode-context.txt) existe deja
+mais n'est pas connecte a opencode.
+
+_Objectif de la session_ : amorcer le pipeline de contexte augmente per-borough
++ brancher opencode.json.
+
+== Actions
+. Audit complet de l'etat des 12 boroughs + 2 projets pilotes (INDEX.adoc → statut EPICs)
+. Global Code Review v7 (section 14) dans `../../GLOBAL_CODE_REVIEW.adoc`
+. workspace-gradle : `git init` + ADR Decision 001 (licence OSS Apache 2.0) dans `.agents/DECISIONS_ARCHITECTURE.adoc`
+. Creation de `PrepareContextTask` (DefaultTask Gradle dans codebase-plugin) :
+  - walk + index + RAG pgvector + format → `build/context/{name}.context.txt`
+  - Resilient si pgvector down → EAGER+Graphify only
+. Ajout `buildScoped(boroughName, question)` dans `CompositeContextBuilder`
+  → scope EAGER a un seul borough
+. Rendu `CompositeContextConfig.init` tolerant floating-point (abs(sum - 1.0) < 0.001)
+. Rendu `assembleContext` RAG resilient (try-catch → fallback message)
+. Enregistrement de `prepareContext` dans `CodebasePlugin.apply()`
+. Test sur codex-gradle → compilation OK, execution produit `build/context/codex-gradle.context.txt` (2430 bytes, EAGER+RAG+Graphify degrade)
+. Branche `opencode.json` (racine workspace) : `"instructions": ["AGENTS.adoc", "/tmp/opencode-context.txt"]`
+. Cleanup `engine.sh` : retire commands `graph`, `augment`, `verify` (taches deplacees/supprimees dans EPIC B)
+. Publication codebase-plugin 0.0.1 dans mavenLocal
+
+== Fichiers Creés
+|===
+| Fichier | Role
+| `codebase-plugin/src/main/kotlin/codebase/rag/PrepareContextTask.kt` (85l) | Tache Gradle per-borough context prep
+| `../../workspace-gradle/.agents/DECISIONS_ARCHITECTURE.adoc` (103l) | ADR 001 (licence OSS) + 002 (CCCP migration)
+|===
+
+== Fichiers Modifies
+|===
+| Fichier | Changement
+| `CompositeContextBuilder.kt` | +buildScoped() + refactor assembleContext() + RAG resilient
+| `CompositeContextConfig.kt` | init tolerance flottante
+| `CodebasePlugin.kt` | +prepareContext task registration (etait vide)
+| `../../GLOBAL_CODE_REVIEW.adoc` | +section 14 (v7 update 2026-05-18)
+| `../../opencode.json` | +"/tmp/opencode-context.txt" dans instructions
+| `../../foundry/public/engine/engine.sh` | -graph -augment -verify
+| `../../workspace-gradle/AGENT.adoc` | reference concise vers DECISIONS_ARCHITECTURE
+| `../../workspace-gradle/.agents/INDEX.adoc` | Session 002 enregistree
+|===
+
+== Backlog Max Priorite (Session 030)
+. Cadrage agile 7 ateliers documente dans `.agents/CADRAGE_CONFEXT_AUGMENTE.adoc`
+. Tests Cucumber pour `PrepareContextTask` (pipeline walk→index→build→inject scoped)
+. `assembleWorkspaceContext` task (aggregation des `build/context/*.context.txt`)
+. Appliquer codebase-plugin sur les N2 boroughs (planner, training, capsule, quizz)
+. Fix Jackson mismatch quizz-benchmark (2.18.2/2.19.1)
+. Kover pour codebase-gradle
+. ktlint/detekt global
+
+== Prochaine session
+030 — Cadrage agile + Tests Cucumber PrepareContextTask + assembleWorkspaceContext

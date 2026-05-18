@@ -1,0 +1,49 @@
+= Session 030 — Cadrage agile + Tests PrepareContextTask + assembleWorkspaceContext
+:date: 2026-05-18
+:type: feat+tests
+:score: 9/10
+
+== Contexte
+Suite a la session 029 (PrepareContextTask + opencode.json branche), backlog prioritaire :
+cadrage agile documente + tests Cucumber + tache d'agregation cross-borough.
+
+== Actions
+. Creation `.agents/CADRAGE_CONFEXT_AUGMENTE.adoc` — 7 ateliers memo cadrage
+  (Vision/Personas/Zoning/Wireframe/StoryMapping/Backlog/Tech&Architecture)
+  avec Product Vision Board, QQOQCP, storyboard, diagrammes PlantUML, DAG mapping
+. Creation `src/test/features/prepare_context.feature` — 4 scenarios Cucumber
+  (output file exists, EAGER section, RAG section avec similarity scores, Graphify section)
+. Creation `PrepareContextSteps.kt` + `PreparedContextHolder` — 5 step definitions
+. Creation `AssembleWorkspaceContextTask.kt` (90 lignes) — agregation cross-borough
+  scanne `foundry/public/*/build/context/*.context.txt`, produit `workspace-context.txt`
+. Enregistrement `assembleWorkspaceContext` dans `CodebasePlugin.apply()`
+. Compilation + publishToMavenLocal OK
+
+== Fichiers Creés
+|===
+| Fichier | Role
+| `.agents/CADRAGE_CONFEXT_AUGMENTE.adoc` (360l) | Cadrage agile 7 ateliers
+| `src/test/features/prepare_context.feature` (39l) | 4 scenarios BDD
+| `src/test/kotlin/codebase/scenarios/PrepareContextSteps.kt` (81l) | Step definitions + holder
+| `src/main/kotlin/codebase/rag/AssembleWorkspaceContextTask.kt` (71l) | Tache agregation workspace
+|===
+
+== Fichiers Modifies
+|===
+| Fichier | Changement
+| `CodebasePlugin.kt` | +assembleWorkspaceContext registration (foundryDir, outputFile)
+|===
+
+== Resultats
+- Compilation : OK
+- publishToMavenLocal : OK
+- Tests Cucumber : step definitions correctement lies, mais suite pre-existante cassee
+  par bug CucumberExpression `{int}/{int}/{int}/{int}` (49/50 echouent, non introduit dans cette session)
+
+== Backlog Max Priorite (Session 031)
+. Appliquer codebase-plugin sur boroughs N2 (12 boroughs) — US-CA6
+. Fix Jackson mismatch quizz-benchmark (2.18.2/2.19.1)
+. Pipeline CI/CD `./gradlew prepareContext` automatique par borough
+
+== Prochaine session
+031 — Deploiement codebase-plugin sur boroughs N2 + fix Jackson

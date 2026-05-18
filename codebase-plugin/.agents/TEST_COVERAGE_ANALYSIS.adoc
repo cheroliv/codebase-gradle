@@ -1,9 +1,12 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : 34 scenarios Cucumber (30 EPIC 9 + 4 EPIC 2/4 @wip) + 8/8 JUnit5 EPIC 10 PASS
+_Statut_ : 19 tests JUnit5 EPIC K (8 Metadata + 11 Validator) PASS + 1 test JUnit5 GenerateSPGTask PASS + Feature Cucumber epic_k_metadata_contract (9 scenarios, @epic_k taggué)
 
-|===
 | Session | Fichiers testes | Couverture | Notes
+| 031b | `MetadataUnitTest.kt` + `MetadataValidatorUnitTest.kt` (JUnit5) | 19 tests PASS | EPIC K format pivot : SPG/SPD/Quiz/Plan/PDF fromJson, type inconnu → exception, fromFile, defaults vides, validate OK/absent/corrompu/version/type/deps, isVersionCompatible
+| 031b | `GenerateSPGTaskTest.kt` (JUnit5, Manhattan) | 1 test PASS | generateSPG: spg.adoc + metadata.json valide (type SPG, source manhattan, sessions 24)
+| 030 | `PrepareContextUnitTest.kt` + `PrepareContextSteps.kt` (JUnit5 + Cucumber) | 5 tests PASS + steps binds | —
+| 029 | `PrepareContextTask.kt` + `CompositeContextBuilder.kt` (buildScoped) | AUCUN — compile+run manuel uniquement | Session de bootstrapping sans tests. Tests Cucumber prevus en session 030
 | 025 | `DilutionExecutor.kt` + `StimulusDetector.kt` + `StimulusDetectorMain.kt` (JUnit5) | 8 tests PASS | EPIC 10 STIMULUS Cascade MVP2 — DilutionExecutor (injection+backup+dryRun+trace), StimulusDetector (scan+actif+stale+exports), DRY RUN integrity, OPINION reject, missing file error
 | 021 | `VisionOpinionClassifier.kt` + `VisionOpinionClassifierMain.kt` + `VisionOpinionClassifierSteps.kt` (Cucumber) | 5 scénarios PASS | US-9.14 — 10 sections test (5 VISION + 5 OPINION), classifier instantiable, system prompt validé (critères VISION/OPINION), JSON/AsciiDoc exports format valide, gate 80% précision
 | 020 | `PertinenceBenchmark.kt` + `PertinenceBenchmarkSteps.kt` (Cucumber) | 5 scenarios PASS | US-9.13 — 10 questions dataset valide, runner instantiable, JSON/AsciiDoc exports valides, gate MVP0 70%

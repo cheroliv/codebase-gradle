@@ -9,7 +9,7 @@ data class CompositeContextConfig(
 ) {
     init {
         val sum = budgetEagerLazy + budgetRag + budgetGraphify + budgetOverhead
-        require(sum == 1.0) { "Token budget must sum to 1.0, got $sum" }
+        require(kotlin.math.abs(sum - 1.0) < 0.001) { "Token budget must sum to 1.0, got $sum" }
     }
 
     val eagerLazyTokens: Int get() = (totalTokenBudget * budgetEagerLazy).toInt()

@@ -1,0 +1,400 @@
+= Cadrage Agile — Contexte Augmenté per Borough
+:toc:
+:icons: font
+:sectnums:
+:jbake-status: EAGER
+:date: 2026-05-18
+
+_Méthode : Mémo Cadrage (cf. blog/2022/0054_memo_cadrage_post.adoc)_
+_Projet : codebase-gradle/codebase-plugin — Plugin Gradle N1_
+
+'''
+
+== Atelier 1 : Vision
+
+=== QQOQCP
+
+[cols="2,5"]
+|===
+| Qui | opencode (l'agent CLI) + le dev humain qui ouvre une session dans un borough
+| Quoi | Un fichier de contexte injectable par borough, généré à partir des sources indexées en pgvector + fichiers EAGER + Knowledge Graph workspace
+| Où | Dans `/tmp/opencode-context.txt` (branché sur `opencode.json` racine workspace)
+| Quand | Avant chaque session opencode. Pipeline déclenché manuellement ou automatiquement via engine N3
+| Comment | Tâche Gradle `prepareContext` dans codebase-plugin N1. Appelé par borough N2 ou par engine N3 (`assembleCompositeContext`)
+| Pourquoi | Réduire les 20k-30k tokens EAGER par session. Substituer le chargement exhaustif de tous les fichiers gouvernance par un résumé ciblé RAG+EAGER+Graphify
+|===
+
+=== Product Vision Board
+
+==== Target Group
+- Agent opencode (consommateur primaire)
+- Développeur humain ouvrant une session dans un borough N2
+- Engine N3 (assembleWorkspaceContext pour contexte global)
+
+==== Needs (5 besoins principaux)
+. Comprendre le statut du borough (EPICs, roadmap, backlog) sans charger tous les fichiers EAGER
+. Obtenir le contexte RAG pertinent sur une question métier (pgvector cosine similarity)
+. Visualiser la position du borough dans le graphe de dépendances workspace
+. Résilience : fonctionner même si pgvector est down (fallback EAGER+Graphify)
+. Pipeline automatisable (appelé par engine N3, CI/CD)
+
+==== Product (proposition de valeur)
+Un plugin Gradle N1 qui, pour un borough donné, produit un fichier de contexte
+structuré (EAGER + RAG + Graphify) injectable dans opencode. Remplace le chargement
+manuel de 3-5 fichiers EAGER par borough.
+
+==== 5 fonctionnalités principales
+. `prepareContext` — scan + index + RAG + inject par borough
+. `CompositeContextBuilder.buildScoped()` — scope à un seul borough
+. `OpencodeInjector.injectToFile()` — formatage opencode-compatible
+. Résilience RAG (pgvector down → fallback message)
+. `assembleWorkspaceContext` — agrégation cross-borough (engine N3 ou codebase N1)
+
+==== Business Goal (critères de succès)
+- 2430 bytes de contexte généré pour codex-gradle ✅ (session 029)
+- Réduction de 50%+ des tokens EAGER par session (cible : <8k tokens au lieu de 20k-30k)
+- 100% des boroughs N2 couverts (12 boroughs)
+- Tests Cucumber passants pour `prepareContext` et `assembleWorkspaceContext`
+
+==== Vision (1 phrase)
+Un pipeline de contexte augmenté par borough qui nourrit opencode avec
+un résumé EAGER ciblé + du RAG pgvector pertinent + une carte Knowledge Graph,
+en remplacement du chargement exhaustif des fichiers de gouvernance.
+
+'''
+
+== Atelier 2 : Personas / Parcours utilisateurs
+
+=== Persona 1 : Agent opencode (terminal consommateur)
+- *Cible* : Agent opencode qui démarre une session
+- *But* : Recevoir le contexte minimum pertinent pour le borough cible sans charger 10+ fichiers EAGER
+- *Parcours utilisateur* :
+  . Le dev ouvre une session opencode dans un borough (ex: codex-gradle)
+  . opencode.json racine charge `/tmp/opencode-context.txt`
+  . Le fichier contient : INDEX.adoc du borough (EAGER tronqué) + top-K RAG sur "architecture du workspace" + stats Graphify
+  . L'agent opencode lit ce fichier en 1 bloc → ~2-3k tokens au lieu de 20k-30k
+
+=== Persona 2 : Développeur humain
+- *Cible* : Le dev qui prépare une session de travail
+- *But* : Générer le contexte augmenté pour le borough sur lequel il va travailler
+- *Parcours utilisateur* :
+  . `cd foundry/public/codex-gradle && ./gradlew prepareContext`
+  . La tâche scanne les sources, indexe dans pgvector, build le contexte scoped
+  . Résultat : `build/context/codex-gradle.context.txt` (local)
+  . Optionnel : copier vers `/tmp/opencode-context.txt` ou laisser engine N3 le faire
+
+=== Persona 3 : Engine N3 (orchestrateur)
+- *Cible* : Le pipeline `assembleCompositeContext` dans engine
+- *But* : Agréger les contextes de tous les boroughs en un seul workspace context
+- *Parcours utilisateur* :
+  . `./gradlew assembleCompositeContext -Pquery="formation FPA pipeline"`
+  . L'engine appelle codebase-gradle N1 avec le contrat RAG
+  . Lit `build/context/*.context.txt` de tous les boroughs
+  . Produit `build/engine/composite-context.json`
+
+'''
+
+== Atelier 3 : Zoning / Storyboard / Sitemap
+
+_Adapté pour un plugin Gradle CLI (pas d'interface graphique)_
+
+=== Zoning (espaces fonctionnels)
+
+[source,text]
+----
+┌─────────────────────────────────────────────────────────────┐
+│ codebase-gradle/codebase-plugin/                            │
+│                                                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │ Walk & Index │  │  RAG Query   │  │   Inject     │      │
+│  │ WorkspaceWalk│  │ VectorQuery  │  │  OpencodeInj │      │
+│  │ KotlinMdExtr │  │ EmbedPipeline│  │  /tmp/openc..│      │
+│  │ YamlAnonymize│  │ pgvector topK│  │  build/contex│      │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘      │
+│         │                 │                 │               │
+│         └────────┬────────┴────────┬────────┘               │
+│                  │                 │                        │
+│         ┌────────▼─────────────────▼────────┐               │
+│         │   CompositeContextBuilder         │               │
+│         │   build() / buildScoped()         │               │
+│         │   EAGER + RAG + Graphify          │               │
+│         └──────────────┬───────────────────┘               │
+│                        │                                    │
+│         ┌──────────────▼───────────────────┐               │
+│         │ PrepareContextTask (Gradle)      │               │
+│         │ assembleWorkspaceContextTask     │               │
+│         └──────────────────────────────────┘               │
+└─────────────────────────────────────────────────────────────┘
+----
+
+=== Storyboard (séquence d'exécution)
+
+[cols="1,5", options="header"]
+|===
+| Étape | Action
+| 1 | `PrepareContextTask.execute()` démarre
+| 2 | Initialise pgvector (`PgVectorConfig.fromEnv()`)
+| 3 | Si pgvector OK ET 0 documents indexés → `indexBoroughSources()` (walk + chunk + embed)
+| 4 | Si pgvector KO → log warn, continue sans RAG
+| 5 | `CompositeContextBuilder.buildScoped(name, question)` → EAGER borough + RAG top-K + Graphify stats
+| 6 | `OpencodeInjector.injectToFile(composite, outputFile)` → écrit `build/context/{name}.context.txt`
+| 7 | Log lifecycle : bytes, tailles EAGER/RAG/Graphify
+|===
+
+=== Sitemap (navigation des fonctionnalités)
+
+----
+codebase-plugin tasks:
+  prepareContext         → contexte augmenté per borough
+  assembleWorkspaceContext → agrégation cross-borough (à créer)
+  augmentOpencode       → ancien pipeline workspace global (EPIC 9)
+  indexCodebase         → indexation brute pgvector
+  queryCodebase         → query pgvector directe
+----
+
+'''
+
+== Atelier 4 : Wireframe / Moodboard
+
+_Non applicable pour un plugin Gradle CLI. Le format de sortie est défini par `OpencodeInjector` :_
+
+=== Format de sortie (opencode-context.txt)
+
+[source,adoc]
+----
+= CONTEXTE AUGMENTE — codex-gradle
+:toc:
+
+== EAGER (essentiel local)
+--- codex-gradle/.agents/INDEX.adoc ---
+(tronqué à 2000 chars)
+
+--- codex-gradle/PROMPT_REPRISE.adoc ---
+(tronqué à 2000 chars)
+
+== RAG (pgvector contextuel)
+[sim=0.892] Top chunk text... (300 chars max)
+[sim=0.784] Second chunk text...
+...
+
+== Graphify (knowledge graph workspace)
+[Graphify] global graph: ~21000 nodes, ~22000 edges
+----
+
+'''
+
+== Atelier 5 : Story Mapping / User Stories
+
+=== Story Mapping (priorisation par squelette → backbone → walking skeleton → détails)
+
+[cols="1,3,3,3", options="header"]
+|===
+| Niveau | US | État | Points
+| Squelette
+| US-CA1 — `PrepareContextTask` compile et s'exécute
+| ✅ DONE (session 029)
+| 3
+
+| Backbone
+| US-CA2 — `buildScoped()` scope EAGER à un seul borough
+| ✅ DONE (session 029)
+| 2
+
+| Walking skeleton
+| US-CA3 — Injecter dans `/tmp/opencode-context.txt` + opencode.json branché
+| ✅ DONE (session 029)
+| 2
+
+| US-CA4 — Tests Cucumber `PrepareContextTask`
+| À FAIRE (session 030)
+| 3
+
+| US-CA5 — `assembleWorkspaceContext` task (agrégation cross-borough)
+| À FAIRE (session 030)
+| 3
+
+| Détails
+| US-CA6 — Appliquer codebase-plugin sur 12 boroughs N2
+| À FAIRE
+| 5
+
+| US-CA7 — CI/CD prepareContext automatique par borough
+| À FAIRE
+| 2
+
+| US-CA8 — Cache RAG (ne pas ré-indexer si sources inchangées)
+| À FAIRE
+| 3
+|===
+
+=== User Stories détaillées
+
+==== US-CA4 — Tests Cucumber `PrepareContextTask`
+
+*En tant que* développeur du codebase-plugin,
+*je veux* des tests Cucumber qui valident le pipeline walk→index→build→inject scoped per borough,
+*afin que* le comportement de `PrepareContextTask` soit vérifié en isolation.
+
+[cols="2,5"]
+|===
+| Scénario 1 | pgvector UP → index fixtures → buildScoped → verify context.txt non vide (EAGER+RAG+Graphify)
+| Scénario 2 | pgvector UP → index fixtures → buildScoped → verify EAGER section contient INDEX.adoc
+| Scénario 3 | pgvector DOWN → EAGER+Graphify only → verify log warn + RAG section = fallback message
+|===
+
+==== US-CA5 — `assembleWorkspaceContext` task
+
+*En tant que* développeur,
+*je veux* une tâche Gradle qui agrège tous les `build/context/*.context.txt` des boroughs,
+*afin que* l'engine N3 (ou le dev) puisse construire un contexte workspace complet.
+
+==== US-CA6 — Appliquer codebase-plugin sur 12 boroughs N2
+
+*En tant que* développeur,
+*je veux* que chaque borough N2 (codex, planner, training, capsule, quizz, etc.)
+génère son propre contexte augmenté via `prepareContext`,
+*afin que* le workspace complet soit couvert.
+
+==== US-CA7 — CI/CD prepareContext automatique
+
+*En tant que* développeur,
+*je veux* un workflow GitHub Actions qui exécute `prepareContext` sur chaque borough à chaque push,
+*afin que* le contexte soit toujours frais sans intervention manuelle.
+
+==== US-CA8 — Cache RAG
+
+*En tant que* développeur,
+*je veux* que `prepareContext` ne ré-indexe les sources que si elles ont changé (hash-based),
+*afin que* le pipeline soit rapide en usage quotidien.
+
+'''
+
+== Atelier 6 : Backlog
+
+_Extrait du backlog prioritaire — session 030 :_
+
+[cols="1,3,1,2,1", options="header"]
+|===
+| # | US | Prio | Dépendances | Points
+| 1 | Tests Cucumber `PrepareContextTask` (US-CA4) | P0 | pgvector Testcontainers | 3
+| 2 | `assembleWorkspaceContext` task (US-CA5) | P0 | PrepareContextTask | 3
+| 3 | Appliquer codebase-plugin sur boroughs N2 (US-CA6) | P1 | US-CA4 ✅ | 5
+| 4 | Fix Jackson mismatch quizz-benchmark (2.18.2/2.19.1) | P1 | Aucune | 1
+| 5 | CI/CD prepareContext automatique (US-CA7) | P1 | US-CA5 ✅ | 2
+| 6 | Cache RAG par hash (US-CA8) | P2 | US-CA4 ✅ | 3
+| 7 | Kover pour codebase-gradle | P2 | Aucune | 2
+| 8 | ktlint/detekt global | P2 | Aucune | 2
+|===
+
+'''
+
+== Atelier 7 : Technique et Architecture
+
+=== Stack technique
+[cols="2,3"]
+|===
+| Langage | Kotlin 2.x
+| Build | Gradle 9.x (Kotlin DSL), codebase-plugin autonome
+| Vector DB | pgvector/pgvector:pg17 (via JDBC, pas langchain4j-pgvector)
+| Embedding | ONNX AllMiniLmL6V2 (langchain4j)
+| RAG | `VectorQueryService` (cosine similarity sur chunks embarqués)
+| EAGER | Lecture fichiers `.adoc` locaux (INDEX.adoc, PROMPT_REPRISE.adoc)
+| Graphify | Lecture `office/graph.json` (node/edge counts)
+| Injection | `OpencodeInjector` → format AsciiDoc → outputFile
+| Tests | Cucumber JVM + Testcontainers + JUnit 5
+|===
+
+=== Architecture des classes (diagramme statique)
+
+[source,plantuml]
+----
+@startuml
+skinparam componentStyle rectangle
+
+[PrepareContextTask] --> [CompositeContextBuilder] : buildScoped()
+[PrepareContextTask] --> [OpencodeInjector] : injectToFile()
+[CompositeContextBuilder] --> [VectorQueryService] : query()
+[CompositeContextBuilder] --> [EmbeddingPipeline] : embedAll()
+[VectorStore] --> [PostgreSQL pgvector] : JDBC
+[PrepareContextTask] --> [WorkspaceWalker] : walk()
+[PrepareContextTask] --> [KotlinMetadataExtractor] : extract()
+[PrepareContextTask] --> [YamlConfigAnonymizer] : anonymize()
+
+note right of [PrepareContextTask]
+  Gradle DefaultTask
+  inputs: workspaceRoot, ragQuestion, projectName
+  outputs: build/context/{name}.context.txt
+end note
+
+note right of [assembleWorkspaceContext]
+  À créer — session 030
+  Agrège foundry/public/*/build/context/*.context.txt
+end note
+
+[assembleWorkspaceContext] ..> [PrepareContextTask] : consomme les outputs
+@enduml
+----
+
+=== Flux de données (diagramme dynamique)
+
+[source,plantuml]
+----
+@startuml
+actor Dev
+participant "engine.sh\nassemble" as Engine
+participant "PrepareContextTask\n(codebase-plugin)" as PCT
+database "pgvector" as PGV
+participant "CompositeContextBuilder" as CCB
+participant "OpencodeInjector" as INJ
+participant "opencode" as OC
+
+Dev -> Engine : ./engine assemble "architecture du workspace"
+Engine -> PCT : gradlew prepareContext -PragQuestion=...
+PCT -> PGV : initSchema(), countDocuments()
+alt 0 documents
+  PCT -> PCT : WorkspaceWalker → indexBoroughSources()
+  PCT -> PGV : insertDocument() + embedAll()
+end
+PCT -> CCB : buildScoped(name, question)
+CCB -> PCT : CompositeContext (EAGER+RAG+Graphify)
+PCT -> INJ : injectToFile()
+INJ -> INJ : build/context/{name}.context.txt
+Engine -> Engine : assembleWorkspaceContext → aggregate
+Engine -> OC : /tmp/opencode-context.txt
+OC -> OC : load instructions
+@enduml
+----
+
+=== Dépendances inter-boroughs (DAG)
+
+[cols="2,2,5", options="header"]
+|===
+| Niveau | Borough | Rôle Contexte Augmenté
+| N1 | codebase-gradle | *Fournisseur* — PrepareContextTask, CompositeContextBuilder
+| N2 | codex-gradle | Consommateur — `./gradlew prepareContext` → contexte codex
+| N2 | planner-gradle | Consommateur — contexte planner
+| N2 | training-gradle | Consommateur — contexte training (AFNOR/REAC)
+| N2 | capsule-gradle | Consommateur — contexte capsule video
+| N2 | quizz-benchmark | Consommateur — contexte quizz
+| N2 | slider-gradle | Consommateur — contexte slides
+| N2 | bakery-gradle | Consommateur — contexte bakery
+| N2 | plantuml-gradle | Consommateur — contexte diagrammes
+| N2 | readme-gradle | Consommateur — contexte README
+| N2 | waiter-gradle | Consommateur — contexte paiement
+| N3 | engine | Consommateur — assembleCompositeContext, aggregate
+|===
+
+=== Contrainte technique : Résilience pgvector
+
+Le pipeline ne doit pas planter si pgvector est indisponible. La stratégie :
+
+. `try { store.initSchema() } catch { log.warn }` → continue
+. Si pgvector down → `indexBoroughSources()` skipé
+. `buildScoped()` → `assembleContext()` → `try { queryService.query() } catch { fallback message }`
+. Résultat : EAGER + Graphify OK, RAG = "[RAG] pgvector indisponible"
+
+=== Points d'attention
+
+- *Pas de duplication* : `assembleWorkspaceContext` dans engine? Ou dans codebase-plugin? → codebase-plugin (N1) pour que les tests y soient. Engine N3 l'appelle comme consommateur.
+- *Pas de dépendance circulaire* : codebase-plugin N1 ne peut pas importer un N2. L'agrégation cross-borough se fait en lisant les fichiers, pas en important les plugins.
+- *Jackson version* : quizz-benchmark a un mismatch 2.18.2/2.19.1. À fixer avant d'y appliquer codebase-plugin.

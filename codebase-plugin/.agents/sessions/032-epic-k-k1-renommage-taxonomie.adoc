@@ -1,0 +1,36 @@
+= Session 032 — EPIC K K-1 Renommage Taxonomie
+:date: 2026-05-19
+:type: refactor
+:score: 10/10
+
+== Résumé
+
+Renommage des tâches Gradle codebase-plugin selon la taxonomie unifiée EPIC K
+(4 verbes : GENERER/COLLECTER/TRANSFORMER/DÉPLOYER).
+
+== Renommages appliqués
+
+|===
+| Ancien nom | Nouveau nom | Groupe
+| `prepareContext` | `collectFromCodebase` | collect
+| `assembleWorkspaceContext` | `collectCompositeContext` | collect
+| `planIntention` | `generatePlan` | generate
+|===
+
+== Fichiers modifiés
+
+- `CodebasePlugin.kt` — renommage des 3 tâches + groupes Gradle
+- `CodebasePluginTest.kt` — reflet des nouveaux noms
+- `PrepareContextTask.kt` → renommé en `CollectFromCodebaseTask.kt`
+- `CollectFromCodebaseTask.kt` — header mis à jour
+- `CollectCompositeContextTask.kt` — header mis à jour
+- `GeneratePlanTask.kt` — header mis à jour
+
+== Compilation
+
+`./gradlew :codebase-plugin:build` → OK
+
+== Prochaine session
+
+033 — K-02 Format pivot metadata.json : généralisation du contrat metadata.json
+dans tous les boroughs producteurs N2 (planner, training, capsule, quizz, codex).

@@ -4,4 +4,4 @@ codebase-plugin = "0.0.1"
 [libraries]
 
 [plugins]
-codebase = { id = "com.cheroliv.codebase", version.ref = "codebase-plugin" }
+codebase = { id = "education.cccp.codebase", version.ref = "codebase-plugin" }

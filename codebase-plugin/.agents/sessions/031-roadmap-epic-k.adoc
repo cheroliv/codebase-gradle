@@ -1,0 +1,35 @@
+= Session 031 — Plan d'attaque EPIC K (Ontologie Workspace)
+:date: 2026-05-18
+:type: cadrage + planification
+:score: 10/10
+
+== Contexte
+
+EPIC K formalisé dans `TAXONOMIE_WORKSPACE.adoc` (9ème document du jardin secret).
+Cadrage agile complet dans `.agents/CADRAGE_EPIC_K_TAXONOMIE.adoc` (468 lignes, 7 ateliers).
+
+== Décision d'architecture
+
+3 vagues au lieu de 11 sessions linéaires :
+- *Vague 1* : Walking skeleton — valider l'hypothèse metadata.json producteur↔consommateur
+- *Vague 2* : Expansion fan-out massif — le pattern est sûr
+- *Vague 3* : Polish — méta-communication typée + documentation
+
+== Sessions lancées en parallèle (Vague 1)
+
+- *031a* : US-K01 — Convention nommage sur 4 boroughs P0 (Manhattan, Newark, Brooklyn, Bronx). Fan-out ×4 @xp.
+- *031b* : US-K02 — Classes Metadata.kt + MetadataValidator.kt dans codebase-plugin. @xp unique.
+
+== Inférences calculées
+
+[%header%autowidth.stretch]
+|===
+| Paramètre | Valeur
+| Sessions totales | 6 effectives (vs 11 linéaires)
+| Durée estimée | ~6j (vs ~9j)
+| Points totaux | 42
+| Risque architectural | Éliminé après Vague 1 (session 033)
+| Boroughs impactés | 11 (N0→N4)
+| Tâches renommées | ~15 (tous boroughs N2)
+| Fichiers créés | ~30 (Metadata.kt, Validator.kt, metadata.json ×8+, extensions ×11, doc ×11)
+|===

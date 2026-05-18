@@ -1,0 +1,846 @@
+= Cadrage Agile — EPIC K — Ontologie Workspace (Taxonomie Unifiée)
+:toc:
+:icons: font
+:sectnums:
+:jbake-status: EAGER
+:date: 2026-05-18
+
+_Méthode : Mémo Cadrage (cf. blog/2022/0054_memo_cadrage_post.adoc)_
+_Projet : EPIC K — Niveau transverse à tous les boroughs N0→N4_
+_Document source : `TAXONOMIE_WORKSPACE.adoc` (9ème document du jardin secret)_
+_Décision stratégique : import des patterns ontologiques de docToolchain, pas du code._
+
+'''
+
+== Atelier 1 : Vision
+
+=== QQOQCP
+
+[cols="2,5"]
+|===
+| Qui | Tous les boroughs du workspace (11 boroughs N0→N4). Les développeurs humains qui lisent `./gradlew tasks`. Les agents opencode qui découvrent les capacités disponibles. Les consommateurs N3 (engine) qui orchestrent le DAG.
+| Quoi | Une taxonomie unifiée à 4 verbes (GENERER/COLLECTER/TRANSFORMER/DÉPLOYER) appliquée à toutes les tâches Gradle de tous les boroughs. Un format pivot explicite (AsciiDoc structuré + `metadata.json`) comme contrat d'interface entre boroughs. Une convention over configuration pour l'inférence des métadonnées depuis le filesystem. Une configuration par domaine (namespace par borough).
+| Où | Dans chaque `build.gradle.kts` de chaque plugin borough — renommage des tâches + groupes Gradle. Dans `codebase-plugin/src/main/kotlin/codebase/` — implémentation du format pivot (`Metadata.kt`, `MetadataValidator.kt`). Dans chaque borough producteur — écriture de `metadata.json` en sortie.
+| Quand | *Immédiatement* — avant toute nouvelle construction de fonctionnalité. EPIC K est un prérequis de lisibilité pour la Phase 0. Sans lui, on accumule des tâches mal nommées dont le coût de renommage futur est exponentiel.
+| Comment | 5 phases (K-1→K-5) : renommage des tâches → format pivot → configuration par domaine → convention over configuration → documentation. Chaque phase est un sprint indépendant de ~1-3j, exécuté par des agents @xp en parallèle sur les boroughs concernés.
+| Pourquoi | Actuellement, `./gradlew tasks` liste des noms opaques : `trainingRetrieve`, `assembleCompositeContext`, `codexPipeline` — la charge cognitive est élevée, personne ne sait dans quel ordre appeler les tâches, et le contrat inter-borough est implicite (le consommateur "devine" le format de la sortie). Avec la taxonomie unifiée, le cycle de vie est lisible en une commande (`./gradlew tasks --group=generate`), et chaque consommateur vérifie le contrat `metadata.json` avant traitement.
+|===
+
+=== Product Vision Board
+
+==== Target Group
+. *Développeur humain* — lit `./gradlew tasks` pour découvrir le pipeline de formation
+. *Agent opencode* — découvre les capacités disponibles par groupe Gradle
+. *Engine N3* — orchestre le DAG en vérifiant les contrats `metadata.json`
+. *Nouveau borough (futur)* — s'intègre en respectant le contrat sans ambiguïté
+
+==== Needs (5 besoins principaux)
+. *Lisibilité immédiate* : comprendre le cycle de vie formation en lisant `./gradlew tasks --group=collect` puis `--group=generate`
+. *Contrat explicite* : chaque borough consommateur vérifie `metadata.json` avant de traiter un artefact — zéro devinette sur le format
+. *DAG vérifiable* : le champ `dependencies[]` du `metadata.json` permet à engine de valider `verifyDagAcyclic` sur les dépendances déclarées
+. *Onboarding nul* : un nouveau développeur comprend le flux `collect → transform → generate → deploy` sans lire 4000 lignes de doc
+. *Interopérabilité outil* : AsciiDoc + JSON = lisible par n'importe quel agent, humain ou LLM
+
+==== Product (proposition de valeur)
+Une ontologie commune à 11 boroughs qui rend le DAG N0→N4 lisible,
+vérifiable et extensible — sans casser l'existant.
+
+==== 5 fonctionnalités principales
+. Convention de nommage — renommer toutes les tâches Gradle selon GENERER/COLLECTER/TRANSFORMER/DÉPLOYER
+. Format pivot — `metadata.json` obligatoire en sortie de tout borough producteur N2
+. Configuration par domaine — chaque borough expose son extension sous un namespace dédié
+. Convention over configuration — inférence des métadonnées depuis la structure du filesystem
+. Documentation — mise à jour des `.agents/INDEX.adoc` et `AGENTS.adoc` workspace
+
+==== Business Goal (critères de succès)
+- 100% des tâches Gradle N2 renommées selon la taxonomie (0 tâche orpheline)
+- 100% des boroughs producteurs N2 émettent un `metadata.json` valide
+- `./gradlew tasks --group=generate` liste toutes les tâches de génération
+- Zéro régression : tous les tests existants passent après renommage
+- CI/CD vert sur tous les boroughs après application de la taxonomie
+
+==== Vision (1 phrase)
+Une ontologie à 4 verbes qui transforme 11 boroughs disparates en un pipeline lisible,
+où chaque artefact porte son contrat, et où `./gradlew tasks` raconte le flux de formation.
+
+'''
+
+== Atelier 2 : Personas / Parcours utilisateurs
+
+=== Persona 1 : Développeur humain — découverte du pipeline
+
+- *Cible* : Dev qui clone le workspace et veut comprendre le flux de formation
+- *But* : Comprendre l'ordre des tâches sans lire la documentation exhaustive
+- *Parcours utilisateur* :
+  . `cd workspace && ./gradlew tasks`
+  . Voit les groupes : `collect`, `generate`, `transform`, `deploy`
+  . `./gradlew tasks --group=collect` → `collectFromCorpus` (Newark), `collectContext` (engine)
+  . `./gradlew tasks --group=generate` → `generateSPG` (Manhattan), `generateSlides` (Brooklyn), `generateQuiz` (Bronx)
+  . Comprend le flux en < 30 secondes
+
+=== Persona 2 : Agent opencode — session dans un borough
+
+- *Cible* : Agent opencode qui démarre une session de travail dans un borough N2
+- *But* : Découvrir les tâches disponibles et leurs contrats
+- *Parcours utilisateur* :
+  . L'agent lit le `metadata.json` des artefacts d'entrée
+  . Vérifie `type`, `version`, `dependencies[]`
+  . Si contrat OK → exécute la tâche appropriée (ex: `transformCorpusToPdf`)
+  . Si contrat KO → lève une erreur explicite ("version 2.0 non supportée, attendu 1.0")
+
+=== Persona 3 : Engine N3 — orchestration du DAG
+
+- *Cible* : Pipeline `assembleCompositeContext` dans engine
+- *But* : Vérifier le DAG inter-boroughs avant exécution
+- *Parcours utilisateur* :
+  . Engine scanne tous les `metadata.json` des boroughs producteurs
+  . Extrait les `dependencies[]` de chaque artefact
+  . Vérifie `verifyDagAcyclic` sur le graphe de dépendances déclaré
+  . Si acyclique → exécute le pipeline dans l'ordre topologique
+  . Si cyclique → refuse et log l'erreur
+
+=== Persona 4 : Nouveau borough — intégration future
+
+- *Cible* : Développeur qui crée un nouveau plugin N2 (ex: `confluence-gradle`)
+- *But* : S'intégrer dans l'écosystème sans ambiguïté
+- *Parcours utilisateur* :
+  . Lit `TAXONOMIE_WORKSPACE.adoc` — connaît les 4 verbes
+  . Nomme ses tâches : `collectFromConfluence` (COLLECTER), `deployToConfluence` (DÉPLOYER)
+  . Émet un `metadata.json` avec `source`, `type`, `version`, `dependencies`
+  . S'intègre sans friction — engine le découvre automatiquement
+
+'''
+
+== Atelier 3 : Zoning / Storyboard / Sitemap
+
+_Adapté pour un EPIC transverse (pas de code applicatif, de la régularisation sémantique)_
+
+=== Zoning (espaces fonctionnels)
+
+[source,text]
+----
+┌─────────────────────────────────────────────────────────────────────┐
+│ EPIC K — Ontologie Workspace (Transverse à 11 boroughs)              │
+│                                                                      │
+│  ┌──────────────────────┐  ┌──────────────────────┐                 │
+│  │ K-1 Convention       │  │ K-2 Format Pivot     │                 │
+│  │ Nommage des tâches   │  │ metadata.json        │                 │
+│  │                      │  │                      │                 │
+│  │ Manhattan: planner→  │  │ Producteurs:         │                 │
+│  │   generateSPG        │  │   Manhattan→ SPG     │                 │
+│  │ Newark: training→    │  │   Newark  → SPD      │                 │
+│  │   collectFromCorpus  │  │   Bronx   → Quiz     │                 │
+│  │ Brooklyn: codex→     │  │   Brooklyn→ PDF      │                 │
+│  │   transformCorpusToPdf│ │ Consommateurs:        │                 │
+│  │ Bronx: quiz→         │  │   Engine  → vérifie  │                 │
+│  │   generateQuiz       │  │   opencode→ ingère   │                 │
+│  └──────────┬───────────┘  └──────────┬───────────┘                 │
+│             │                         │                              │
+│             └────────────┬────────────┘                              │
+│                          │                                           │
+│  ┌───────────────────────▼───────────────────────┐                  │
+│  │ K-3 Configuration par domaine                 │                  │
+│  │ Chaque borough → namespace dédié              │                  │
+│  │ confluence { }, jira { }, openApi { }         │                  │
+│  └───────────────────────┬───────────────────────┘                  │
+│                          │                                           │
+│  ┌───────────────────────▼───────────────────────┐                  │
+│  │ K-4 Convention over configuration             │                  │
+│  │ Inférence métadonnées depuis filesystem       │                  │
+│  │ 01_accueil/001_bienvenue.adoc → module,ordre  │                  │
+│  └───────────────────────┬───────────────────────┘                  │
+│                          │                                           │
+│  ┌───────────────────────▼───────────────────────┐                  │
+│  │ K-5 Documentation                             │                  │
+│  │ .agents/INDEX.adoc × 11 boroughs              │                  │
+│  │ AGENTS.adoc workspace                         │                  │
+│  └───────────────────────────────────────────────┘                  │
+└─────────────────────────────────────────────────────────────────────┘
+----
+
+=== Storyboard (séquence d'exécution)
+
+[cols="1,5", options="header"]
+|===
+| Phase | Action
+| K-1 | Renommer toutes les tâches Gradle N2 selon la taxonomie. Ajouter les groupes Gradle `collect`, `generate`, `transform`, `deploy`. Vérifier que tous les tests passent.
+| K-2 | Implémenter `metadata.json` obligatoire en sortie de chaque borough producteur N2. Ajouter la vérification dans les consommateurs (engine N3). Créer les classes `Metadata.kt`, `MetadataValidator.kt` dans codebase-plugin.
+| K-3 | Chaque borough N2 expose son extension sous un namespace dédié (`confluence { }`, `training { }`). Pas de propriétés globales.
+| K-4 | Inférence des métadonnées depuis la structure du filesystem. Implémenter le parsing des préfixes numériques (`01_accueil/001_bienvenue.adoc`).
+| K-5 | Mise à jour de tous les `.agents/INDEX.adoc` (11 boroughs) + `AGENTS.adoc` workspace + matrice des tâches.
+|===
+
+=== Sitemap (navigation des livrables)
+
+----
+EPIC K — Livrables par phase:
+
+  K-1 : Convention de nommage
+    ├── planner-gradle    : plannerGenerateSPG → generateSPG
+    ├── training-gradle   : trainingRetrieve → collectFromCorpus
+    ├── codex-gradle      : codexPipeline → transformCorpusToPdf
+    ├── quizz-benchmark   : quizGenerate → generateQuiz
+    └── magic-stick       : deploy → deployToGhPages
+
+  K-2 : Format pivot
+    ├── codebase-plugin   : Metadata.kt, MetadataValidator.kt
+    ├── Manhattan         : écrit metadata.json (type=SPG)
+    ├── Newark            : écrit metadata.json (type=SPD)
+    ├── Bronx             : écrit metadata.json (type=Quiz)
+    └── engine            : vérifie metadata.json avant orchestration
+
+  K-3 : Configuration par domaine
+    ├── training-gradle   : training { } extension
+    ├── codex-gradle      : codex { } extension
+    └── (futurs)          : confluence { }, jira { }
+
+  K-4 : Convention over configuration
+    ├── training-gradle   : FileSystemMetadataExtractor.kt
+    └── Manhattan         : inférence SPG/SPD depuis arborescence
+
+  K-5 : Documentation
+    ├── 11 × .agents/INDEX.adoc
+    ├── AGENTS.adoc (workspace)
+    └── TAXONOMIE_WORKSPACE.adoc (final)
+----
+
+'''
+
+== Atelier 4 : Wireframe / Moodboard
+
+_Non applicable pour un EPIC transverse. La "sortie" est le terminal :_
+
+=== Avant/Après — `./gradlew tasks` (moodboard terminal)
+
+==== Avant (taxonomie actuelle — opaque)
+
+[source,bash]
+----
+$ ./gradlew tasks
+trainingRetrieve           — Récupère les manuels AFNOR/REAC
+assembleCompositeContext   — Assemble le contexte composite
+plannerGenerateSPG         — Génère un SPG via LLM
+codexPipeline              — Pipeline documentaire complet
+quizGenerate               — Génère un quiz d'évaluation
+----
+
+→ Charge cognitive élevée : quelle tâche fait quoi ? Dans quel ordre ?
+
+==== Après (taxonomie unifiée — lisible)
+
+[source,bash]
+----
+$ ./gradlew tasks --group=collect
+
+collectFromCorpus (Newark)     — Collecte les manuels AFNOR/REAC
+collectContext (engine)        — Collecte le contexte composite workspace
+
+$ ./gradlew tasks --group=generate
+
+generateSPG (Manhattan)        — Génère un Scénario Pédagogique Global via LLM
+generateSPD (Newark)           — Génère les Scénarios Pédagogiques Détaillés (36)
+generateSlides (Brooklyn)      — Génère les slides reveal.js d'animation
+generateQuiz (Bronx)           — Génère les quiz d'évaluation fin de module
+
+$ ./gradlew tasks --group=transform
+
+transformCorpusToPdf (Brooklyn)— Transforme le corpus AsciiDoc en PDF stagiaire
+transformToDocx (Brooklyn)     — Transforme en DOCX éditable
+transformToEpub (Brooklyn)     — Transforme en EPUB lisible
+
+$ ./gradlew tasks --group=deploy
+
+deployToGhPages (Staten)       — Déploie le site bakery sur GitHub Pages
+----
+
+→ N'importe qui comprend le cycle de vie en une commande.
+
+=== Format pivot — metadata.json (template)
+
+[source,json]
+----
+{
+  "source": "manhattan",
+  "type": "SPG",
+  "sessions": 24,
+  "modules": ["accueil", "algorithmique", "projet"],
+  "competences": ["C1", "C2", "C3"],
+  "generatedAt": "2026-05-18T19:00:00Z",
+  "model": "deepseek-v4-pro",
+  "version": "1.0",
+  "dependencies": ["queens", "graphify"]
+}
+----
+
+'''
+
+== Atelier 5 : Story Mapping / User Stories
+
+=== Story Mapping (priorisation par squelette → backbone → walking skeleton → détails)
+
+[cols="1,3,3,3", options="header"]
+|===
+| Niveau | US | État | Points
+
+| Squelette
+| US-K01 — Convention de nommage sur 4 boroughs P0 (Manhattan, Newark, Brooklyn, Bronx)
+| À FAIRE
+| 5
+
+| Backbone
+| US-K02 — Classes `Metadata.kt` + `MetadataValidator.kt` dans codebase-plugin
+| À FAIRE
+| 5
+
+| Walking skeleton
+| US-K03 — `metadata.json` émis par 1 borough pilote (Manhattan → generateSPG)
+| À FAIRE
+| 3
+
+| US-K04 — `metadata.json` vérifié par 1 consommateur pilote (engine → verifyDagAcyclic)
+| À FAIRE
+| 2
+
+| US-K05 — Configuration par domaine sur 2 boroughs pilotes
+| À FAIRE
+| 3
+
+| Détails
+| US-K06 — Convention over configuration (inférence filesystem pour SPG→SPD)
+| À FAIRE
+| 5
+
+| US-K07 — Appliquer format pivot sur tous les boroughs producteurs restants
+| À FAIRE
+| 5
+
+| US-K08 — Appliquer configuration par domaine sur tous les boroughs N2 restants
+| À FAIRE
+| 3
+
+| US-K09 — Appliquer convention de nommage sur tous les boroughs restants (7)
+| À FAIRE
+| 3
+
+| US-K10 — Documentation (.agents/INDEX.adoc × 11 + AGENTS.adoc + matrice)
+| À FAIRE
+| 3
+
+| US-K11 — Niveau 2 — Enrichissement metadata.json par type (SPG, SPD, Quiz, Plan)
+| À FAIRE
+| 5
+|===
+
+=== User Stories détaillées
+
+==== US-K01 — Convention de nommage sur 4 boroughs P0
+
+*En tant que* développeur,
+*je veux* renommer les tâches de Manhattan, Newark, Brooklyn et Bronx selon la taxonomie GENERER/COLLECTER/TRANSFORMER/DÉPLOYER,
+*afin que* les 4 boroughs cœur du MVP0 soient lisibles en une commande `./gradlew tasks --group=generate`.
+
+[cols="2,5"]
+|===
+| Sous-tâche | Détail
+| Manhattan | `plannerGenerateSPG` → `generateSPG`. Ajouter `group = "generate"`.
+| Newark | `trainingRetrieve` → `collectFromCorpus`. Ajouter `group = "collect"`. +
+`assembleCompositeContext` → `collectContext`. Ajouter `group = "collect"`.
+| Brooklyn | `codexPipeline` → `transformCorpusToPdf`. Ajouter `group = "transform"`. +
+Nouvelles tâches : `generateSlides` (group=generate), `generatePdf` (group=generate).
+| Bronx | `quizGenerate` → `generateQuiz`. Ajouter `group = "generate"`. +
+`quizReport` → `generateQuizReport`. Ajouter `group = "generate"`.
+|===
+
+*Contrainte* : Dépréciation transitoire. L'ancien nom reste disponible avec un warning pendant 1 cycle.
+
+*Critère d'acceptation* :
+- `./gradlew tasks --group=generate` liste `generateSPG`, `generateSlides`, `generatePdf`, `generateQuiz`
+- Tous les tests existants passent
+- L'ancien nom affiche `[DEPRECATED] use generateSPG instead`
+
+==== US-K02 — Classes Metadata + MetadataValidator
+
+*En tant que* développeur,
+*je veux* des classes `Metadata.kt` et `MetadataValidator.kt` dans codebase-plugin (N1),
+*afin que* tous les boroughs N2 puissent les utiliser pour émettre et vérifier le contrat `metadata.json`.
+
+[cols="2,5"]
+|===
+| Classe | Responsabilité
+| `Metadata.kt` | Data class sealed avec champs obligatoires (`source`, `type`, `version`, `generatedAt`, `model`, `dependencies`). Sous-types par `type` : `SPGMetadata`, `SPDMetadata`, `QuizMetadata`, `PlanMetadata`. Sérialisation Jackson.
+| `MetadataValidator.kt` | Vérifie la présence du fichier, la compatibilité de version (semver), l'intégrité du champ `dependencies[]`.
+|===
+
+*Critère d'acceptation* :
+- `jacksonObjectMapper().readValue<Metadata>(json)` parse correctement
+- `MetadataValidator.validate(file)` retourne `Result<Metadata>`
+- Tests JUnit5 : JSON valide → OK, JSON invalide → erreur explicite, version mismatch → erreur
+
+==== US-K03 — metadata.json pilote — Manhattan generateSPG
+
+*En tant que* développeur,
+*je veux* que la tâche `generateSPG` de Manhattan écrive un `metadata.json` à côté de sa sortie AsciiDoc,
+*afin de* valider le contrat sur un borough pilote avant déploiement général.
+
+*Critère d'acceptation* :
+- Après `./gradlew generateSPG -Pintention="..."`, le répertoire de sortie contient `spg.adoc` et `metadata.json`
+- `metadata.json` contient `"type": "SPG"`, `"source": "manhattan"`, `"version": "1.0"`
+- `MetadataValidator.validate("build/spg/metadata.json")` retourne `Success`
+
+==== US-K04 — metadata.json vérifié par engine
+
+*En tant que* développeur,
+*je veux* que le pipeline `assembleCompositeContext` de engine vérifie le `metadata.json` avant de consommer un artefact,
+*afin d'* éviter les erreurs silencieuses quand un borough change son format de sortie.
+
+*Critère d'acceptation* :
+- Engine lit `foundry/public/manhattan/build/spg/metadata.json`
+- Si absent → erreur explicite "metadata.json manquant pour Manhattan"
+- Si `version` incompatible → erreur "version 2.0 non supportée par engine v1.x"
+- Si OK → poursuit l'assemblage
+
+==== US-K05 — Configuration par domaine pilote
+
+*En tant que* développeur,
+*je veux* que Manhattan et Newark exposent leur configuration sous des namespaces dédiés,
+*afin que* les consommateurs n'aient pas à deviner les propriétés globales.
+
+[source,kotlin]
+----
+// Exemple — build.gradle.kts
+planner {
+    ollamaUrl.set("http://localhost:11434")
+    modelName.set("deepseek-v4-pro:cloud")
+}
+
+training {
+    corpusPath.set("data/corpus/afnor/")
+    outputFormat.set("asciidoc")
+}
+----
+
+*Critère d'acceptation* :
+- `project.extensions.getByType(PlannerExtension::class.java)` fonctionnel
+- Les propriétés sont typées (pas de `String` partout)
+- Documentation dans le `README.adoc` du borough
+
+==== US-K06 — Convention over configuration (inférence filesystem)
+
+*En tant que* développeur,
+*je veux* que le pipeline SPG→SPD infère les métadonnées de session depuis la structure du filesystem,
+*afin que* l'ajout d'une nouvelle session se fasse par simple création de fichier, sans modifier une configuration centrale.
+
+[source]
+----
+data/formations/
+├── 01_accueil/
+│   ├── 001_bienvenue.adoc     → module=accueil, session=001, ordre=1
+│   └── 002_objectifs.adoc     → module=accueil, session=002, ordre=2
+└── 02_core/
+    ├── 003_algorithmes.adoc   → module=core, session=003, ordre=3
+    └── index.adoc             → ordre=-987654321 (magic value, toujours premier)
+----
+
+*Critère d'acceptation* :
+- `FileSystemMetadataExtractor.extract(File)` retourne `{module, ordre, statut, titre}`
+- Les fichiers préfixés `_` sont `draft`
+- `index.adoc` a l'ordre magic value `-987654321`
+- Tests JUnit5 sur une arborescence fixture
+
+==== US-K07 — Format pivot sur tous les boroughs restants
+
+*En tant que* développeur,
+*je veux* que tous les boroughs producteurs N2 (quizz, codex, capsule, training, bakery, slider, plantuml, readme) émettent un `metadata.json`,
+*afin que* l'ensemble du workspace soit couvert par le contrat.
+
+*Dépendance* : US-K02 (classes Metadata), US-K03 (pilote validé)
+
+*Critère d'acceptation* : `grep -r "metadata.json" foundry/public/*/build/` retourne 8+ entrées.
+
+==== US-K08 — Configuration par domaine tous boroughs
+
+*En tant que* développeur,
+*je veux* que chaque borough N2 expose son extension sous un namespace dédié,
+*afin d'* uniformiser la configuration à travers le workspace.
+
+*Dépendance* : US-K05 (pilote validé)
+
+==== US-K09 — Convention de nommage boroughs restants
+
+*En tant que* développeur,
+*je veux* appliquer la taxonomie aux 7 boroughs restants (capsule, bakery, slider, plantuml, readme, waiter, workspace),
+*afin que* 100% des tâches soient classifiées.
+
+*Dépendance* : US-K01 (P0 validé)
+
+==== US-K10 — Documentation
+
+*En tant que* développeur,
+*je veux* mettre à jour tous les `.agents/INDEX.adoc`, `AGENTS.adoc` workspace, et la matrice des tâches,
+*afin que* la documentation reflète la nouvelle taxonomie.
+
+*Livrables* :
+- 11 × `.agents/INDEX.adoc` — section "Tâches" mise à jour avec les nouveaux noms + groupes
+- `AGENTS.adoc` workspace — mise à jour de l'EPIC K dans l'historique
+- `TAXONOMIE_WORKSPACE.adoc` — version finale post-implémentation
+
+==== US-K11 — Niveau 2 — Enrichissement metadata.json par type
+
+*En tant que* développeur,
+*je veux* que chaque type de contenu (SPG, SPD, Quiz, Plan) ait son propre schéma enrichi dans `metadata.json`,
+*afin de* réaliser une véritable méta-communication typée entre boroughs.
+
+[cols="2,3,5", options="header"]
+|===
+| Type | Champs additionnels | Borough producteur
+| `SPG` | `sessions`, `modules[]`, `competences[]` | Manhattan
+| `SPD` | `sessionNumber`, `duree`, `prerequis[]` | Newark
+| `Quiz` | `questions`, `bareme`, `dureeMax` | Bronx
+| `Plan` | `epics`, `totalPoints`, `classification`, `estimatedSessions` | codebase (langgraph4j)
+| `PDF` | `pages`, `taille`, `sourceCorpus` | Brooklyn
+|===
+
+*Dépendance* : US-K02 (classe Metadata sealed)
+
+*Contrat Kotlin* :
+[source,kotlin]
+----
+sealed class Metadata {
+    abstract val source: String
+    abstract val type: String
+    abstract val version: String
+    abstract val generatedAt: Instant
+    abstract val model: String
+    abstract val dependencies: List<String>
+}
+
+@Serializable
+data class SPGMetadata(
+    override val source: String,
+    override val version: String,
+    override val generatedAt: Instant,
+    override val model: String,
+    override val dependencies: List<String>,
+    val sessions: Int,
+    val modules: List<String>,
+    val competences: List<String>
+) : Metadata() {
+    override val type = "SPG"
+}
+----
+
+'''
+
+== Atelier 6 : Backlog
+
+_Backlog priorisé, chiffré, avec dépendances explicites. Ordre d'attaque = ordre du tableau._
+
+[cols="1,3,1,2,1,3", options="header"]
+|===
+| # | US | Prio | Points | Dépendances | Session cible
+
+| 1
+| US-K01 — Convention de nommage 4 boroughs P0 (Manhattan, Newark, Brooklyn, Bronx)
+| P0
+| 5
+| Aucune
+| Session 031 — @xp fan-out ×4
+
+| 2
+| US-K02 — Classes `Metadata.kt` + `MetadataValidator.kt` dans codebase-plugin
+| P0
+| 5
+| Aucune
+| Session 032 — @xp sur codebase-plugin
+
+| 3
+| US-K03 — `metadata.json` pilote Manhattan (generateSPG)
+| P0
+| 3
+| US-K02 ✅
+| Session 033 — @xp sur Manhattan
+
+| 4
+| US-K04 — `metadata.json` vérifié par engine
+| P0
+| 2
+| US-K02 ✅, US-K03 ✅
+| Session 034 — @xp sur engine
+
+| 5
+| US-K05 — Configuration par domaine pilote (Manhattan + Newark)
+| P0
+| 3
+| US-K01 ✅
+| Session 035 — @xp fan-out ×2
+
+| 6
+| US-K06 — Convention over configuration (inférence filesystem)
+| P1
+| 5
+| K-4 indépendant
+| Session 036 — @xp sur training + Manhattan
+
+| 7
+| US-K07 — Format pivot sur boroughs restants (6 boroughs)
+| P1
+| 5
+| US-K03 ✅ (pilote validé)
+| Session 037 — @xp fan-out ×6
+
+| 8
+| US-K08 — Configuration par domaine tous boroughs
+| P1
+| 3
+| US-K05 ✅ (pilote validé)
+| Session 038 — @xp fan-out
+
+| 9
+| US-K09 — Convention de nommage boroughs restants (7 boroughs)
+| P1
+| 3
+| US-K01 ✅ (pattern validé)
+| Session 039 — @xp fan-out
+
+| 10
+| US-K11 — Niveau 2 — Enrichissement metadata.json par type
+| P1
+| 5
+| US-K02 ✅
+| Session 040 — @xp sur codebase + boroughs
+
+| 11
+| US-K10 — Documentation (.agents/INDEX.adoc × 11 + AGENTS.adoc)
+| P1
+| 3
+| Toutes les US ✅
+| Session 041 — @xp fan-out
+|===
+
+*Total : 42 points, 11 sessions, ~9 jours (estimé TAXONOMIE_WORKSPACE.adoc confirmé).*
+
+=== Ordre d'attaque canonique
+
+[source,text]
+----
+Session 031 ──→ US-K01 (nommage P0)          ──→ 4 boroughs en parallèle
+Session 032 ──→ US-K02 (Metadata classes)     ──→ codebase-plugin seul
+                    │
+Session 033 ──→ US-K03 (metadata pilote)      ──→ Manhattan (dépend US-K02)
+Session 034 ──→ US-K04 (vérification engine)  ──→ engine (dépend US-K03)
+                    │
+Session 035 ──→ US-K05 (config domaine pilote)──→ Manhattan + Newark
+                    │
+                    ├── Les P0 sont faits, le walking skeleton tourne
+                    │
+Session 036 ──→ US-K06 (convention over conf) ──→ training + Manhattan
+Session 037 ──→ US-K07 (format pivot ×6)      ──→ 6 boroughs en parallèle
+Session 038 ──→ US-K08 (config domaine tous)  ──→ fan-out
+Session 039 ──→ US-K09 (nommage restants)     ──→ 7 boroughs en parallèle
+Session 040 ──→ US-K11 (méta-comm typée)      ──→ codebase + boroughs
+Session 041 ──→ US-K10 (documentation)        ──→ 11 INDEX.adoc + AGENTS.adoc
+----
+
+'''
+
+== Atelier 7 : Technique et Architecture
+
+=== Stack technique
+
+[cols="2,3"]
+|===
+| Méthode | Cadrage agile 7 ateliers → backlog → @xp sessions
+| Langage | Kotlin 2.3.20 (pour codebase-plugin N1)
+| Build | Gradle 9.5.0, Kotlin DSL, tâches renommées dans chaque borough
+| Format pivot | Jackson (sérialisation JSON) + AsciiDoc (format natif)
+| Validation | `MetadataValidator` → `kotlin.Result<Metadata>`
+| Inférence FS | `FileSystemMetadataExtractor` → parsing noms de dossiers/fichiers
+| Configuration | `project.extensions.create("xxx", XxxExtension::class.java)`
+| Tests | JUnit5 + Cucumber (boroughs existants)
+| CI/CD | GitHub Actions — vérifier que `./gradlew tasks --group=generate` liste les tâches
+|===
+
+=== Architecture des classes — Format Pivot (diagramme statique)
+
+[source,plantuml]
+----
+@startuml
+skinparam componentStyle rectangle
+
+package "codebase-plugin (N1)" {
+  [Metadata.kt] as Metadata
+  [MetadataValidator.kt] as Validator
+  [FileSystemMetadataExtractor.kt] as FSExtractor
+}
+
+package "Manhattan (N2)" {
+  [generateSPG] as GenSPG
+  [SPGMetadata] as SPGMet
+}
+
+package "Newark (N2)" {
+  [collectFromCorpus] as ColCorpus
+  [generateSPD] as GenSPD
+}
+
+package "Bronx (N2)" {
+  [generateQuiz] as GenQuiz
+}
+
+package "Brooklyn (N2)" {
+  [transformCorpusToPdf] as TransPDF
+}
+
+package "engine (N3)" {
+  [assembleCompositeContext] as Assemble
+  [verifyDagAcyclic] as VerifyDAG
+}
+
+GenSPG --> SPGMet : écrit
+GenSPG --> Metadata : utilise
+ColCorpus --> Metadata : utilise
+GenSPD --> Metadata : utilise
+GenQuiz --> Metadata : utilise
+TransPDF --> Metadata : utilise
+
+Assemble --> Validator : vérifie metadata.json
+Assemble --> FSExtractor : infère métadonnées
+VerifyDAG --> Metadata : lit dependencies[]
+
+note right of Metadata
+  sealed class
+  sous-types: SPGMetadata,
+  SPDMetadata, QuizMetadata,
+  PlanMetadata, PDFMetadata
+end note
+
+note right of Validator
+  validate(File) → Result<Metadata>
+  vérifie: présence, version,
+  compatibilité type
+end note
+
+@enduml
+----
+
+=== Flux de données — Pipeline complet avec métadonnées typées (diagramme dynamique)
+
+[source,plantuml]
+----
+@startuml
+actor Dev
+participant "engine\n(assemble)" as Engine
+participant "Manhattan\n(generateSPG)" as MH
+participant "Newark\n(collectFromCorpus)" as NW
+participant "Brooklyn\n(transformToPdf)" as BK
+participant "codebase-plugin\n(MetadataValidator)" as Val
+database "filesystem\n(build/)" as FS
+
+Dev -> Engine : ./gradlew assembleCompositeContext
+Engine -> NW : collectFromCorpus
+NW -> FS : build/spd/spd.adoc
+NW -> FS : build/spd/metadata.json {"type":"SPD",...}
+
+Engine -> Val : validate("build/spd/metadata.json")
+Val -> Engine : Result.success(SPDMetadata)
+
+Engine -> MH : generateSPG
+MH -> FS : build/spg/spg.adoc
+MH -> FS : build/spg/metadata.json {"type":"SPG",...}
+
+Engine -> Val : validate("build/spg/metadata.json")
+Val -> Engine : Result.success(SPGMetadata)
+
+Engine -> BK : transformCorpusToPdf
+BK -> FS : build/pdf/formation.pdf
+BK -> FS : build/pdf/metadata.json {"type":"PDF","pages":240,...}
+
+Engine -> Engine : verifyDagAcyclic(dependencies[])
+Engine -> Dev : Contexte composite assemblé + DAG vérifié
+@enduml
+----
+
+=== Dépendances inter-boroughs — DAG de l'EPIC K
+
+[source,text]
+----
+US-K01 (nommage P0) ─────────────────────────────────────────────┐
+US-K02 (Metadata classes) ──────────────────────────────────────┐ │
+       │                                                         │ │
+       ├──→ US-K03 (metadata pilote Manhattan) ──→ US-K04 (engine)│
+       │         │                                                │ │
+       │         └──→ US-K07 (format pivot ×6 boroughs)          │ │
+       │                                                          │ │
+       └──→ US-K11 (méta-comm typée Niveau 2)                    │ │
+                                                                  │ │
+US-K01 ──→ US-K05 (config domaine pilote) ──→ US-K08 (tous)     │ │
+                                                                  │ │
+US-K01 ──→ US-K09 (nommage restants 7)                           │ │
+                                                                  │ │
+US-K06 (convention over conf) ← indépendant                      │ │
+       │                                                          │ │
+       └──────────────────────────────────────────────────────────┼─┐
+                                                                  │ │
+TOUTES ──→ US-K10 (documentation ×11)                            │ │
+                                                                  │ │
+                              ┌───────────────────────────────────┘ │
+                              ▼                                     ▼
+                        engine N3 ── verifyDagAcyclic(dependencies[])
+                              │
+                              ▼
+                        Déploiement gh-pages (US post-K)
+----
+
+=== Contrainte technique : Dépréciation transitoire
+
+Le renommage des tâches est un *breaking change* pour tout script, CI, et doc
+qui référence l'ancien nom. La stratégie :
+
+. *Alias déprécié* — l'ancien nom reste disponible 1 cycle avec un warning :
++
+[source,kotlin]
+----
+project.tasks.register("trainingRetrieve") {
+    group = "deprecated"
+    description = "DEPRECATED: use collectFromCorpus instead"
+    dependsOn("collectFromCorpus")
+    doLast { logger.warn("[DEPRECATED] trainingRetrieve → use collectFromCorpus") }
+}
+----
+
+. *CI/CD* — mettre à jour les workflows GitHub Actions *après* validation de l'alias
+. *Documentation* — les `.agents/INDEX.adoc` référencent le nouveau nom,
+  avec une note "anciennement trainingRetrieve" en commentaire
+
+=== Contrainte technique : Compatibilité ascendante du metadata.json
+
+Le champ `version` suit le semver. Règle :
+
+- *MAJOR (1.0 → 2.0)* : breaking change, le consommateur DOIT être migré
+- *MINOR (1.0 → 1.1)* : ajout de champs optionnels, rétrocompatible
+- *PATCH (1.0.0 → 1.0.1)* : correction, transparent
+
+Le `MetadataValidator` vérifie la compatibilité :
+[source,kotlin]
+----
+fun isCompatible(provided: String, expected: String): Boolean {
+    val (pMajor) = provided.split(".").map { it.toInt() }
+    val (eMajor) = expected.split(".").map { it.toInt() }
+    return pMajor == eMajor // même majeure = compatible
+}
+----
+
+=== Points d'attention
+
+- *Pas de dépendance circulaire* : Metadata est dans codebase-plugin (N1). Les N2 l'utilisent. Engine N3 lit les fichiers, n'importe pas les plugins N2.
+- *Langgraph4j est prêt* : le `PlanningState` (classification, planJson, plan) est directement sérialisable en `PlanMetadata`. Ajout d'une méthode `toMetadata()` dans `FormatNode`.
+- *Jackson version* : quizz-benchmark a un mismatch 2.18.2/2.19.1. À fixer avant K-2 (Metadata utilise Jackson).
+- *Ordre K vs G* : EPIC K (ontologie) et EPIC G (migration CCCP) sont parallélisables. Mais K doit être fait *avant* la republication massive (EPIC G-06) pour ne pas publier sous l'ancienne taxonomie.
+
+'''
+
+[.text-right]
+*Document rédigé le 18 mai 2026 — Session de cadrage EPIC K.*
+*Méthode : 7 ateliers de cadrage agile (cf. blog/2022/0054_memo_cadrage_post.adoc).*
+*Source : TAXONOMIE_WORKSPACE.adoc (9ème document du jardin secret).*
+*Backlog : 11 US, 42 points, ~9 jours, 11 sessions @xp.*

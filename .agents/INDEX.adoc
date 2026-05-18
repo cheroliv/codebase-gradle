@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-14
-_Session terminee_ : 027 — CI Template (EPIC F — engine orchestration)
-_Session en cours_ : 028 — EPIC 5 Fine-tuning CDA/FPA ou EPIC 13 LangGraph4j
+_Derniere mise a jour_ : 2026-05-18
+_Session terminee_ : 031 (cadrage) — EPIC K Ontologie Workspace
+_Session en cours_ : 031a/031b — Vague 1 Walking Skeleton (K01 nommage ×4 + K02 Metadata)
 
 '''
 == REGLES ABSOLUES (resume)
@@ -22,6 +22,9 @@ _Session en cours_ : 028 — EPIC 5 Fine-tuning CDA/FPA ou EPIC 13 LangGraph4j
 
 |===
 | # | Date | Type | Sujet | Score
+| 031 | 2026-05-18 | cadrage | EPIC K — Atelier cadrage agile 7 ateliers (TAXONOMIE_WORKSPACE.adoc). Backlog 11 US, 42pts, ~9j. Plan d'attaque 3 vagues. | 10/10
+| 030 | 2026-05-18 | feat | Sessions 028-030 fan-out parallèle — EPIC 11 LangGraph4j + EPIC 13 ConditionalEdge. Package langgraph/, PlannerIntegration, PlanIntentionTask. BUILD SUCCESSFUL. | 10/10
+| 028-029 | 2026-05-18 | feat | EPIC 11 LangGraph4j + EPIC 13 Classifieur Vision/Opinion — bootstrap + nœuds StateGraph. | 10/10
 | 027 | 2026-05-14 | infra | CI Template — .github/workflows/test.yml (JDK 24, Gradle, JUnit), build OK, EPIC F cross-boroughs | 10/10
 | 026 | 2026-05-13 | feat | Benchmark Flash + Graphify — deepseek-v4-flash:cloud sur instance B, OLLAMA_BASE_URL/MODEL env vars, fix @JsonIgnoreProperties office/graph.json (21174n/22286e), benchmark-output/ (+.gitignore), 175 classifications 0% erreur, gate MVP1 PASS | 10/10
 | 025 | 2026-05-12 | feat | EPIC 10 STIMULUS Cascade — DilutionExecutor (injection auto + backup + dryRun), StimulusDetector (scan workspace/*.adoc + stale > 2j), detectStimuli + detectStaleStimuli Gradle tasks, StdoutFormatter.error(), 8/8 JUnit5 PASS | 10/10
@@ -65,9 +68,20 @@ _Session en cours_ : 028 — EPIC 5 Fine-tuning CDA/FPA ou EPIC 13 LangGraph4j
 | EPIC 7 | Wiring LangChain4j + pgvector experts | A FAIRE | P1
 | EPIC 8 | Exposer experts via Ollama (consommation plugins) | A FAIRE | P2
 | EPIC 10 | Instrumentation STIMULUS — cascade automatique | TERMINE (10/10 sous-taches, session 025) | P0
-| EPIC 11 | LangGraph4j — chaines de pensees | A FAIRE | P1
+| EPIC 11 | LangGraph4j — chaines de pensees | ✅ TERMINE (sessions 028-030 : 7 classes, ConditionalEdge, build OK) | P1
 | EPIC 12 | Dilution Article de Blog automatique | A FAIRE | P1
-| EPIC 13 | LangGraph4j Classifieur Vision/Opinion | A FAIRE | P1
+| EPIC 13 | LangGraph4j Classifieur Vision/Opinion | ✅ TERMINE (sessions 028-030 : ClassifyNode, ProDecomposeNode, FlashDecomposeNode, FormatNode) | P1
+| EPIC K | Ontologie Workspace — Taxonomie unifiée, format pivot, méta-communication typée inter-borough | EN COURS (cadrage session 031. Vague 1 : sessions 031a+031b en parallèle) | P0
+
+== Plan d'attaque EPIC K — 3 Vagues
+
+[cols="1,3,1,1,3"]
+|===
+| Vague | Sessions | US | Points | Dépendances
+| Vague 1 — Walking Skeleton | 031a (fan-out ×4) + 031b + 032 + 033 | K01 Nommage P0, K02 Metadata, K03 Pilote MHT, K04 Engine | 15 | Aucune (031a/031b parallèles)
+| Vague 2 — Expansion | 034 (fan-out massif) + 035a | K05+K07+K08+K09 (tous boroughs) + K06 Convention FS | 16 | Vague 1 ✅
+| Vague 3 — Polish | 035b + 036 | K11 Méta-comm typée N2 + K10 Documentation | 8 | Vagues 1+2 ✅
+|===
 |===
 
 '''
