@@ -1,33 +1,26 @@
-= PROMPT_REPRISE — Mission Session 033 EPIC K
+= PROMPT_REPRISE — Mission Session 034 (fermée) → 035 K-4
 :date: 2026-05-19
 
 == Contexte
 
-EPIC K (Ontologie Workspace) — Vague 1 walking skeleton.
-K-1 terminé (session 032) : renommage taxonomie des tâches codebase-plugin
-selon les 4 verbes (collectFromCodebase, collectCompositeContext, generatePlan).
+Session 034 fermée — EPIC L cadrage + décision architecturale.
+EPIC K K-2 ✅ TERMINÉ (session 017 configuration/, session 033 codebase-gradle INDEX corrigé).
+K-3 ✅ TERMINÉ. Reste : K-4 (convention over config, 3j) + K-5 (doc, 1j).
 
-== Mission session 033
+== Session 034 — Décisions persistées
 
-K-02 — Généralisation du contrat format pivot metadata.json dans tous les
-boroughs producteurs N2 (planner, training, capsule, quizz, codex).
+. *Déclenchement EPIC L* : post-K-4+K-5 (~4j). Contrat nommage figé depuis K-1.
+. *Architecture koog* : Option A — bibliothèque autonome `foundry/public/koog/`, `cccp.education:koog`.
+. *Baseline langgraph4j* : 7 classes/357 lignes (PlanningGraph, ClassifyNode, ProDecomposeNode, FlashDecomposeNode, FormatNode, PlanningState, Plan). ClassificationGraph (EPIC 13) non trouvé.
+. *Split-brain corrigé* : INDEX.adoc codebase-gradle (K-2 stale) + PLAN_GLOBAL.adoc (K-2/K-3).
 
-== Tâches
+== Mission session 035 (prochaine)
 
-. Vérifier que chaque borough N2 produit un metadata.json valide en sortie
-. Valider le contrat MetadataValidator sur les outputs réels
-. engine N3 lit metadata.json par fichier (sans import direct)
+EPIC K K-4 — Convention over configuration SPG→SPD (Manhattan + Newark).
+Inférence metadata depuis structure filesystem.
 
 == État du workspace
 
-- `codebase-plugin` : compilable, K-1 ✅ (renommage terminé)
-- `planner-gradle` : compilable, generateSPG fonctionnel
-- `quizz-benchmark` : compilable
-- `training-gradle` : compil bloqué MavenLocal préexistant
-- `codex-gradle` : compil bloqué MavenLocal préexistant
-
-== Règles
-
-- ZERO commit/push/merge sans permission
-- TDD : écrire le test AVANT le code
-- Engine N3 lit metadata.json par fichier — pas d'import direct N2
+- `codebase-plugin` : compilable, K-1 ✅, K-2 ✅ (metadata.json consommateur), K-3 ✅
+- `koog/` : à créer (post-K-5)
+- Session 034 archivée : `.agents/sessions/034-epic-l-cadrage-decision.adoc`

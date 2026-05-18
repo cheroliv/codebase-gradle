@@ -1,6 +1,6 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : 19 tests JUnit5 EPIC K (8 Metadata + 11 Validator) PASS + 1 test JUnit5 GenerateSPGTask PASS + Feature Cucumber epic_k_metadata_contract (9 scenarios, @epic_k taggué)
+_Statut_ : 34 scénarios Cucumber (30 EPIC 9 + 4 EPIC 2/4 @wip) + 28 tests JUnit5 PASS (8 EPIC 10 + 19 EPIC K Metadata/Validator + 1 GenerateSPGTask) + Feature Cucumber epic_k_metadata_contract (9 scénarios, @epic_k taggué)
 
 | Session | Fichiers testes | Couverture | Notes
 | 031b | `MetadataUnitTest.kt` + `MetadataValidatorUnitTest.kt` (JUnit5) | 19 tests PASS | EPIC K format pivot : SPG/SPD/Quiz/Plan/PDF fromJson, type inconnu → exception, fromFile, defaults vides, validate OK/absent/corrompu/version/type/deps, isVersionCompatible

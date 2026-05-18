@@ -1,0 +1,68 @@
+= Session 034 — EPIC L Cadrage + Décision Architecturale
+:date: 2026-05-19
+:type: architecture
+:score: 9/10
+
+== Contexte
+
+EPIC L — Migration langgraph4j → koog+langchain4j (31 pts, 5 sprints).
+Cadré dans PLAN_GLOBAL.adoc (L-0→L-5). Dépend d'EPIC K (taxonomie 4 verbes).
+
+== Diagnostic Baseline langgraph4j (à remplacer)
+
+Package `codebase.langgraph/` — 7 classes, 357 lignes, session 028-030 :
+
+| Classe | Rôle | Lignes |
+| PlanningGraph.kt | StateGraph 4 nœuds (classify→pro/flash→format) | 55 |
+| ClassifyNode.kt | Classification via deepseek-v4-flash | 57 |
+| ProDecomposeNode.kt | Décomposition EPICs/US via deepseek-v4-pro | 95 |
+| FlashDecomposeNode.kt | Décomposition simple via flash | 66 |
+| FormatNode.kt | Parse JSON → Plan | 46 |
+| PlanningState.kt | AgentState (MutableMap hérité langgraph4j) | 13 |
+| Plan.kt | Data classes Plan/Epic/UserStory/Task | 25 |
+
+*Écart découvert* : `ClassificationGraph` (EPIC 13) marqué ✅ TERMINÉ mais *aucun fichier source trouvé*.
+
+== Décision
+
+*Déclenchement* : démarrer EPIC L *après* EPIC K K-4 (convention over config SPG→SPD, 3j) + K-5 (documentation, 1j).
+Le contrat de nommage (verbes GENERER/COLLECTER/TRANSFORMER/DÉPLOYER) est figé depuis K-1.
+koog peut respecter ce contrat dès aujourd'hui. K-4+K-5 = formalisation, pas refonte.
+
+== Architecture koog (Option A retenue)
+
+Bibliothèque autonome `foundry/public/koog/` publiée en `cccp.education:koog` via mavenLocal.
+Consommable par codebase-gradle (N1) ET IJ-5 Chain Monitor (plugin IntelliJ, N-IDE).
+
+Package `cccp.education.koog/` :
+- StateGraph.kt — DSL builder
+- Node.kt — NodeAction<T> typé
+- ConditionalEdge.kt — routage conditionnel
+- Checkpoint.kt — persistance état (time-travel)
+- Reducer.kt — merge état entre nœuds
+- ChainMonitor.kt — WebSocket + log JSON
+- HumanInTheLoop.kt — interrupt/resume
+
+*Alternative écartée* : Option B (package interne codebase-gradle) — non réutilisable par IJ-5, couplage fort.
+
+== Plan d'Attaque (5 sprints)
+
+SPRINT 1 : L-0 création koog + DSL StateGraph
+SPRINT 2 : L-1 koog PlanningGraph (migration code existant)
+SPRINT 3 : L-2 koog ClassificationGraph (création, car inexistant)
+SPRINT 4 : L-3 WebSocket + L-4 Logger
+SPRINT 5 : L-5 Tests + suppression package langgraph/
+
+== Split-Brain Corrigé (action immédiate)
+
+Deux INDEX.adoc désynchronisés :
+- codebase-gradle `.agents/INDEX.adoc` : K-2 « EN COURS session 033 »
+- configuration `.agents/INDEX.adoc` : K-2 ✅ TERMINÉ session 017
+
+→ Corrigé dans INDEX.adoc codebase-gradle (L-7) + PLAN_GLOBAL.adoc (K-2 et K-3)
+→ Ajoutée entrée session 033 (K-2) dans table sessions codebase-gradle
+
+== Fichiers Impactés
+
+- `codebase-gradle/codebase-plugin/.agents/INDEX.adoc` : K-2 mis à jour → TERMINÉ, roadmap K/L mises à jour
+- `PLAN_GLOBAL.adoc` : K-2 et K-3 statuts corrigés (À faire → TERMINÉ)

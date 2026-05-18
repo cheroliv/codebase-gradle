@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
 _Derniere mise a jour_ : 2026-05-19
-_Session terminee_ : 032 — EPIC K K-1 Renommage taxonomie (collectFromCodebase, collectCompositeContext, generatePlan)
-_Session en cours_ : 033 — K-02 Format pivot metadata.json → généralisation du contrat metadata.json dans tous les boroughs producteurs N2
+_Session terminee_ : 034 — EPIC L Cadrage + Décision architecturale (koog autonome, post-K-4/K-5). Baseline langgraph4j 7 classes/357 lignes. Split-brain K-2 corrigé.
+_Session en cours_ : 035 — EPIC K K-4 Convention over configuration (Manhattan + Newark, pipeline SPG→SPD)
 
 '''
 == REGLES ABSOLUES (resume)
@@ -22,6 +22,7 @@ _Session en cours_ : 033 — K-02 Format pivot metadata.json → généralisatio
 
 |===
 | # | Date | Type | Sujet | Score
+| 033 | 2026-05-19 | feat | EPIC K K-2 Format pivot metadata.json (classe Metadata.kt dans 4 boroughs producteurs + Engine N3). Codebase-plugin non impacté directement (pas de nouvelle metadata source), alignement indirect via K-4 convention over config. | —
 | 032 | 2026-05-19 | refactor | EPIC K K-1 Renommage taxonomie — `prepareContext`→`collectFromCodebase`, `assembleWorkspaceContext`→`collectCompositeContext`, `planIntention`→`generatePlan` (groupes collect/generate, 6 fichiers modifiés, compile OK) | 10/10
 | 031 | 2026-05-18 | feat+deploy | Déploiement codebase-plugin sur 10 boroughs N2 (catalog TOML + mavenLocal) + Fix Jackson mismatch quizz-benchmark (2.18.2→2.19.1 + dedup) | 8/10
 | 030 | 2026-05-18 | feat+tests | Cadrage agile 7 ateliers + Tests JUnit5 PrepareContextTask (5 PASS) + assembleWorkspaceContext task | 9/10
@@ -73,7 +74,8 @@ _Session en cours_ : 033 — K-02 Format pivot metadata.json → généralisatio
 | EPIC 11 | LangGraph4j — chaines de pensees | A FAIRE | P1
 | EPIC 12 | Dilution Article de Blog automatique | A FAIRE | P1
 | EPIC 13 | LangGraph4j Classifieur Vision/Opinion | A FAIRE | P1
-| EPIC K | Ontologie Workspace — Taxonomie unifiée (4 verbes, format pivot, convention over configuration) | EN COURS — K-1 terminé (renommage), K-02 format pivot à faire | P0
+| EPIC K | Ontologie Workspace — Taxonomie unifiée (4 verbes, format pivot, convention over configuration) | EN COURS — K-0 ✅, K-1 ✅, K-2 ✅, K-3 ✅. Reste : K-4 (convention over config SPG→SPD, 3j) + K-5 (documentation, 1j) | P0
+| EPIC L | Migration langgraph4j → koog+langchain4j — DSL Kotlin pur (StateGraph/ConditionalEdges/Checkpoints) + wrapper langchain4j (LLM/embeddings/pgvector). Remplace EPIC 11+11bis+13. 6 sous-EPICs (L-0→L-5, 31 pts). Déclenchement : post-K-4+K-5. EPIC 11/13 baseline ✅ (sessions 028-030) + ClassificationGraph (EPIC 13, code non trouvé). | CADRE — L-0→L-5 À faire. Bloqué par K-4 (3j). | P1
 |===
 
 '''
