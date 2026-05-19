@@ -1,7 +1,7 @@
 package codebase.rag
 
-import codebase.langgraph.Plan
-import codebase.langgraph.PlanningState
+import codebase.koog.Plan
+import codebase.koog.PlanState
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
@@ -110,7 +110,7 @@ abstract class PlanIntentionTask : DefaultTask() {
         println("=" .repeat(60))
     }
 
-    private fun formatOutput(intention: String, result: PlanningState): String {
+    private fun formatOutput(intention: String, result: PlanState): String {
         val sb = StringBuilder()
         sb.appendLine("=" .repeat(60))
         sb.appendLine("PLAN — $intention")
