@@ -1,29 +1,28 @@
-= PROMPT_REPRISE — Mission Session 042 EPIC V-1 VibecodingGraph
+= PROMPT_REPRISE — Mission Session 043 EPIC V-2 VibecodingTask
 :date: 2026-05-19
 
 == Contexte
 
-Session 041 fermée — EPIC V-0 terminé :
-- ExecShellTool + ExecGradleTool créés (extends SimpleTool<Args>)
-- Blacklist bash 10 patterns + Gradle 4 patterns
-- 7/7 Cucumber @epic_v_0 PASS + 20/20 JUnit5 PASS
-- 2/15 pts EPIC V
+Session 042 fermee — EPIC V-1 termine :
+- VibecodingGraph.kt (122 lignes) + VibecodingState.kt (20 lignes)
+- 10/10 JUnit5 PASS + 5/5 Cucumber @epic_v_1 PASS
+- 5/15 pts EPIC V
 
-== Mission session 042
+== Mission session 043
 
-Créer VibecodingGraph.kt — graphe koog complet :
-1. buildContext→classify→plan→executeTools→sendToolResult→loop/FIN
-2. ToolRegistry 7 tools (5 koog built-in + ExecShellTool + ExecGradleTool)
-3. systemPrompt dynamique (intention + plan + workspaceRoot)
-4. Tests : JUnit5 (graphe compile, edges valides, Mermaid) + Cucumber @epic_v_1
+Creer VibecodingTask Gradle — tache CLI koog autonome :
+1. VibecodingTask (DefaultTask) avec intention/dryRun/maxActions/workspaceRoot
+2. ToolRegistry 7 tools (ReadFile/WriteFile/EditFile/ListDirectory/Exit + ExecShell + ExecGradle)
+3. Audit trail JSONL
+4. Tests : JUnit5 (task registered, dryRun flag, audit format) + Cucumber @epic_v_2
 
-== Fichiers à créer
+== Fichiers a creer
 
-- `src/main/kotlin/codebase/koog/tools/VibecodingGraph.kt` — graphe koog
-- `src/test/kotlin/codebase/koog/tools/VibecodingGraphTest.kt` — JUnit5
-- `src/test/features/epic_v_1_vibecoding_graph.feature` — Cucumber
+- `src/main/kotlin/codebase/koog/VibecodingTask.kt` — tache Gradle
+- `src/test/kotlin/codebase/koog/VibecodingTaskTest.kt` — JUnit5
+- `src/test/features/epic_v_2_vibecoding_task.feature` — Cucumber
 
-== État du workspace
+== Etat du workspace
 
-- `codebase-plugin` : compile OK, 20/20 JUnit5 PASS, 7/7 Cucumber V-0 PASS
-- EPIC V : 2/15 pts
+- `codebase-plugin` : compile OK, 15/15 JUnit5 PASS, 12/12 Cucumber PASS (V-0 + V-1)
+- EPIC V : 5/15 pts (V-0 2 + V-1 3)

@@ -100,6 +100,34 @@ val cucumberTestEpicL3 = tasks.register<Test>("cucumberTestEpicL3") {
     filter { includeTestsMatching("codebase.scenarios.EpicL3CucumberRunner") }
 }
 
+val cucumberTestEpicV1 = tasks.register<Test>("cucumberTestEpicV1") {
+    description = "Runs Cucumber BDD tests — EPIC V-1 (VibecodingGraph) only"
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = configurations.testRuntimeClasspath.get() +
+        sourceSets.test.get().output +
+        sourceSets.main.get().output +
+        files(tasks.jar.get().archiveFile)
+
+    dependsOn(tasks.classes)
+    useJUnitPlatform { excludeEngines("junit-jupiter") }
+    systemProperty("cucumber.junit-platform.naming-strategy", "long")
+    maxHeapSize = "1g"
+    maxParallelForks = 1
+    forkEvery = 1
+    jvmArgs("-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=256m", "-XX:TieredStopAtLevel=1")
+    timeout.set(Duration.ofMinutes(5))
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+        exceptionFormat = FULL
+    }
+    outputs.upToDateWhen { false }
+
+    filter { includeTestsMatching("codebase.scenarios.EpicV1CucumberRunner") }
+}
+
 val cucumberTestEpicV0 = tasks.register<Test>("cucumberTestEpicV0") {
     description = "Runs Cucumber BDD tests — EPIC V-0 (Custom tools shell) only"
     group = "verification"

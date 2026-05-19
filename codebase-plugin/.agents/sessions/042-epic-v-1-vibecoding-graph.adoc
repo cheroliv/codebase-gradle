@@ -1,0 +1,38 @@
+= Session 042 — EPIC V-1 VibecodingGraph
+:date: 2026-05-19
+:score: 10/10
+
+== Contexte
+
+Session 041 fermee : EPIC V-0 termine (ExecShellTool + ExecGradleTool, 7/7 Cucumber + 20/20 JUnit5 PASS, 2/15 pts EPIC V).
+
+== Actions
+
+. VibecodingGraph.kt (122 lignes) — graphe koog connectant buildContext → classify → plan → executeTools → sendToolResult → FIN
+. VibecodingState.kt (20 lignes) — data class etat vibecoding (iteration, maxActions, dryRun, planJson, classification, isFinal)
+. Reutilisation KoogAugmentedContextGraph pour buildContext/classify/plan
+. systemPrompt dynamique (intention + plan + workspaceRoot + dryRun + iteration)
+. ExecuteToolsNode = placeholder V-1 (implementation V-2)
+
+== Commandes
+
+- ./gradlew compileKotlin → SUCCESS
+- ./gradlew test --tests 'codebase.koog.VibecodingGraphTest' → 10/10 PASS
+- ./gradlew cucumberTestEpicV1 → 5/5 PASS
+- ./gradlew publishToMavenLocal → SUCCESS
+
+== Resultats
+
+- 10 JUnit5 : graph nodes, Mermaid edges, systemPrompt fields, state iteration, withPlan, execute no-crash, augmentedGraph not null
+- 5 Cucumber @epic_v_1 : 5 nœuds, Mermaid valide, systemPrompt dynamique, iterations, reutilisation KoogAugmentedContextGraph
+- cucumberTestEpicV1 task ajoutee a build.gradle.kts
+- 5/15 pts EPIC V (V-0 2 + V-1 3)
+
+== Lecons
+
+- koog `nodeStart`/`nodeFinish` non nommes dans Mermaid (internes koog) — ne pas tester explicitement
+- buildSystemPrompt capitalise les labels (Intention:, Plan:, etc.) — tests utilisent meme capitalisation
+
+== Prochaine session
+
+043 — EPIC V-2 VibecodingTask Gradle (CLI task + audit trail + ToolRegistry 7 tools)
