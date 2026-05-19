@@ -1,28 +1,31 @@
-= PROMPT_REPRISE — Mission Session 043 EPIC V-2 VibecodingTask
+= PROMPT_REPRISE — Mission Session 045 EPIC V-4 Integration Validation
 :date: 2026-05-19
 
 == Contexte
 
-Session 042 fermee — EPIC V-1 termine :
-- VibecodingGraph.kt (122 lignes) + VibecodingState.kt (20 lignes)
-- 10/10 JUnit5 PASS + 5/5 Cucumber @epic_v_1 PASS
-- 5/15 pts EPIC V
+Session 044 fermee — EPIC V-3 termine :
+- Sandbox workspaceRoot (resolvePath normalisation + startsWith)
+- dryRun guard (write_file/edit_file/exec_shell/exec_gradle simulent sans ecriture/execution)
+- Audit trail (AuditEntry timestamp+tool+args+dryRun+result 500 chars+error)
+- 30/30 JUnit5 PASS + 11/11 Cucumber @epic_v_3 PASS
+- 12/15 pts EPIC V
 
-== Mission session 043
+== Mission session 045
 
-Creer VibecodingTask Gradle — tache CLI koog autonome :
-1. VibecodingTask (DefaultTask) avec intention/dryRun/maxActions/workspaceRoot
-2. ToolRegistry 7 tools (ReadFile/WriteFile/EditFile/ListDirectory/Exit + ExecShell + ExecGradle)
-3. Audit trail JSONL
-4. Tests : JUnit5 (task registered, dryRun flag, audit format) + Cucumber @epic_v_2
+EPIC V-4 Integration validation — test end-to-end vibecode Gradle task :
+1. Projet reel — executer `./gradlew vibecode --intention="..."` sur un projet existant
+2. Verifier audit trail complet : sandbox bloque path traversal, dryRun pas d'effet, exec trace
+3. Verifier que l'audit JSONL est ecrit dans build/vibecoding/audit.jsonl
+4. Tests : JUnit5 (integration Testcontainers ou projet temporaire) + Cucumber @epic_v_4
 
-== Fichiers a creer
+== Fichiers a modifier
 
-- `src/main/kotlin/codebase/koog/VibecodingTask.kt` — tache Gradle
-- `src/test/kotlin/codebase/koog/VibecodingTaskTest.kt` — JUnit5
-- `src/test/features/epic_v_2_vibecoding_task.feature` — Cucumber
+- `src/test/kotlin/codebase/koog/VibecodingTaskTest.kt` — tests integration
+- `src/test/features/epic_v_4_integration.feature` — Cucumber
+- `src/test/kotlin/codebase/scenarios/EpicV4CucumberRunner.kt` — runner
+- `build.gradle.kts` — cucumberTestEpicV4 task
 
 == Etat du workspace
 
-- `codebase-plugin` : compile OK, 15/15 JUnit5 PASS, 12/12 Cucumber PASS (V-0 + V-1)
-- EPIC V : 5/15 pts (V-0 2 + V-1 3)
+- `codebase-plugin` : compile OK, 30/30 JUnit5 PASS, 27/27 Cucumber PASS (V-0 + V-1 + V-2 + V-3)
+- EPIC V : 12/15 pts (V-0 2 + V-1 3 + V-2 5 + V-3 2)

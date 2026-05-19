@@ -1,0 +1,85 @@
+= Session 044 — EPIC V-3 Security Constraints
+:date: 2026-05-19
+:type: feat
+:score: 10/10
+
+== Contexte
+
+Session 043 fermee — EPIC V-2 VibecodingTask (ToolRegistry 7 tools + VibecodingTask Gradle, 17/17 JUnit5 + 4/4 Cucumber).
+EPIC V : 10/15 points.
+
+== Mission
+
+EPIC V-3 Security constraints — 3 axes :
+1. Sandbox workspaceRoot — bloquer tout path traversal hors workspaceRoot
+2. dryRun guard — outils mutatifs simulent sans ecrire ni executer
+3. Audit trail — chaque action tracee (timestamp, tool, args, dryRun, result, error)
+
+== Actions
+
+=== 1. ToolRegistry.kt — Sandbox + dryRun + Audit
+
+- `resolvePath()` : normalisation Paths avec verification `startsWith(workspaceRoot)` → SecurityException
+- `execute()` : nouveau paramètre `dryRun: Boolean = false`
+- `write_file`/`edit_file`/`exec_shell`/`exec_gradle` : dryRun → message DRY RUN, pas d'effet disque
+- `AuditEntry` : data class (timestamp, tool, arguments, dryRun, result 500 chars, error)
+- `auditTrail: MutableList<AuditEntry>` dans ToolRegistry
+- `auditEntries()` / `clearAudit()` exposés
+
+=== 2. VibecodingTask.kt — Intégration audit
+
+- `toolRegistry` passé de `private val` à `val` (exposable)
+- `executeVibecoding()` : `clearAudit()` avant exécution, `writeSessionAudit()` + `writeToolAudit()` après
+- Correction warning `!!` inutile sur String non-nullable
+
+=== 3. JUnit5 — 8 nouveaux tests (30 total)
+
+- `dryRun write_file does not write to disk`
+- `dryRun edit_file does not modify file`
+- `dryRun exec_shell does not execute`
+- `dryRun exec_gradle does not execute`
+- `sandbox blocks path traversal with double dots`
+- `sandbox blocks absolute path outside workspaceRoot`
+- `sandbox allows files inside workspaceRoot`
+- `sandbox allows subdirectory traversal inside workspaceRoot`
+- `audit trail records successful tool execution`
+- `audit trail records failed tool execution`
+- `audit trail records multiple executions`
+- `audit trail truncates result to 500 chars`
+- `read_file works with dryRun enabled`
+
+=== 4. Cucumber @epic_v_3 — 11/11 PASS
+
+- `epic_v_3_security.feature` — 10 scénarios
+- `EpicV3CucumberRunner` — Suite JUnit5
+- `cucumberTestEpicV3` — tâche Gradle dédiée
+- Steps prefixés `v3-` pour éviter conflits avec V-0/V-1/V-2
+
+=== 5. KOOG_AGENTIC_PATTERNS.adoc (livrable parallèle @deep)
+
+- `/home/cheroliv/workspace/office/pilotage/KOOG_AGENTIC_PATTERNS.adoc` — 1774 lignes
+- 15 patterns agentiques koog isolables et reproductibles
+- 6 sections : intro, architecture, catalogue, matrice boroughs, combos, références
+
+== Résultats
+
+- JUnit5 : 30/30 PASS (17 V-2 + 8 V-3 + 5 existants)
+- Cucumber @epic_v_3 : 11/11 PASS
+- Compilation : OK (1 warning corrigé)
+- EPIC V : 12/15 pts (V-0 2 + V-1 3 + V-2 5 + V-3 2)
+
+== Fichiers modifies
+
+- `src/main/kotlin/codebase/koog/ToolRegistry.kt` — sandbox + dryRun + AuditEntry
+- `src/main/kotlin/codebase/koog/VibecodingTask.kt` — intégration audit registry
+- `src/test/kotlin/codebase/koog/VibecodingTaskTest.kt` — +14 tests security
+- `src/test/kotlin/codebase/scenarios/VibecodingTaskSteps.kt` — +30 steps V-3
+- `src/test/kotlin/codebase/scenarios/VibecodingTaskWorld.kt` — +5 fields (AuditEntry, registry, workspace)
+- `src/test/features/epic_v_3_security.feature` — créé (11 scénarios)
+- `src/test/kotlin/codebase/scenarios/EpicV3CucumberRunner.kt` — créé
+- `build.gradle.kts` — cucumberTestEpicV3 task
+- `PROMPT_REPRISE.adoc` — MAJ 043→044
+
+== Prochaine session (045)
+
+EPIC V-4 — Integration validation (3 pts) : test end-to-end vibecode Gradle task avec projet réel, vérification audit trail complet sandbox+dryRun+exec en conditions réelles.

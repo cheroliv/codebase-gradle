@@ -1,0 +1,13 @@
+= Completed Tasks Archive — Mai 2026 — Codebase Gradle
+
+|===
+| Session | EPIC | Livrable
+| 044 | V-3 | Security constraints — Sandbox workspaceRoot (resolvePath normalisation + startsWith), dryRun guard (write/edit/shell/gradle simulent sans ecriture), Audit trail (AuditEntry timestamp+tool+args+dryRun+result 500 chars+error). 30/30 JUnit5 + 11/11 Cucumber @epic_v_3 PASS.
+| 043 | V-2 | VibecodingTask — ToolRegistry (7 tools: read_file, write_file, edit_file, list_directory, exit, exec_shell, exec_gradle) + VibecodingTask Gradle (vibecode task, audit trail JSONL). 17/17 JUnit5 + 4/4 Cucumber @epic_v_2 PASS.
+| 042 | V-1 | VibecodingGraph — Graphe koog buildContext→classify→plan→executeTools→sendToolResult. 10/10 JUnit5 + 5/5 Cucumber PASS.
+| 041 | V-0 | Custom tools shell — ExecShellTool + ExecGradleTool (extends SimpleTool<Args> koog). 20/20 JUnit5 + 7/7 Cucumber PASS.
+| 040 | L-3 | EPIC L Cloture — Cucumber PicoContainer standardise + 7/7 koog PASS.
+| 039 | L-2 | KoogAugmentedContextGraph — Wrapper koog+langchain4j contexte augmente. 5/5 PASS.
+| 037 | L-1 | KoogPlanningGraph — Migration orchestrateur langgraph4j → koog DSL. 2/2 PASS.
+| 031b | K | EPIC K cadrage + Vague 1 — 19 tests Metadata+Validator PASS.
+|===

@@ -1,0 +1,48 @@
+= Session 043 — EPIC V-2 VibecodingTask Gradle
+:date: 2026-05-19
+:type: feat
+:score: 10/10
+:epic: EPIC V — Vibecoding
+
+== Contexte
+
+Session 042 fermee — V-1 VibecodingGraph (graphe koog 5 nœuds, 10/10 JUnit5 + 5/5 Cucumber PASS, 5/15 pts EPIC V).
+
+== Actions
+
+=== Fichiers créés
+
+- `src/main/kotlin/codebase/koog/ToolRegistry.kt` — Registry 7 tools (read_file, write_file, edit_file, list_directory, exit, exec_shell, exec_gradle) + execute()
+- `src/main/kotlin/codebase/koog/VibecodingTask.kt` — Tâche Gradle CLI `vibecode` (DefaultTask, intention/dryRun/maxActions/workspaceRoot, TaskAction, audit trail JSONL)
+- `src/main/kotlin/codebase/koog/tools/ToolkitIsMissingException.kt` — Exception métier tool inconnu
+- `src/test/kotlin/codebase/koog/VibecodingTaskTest.kt` — 17 tests JUnit5
+- `src/test/features/epic_v_2_vibecoding_task.feature` — 4 scénarios Cucumber @epic_v_2
+- `src/test/kotlin/codebase/scenarios/VibecodingTaskWorld.kt` — World Cucumber
+- `src/test/kotlin/codebase/scenarios/VibecodingTaskSteps.kt` — Steps Cucumber
+- `src/test/kotlin/codebase/scenarios/EpicV2CucumberRunner.kt` — Runner Cucumber
+
+=== Fichiers modifiés
+
+- `CodebasePlugin.kt` — Enregistrement tâche `vibecode` (generate group)
+- `build.gradle.kts` — Ajout tâche `cucumberTestEpicV2`
+- `BACKLOG.adoc` — Ajout EPIC V + US backlog split codebase(N1)/planner(N2 vibecoding)
+
+=== Tests
+
+|===
+| Type | Fichier | Tests | Statut
+| JUnit5 | VibecodingTaskTest | 17/17 | ✅ PASS
+| Cucumber | @epic_v_2 | 4/4 | ✅ PASS
+| Cucumber (non-reg) | @epic_v_1 | 5/5 | ✅ PASS
+| Cucumber (non-reg) | @epic_v_0 | 7/7 | ✅ PASS
+|===
+
+=== Architecture — Décision
+
+Le vibecoding est une préoccupation N2. Split différé : codebase garde ToolRegistry/tools (N1 primitives), planner-gradle recevra VibecodingTask/VibecodingGraph/VibecodingState (N2 orchestration). US backlog ajoutée dans BACKLOG.adoc.
+
+== Résultat
+
+- EPIC V : 10/15 pts (V-0 2 + V-1 3 + V-2 5)
+- Reste : V-3 (Security constraints, 2 pts), V-4 (Integration validation, 3 pts)
+- Compilation OK, zero régression

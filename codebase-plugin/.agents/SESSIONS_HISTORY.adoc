@@ -2,6 +2,8 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 044 | 2026-05-19 | feat | EPIC V-3 Security constraints — Sandbox workspaceRoot + dryRun guard + AuditEntry trail. 30/30 JUnit5 + 11/11 Cucumber @epic_v_3 PASS. 12/15 pts EPIC V. | 10/10
+| 043 | 2026-05-19 | feat | EPIC V-2 VibecodingTask — ToolRegistry (7 tools: read_file, write_file, edit_file, list_directory, exit, exec_shell, exec_gradle) + VibecodingTask Gradle (vibecode task, audit trail JSONL). 17/17 JUnit5 + 4/4 Cucumber @epic_v_2 PASS. Non-regression V-0 (7/7), V-1 (5/5). 10/15 pts EPIC V. | 10/10
 | 042 | 2026-05-19 | feat | EPIC V-1 VibecodingGraph — Graphe koog buildContext→classify→plan→executeTools→sendToolResult. VibecodingState (itérations, maxActions, dryRun). Reutilisation KoogAugmentedContextGraph. systemPrompt dynamique. 10/10 JUnit5 PASS + 5/5 Cucumber @epic_v_1 PASS. cucumberTestEpicV1 task. 5/15 pts EPIC V. | 10/10
 | 041 | 2026-05-19 | feat | EPIC V-0 Custom tools shell — ExecShellTool + ExecGradleTool (extends SimpleTool<Args> koog). 7/7 Cucumber + 20/20 JUnit5 PASS. 2/15 pts EPIC V. | 10/10
 | 039 | 2026-05-19 | feat+refactor | EPIC L-3 — Refactor KoogAugmentedContextGraph.execute() partage lambdas avec nœuds graphe (buildContextNode/classifyNode/planNode, zéro duplication). PlanIntentionTask délégué à KoogAugmentedContextGraph. toPlanMetadata(AugmentedState) ajouté. Cucumber L-3 : 7 scénarios créés (AugmentedPlanningSteps + World). cucumberTest classpath aligné plantuml-gradle. 7/7 tests koog JUnit5 PASS (5 L-3 + 2 L-1). Cucumber L-3 non passant (pgvector down cascade). 5/8 pts EPIC L. | 9/10

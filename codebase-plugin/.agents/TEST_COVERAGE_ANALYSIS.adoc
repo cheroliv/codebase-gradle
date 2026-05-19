@@ -1,8 +1,10 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : 38 scénarios Cucumber (30 EPIC 9 + 4 EPIC 2/4 @wip + 7 L-3 @epic_l_3) + 33 tests JUnit5 PASS (8 EPIC 10 + 19 EPIC K Metadata/Validator + 1 GenerateSPGTask + 5 L-3 KoogAugmentedContextGraph). EPIC L (koog) : 7/7 JUnit5 PASS + 7/7 Cucumber @epic_l_3 PASS (EpicL3CucumberRunner).
+_Statut_ : 57 scenarios Cucumber cumulatifs (30 EPIC 9 + 4 EPIC 2/4 @wip + 7 L-3 + 4 V-2 + 11 V-3 + 1 V-1) + 55 tests JUnit5 PASS (8 EPIC 10 + 19 EPIC K + 5 L-3 + 17 V-2 + 6 V-0/1 existants + ...). EPIC V : 30/30 JUnit5 + 27/27 Cucumber (V-0+V-1+V-2+V-3).
 
 | Session | Fichiers testes | Couverture | Notes
+| 044 | `epic_v_3_security.feature` (Cucumber 11) + `VibecodingTaskSteps.kt` (V-3) + `EpicV3CucumberRunner.kt` | 11/11 Cucumber PASS | EPIC V-3 : Sandbox (resolvePath/startsWith), dryRun guard (write_file/edit_file/exec_shell/exec_gradle simulent sans ecriture), Audit trail (AuditEntry timestamp+tool+args+dryRun+result 500 chars+error). Non-regression V-0/V-1/V-2 preservee. <|
+| 043 | `VibecodingTaskTest.kt` (JUnit5 17) + `epic_v_2_vibecoding_task.feature` (Cucumber 4) + `VibecodingTaskSteps.kt` | 17/17 JUnit5 + 4/4 Cucumber PASS | EPIC V-2 : ToolRegistry (7 tools), VibecodingTask (vibecode task, audit trail JSONL). Non-regression V-0 (7/7), V-1 (5/5). <|
 | 040 | `AugmentedPlanningSteps.kt` + `AugmentedPlanningWorld.kt` (Cucumber) | 7/7 scenarios PASS | EPIC L-3 PicoContainer — Pattern standardise (AugmentedPlanningWorld injecte par constructeur). 3 bugs glue corriges (CucumberExpression {int}/ + 2 DuplicateStep). buildSrc supprime. <|
 
 | Session | Fichiers testes | Couverture | Notes
@@ -81,4 +83,4 @@ _Statut_ : 38 scénarios Cucumber (30 EPIC 9 + 4 EPIC 2/4 @wip + 7 L-3 @epic_l_3
 
 == Prochaine étape
 
-Session 022 — EPIC 10 (STIMULUS Cascade) ou EPIC 4 (Benchmark MVP1 Finalisation) ou EPIC 13 (LangGraph4j Classifieur Vision/Opinion).
+Session 045 — EPIC V-4 Integration validation (test end-to-end vibecode Gradle task avec projet reel).

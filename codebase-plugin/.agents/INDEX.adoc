@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-19 (EPIC V-1 VibecodingGraph termine, 10/10 JUnit5 + 5/5 Cucumber PASS)
-_Session terminee_ : 042 — EPIC V-1 VibecodingGraph.kt (122l) + VibecodingState.kt (20l). Graphe koog buildContext→classify→plan→executeTools→sendToolResult. systemPrompt dynamique. 5/15 pts EPIC V.
+_Derniere mise a jour_ : 2026-05-19 (EPIC V-3 Security constraints termine, 30/30 JUnit5 + 11/11 Cucumber @epic_v_3 PASS)
+_Session terminee_ : 044 — EPIC V-3 Security constraints — Sandbox workspaceRoot (resolvePath normalisation + startsWith), dryRun guard (tools mutatifs simulent sans ecriture), Audit trail (AuditEntry). 12/15 pts EPIC V.
 
 '''
 == REGLES ABSOLUES (resume)
@@ -35,6 +35,8 @@ _Session terminee_ : 042 — EPIC V-1 VibecodingGraph.kt (122l) + VibecodingStat
 
 |===
 | # | Date | Type | Sujet | Score
+| 044 | 2026-05-19 | feat | EPIC V-3 Security constraints — Sandbox workspaceRoot + dryRun guard + audit trail (AuditEntry). 30/30 JUnit5 + 11/11 Cucumber @epic_v_3 PASS. 12/15 pts EPIC V. | 10/10
+| 043 | 2026-05-19 | feat | EPIC V-2 VibecodingTask — ToolRegistry (7 tools) + VibecodingTask Gradle (vibecode task, audit trail JSONL). 17/17 JUnit5 + 4/4 Cucumber @epic_v_2 PASS. 10/15 pts EPIC V. | 10/10
 | 042 | 2026-05-19 | feat | EPIC V-1 VibecodingGraph — Graphe koog buildContext→classify→plan→executeTools→sendToolResult. VibecodingState (itérations, maxActions, dryRun). systemPrompt dynamique. Reutilisation KoogAugmentedContextGraph. 10/10 JUnit5 + 5/5 Cucumber PASS. cucumberTestEpicV1 task. 5/15 pts EPIC V. | 10/10
 | 041 | 2026-05-19 | feat | EPIC V-0 Custom tools shell — ExecShellTool + ExecGradleTool (extends SimpleTool<Args> koog). Blacklist bash 10 patterns + Gradle 4 patterns. 7/7 Cucumber @epic_v_0 PASS + 20/20 JUnit5 PASS. cucumberTestEpicV0 task. 2/15 pts EPIC V. | 10/10
 | 033 | 2026-05-19 | feat | EPIC K K-2 Format pivot metadata.json (classe Metadata.kt dans 4 boroughs producteurs + Engine N3). Codebase-plugin non impacté directement (pas de nouvelle metadata source), alignement indirect via K-4 convention over config. | —
@@ -91,7 +93,7 @@ _Session terminee_ : 042 — EPIC V-1 VibecodingGraph.kt (122l) + VibecodingStat
 | EPIC 13 | LangGraph4j Classifieur Vision/Opinion | A FAIRE | P1
 | EPIC K | Ontologie Workspace — Taxonomie unifiée (4 verbes, format pivot, convention over configuration) | ✅ TERMINE (2026-05-19). K-0→K-5 toutes les 6 phases terminées. | P0
 | EPIC L | Migration langgraph4j → koog+langchain4j — DSL Kotlin JetBrains/koog (`ai.koog:koog-agents:0.8.0`). Koog = orchestrateur uniquement, langchain4j = exécutant (LLM/RAG/pgvector) préservé. 3 sous-EPICs restructurés (L-0→L-3, ~8 pts). L-0 ✅ (dépendances + test unitaire DSL). Remplace EPIC 11+11bis+13. | ✅ TERMINE — L-0 ✅, L-1 ✅, L-2 ✅, L-3 ✅ (session 040). 7/7 Cucumber @epic_l_3 PASS. 6/8 pts.
-| EPIC V | *Vibecoding* — Remplacer opencode par VibecodingTask Gradle (agent koog autonome : LLM + filesystem + shell koog). 7 tools (5 built-in + ExecShellTool + ExecGradleTool). pipeline buildContext→classify→plan→executeTools. 5 sous-EPICs (V-0→V-4, 15 pts). | EN COURS — V-0 ✅ (session 041), V-1 ✅ (session 042). 5/15 pts. Prochaine V-2 VibecodingTask Gradle. | P0
+| EPIC V | *Vibecoding* — Remplacer opencode par VibecodingTask Gradle (agent koog autonome : LLM + filesystem + shell koog). 7 tools (5 built-in + ExecShellTool + ExecGradleTool). pipeline buildContext→classify→plan→executeTools. 5 sous-EPICs (V-0→V-4, 15 pts). | EN COURS — V-0 ✅ (session 041), V-1 ✅ (session 042), V-2 ✅ (session 043), V-3 ✅ (session 044). 12/15 pts. Prochaine V-4 Integration validation. | P0
 |===
 
 '''
