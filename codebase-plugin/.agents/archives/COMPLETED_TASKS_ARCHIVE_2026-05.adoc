@@ -2,6 +2,8 @@
 
 |===
 | Date | Session | EPIC/US | Description
+| 2026-05-19 | 045 | EPIC V-4 | Integration validation — Test end-to-end VibecodingTask sur projet reel ProjectBuilder. 8/8 JUnit5 + 5/5 Cucumber PASS. Fix jsonlEscape. EPIC V = 15/15 TERMINE.
+| 2026-05-19 | 044 | EPIC V-3 | Security constraints — Sandbox + dryRun guard + Audit trail. 30/30 JUnit5 + 11/11 Cucumber PASS. 12/15 pts EPIC V.
 | 2026-05-19 | 039 | EPIC L-3 | Refactor KoogAugmentedContextGraph.execute() partage lambdas avec nœuds graphe (buildContextNode/classifyNode/planNode, zéro duplication). PlanIntentionTask délégué à KoogAugmentedContextGraph. toPlanMetadata(AugmentedState) ajouté. cucumberTest classpath aligné plantuml-gradle. Tests Cucumber L-3 créés (AugmentedPlanningSteps + World, 7 scénarios feature). 7/7 tests JUnit5 PASS (5 L-3 + 2 regression). Cucumber L-3 non passant (pgvector cascade). 5/8 pts EPIC L.
 | 2026-05-19 | 037 | EPIC L-1 | Migration orchestrateur langgraph4j → koog DSL. KoogPlanningGraph.kt (278 lignes, strategy{} DSL). Plan/PlanState data classes. OllamaChatModel langchain4j préservé. PlannerIntegration + PlanIntentionTask migrés. 2/2 tests PASS. Commit baf6a3c push OK.
 | 2026-05-19 | 036 | EPIC L-0 | Dépendances koog JetBrains (`ai.koog:koog-agents:0.8.0`) + test unitaire DSL. Cohabitation langgraph4j. Compilation OK.

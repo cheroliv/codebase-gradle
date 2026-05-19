@@ -67,18 +67,25 @@ abstract class VibecodingTask : DefaultTask() {
     }
 
     private fun writeSessionAudit(file: File, state: VibecodingState) {
-        val errorValue = if (state.error != null) "\"${state.error.replace("\"", "\\\"")}\"" else "null"
-        val entry = """|{"timestamp":"${Instant.now()}","iteration":${state.iteration},"intention":"${state.intention.replace("\"", "\\\"")}","dryRun":${state.dryRun},"action":"session_complete","error":$errorValue,"finished":${state.finished}}
+        val errorValue = if (state.error != null) "\"${jsonlEscape(state.error)}\"" else "null"
+        val entry = """|{"timestamp":"${Instant.now()}","iteration":${state.iteration},"intention":"${jsonlEscape(state.intention)}","dryRun":${state.dryRun},"action":"session_complete","error":$errorValue,"finished":${state.finished}}
 """.trimMargin()
         file.appendText(entry)
     }
 
+    private fun jsonlEscape(raw: String): String =
+        raw.replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t")
+
     private fun writeToolAudit(file: File) {
         val entries = toolRegistry.auditEntries()
         for (entry in entries) {
-            val escapedTool = entry.tool.replace("\"", "\\\"")
-            val errorStr = entry.error?.replace("\"", "\\\"")?.let { "\"$it\"" } ?: "null"
-            val jsonl = """|{"timestamp":"${entry.timestamp}","tool":"$escapedTool","dryRun":${entry.dryRun},"result":"${entry.result.replace("\"","\\\"")}","error":$errorStr}
+            val escapedTool = jsonlEscape(entry.tool)
+            val errorStr = entry.error?.let { "\"${jsonlEscape(it)}\"" } ?: "null"
+            val jsonl = """|{"timestamp":"${entry.timestamp}","tool":"$escapedTool","dryRun":${entry.dryRun},"result":"${jsonlEscape(entry.result)}","error":$errorStr}
 """.trimMargin()
             file.appendText(jsonl)
         }

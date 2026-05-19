@@ -1,6 +1,18 @@
 = Backlog — Codebase Gradle
 :sectnums:
 
+== EPIC V : Vibecoding — Agent Gradle Autonome (codebase N1 → planner N2 split differe)
+
+**Statut** : EN COURS (V-0 ✅, V-1 ✅, V-2 ✅ — 10/15 pts)
+**Priorite** : P0
+
+**Note architecture (session 043)** : Le vibecoding est une preoccupation N2 (orchestration agent + LLM + CLI).
+Le split cible est :
+- **codebase (N1)** : tools bas niveau (ToolRegistry, ExecShellTool, ExecGradleTool, filesystem tools), KoogAugmentedContextGraph, audit trail JSONL, infrastructure RAG
+- **planner (N2)** : VibecodingTask Gradle, VibecodingGraph, VibecodingState — orchestration consommant les primitives codebase
+
+* [ ] **US backlog** : Migrer VibecodingTask + VibecodingGraph + VibecodingState vers planner-gradle (N2). Codebase conserve ToolRegistry + tools + KoogAugmentedContextGraph (N1). Planner-gradle consomme deja `libs.plugins.codebase` dans son build.gradle.kts. Cette US est **retardee** apres consolidation de l'EPIC V dans codebase.
+
 == EPIC 1 : Initialisation gouvernance agent codebase-gradle
 
 **Statut** : EN COURS

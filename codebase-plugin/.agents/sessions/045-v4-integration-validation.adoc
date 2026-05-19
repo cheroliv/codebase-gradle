@@ -1,0 +1,55 @@
+= Session 045 — EPIC V-4 Integration Validation
+:date: 2026-05-19
+:type: feat+tests
+:score: 10/10
+
+== Contexte
+
+EPIC V-4 Integration validation — test end-to-end vibecode Gradle task sur projet réel.
+12/15 pts EPIC V avant session. Objectif : tests JUnit5 (intégration, projet temporaire ProjectBuilder) + Cucumber @epic_v_4.
+
+== Actions
+
+. Creation cucumberTestEpicV4 dans build.gradle.kts (meme pattern V-0..V-3)
+. EpicV4CucumberRunner.kt — runner @epic_v_4
+. epic_v_4_integration.feature — 5 scenarios end-to-end
+. VibecodingIntegrationSteps.kt — step definitions (prefixe v4-)
+. VibecodingIntegrationWorld.kt — world PicoContainer
+. VibecodingIntegrationTest.kt — 8 JUnit5 integration tests
+. Fix jsonlEscape dans VibecodingTask.kt : echappe \n, \r, \t, \\, \" dans l'audit JSONL (les erreurs LLM contenaient des retours a la ligne qui cassaient le format JSONL)
+
+== Tests
+
+[cols="2,2"]
+|===
+| Suite | Resultat
+| JUnit5 VibecodingIntegrationTest | 8/8 PASS
+| Cucumber @epic_v_4 | 5/5 PASS
+| Regression JUnit5 (VibecodingTaskTest) | 31/31 PASS
+| Regression Cucumber @epic_v_0 | 7/7 PASS
+| Regression Cucumber @epic_v_1 | 5/5 PASS
+| Regression Cucumber @epic_v_2 | 4/4 PASS
+| Regression Cucumber @epic_v_3 | 11/11 PASS
+|===
+
+== EPIC V : 15/15 pts — TERMINE
+
+- V-0 ✅ Custom tools shell (ExecShellTool + ExecGradleTool)
+- V-1 ✅ VibecodingGraph (graphe koog 5 nœuds + VibecodingState)
+- V-2 ✅ VibecodingTask (ToolRegistry 7 tools + Gradle task)
+- V-3 ✅ Security constraints (sandbox path traversal + dryRun guard + audit trail)
+- V-4 ✅ Integration validation (test end-to-end projet reel ProjectBuilder)
+
+== Fichiers modifies
+
+- build.gradle.kts — +cucumberTestEpicV4
+- VibecodingTask.kt — +jsonlEscape() pour audit.jsonl valide
+- BACKLOG.adoc (modifie avant session, non commit)
+
+== Fichiers crees
+
+- src/test/features/epic_v_4_integration.feature
+- src/test/kotlin/codebase/koog/VibecodingIntegrationTest.kt
+- src/test/kotlin/codebase/scenarios/EpicV4CucumberRunner.kt
+- src/test/kotlin/codebase/scenarios/VibecodingIntegrationSteps.kt
+- src/test/kotlin/codebase/scenarios/VibecodingIntegrationWorld.kt
