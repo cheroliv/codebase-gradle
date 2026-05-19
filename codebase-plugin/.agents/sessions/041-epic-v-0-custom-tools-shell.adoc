@@ -1,0 +1,66 @@
+= Session 041 — EPIC V-0 Custom Tools Shell
+:date: 2026-05-19
+:score: 10/10
+
+== Contexte
+
+EPIC V-0 — Première session du pipeline Vibecoding (remplacement opencode par tâche Gradle koog).
+Création des 2 custom tools shell manquants (ExecShellTool + ExecGradleTool).
+
+== Actions
+
+. Cucumber @epic_v_0 — Feature 7 scénarios RED : exec valide, blacklist rm-rf/sudo, gradle valide/bloqué, timeout, stdout+stderr
+. PicoContainer World + Steps (VibecodingToolWorld + VibecodingToolSteps)
+. EpicV0CucumberRunner + cucumberTestEpicV0 task Gradle
+. ExecShellTool extends SimpleTool<Args> — blacklist 10 patterns, timeout 120s, stdout 8000 chars
+. ExecGradleTool extends SimpleTool<Args> — blacklist 4 patterns, timeout 120s
+. JUnit5 tests : 14/14 PASS (ExecShellToolTest 14 tests, ExecGradleToolTest 6 tests)
+. 3 bugs corrigés : companion object in standalone object, DuplicateStepDefinition, gradleWorkingDir
+
+== Résultats
+
+[cols="2,2,2"]
+|===
+| Test | Type | Résultat
+| Cucumber @epic_v_0 | BDD | 7/7 PASS
+| ExecShellToolTest | JUnit5 unitaire | 14/14 PASS
+| ExecGradleToolTest | JUnit5 unitaire | 6/6 PASS
+| compileKotlin | Build | OK
+|===
+
+== Fichiers créés/modifiés
+
+[cols="3,5"]
+|===
+| Fichier | Action
+| `src/main/kotlin/codebase/koog/tools/ExecShellTool.kt` | Créé — 89 lignes
+| `src/main/kotlin/codebase/koog/tools/ExecGradleTool.kt` | Créé — 66 lignes
+| `src/test/features/epic_v_0_custom_tools_shell.feature` | Créé — 7 scénarios
+| `src/test/kotlin/codebase/scenarios/VibecodingToolWorld.kt` | Créé — 14 lignes
+| `src/test/kotlin/codebase/scenarios/VibecodingToolSteps.kt` | Créé — 104 lignes
+| `src/test/kotlin/codebase/scenarios/EpicV0CucumberRunner.kt` | Créé — 18 lignes
+| `src/test/kotlin/codebase/koog/tools/ExecShellToolTest.kt` | Créé — 107 lignes
+| `src/test/kotlin/codebase/koog/tools/ExecGradleToolTest.kt` | Créé — 58 lignes
+| `build.gradle.kts` | Modifié — cucumberTestEpicV0 task
+|===
+
+== Leçons
+
+- koog `object` standalone n'accepte pas `companion object` → membres directs
+- Cucumber `@Then` unique par pattern — un seul `output contains {string}` pour shell et gradle
+- `ExecGradleTool` doit utiliser `user.dir` du vrai projet (pas `/tmp/workspace-root`)
+- `SecurityException` (pas `IllegalArgumentException`) pour les rejets de sécurité
+
+== EPIC V — État
+
+|===
+| Sous-EPIC | Statut | Pts
+| V-0 Custom tools shell | ✅ TERMINE (session 041) | 2/15
+| V-1 VibecodingGraph | À faire (session 042) | 3/15
+| V-2 VibecodingTask Gradle | À faire (session 043) | 5/15
+| V-3 Contraintes sécurité | À faire (session 043) | 2/15
+| V-4 Integration cross-borough | À faire (session 044) | 3/15
+|===
+
+[.text-right]
+*Fermé le 19 mai 2026 — Session 041.*

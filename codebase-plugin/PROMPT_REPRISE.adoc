@@ -1,36 +1,29 @@
-= PROMPT_REPRISE — Mission Session 040 L-3 PicoContainer Cucumber
+= PROMPT_REPRISE — Mission Session 042 EPIC V-1 VibecodingGraph
 :date: 2026-05-19
 
 == Contexte
 
-Session 039 fermée — EPIC L-3 core terminé :
-- KoogAugmentedContextGraph.execute() refactoré (lambdas partagées graphe+execute, zéro duplication)
-- PlanIntentionTask délégué à KoogAugmentedContextGraph
-- 7/7 tests koog PASS (5 L-3 + 2 L-1 régression)
-- Cucumber L-3 : 7 scénarios créés mais pas passants (pgvector cascade)
-- PicoContainer présent dans les dépendances mais inutilisé dans codebase-gradle
+Session 041 fermée — EPIC V-0 terminé :
+- ExecShellTool + ExecGradleTool créés (extends SimpleTool<Args>)
+- Blacklist bash 10 patterns + Gradle 4 patterns
+- 7/7 Cucumber @epic_v_0 PASS + 20/20 JUnit5 PASS
+- 2/15 pts EPIC V
 
-== Décisions persistées
+== Mission session 042
 
-. *Pattern Steps* : 4 boroughs utilisent PicoContainer (plantuml, slider, bakery, readme), codebase non
-. *AugmentedPlanningSteps* suit le pattern local (champs instance + @Before)
-. *cucumberTest classpath* aligné sur plantuml-gradle (test.output + main.output + jar)
+Créer VibecodingGraph.kt — graphe koog complet :
+1. buildContext→classify→plan→executeTools→sendToolResult→loop/FIN
+2. ToolRegistry 7 tools (5 koog built-in + ExecShellTool + ExecGradleTool)
+3. systemPrompt dynamique (intention + plan + workspaceRoot)
+4. Tests : JUnit5 (graphe compile, edges valides, Mermaid) + Cucumber @epic_v_1
 
-== Mission session 040
+== Fichiers à créer
 
-Rendre les 7 scénarios Cucumber L-3 passants :
-1. Migrer AugmentedPlanningSteps vers PicoContainer (class AugmentedPlanningSteps(private val world: AugmentedPlanningWorld))
-   OU garder le pattern local existant (pas d'injection)
-2. Lancer cucumberTest ciblé sur @epic_l_3 uniquement (sans pgvector)
-3. 7/7 PASS attendus
-
-== Fichiers à modifier
-
-- `src/test/kotlin/codebase/scenarios/AugmentedPlanningSteps.kt` — PicoContainer ou fix local
-- `src/test/features/epic_l_3_augmented_planning.feature` — tag @epic_l_3 déjà présent
+- `src/main/kotlin/codebase/koog/tools/VibecodingGraph.kt` — graphe koog
+- `src/test/kotlin/codebase/koog/tools/VibecodingGraphTest.kt` — JUnit5
+- `src/test/features/epic_v_1_vibecoding_graph.feature` — Cucumber
 
 == État du workspace
 
-- `codebase-plugin` : compile OK, 7/7 tests koog PASS
-- `langgraph4j` cohabitation toujours OK
-- 5/8 pts EPIC L (L-3 refactor core ✅, Cucumber 🔲)
+- `codebase-plugin` : compile OK, 20/20 JUnit5 PASS, 7/7 Cucumber V-0 PASS
+- EPIC V : 2/15 pts
