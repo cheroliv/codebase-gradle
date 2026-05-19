@@ -2,6 +2,8 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 036 | 2026-05-19 | feat | EPIC L-0 — Dépendances koog JetBrains (`ai.koog:koog-agents:0.8.0`). BOM + codebase-gradle catalog + build, cohabitation langgraph4j. Test unitaire KoogPlanningGraphTest (DSL miroir PlanningGraph actuel). Compilation OK. | 9/10
+| 035 | 2026-05-19 | documentation | EPIC K K-5 — INDEX.adoc synchronise taxonomie 4 verbes + metadata.json + convention over config. EPIC K ferme (K-0→K-5). | ✅
 | 034 | 2026-05-19 | architecture | EPIC L — Cadrage + Décision architecturale. Diagnostic baseline langgraph4j (7 classes, 357 lignes). ClassificationGraph (EPIC 13) non trouvé. Décision : démarrer L post-K-4/K-5. Architecture koog retenue : bibliothèque autonome `foundry/public/koog/` (Option A). Split-brain INDEX.adoc K-2 corrigé (codebase-gradle stale). PLAN_GLOBAL.adoc K-2/K-3 → TERMINÉ. | 9/10
 | 032 | 2026-05-19 | refactor | EPIC K K-1 Renommage taxonomie — `prepareContext`→`collectFromCodebase`, `assembleWorkspaceContext`→`collectCompositeContext`, `planIntention`→`generatePlan`. Groupes : collect (collectFromCodebase, collectCompositeContext), generate (generatePlan). 6 fichiers modifiés dans codebase-plugin, compile OK. | 10/10
 | 031b | 2026-05-18 | cadrage+propagation | EPIC K — Cadrage agile 7 ateliers + Propagation 8 docs jardin secret + Vague 1 partielle (K01 nommage ×4, K02 Metadata+Validator, K03 generateSPG Manhattan). 14 fichiers créés, 8 modifiés. TDD: 19 tests JUnit5 Metadata+Validator PASS + 1 test GenerateSPGTask PASS + feature Cucumber. DAG calculé: critical path 18 pts, 6 sessions ~6j. | 10/10

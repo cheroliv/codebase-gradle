@@ -1,0 +1,46 @@
+= Session 036 — EPIC L-0 : Dépendances koog (JetBrains) + Test unitaire DSL
+:date: 2026-05-19
+:type: feat
+:score: 9/10
+
+== Contexte
+
+EPIC L — Migration langgraph4j → koog+langchain4j.
+Découverte : koog n'est PAS un projet à créer mais JetBrains/koog (`ai.koog:koog-agents:0.8.0`, 4.2k stars, Apache 2.0).
+Framework Kotlin agentique complet — strategy DSL, graph-based agents, Ollama nativement supporté.
+
+== Correction de trajectoire
+
+Initialement parti pour créer une librairie `foundry/public/koog/`. Supprimé après découverte de JetBrains/koog.
+Recherche web : docs.koog.ai, GitHub JetBrains/koog, Maven Central ai.koog:koog-agents:0.8.0.
+
+== Réalisations
+
+=== L-0 — Dépendances koog
+
+- workspace-bom : `ai.koog:koog-agents:0.8.0` ajouté dans `libs.versions.toml` + `build.gradle.kts`
+- codebase-gradle catalog : version `koog = "0.8.0"`, lib `koog-agents`, bundle `koog`
+- codebase-gradle build : `libs.bundles.koog` ajouté CÔTE À CÔTÉ avec `libs.bundles.langgraph4j` (cohabitation, pas de suppression brutale)
+- langchain4j préservé (Ollama, pgvector, RAG) — koog remplace UNIQUEMENT l'orchestrateur, pas le LLM
+- Compilation OK (les deux dépendances ensemble)
+
+=== Test unitaire KoogPlanningGraphTest
+
+- Baby-step TDD : graphe koog sans LLM, nœuds mockés
+- Structure miroir du PlanningGraph actuel (classify → flash/pro → format)
+- Validation du DSL koog (strategy, node, edge, onCondition, forwardTo)
+- Validation asMermaidDiagram() pour visualisation
+- Test compile ✅
+
+== Fichiers impactés
+
+- `workspace-bom/gradle/libs.versions.toml` : +koog version 0.8.0
+- `workspace-bom/build.gradle.kts` : +ai.koog:koog-agents constraint
+- `codebase-gradle/codebase-plugin/gradle/libs.versions.toml` : koog à côté de langgraph4j
+- `codebase-gradle/codebase-plugin/build.gradle.kts` : +libs.bundles.koog
+- `codebase-gradle/codebase-plugin/src/test/kotlin/codebase/koog/KoogPlanningGraphTest.kt` : NEW
+
+== Prochaine session
+
+Session 037 — L-1 : Migrer PlanningGraph → koog strategy DSL.
+Test KoogPlanningGraphTest passe → commencer la migration codebase.langgraph/PlanningGraph.kt.

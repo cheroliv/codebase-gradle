@@ -4,9 +4,11 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-19
-_Session terminee_ : 034 — EPIC L Cadrage + Décision architecturale (koog autonome, post-K-4/K-5). Baseline langgraph4j 7 classes/357 lignes. Split-brain K-2 corrigé.
-_Session en cours_ : 035 — EPIC K K-4 Convention over configuration (Manhattan + Newark, pipeline SPG→SPD)
+_Derniere mise a jour_ : 2026-05-19 (EPIC L-0 terminé, dépendances koog JetBrains)
+_Session terminee_ : 034 — EPIC L Cadrage + Décision architecturale. Baseline langgraph4j 7 classes/357 lignes. Split-brain K-2 corrigé.
+_Session terminee_ : 035 — EPIC K complet (K-0→K-5, toutes les phases ✅)
+_Session terminee_ : 036 — EPIC L-0 Dépendances koog (`ai.koog:koog-agents:0.8.0`) + test unitaire DSL. Compilation OK.
+_Session en cours_ : 037 — EPIC L-1 koog PlanningGraph (migration code existant)
 
 '''
 == REGLES ABSOLUES (resume)
@@ -16,6 +18,20 @@ _Session en cours_ : 035 — EPIC K K-4 Convention over configuration (Manhattan
 === 1b. FICHIERS DE CONFIGURATION — REGLE ABSOLUE DE SURETE (backup avant modif)
 === 2. TESTS EN FIN DE SESSION — INTERDICTION FORMELLE
 === 3. PROCEDURE DE FIN DE SESSION — 6 ETAPES OBLIGATOIRES
+
+'''
+== EPIC K — Taxonomie Workspace
+
+[cols="1,3,2,3", options="header"]
+|===
+| Phase | Livrable | Statut | Boroughs
+| K-0 | Document Jardin Secret — TAXONOMIE_WORKSPACE.adoc | ✅ 2026-05-18 | Workspace root
+| K-1 | Renommage 4 verbes (GENERER/COLLECTER/TRANSFORMER/DÉPLOYER) | ✅ 2026-05-19 | Tous N2
+| K-2 | Format pivot — Metadata.kt + metadataExpectedPath engine | ✅ 2026-05-19 | 4 boroughs + engine
+| K-3 | Configuration par domaine — CodebaseExtension | ✅ 2026-05-18 | Codebase
+| K-4 | Convention over configuration SPG→SPD | ✅ 2026-05-19 | Newark (training 018) + Manhattan (planner 019)
+| K-5 | Documentation — MàJ INDEX.adoc boroughs | ✅ TERMINE (2026-05-19) | Gouvernance
+|===
 
 '''
 == Sessions
@@ -74,8 +90,8 @@ _Session en cours_ : 035 — EPIC K K-4 Convention over configuration (Manhattan
 | EPIC 11 | LangGraph4j — chaines de pensees | A FAIRE | P1
 | EPIC 12 | Dilution Article de Blog automatique | A FAIRE | P1
 | EPIC 13 | LangGraph4j Classifieur Vision/Opinion | A FAIRE | P1
-| EPIC K | Ontologie Workspace — Taxonomie unifiée (4 verbes, format pivot, convention over configuration) | EN COURS — K-0 ✅, K-1 ✅, K-2 ✅, K-3 ✅. Reste : K-4 (convention over config SPG→SPD, 3j) + K-5 (documentation, 1j) | P0
-| EPIC L | Migration langgraph4j → koog+langchain4j — DSL Kotlin pur (StateGraph/ConditionalEdges/Checkpoints) + wrapper langchain4j (LLM/embeddings/pgvector). Remplace EPIC 11+11bis+13. 6 sous-EPICs (L-0→L-5, 31 pts). Déclenchement : post-K-4+K-5. EPIC 11/13 baseline ✅ (sessions 028-030) + ClassificationGraph (EPIC 13, code non trouvé). | CADRE — L-0→L-5 À faire. Bloqué par K-4 (3j). | P1
+| EPIC K | Ontologie Workspace — Taxonomie unifiée (4 verbes, format pivot, convention over configuration) | ✅ TERMINE (2026-05-19). K-0→K-5 toutes les 6 phases terminées. | P0
+| EPIC L | Migration langgraph4j → koog+langchain4j — DSL Kotlin JetBrains/koog (`ai.koog:koog-agents:0.8.0`). Koog = orchestrateur uniquement, langchain4j = exécutant (LLM/RAG/pgvector) préservé. 3 sous-EPICs restructurés (L-0→L-3, ~8 pts). L-0 ✅ (dépendances + test unitaire DSL). Remplace EPIC 11+11bis+13. | EN COURS — L-0 ✅, L-1→L-3 🔲 | P0
 |===
 
 '''
@@ -114,3 +130,5 @@ _Session en cours_ : 035 — EPIC K K-4 Convention over configuration (Manhattan
 | waiter-gradle | `foundry/OSS/waiter-gradle/` | 0 (bootstrap) | 2026-05-11
 | training-gradle | `foundry/OSS/training-gradle/` | 0 (bootstrap) | 2026-05-12
 |===
+
+Voir aussi : `TAXONOMIE_WORKSPACE.adoc` (racine workspace) pour l'ontologie complete.

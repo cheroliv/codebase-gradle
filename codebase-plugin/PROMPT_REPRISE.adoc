@@ -1,26 +1,39 @@
-= PROMPT_REPRISE — Mission Session 034 (fermée) → 035 K-4
+= PROMPT_REPRISE — Mission Session 037 L-1 koog PlanningGraph
 :date: 2026-05-19
 
 == Contexte
 
-Session 034 fermée — EPIC L cadrage + décision architecturale.
-EPIC K K-2 ✅ TERMINÉ (session 017 configuration/, session 033 codebase-gradle INDEX corrigé).
-K-3 ✅ TERMINÉ. Reste : K-4 (convention over config, 3j) + K-5 (doc, 1j).
+Session 036 fermée — EPIC L-0 terminé. Dépendances koog (JetBrains) ajoutées dans BOM + codebase-gradle.
+Koog n'est PAS un projet à créer — c'est `ai.koog:koog-agents:0.8.0` (JetBrains, 4.2k stars, Apache 2.0).
+Framework Kotlin agentique avec strategy DSL, graph-based agents, Ollama nativement supporté.
+Koog cohabite avec langgraph4j (pas de suppression brutale). langchain4j préservé (LLM/RAG/pgvector).
 
-== Session 034 — Décisions persistées
+== Décisions persistées
 
-. *Déclenchement EPIC L* : post-K-4+K-5 (~4j). Contrat nommage figé depuis K-1.
-. *Architecture koog* : Option A — bibliothèque autonome `foundry/public/koog/`, `cccp.education:koog`.
-. *Baseline langgraph4j* : 7 classes/357 lignes (PlanningGraph, ClassifyNode, ProDecomposeNode, FlashDecomposeNode, FormatNode, PlanningState, Plan). ClassificationGraph (EPIC 13) non trouvé.
-. *Split-brain corrigé* : INDEX.adoc codebase-gradle (K-2 stale) + PLAN_GLOBAL.adoc (K-2/K-3).
+. *Koog = orchestrateur uniquement* — remplace `org.bsc.langgraph4j.*`, pas langchain4j.
+  Le wrapper koog sur langchain4j n'est plus nécessaire : koog intègre nativement ollama.
+. *Test unitaire KoogPlanningGraphTest.kt* — valide la structure du graphe (classify → flash/pro → format → END).
+. *Prochaine étape L-1* : migrer `codebase.langgraph.PlanningGraph` → koog `strategy()` DSL.
 
-== Mission session 035 (prochaine)
+== Mission session 037 (prochaine)
 
-EPIC K K-4 — Convention over configuration SPG→SPD (Manhattan + Newark).
-Inférence metadata depuis structure filesystem.
+EPIC L-1 — Migrer PlanningGraph langgraph4j → koog strategy DSL.
+Conserver ClassifyNode/ProDecomposeNode/FlashDecomposeNode/FormatNode.
+Adapter les appels LLM : `OllamaChatModel` (langchain4j) → `simpleOllamaAIExecutor()` (koog).
+Garder `Plan.kt` (data classes) inchangé.
+
+== Fichiers à migrer (session 036 baseline)
+
+- `codebase/langgraph/PlanningGraph.kt` → `codebase/koog/KoogPlanningGraph.kt` (55 lignes)
+- `codebase/langgraph/PlanningState.kt` → intégré dans graphe koog
+- `codebase/langgraph/ClassifyNode.kt` → nœud custom koog
+- `codebase/langgraph/ProDecomposeNode.kt` → nœud custom koog
+- `codebase/langgraph/FlashDecomposeNode.kt` → nœud custom koog
+- `codebase/langgraph/FormatNode.kt` → nœud custom koog
+- `codebase/langgraph/Plan.kt` → inchangé (move to `codebase/koog/`)
 
 == État du workspace
 
-- `codebase-plugin` : compilable, K-1 ✅, K-2 ✅ (metadata.json consommateur), K-3 ✅
-- `koog/` : à créer (post-K-5)
-- Session 034 archivée : `.agents/sessions/034-epic-l-cadrage-decision.adoc`
+- `codebase-plugin` : compile OK (langgraph4j + koog cohabitation)
+- `workspace-bom` : koog 0.8.0 ajouté
+- `KoogPlanningGraphTest.kt` : test structure miroir, 2 tests (build + mermaid)
