@@ -11,8 +11,8 @@ class BatchValidationSteps {
     private val log = LoggerFactory.getLogger(BatchValidationSteps::class.java)
     private val ctx = PgVectorTestContext
 
-    @When("I tokenize all dataset files into sentence-level chunks")
-    fun `tokenize all dataset files`() {
+    @When("I tokenize all dataset files into chunks for batch validation")
+    fun `tokenize all dataset files for batch`() {
         val datasetDir = java.io.File(ctx.DATASETS_DIR)
         val allFiles = datasetDir.listFiles { f -> f.isFile && !f.name.startsWith(".") }?.sortedBy { it.name }
             ?: throw AssertionError("No files found in ${ctx.DATASETS_DIR}")
@@ -125,7 +125,7 @@ class BatchValidationSteps {
         log.info("Confirmed: no raw secrets in chunk_text")
     }
 
-    @Then("the top result is from a Kotlin source file")
+    @Then("the top result is from a Kotlin source file in batch validation")
     fun `top result is from Kotlin file`() {
         val top = ctx.topResults.first()
         assert(top.text.startsWith("(") && ".kt)" in top.text) {

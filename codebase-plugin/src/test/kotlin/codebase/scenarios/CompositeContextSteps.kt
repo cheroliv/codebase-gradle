@@ -19,7 +19,7 @@ class CompositeContextSteps {
     private val ctx = PgVectorTestContext
     private var composite: CompositeContext? = null
 
-    @When("I build a CompositeContext with the question {string} and budget {int}/{int}/{int}/{int}")
+    @When("I build a CompositeContext with the question {string} and budget {int}\\/{int}\\/{int}\\/{int}")
     fun `build CompositeContext`(question: String, eagerPct: Int, ragPct: Int, graphifyPct: Int, overheadPct: Int) {
         val store = VectorStore(ctx.jdbcUrl(), ctx.jdbcUser(), ctx.jdbcPassword())
         val pipeline = EmbeddingPipeline(store)

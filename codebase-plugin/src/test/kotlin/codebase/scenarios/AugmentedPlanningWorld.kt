@@ -10,26 +10,16 @@ import java.io.File
  *
  * Pattern aligné sur plantuml-gradle (PlantumlWorld) :
  * - Injection par constructeur dans les Steps
- * - État mutable partagé entre les scénarios (réinitialisé dans @Before)
- * - Pas de singleton global — propre à chaque scénario
+ * - État mutable partagé entre les scénarios
+ * - PicoContainer crée une nouvelle instance par scénario → pas besoin de reset()
+ * - Le graphe est initialisé paresseusement (appel LLM évité tant que `execute()` n'est pas appelé)
  *
  * L-3 : introduit pour les tests Cucumber du pipeline KoogAugmentedContextGraph.
  */
 class AugmentedPlanningWorld {
 
-    var workspaceRoot: File = File("/tmp/augmented-planning-test")
-    var intention = ""
+    val workspaceRoot: File = File("/tmp/augmented-planning-test").also { it.mkdirs() }
+    var intention: String = ""
     var resultState: AugmentedState? = null
-    var graph: KoogAugmentedContextGraph? = null
-
-    /**
-     * Réinitialise le World entre chaque scénario.
-     * Appelé par une Step @Before dans AugmentedPlanningSteps.
-     */
-    fun reset() {
-        workspaceRoot = File("/tmp/augmented-planning-test")
-        intention = ""
-        resultState = null
-        graph = null
-    }
+    val graph: KoogAugmentedContextGraph by lazy { KoogAugmentedContextGraph() }
 }

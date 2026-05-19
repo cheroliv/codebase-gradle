@@ -1,6 +1,9 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : 38 scénarios Cucumber (30 EPIC 9 + 4 EPIC 2/4 @wip + 7 L-3 @epic_l_3) + 33 tests JUnit5 PASS (8 EPIC 10 + 19 EPIC K Metadata/Validator + 1 GenerateSPGTask + 5 L-3 KoogAugmentedContextGraph). EPIC L (koog) : 7/7 JUnit5 PASS (2 L-1 KoogPlanningGraph + 5 L-3 KoogAugmentedContextGraph).
+_Statut_ : 38 scénarios Cucumber (30 EPIC 9 + 4 EPIC 2/4 @wip + 7 L-3 @epic_l_3) + 33 tests JUnit5 PASS (8 EPIC 10 + 19 EPIC K Metadata/Validator + 1 GenerateSPGTask + 5 L-3 KoogAugmentedContextGraph). EPIC L (koog) : 7/7 JUnit5 PASS + 7/7 Cucumber @epic_l_3 PASS (EpicL3CucumberRunner).
+
+| Session | Fichiers testes | Couverture | Notes
+| 040 | `AugmentedPlanningSteps.kt` + `AugmentedPlanningWorld.kt` (Cucumber) | 7/7 scenarios PASS | EPIC L-3 PicoContainer — Pattern standardise (AugmentedPlanningWorld injecte par constructeur). 3 bugs glue corriges (CucumberExpression {int}/ + 2 DuplicateStep). buildSrc supprime. <|
 
 | Session | Fichiers testes | Couverture | Notes
 | 039 | `KoogAugmentedContextGraph.kt` (JUnit5) | 5 tests PASS | EPIC L-3 : execute() remplace processState(), lambdas partagées avec nœuds graphe (buildContextNode/classifyNode/planNode), classification simple/complexe heuristique, état compositeContext+plan fields. 5/5 PASS (3 adaptés + 2 nouveaux). Régression L-1 (KoogPlanningGraph) : 2/2 PASS.
