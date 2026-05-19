@@ -1,39 +1,35 @@
-= PROMPT_REPRISE — Mission Session 037 L-1 koog PlanningGraph
+= PROMPT_REPRISE — Mission Session 038 L-2 koog+langchain4j Contexte Augmenté
 :date: 2026-05-19
 
 == Contexte
 
-Session 036 fermée — EPIC L-0 terminé. Dépendances koog (JetBrains) ajoutées dans BOM + codebase-gradle.
-Koog n'est PAS un projet à créer — c'est `ai.koog:koog-agents:0.8.0` (JetBrains, 4.2k stars, Apache 2.0).
-Framework Kotlin agentique avec strategy DSL, graph-based agents, Ollama nativement supporté.
-Koog cohabite avec langgraph4j (pas de suppression brutale). langchain4j préservé (LLM/RAG/pgvector).
+Session 037 (L-1) fermée — orchestrateur langgraph4j → koog migré avec succès.
+KoogPlanningGraph.kt : strategy{} DSL, Plan/PlanState data classes, OllamaChatModel langchain4j préservé.
+L-1 commit baf6a3c push OK. 3/8 pts EPIC L complétés.
 
 == Décisions persistées
 
-. *Koog = orchestrateur uniquement* — remplace `org.bsc.langgraph4j.*`, pas langchain4j.
-  Le wrapper koog sur langchain4j n'est plus nécessaire : koog intègre nativement ollama.
-. *Test unitaire KoogPlanningGraphTest.kt* — valide la structure du graphe (classify → flash/pro → format → END).
-. *Prochaine étape L-1* : migrer `codebase.langgraph.PlanningGraph` → koog `strategy()` DSL.
+. *Koog = orchestrateur* — remplace `org.bsc.langgraph4j.*`
+. *langchain4j = scope opérationnel* — OllamaChatModel, RAG pgvector, embeddings, vector stores
+. *Wrapper koog+langchain4j (L-2)* — koog injecte le contexte augmenté (CompositeContext) dans ses nœuds
+. *Baby-step* : 1 variable par session. L-2 change le scope, pas l'orchestrateur.
 
-== Mission session 037 (prochaine)
+== Mission session 038 (prochaine)
 
-EPIC L-1 — Migrer PlanningGraph langgraph4j → koog strategy DSL.
-Conserver ClassifyNode/ProDecomposeNode/FlashDecomposeNode/FormatNode.
-Adapter les appels LLM : `OllamaChatModel` (langchain4j) → `simpleOllamaAIExecutor()` (koog).
-Garder `Plan.kt` (data classes) inchangé.
+EPIC L-2 — Wrapper koog autour de langchain4j pour le contexte augmenté.
+Injecter CompositeContext (RAG pgvector + embeddings + vector stores + knowledge graph)
+dans les nœuds koog. Remplacer OllamaChatModel par les nœuds LLM natifs koog (nodeLLMSendMessage).
+Garder Plan.kt et PlanState inchangés.
 
-== Fichiers à migrer (session 036 baseline)
+== Fichiers à modifier
 
-- `codebase/langgraph/PlanningGraph.kt` → `codebase/koog/KoogPlanningGraph.kt` (55 lignes)
-- `codebase/langgraph/PlanningState.kt` → intégré dans graphe koog
-- `codebase/langgraph/ClassifyNode.kt` → nœud custom koog
-- `codebase/langgraph/ProDecomposeNode.kt` → nœud custom koog
-- `codebase/langgraph/FlashDecomposeNode.kt` → nœud custom koog
-- `codebase/langgraph/FormatNode.kt` → nœud custom koog
-- `codebase/langgraph/Plan.kt` → inchangé (move to `codebase/koog/`)
+- `codebase/koog/KoogPlanningGraph.kt` — remplacer OllamaChatModel → appels LLM natifs koog
+- Ajouter dépendance koog prompt-executor-ollama si nécessaire
+- Tests : adapter KoogPlanningGraphTest pour les nœuds LLM koog
 
 == État du workspace
 
-- `codebase-plugin` : compile OK (langgraph4j + koog cohabitation)
-- `workspace-bom` : koog 0.8.0 ajouté
-- `KoogPlanningGraphTest.kt` : test structure miroir, 2 tests (build + mermaid)
+- `codebase-plugin` : compile OK, 2/2 tests koog PASS
+- `workspace-bom` : koog 0.8.0
+- `langgraph4j` cohabitation toujours OK (non supprimé)
+- L-1 commit baf6a3c push OK

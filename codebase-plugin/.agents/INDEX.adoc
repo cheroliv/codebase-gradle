@@ -4,11 +4,12 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-19 (EPIC L-0 terminé, dépendances koog JetBrains)
+_Derniere mise a jour_ : 2026-05-19 (EPIC L-1 terminé, migration orchestrateur koog DSL)
 _Session terminee_ : 034 — EPIC L Cadrage + Décision architecturale. Baseline langgraph4j 7 classes/357 lignes. Split-brain K-2 corrigé.
 _Session terminee_ : 035 — EPIC K complet (K-0→K-5, toutes les phases ✅)
 _Session terminee_ : 036 — EPIC L-0 Dépendances koog (`ai.koog:koog-agents:0.8.0`) + test unitaire DSL. Compilation OK.
-_Session en cours_ : 037 — EPIC L-1 koog PlanningGraph (migration code existant)
+_Session terminee_ : 037 (022 workspace) — EPIC L-1 Migre PlanningGraph langgraph4j → KoogPlanningGraph koog DSL. 278 lignes, Plan/PlanState data classes. OllamaChatModel langchain4j preservé. PlannerIntegration + PlanIntentionTask migres. 2/2 tests PASS. Commit baf6a3c push OK.
+_Session en cours_ : 038 — EPIC L-2 koog+langchain4j wrapper contexte augmenté (RAG pgvector, embeddings, vector stores)
 
 '''
 == REGLES ABSOLUES (resume)
