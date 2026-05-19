@@ -1,7 +1,8 @@
 package codebase.rag
 
+import codebase.koog.AugmentedState
+import codebase.koog.KoogAugmentedContextGraph
 import codebase.koog.Plan
-import codebase.koog.PlanState
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
@@ -33,6 +34,10 @@ abstract class PlanIntentionTask : DefaultTask() {
     @get:Optional
     abstract val ragQuestion: Property<String>
 
+    /**
+     * L-3 : délégué à [KoogAugmentedContextGraph] — le pipeline buildContext → classify → plan
+     * est exécuté nativement par le wrapper koog+langchain4j. Zéro duplication avec les nœuds du graphe.
+     */
     @TaskAction
     fun execute() {
         val intent = intention.get()
@@ -43,40 +48,25 @@ abstract class PlanIntentionTask : DefaultTask() {
         logger.lifecycle("[generatePlan] Intention : {}", intent)
         logger.lifecycle("[generatePlan] Workspace : {}", rootDir.absolutePath)
 
-        // Étape 1 : Construire le contexte composite (EAGER + RAG + Graphify)
-        logger.lifecycle("[generatePlan] Phase 1/3 — Construction contexte composite...")
-        val contextConfig = CompositeContextConfig()
-        val cfg = PgVectorConfig.fromEnv()
-        val store = cfg.toVectorStore()
+        // Construire l'état initial
+        val initialState = AugmentedState(
+            intention = intent,
+            workspaceRoot = rootDir.absolutePath
+        )
 
-        try {
-            store.initSchema()
-            val existingDocCount = store.countDocuments()
-            if (existingDocCount == 0) {
-                logger.lifecycle("[generatePlan] Aucun document indexé — indexation automatique...")
-                indexWorkspaceSources(rootDir, store, rootDir.name)
-            } else {
-                logger.lifecycle("[generatePlan] {} documents déjà indexés — skip indexation", existingDocCount)
-            }
-        } catch (e: Exception) {
-            logger.warn("[generatePlan] pgvector indisponible ({}). Continuation avec EAGER+Graphify uniquement.", e.message)
-        }
+        // Exécuter le pipeline KoogAugmentedContextGraph (buildContext → classify → plan)
+        val graph = KoogAugmentedContextGraph()
+        val resultState = graph.execute(initialState)
 
-        val pipeline = EmbeddingPipeline(store)
-        val builder = CompositeContextBuilder(rootDir, store, pipeline, contextConfig)
-        val compositeContext = builder.build(question)
-
-        logger.lifecycle("[generatePlan] Contexte : EAGER={}B, RAG={}B, Graphify={}B",
-            compositeContext.eagerSection.length,
-            compositeContext.ragSection.length,
-            compositeContext.graphifySection.length)
-
-        // Étape 2 : Classification + Décomposition via langgraph4j
-        logger.lifecycle("[generatePlan] Phase 2/3 — Classification + Décomposition (langgraph4j)...")
-        val result = PlannerIntegration.plan(intent, compositeContext)
+        logger.lifecycle(
+            "[generatePlan] Classification : {} (error={}, planError={})",
+            resultState.classification,
+            resultState.error ?: "none",
+            resultState.planError ?: "none"
+        )
 
         // Générer le metadata.json du plan (méta-communication typée Niveau 2)
-        val planMetadata = result.toPlanMetadata(rootDir.name)
+        val planMetadata = resultState.toPlanMetadata(rootDir.name)
         if (planMetadata != null) {
             val metadataFile = output.parentFile.resolve("${rootDir.name}-plan-metadata.json")
             metadataFile.parentFile.mkdirs()
@@ -93,9 +83,8 @@ abstract class PlanIntentionTask : DefaultTask() {
             }
         }
 
-        // Étape 3 : Formater la sortie
-        logger.lifecycle("[generatePlan] Phase 3/3 — Formatage sortie...")
-        val formattedOutput = formatOutput(intent, result)
+        // Formater la sortie
+        val formattedOutput = formatOutput(intent, resultState)
         output.parentFile.mkdirs()
         output.writeText(formattedOutput)
 
@@ -110,7 +99,7 @@ abstract class PlanIntentionTask : DefaultTask() {
         println("=" .repeat(60))
     }
 
-    private fun formatOutput(intention: String, result: PlanState): String {
+    private fun formatOutput(intention: String, result: AugmentedState): String {
         val sb = StringBuilder()
         sb.appendLine("=" .repeat(60))
         sb.appendLine("PLAN — $intention")
@@ -118,7 +107,7 @@ abstract class PlanIntentionTask : DefaultTask() {
         sb.appendLine("=" .repeat(60))
         sb.appendLine()
 
-        if (result.error != null) {
+        if (result.error != null && result.plan == null) {
             sb.appendLine("ERREUR : ${result.error}")
             sb.appendLine()
             sb.appendLine("JSON brut reçu du LLM :")
@@ -145,6 +134,9 @@ abstract class PlanIntentionTask : DefaultTask() {
             }
         } else {
             sb.appendLine("Aucun plan généré (ni erreur, ni résultat).")
+            if (result.planError != null) {
+                sb.appendLine("Cause : ${result.planError}")
+            }
         }
         return sb.toString()
     }

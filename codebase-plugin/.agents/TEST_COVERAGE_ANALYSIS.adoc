@@ -1,9 +1,10 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : 34 scénarios Cucumber (30 EPIC 9 + 4 EPIC 2/4 @wip) + 28 tests JUnit5 PASS (8 EPIC 10 + 19 EPIC K Metadata/Validator + 1 GenerateSPGTask) + Feature Cucumber epic_k_metadata_contract (9 scénarios, @epic_k taggué). EPIC L (koog) : 5/5 JUnit5 PASS (2 L-1 KoogPlanningGraph + 3 L-2 KoogAugmentedContextGraph).
+_Statut_ : 38 scénarios Cucumber (30 EPIC 9 + 4 EPIC 2/4 @wip + 7 L-3 @epic_l_3) + 33 tests JUnit5 PASS (8 EPIC 10 + 19 EPIC K Metadata/Validator + 1 GenerateSPGTask + 5 L-3 KoogAugmentedContextGraph). EPIC L (koog) : 7/7 JUnit5 PASS (2 L-1 KoogPlanningGraph + 5 L-3 KoogAugmentedContextGraph).
 
 | Session | Fichiers testes | Couverture | Notes
-| 038 | `KoogAugmentedContextGraph.kt` + `AugmentedState.kt` (JUnit5) | 3 tests PASS | EPIC L-2 : structure graphe koog (buildContext, plan, edges), transitions sans pgvector (zéro crash), état (compositeContext nullable, plan nullable, error nullable). Résilience validée : pgvector down → contexte partiel → pas d'exception.
+| 039 | `KoogAugmentedContextGraph.kt` (JUnit5) | 5 tests PASS | EPIC L-3 : execute() remplace processState(), lambdas partagées avec nœuds graphe (buildContextNode/classifyNode/planNode), classification simple/complexe heuristique, état compositeContext+plan fields. 5/5 PASS (3 adaptés + 2 nouveaux). Régression L-1 (KoogPlanningGraph) : 2/2 PASS.
+| 038 | `KoogAugmentedContextGraph.kt` + `AugmentedState.kt` (JUnit5) | 3 tests PASS | EPIC L-2 : structure graphe koog, transitions sans pgvector, état nullable. Résilience validée : pgvector down → contexte partiel → pas d'exception.
 | 037 | `KoogPlanningGraph.kt` (JUnit5) | 2 tests PASS | EPIC L-1 : build planning graph with koog DSL (nœuds + Mermaid edges). Régression L-2 : toujours PASS.
 
 | Session | Fichiers testes | Couverture | Notes

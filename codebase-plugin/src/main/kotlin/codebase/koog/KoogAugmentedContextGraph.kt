@@ -40,40 +40,27 @@ class KoogAugmentedContextGraph {
     private val log = LoggerFactory.getLogger(KoogAugmentedContextGraph::class.java)
     private val planningGraph = KoogPlanningGraph()
 
+    /**
+     * Graphe koog déclaratif — utilisé pour la visualisation Mermaid et l'intégration future
+     * avec `AIAgent` (sans LLM, `NoLLMProvider`). Chaque nœud délègue à une méthode privée
+     * de cette classe, garantissant que la logique métier n'est pas dupliquée.
+     *
+     * L-3 : le graphe et `execute()` partagent les mêmes lambdas — pas de duplication.
+     */
     val graph: AIAgentGraphStrategy<AugmentedState, AugmentedState> = strategy<AugmentedState, AugmentedState>(
         name = "augmented-planning",
         toolSelectionStrategy = ToolSelectionStrategy.NONE
     ) {
         val buildContext by node<AugmentedState, AugmentedState> { state ->
-            val context = buildCompositeContext(state.workspaceRoot, state.intention)
-            state.copy(compositeContext = context)
+            buildContextNode(state)
         }
 
         val classify by node<AugmentedState, AugmentedState> { state ->
-            val classification = if (state.compositeContext != null) {
-                classifyIntention(state.intention)
-            } else {
-                "simple"
-            }
-            state.copy(classification = classification)
+            classifyNode(state)
         }
 
         val plan by node<AugmentedState, AugmentedState> { state ->
-            val ctx = state.compositeContext
-            if (ctx == null) {
-                state.copy(
-                    planError = "CompositeContext unavailable — cannot generate plan",
-                    error = "ContextBuildFailed"
-                )
-            } else {
-                val planState = planningGraph.execute(state.intention, ctx)
-                state.copy(
-                    planJson = planState.planJson,
-                    plan = planState.plan,
-                    planError = planState.error,
-                    error = planState.error
-                )
-            }
+            planNode(state)
         }
 
         edge(nodeStart forwardTo buildContext onCondition { _ -> true } transformed { it })
@@ -83,53 +70,39 @@ class KoogAugmentedContextGraph {
     }
 
     /**
-     * Point d'entrée principal — exécute le pipeline complet.
+     * Point d'entrée principal — pipeline complet : buildContext → classify → plan.
      *
      * Résilient : chaque étape catch ses erreurs. pgvector down → contexte null, pas de crash.
      * La classification utilise une heuristique simple (pas d'appel LLM supplémentaire).
+     *
+     * L-3 : n'appelle plus `processState()` manuel. Chaque étape délègue à la même méthode
+     * privée que le nœud du graphe koog — zéro duplication.
      */
-    fun processState(initialState: AugmentedState): AugmentedState {
-        var state = initialState
-
-        // Étape 1 : buildContext (RAG/pgvector via langchain4j)
-        state = try {
-            val context = buildCompositeContext(state.workspaceRoot, state.intention)
-            state.copy(compositeContext = context)
+    fun execute(initialState: AugmentedState): AugmentedState {
+        // Étape 1 : buildContext
+        var state = try {
+            buildContextNode(initialState)
         } catch (e: Exception) {
             log.warn("[KoogAugmentedContextGraph] buildContext failed (pgvector down?): {}", e.message)
-            state.copy(compositeContext = null, error = "BuildContextFailed: ${e.message}")
+            initialState.copy(compositeContext = null, error = "BuildContextFailed: ${e.message}")
         }
 
-        // Étape 2 : classify (heuristique, pas d'appel LLM)
-        state = state.copy(
-            classification = if (state.compositeContext != null) {
-                classifyIntention(state.intention)
-            } else {
-                "simple"
-            }
-        )
+        // Étape 2 : classify
+        state = try {
+            classifyNode(state)
+        } catch (e: Exception) {
+            log.warn("[KoogAugmentedContextGraph] classify failed: {}", e.message)
+            state.copy(classification = "simple", error = state.error ?: "ClassifyFailed: ${e.message}")
+        }
 
-        // Étape 3 : plan (KoogPlanningGraph)
-        state = if (state.compositeContext != null) {
-            try {
-                val planState = planningGraph.execute(state.intention, state.compositeContext)
-                state.copy(
-                    planJson = planState.planJson,
-                    plan = planState.plan,
-                    planError = planState.error,
-                    error = planState.error
-                )
-            } catch (e: Exception) {
-                log.error("[KoogAugmentedContextGraph] plan failed: {}", e.message)
-                state.copy(
-                    planError = "PlanExecutionFailed: ${e.message}",
-                    error = "PlanExecutionFailed: ${e.message}"
-                )
-            }
-        } else {
+        // Étape 3 : plan
+        state = try {
+            planNode(state)
+        } catch (e: Exception) {
+            log.error("[KoogAugmentedContextGraph] plan failed: {}", e.message)
             state.copy(
-                planError = "CompositeContext is null — cannot generate plan",
-                error = "ContextUnavailable"
+                planError = "PlanExecutionFailed: ${e.message}",
+                error = "PlanExecutionFailed: ${e.message}"
             )
         }
 
@@ -138,7 +111,51 @@ class KoogAugmentedContextGraph {
 
     fun asMermaidDiagram(): String = runBlocking { graph.asMermaidDiagram() }
 
-    // === Méthodes privées — pont koog → langchain4j (RAG/pgvector) ===
+    // === Méthodes privées — partagées entre le graphe koog et execute() ===
+
+    /**
+     * Nœud 1 : buildContext — RAG/pgvector via langchain4j.
+     * Appelé par le graphe koog ET par execute() — pas de duplication.
+     */
+    private fun buildContextNode(state: AugmentedState): AugmentedState {
+        val context = buildCompositeContext(state.workspaceRoot, state.intention)
+        return state.copy(compositeContext = context)
+    }
+
+    /**
+     * Nœud 2 : classify — heuristique simple sans appel LLM.
+     * Appelé par le graphe koog ET par execute() — pas de duplication.
+     */
+    private fun classifyNode(state: AugmentedState): AugmentedState {
+        val classification = if (state.compositeContext != null) {
+            classifyIntention(state.intention)
+        } else {
+            "simple"
+        }
+        return state.copy(classification = classification)
+    }
+
+    /**
+     * Nœud 3 : plan — décomposition en EPICs via KoogPlanningGraph.
+     * Appelé par le graphe koog ET par execute() — pas de duplication.
+     */
+    private fun planNode(state: AugmentedState): AugmentedState {
+        val ctx = state.compositeContext
+        return if (ctx == null) {
+            state.copy(
+                planError = "CompositeContext unavailable — cannot generate plan",
+                error = "ContextBuildFailed"
+            )
+        } else {
+            val planState = planningGraph.execute(state.intention, ctx)
+            state.copy(
+                planJson = planState.planJson,
+                plan = planState.plan,
+                planError = planState.error,
+                error = planState.error
+            )
+        }
+    }
 
     private fun buildCompositeContext(workspaceRoot: String, question: String): CompositeContext {
         val rootDir = File(workspaceRoot)
@@ -162,8 +179,6 @@ class KoogAugmentedContextGraph {
      *
      * Pourquoi pas de LLM ici : KoogPlanningGraph.execute() appelle déjà flashModel.chat()
      * pour sa propre classification. On évite le double appel.
-     *
-     * Cette heuristique suffit pour L-2 — un classifieur LLM dédié sera en L-3.
      */
     private fun classifyIntention(intention: String): String {
         return if (intention.length > 80 ||

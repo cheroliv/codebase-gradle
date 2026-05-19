@@ -48,7 +48,11 @@ val cucumberTest = tasks.register<Test>("cucumberTest") {
     description = "Runs Cucumber BDD tests (EPIC 9 — pgvector infra)"
     group = "verification"
     testClassesDirs = sourceSets.test.get().output.classesDirs
-    classpath = sourceSets.test.get().runtimeClasspath
+    // Aligné sur plantuml-gradle : ajout explicite des outputs compilés dans le classpath
+    classpath = configurations.testRuntimeClasspath.get() +
+        sourceSets.test.get().output +
+        sourceSets.main.get().output +
+        files(tasks.jar.get().archiveFile)
 
     dependsOn(tasks.classes)
     useJUnitPlatform { excludeEngines("junit-jupiter") }

@@ -1,0 +1,57 @@
+= Session 039 — EPIC L-3 Refactor KoogAugmentedContextGraph + Tests Cucumber
+:date: 2026-05-19
+:status: TERMINE
+
+== Objectif
+
+EPIC L-3 : Intégration PlanIntentionTask + refactor processState() → exécution graphe koog natif.
+2 pts.
+
+== Livrables
+
+=== KoogAugmentedContextGraph — execute() partagé avec nœuds graphe
+
+- `execute(state: AugmentedState): AugmentedState` remplace `processState()`
+- Nœuds du graphe koog et `execute()` partagent les MÊMES lambdas via méthodes privées :
+  `buildContextNode()`, `classifyNode()`, `planNode()` — zéro duplication
+- L'ancien `processState()` dupliquait manuellement les 3 étapes (94→137 lignes, maintenant délégué aux lambdas communes)
+
+=== KoogAugmentedContextGraphTest — adapté
+
+- 5 tests JUnit5 PASS (processState → execute)
+- `execute state transitions without pgvector does not crash` ✅
+- `execute classifies simple intention correctly` ✅
+- `execute classifies complex cross-borough intention` ✅
+- Régression L-1 (KoogPlanningGraphTest) : 2/2 PASS ✅
+
+=== PlanIntentionTask — intégré avec KoogAugmentedContextGraph
+
+- L'ancienne `execute()` appelait manuellement CompositeContextBuilder + PlannerIntegration (191 lignes)
+- Maintenant délégué à `KoogAugmentedContextGraph().execute(AugmentedState(...))`
+- `toPlanMetadata(AugmentedState)` ajouté dans PlannerIntegration.kt
+- `formatOutput()` adaptée pour AugmentedState (au lieu de PlanState)
+
+=== Tests Cucumber L-3 — créés (non fonctionnels)
+
+- Feature : `epic_l_3_augmented_planning.feature` — 7 scénarios
+- AugmentedPlanningSteps.kt — pattern codebase existant (champs instance + @Before, pas PicoContainer)
+- AugmentedPlanningWorld.kt — World Object réutilisable
+- **Non passants** : PicoContainer non utilisé par codebase-gradle (aucune des 19 Steps)
+  → Décision : garder pour session 040 (nécessite migration complète du package vers PicoContainer)
+
+=== build.gradle.kts — classpath cucumberTest aligné sur plantuml-gradle
+
+- `classpath = testRuntimeClasspath + test.output + main.output + jar`
+
+== Tests
+
+| Suite | Compte | Statut |
+| KoogAugmentedContextGraphTest | 5/5 | PASS ✅ |
+| KoogPlanningGraphTest | 2/2 | PASS ✅ |
+| Cucumber (L-3) | 7 scénarios | Pas exécutés (pgvector down cascade) |
+
+== Prochaine session (040)
+
+- Rendre PicoContainer fonctionnel pour codebase-gradle (aligner avec plantuml/slider/bakery/readme)
+- OU migrer toutes les Steps codebase vers PicoContainer (19 classes)
+- Faire passer les 7 scénarios Cucumber L-3

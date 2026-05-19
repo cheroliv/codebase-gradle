@@ -10,7 +10,8 @@ _Session terminee_ : 035 — EPIC K complet (K-0→K-5, toutes les phases ✅)
 _Session terminee_ : 036 — EPIC L-0 Dépendances koog (`ai.koog:koog-agents:0.8.0`) + test unitaire DSL. Compilation OK.
 _Session terminee_ : 037 (022 workspace) — EPIC L-1 Migre PlanningGraph langgraph4j → KoogPlanningGraph koog DSL. 278 lignes, Plan/PlanState data classes. OllamaChatModel langchain4j preservé. PlannerIntegration + PlanIntentionTask migres. 2/2 tests PASS. Commit baf6a3c push OK.
 _Session terminee_ : 038 (023 workspace) — EPIC L-2 Wrapper koog+langchain4j contexte augmenté. KoogAugmentedContextGraph.kt (184 lignes) + AugmentedState.kt. Graphe buildContext→classify→plan, pont koog→langchain4j pour pgvector. 5/5 tests PASS (3 new + 2 regression). Doc koog confirmée : pgvector non supporté nativement. Résilience : pgvector down → zéro crash. Commit f7d96b6 push OK. 4/8 pts EPIC L.
-_Session en cours_ : 039 — EPIC L-3 Intégration PlanIntentionTask + refactor processState() → exécution graphe koog natif
+_Session terminee_ : 039 — EPIC L-3 Refactor KoogAugmentedContextGraph.execute() + PlanIntentionTask intégration. 7/7 tests koog JUnit5 PASS. Cucumber L-3 créé (7 scénarios, non passants). 5/8 pts EPIC L.
+_Session en cours_ : 040 — EPIC L-3 PicoContainer Cucumber — rendre les 7 scénarios Cucumber passants
 
 '''
 == REGLES ABSOLUES (resume)

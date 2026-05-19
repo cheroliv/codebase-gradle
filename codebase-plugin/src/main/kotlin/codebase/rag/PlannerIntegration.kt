@@ -1,5 +1,6 @@
 package codebase.rag
 
+import codebase.koog.AugmentedState
 import codebase.koog.KoogPlanningGraph
 import codebase.koog.Plan
 import codebase.koog.PlanState
@@ -35,6 +36,25 @@ object PlannerIntegration {
  * Null si le plan a échoué.
  */
 fun PlanState.toPlanMetadata(source: String = "codebase"): PlanMetadata? {
+    if (error != null || plan == null) return null
+    return PlanMetadata(
+        source = source,
+        version = "1.0",
+        generatedAt = Instant.now().toString(),
+        model = System.getenv("OLLAMA_MODEL") ?: "deepseek-v4-pro:cloud",
+        dependencies = listOf("queens", "graphify"),
+        epics = plan.epics.size,
+        totalPoints = plan.totalPoints,
+        classification = classification,
+        estimatedSessions = plan.estimatedSessions
+    )
+}
+
+/**
+ * L-3 : Convertit un AugmentedState (wrapper koog+langchain4j) en PlanMetadata.
+ * Null si le plan a échoué ou est absent.
+ */
+fun AugmentedState.toPlanMetadata(source: String = "codebase"): PlanMetadata? {
     if (error != null || plan == null) return null
     return PlanMetadata(
         source = source,
