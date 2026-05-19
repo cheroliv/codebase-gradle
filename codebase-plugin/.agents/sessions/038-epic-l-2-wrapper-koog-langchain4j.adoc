@@ -1,0 +1,39 @@
+= Session 038 — EPIC L-2 Wrapper koog+langchain4j (RAG/pgvector)
+:date: 2026-05-19
+:score: 10/10
+
+== Résumé
+
+Wrapper koog autour du pipeline langchain4j de contexte augmenté (pgvector/RAG/ONNX).
+Le graphe koog orchestre `buildContext→classify→plan`, langchain4j exécute le RAG.
+Doc koog confirmée : pgvector non supporté nativement. Pont koog→langchain4j = bonne approche.
+
+== Fichiers créés/modifiés
+
+|===
+| Fichier | Action | Lignes
+| `src/main/kotlin/codebase/koog/AugmentedState.kt` | Créé | 17
+| `src/main/kotlin/codebase/koog/KoogAugmentedContextGraph.kt` | Créé | 184
+| `src/test/kotlin/codebase/koog/KoogAugmentedContextGraphTest.kt` | Créé | 69
+|===
+
+== Tests
+
+5/5 PASS (0 failure, 0 error) :
+- KoogAugmentedContextGraphTest: 3/3 ✅ (structure graphe, transitions sans pgvector, état)
+- KoogPlanningGraphTest (régression): 2/2 ✅
+
+Résilience validée : pgvector down → contexte partiel → zéro crash.
+
+== Architecture
+
+```
+[intention] → buildContext (pgvector/RAG langchain4j) → classify (heuristique) → plan (KoogPlanningGraph flash|pro) → [plan]
+```
+
+Koog orchestre (StateGraph, edges), langchain4j exécute (OllamaChatModel, pgvector, ONNX).
+
+== État EPIC L
+
+4/8 pts — 50%. L-0 ✅, L-1 ✅, L-2 ✅. Prochaine session : 039 → L-3.
+L-3 = intégration PlanIntentionTask + refactor processState() → exécution graphe koog natif.

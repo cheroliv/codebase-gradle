@@ -1,6 +1,10 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : 34 scénarios Cucumber (30 EPIC 9 + 4 EPIC 2/4 @wip) + 28 tests JUnit5 PASS (8 EPIC 10 + 19 EPIC K Metadata/Validator + 1 GenerateSPGTask) + Feature Cucumber epic_k_metadata_contract (9 scénarios, @epic_k taggué)
+_Statut_ : 34 scénarios Cucumber (30 EPIC 9 + 4 EPIC 2/4 @wip) + 28 tests JUnit5 PASS (8 EPIC 10 + 19 EPIC K Metadata/Validator + 1 GenerateSPGTask) + Feature Cucumber epic_k_metadata_contract (9 scénarios, @epic_k taggué). EPIC L (koog) : 5/5 JUnit5 PASS (2 L-1 KoogPlanningGraph + 3 L-2 KoogAugmentedContextGraph).
+
+| Session | Fichiers testes | Couverture | Notes
+| 038 | `KoogAugmentedContextGraph.kt` + `AugmentedState.kt` (JUnit5) | 3 tests PASS | EPIC L-2 : structure graphe koog (buildContext, plan, edges), transitions sans pgvector (zéro crash), état (compositeContext nullable, plan nullable, error nullable). Résilience validée : pgvector down → contexte partiel → pas d'exception.
+| 037 | `KoogPlanningGraph.kt` (JUnit5) | 2 tests PASS | EPIC L-1 : build planning graph with koog DSL (nœuds + Mermaid edges). Régression L-2 : toujours PASS.
 
 | Session | Fichiers testes | Couverture | Notes
 | 031b | `MetadataUnitTest.kt` + `MetadataValidatorUnitTest.kt` (JUnit5) | 19 tests PASS | EPIC K format pivot : SPG/SPD/Quiz/Plan/PDF fromJson, type inconnu → exception, fromFile, defaults vides, validate OK/absent/corrompu/version/type/deps, isVersionCompatible

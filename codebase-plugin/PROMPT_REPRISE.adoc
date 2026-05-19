@@ -1,35 +1,36 @@
-= PROMPT_REPRISE — Mission Session 038 L-2 koog+langchain4j Contexte Augmenté
+= PROMPT_REPRISE — Mission Session 039 L-3 Intégration PlanIntentionTask + Graphe Koog Natif
 :date: 2026-05-19
 
 == Contexte
 
-Session 037 (L-1) fermée — orchestrateur langgraph4j → koog migré avec succès.
-KoogPlanningGraph.kt : strategy{} DSL, Plan/PlanState data classes, OllamaChatModel langchain4j préservé.
-L-1 commit baf6a3c push OK. 3/8 pts EPIC L complétés.
+Session 038 (L-2) fermée — wrapper koog+langchain4j pour contexte augmenté livré.
+KoogAugmentedContextGraph.kt (184 lignes) + AugmentedState.kt : graphe buildContext→classify→plan.
+Pont koog→langchain4j pour pgvector confirmé (koog ne supporte pas pgvector nativement).
+5/5 tests PASS (3 new + 2 L-1 régression). Résilience : pgvector down → zéro crash.
+4/8 pts EPIC L complétés. Commit f7d96b6 push OK.
 
 == Décisions persistées
 
 . *Koog = orchestrateur* — remplace `org.bsc.langgraph4j.*`
 . *langchain4j = scope opérationnel* — OllamaChatModel, RAG pgvector, embeddings, vector stores
-. *Wrapper koog+langchain4j (L-2)* — koog injecte le contexte augmenté (CompositeContext) dans ses nœuds
-. *Baby-step* : 1 variable par session. L-2 change le scope, pas l'orchestrateur.
+. *Wrapper koog+langchain4j (L-2 ✅)* — graphe intègre le contexte augmenté dans koog
+. *processState() actuel* — exécute manuellement (duplication logique graphe)
 
-== Mission session 038 (prochaine)
+== Mission session 039 (prochaine)
 
-EPIC L-2 — Wrapper koog autour de langchain4j pour le contexte augmenté.
-Injecter CompositeContext (RAG pgvector + embeddings + vector stores + knowledge graph)
-dans les nœuds koog. Remplacer OllamaChatModel par les nœuds LLM natifs koog (nodeLLMSendMessage).
-Garder Plan.kt et PlanState inchangés.
+EPIC L-3 — Intégration PlanIntentionTask + refactor processState() → exécution graphe koog natif.
+Au lieu d'appeler manuellement buildContext→classify→plan dans processState(),
+utiliser l'exécution native du graphe koog via l'API AIAgent/GraphStrategy.
 
 == Fichiers à modifier
 
-- `codebase/koog/KoogPlanningGraph.kt` — remplacer OllamaChatModel → appels LLM natifs koog
-- Ajouter dépendance koog prompt-executor-ollama si nécessaire
-- Tests : adapter KoogPlanningGraphTest pour les nœuds LLM koog
+- `codebase/koog/KoogAugmentedContextGraph.kt` — refactor processState() → exécution graphe natif
+- `codebase/rag/PlanIntentionTask.kt` — intégrer KoogAugmentedContextGraph à la place du pipeline manuel
+- Tests : adapter pour l'exécution graphe natif
 
 == État du workspace
 
-- `codebase-plugin` : compile OK, 2/2 tests koog PASS
+- `codebase-plugin` : compile OK, 5/5 tests koog PASS
 - `workspace-bom` : koog 0.8.0
 - `langgraph4j` cohabitation toujours OK (non supprimé)
-- L-1 commit baf6a3c push OK
+- L-2 commit f7d96b6 push OK
