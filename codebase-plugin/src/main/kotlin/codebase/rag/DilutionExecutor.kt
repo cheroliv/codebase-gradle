@@ -141,7 +141,7 @@ class DilutionExecutor(
             record.content.trim(),
             "",
             "[discrete]",
-            "==== _Métadonnées de dilution_",
+            "==== _Metadonnees de dilution_",
             "",
             "[cols=\"2,3\"]",
             "|===",
@@ -171,7 +171,7 @@ class DilutionExecutor(
     }
 
     private fun updateTraceabilityTable(content: String, record: DilutionRecord): String {
-        val tableHeader = "=== Stimuli dilués dans ce document"
+        val tableHeader = "=== Stimuli diluted in this document"
         val tableMarker = "[cols=\"1,1,3\"]"
         val closingMarker = "|==="
 
@@ -208,13 +208,13 @@ class DilutionExecutor(
 
         val table = """
 |
-== Traceabilité des Dilutions
-
-=== Stimuli dilués dans ce document
-
+== Traceability
+|
+=== Stimuli diluted in this document
+|
 [cols="1,1,3"]
 |===
-| Stimulus | Date | Sections enrichies
+| Stimulus | Date | Enriched sections
 | ${record.sectionTitle.take(40)} | $date | ${record.sectionTitle}
 |===
 """.trimStart()

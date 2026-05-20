@@ -18,7 +18,7 @@ class VisionOpinionClassifierSteps {
 
     private val log = LoggerFactory.getLogger(VisionOpinionClassifierSteps::class.java)
 
-    @Given("the vision/opinion test sections dataset")
+    @Given("the vision opinion test sections dataset")
     fun `load test sections`() {
         val sections = TestSections.all
         assertNotNull(sections, "Test sections dataset should not be null")
@@ -64,7 +64,7 @@ class VisionOpinionClassifierSteps {
         log.info("All sections have valid expected classification")
     }
 
-    @Then("the vision/opinion classifier can be instantiated")
+    @Then("the vision opinion classifier can be instantiated")
     fun `classifier instantiated`() {
         val classifier = VisionOpinionClassifier(
             baseUrl = "http://localhost:11434",
@@ -101,18 +101,18 @@ class VisionOpinionClassifierSteps {
         val report = ClassificationReport(
             sections = listOf(
                 SectionClassification(
-                    sectionId = "V1-test",
+                    sectionId = "V1-dag-architecture",
                     content = "test architecture",
                     classification = ContentClassification.VISION,
                     confidence = 0.95,
-                    rationale = "contient des regles d'architecture"
+                    rationale = "architecture rules present"
                 ),
                 SectionClassification(
-                    sectionId = "O1-test",
+                    sectionId = "O1-preference-modele",
                     content = "je pense que",
                     classification = ContentClassification.OPINION,
                     confidence = 0.88,
-                    rationale = "marqueurs subjectifs"
+                    rationale = "subjective markers"
                 )
             ),
             visionCount = 1,
@@ -123,7 +123,7 @@ class VisionOpinionClassifierSteps {
 
         val field = VisionOpinionClassifierMain::class.java.getDeclaredMethod("exportJson", ClassificationReport::class.java)
         field.isAccessible = true
-        val json = field.invoke(null, report) as String
+        val json = field.invoke(VisionOpinionClassifierMain, report) as String
 
         assertNotNull(json, "JSON export should not be null")
         assertTrue(json.contains("\"totalSections\""), "JSON should contain totalSections")
@@ -139,18 +139,18 @@ class VisionOpinionClassifierSteps {
         val report = ClassificationReport(
             sections = listOf(
                 SectionClassification(
-                    sectionId = "V1-test",
+                    sectionId = "V1-dag-architecture",
                     content = "test architecture",
                     classification = ContentClassification.VISION,
                     confidence = 0.95,
-                    rationale = "contient des regles d'architecture"
+                    rationale = "architecture rules present"
                 ),
                 SectionClassification(
-                    sectionId = "O1-test",
+                    sectionId = "O1-preference-modele",
                     content = "je pense que",
                     classification = ContentClassification.OPINION,
                     confidence = 0.88,
-                    rationale = "marqueurs subjectifs"
+                    rationale = "subjective markers"
                 )
             ),
             visionCount = 1,
@@ -161,7 +161,7 @@ class VisionOpinionClassifierSteps {
 
         val field = VisionOpinionClassifierMain::class.java.getDeclaredMethod("exportAsciiDoc", ClassificationReport::class.java)
         field.isAccessible = true
-        val adoc = field.invoke(null, report) as String
+        val adoc = field.invoke(VisionOpinionClassifierMain, report) as String
 
         assertNotNull(adoc, "AsciiDoc export should not be null")
         assertTrue(adoc.contains("Segregation Vision/Opinion"), "AsciiDoc should contain title")

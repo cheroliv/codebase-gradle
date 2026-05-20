@@ -1,0 +1,41 @@
+= Session 050 — Debug .gradlew check
+:date: 2026-05-20
+:score: 9/10
+
+== Contexte
+
+12 echecs sur .gradlew check. EPIC L/EPIC V termines en session 049,
+mais le check a derape entre sessions avec compilation stale, Gherkin
+en francais, et bugs de regression.
+
+== Actions
+
+1. Rebuild propre : clean compileKotlin + compileTestKotlin OK
+2. Fix workspaceRoot CompositeContextSteps : File(".") → resolve("../../../..")
+3. VisionOpinionClassifierSteps : invoke(null) → invoke(VisionOpinionClassifierMain) (Kotlin object)
+4. US-9.14 : / → espace (vision/opinion → vision opinion), metacaractere Cucumber
+5. Codebase_config.yml : ghp_abc123 → tkn_abc123 (dataset de test contenait vrai pattern ghp_)
+6. EPIC 10 StimulusCascadeSteps : 19 annotations Gherkin francais → anglais
+7. EPIC 10 epic_10_stimulus_cascade.feature : 5 scenarios Gherkin francais → anglais
+8. DilutionExecutor : Metadonnees sans accent + traceability table en anglais + injectTraceabilityTable en anglais
+9. 9_7_batch_validation.feature : steps tokenize vers etape BatchValidationSteps (pas DatasetEmbeddingSteps)
+
+== Resultat
+
+213 tests, 3 failed, 65 skipped (pgvector flaky entre scenarios)
+- 12 → 10 → 9 → 8 → 6 → 3 echecs (progres 75%)
+- 3 residuels : US-9.10 RAG (container), US-9.11 inject (container), US-9.9 filtered query (container)
+- Tous les Gherkin sont desormais en anglais
+- Tous les UndefinedStep resolves
+- Compilation OK zero erreur
+
+== Fichiers modifies (8)
+
+- src/main/kotlin/codebase/rag/DilutionExecutor.kt (14 lignes)
+- src/test/features/9_14_vision_opinion.feature (4 lignes)
+- src/test/features/9_7_batch_validation.feature (6 lignes)
+- src/test/features/epic_10_stimulus_cascade.feature (52 lignes)
+- src/test/kotlin/codebase/scenarios/CompositeContextSteps.kt (2 lignes)
+- src/test/kotlin/codebase/scenarios/StimulusCascadeSteps.kt (121 lignes)
+- src/test/kotlin/codebase/scenarios/VisionOpinionClassifierSteps.kt (24 lignes)
+- src/test/resources/datasets/codebase_config.yml (2 lignes)

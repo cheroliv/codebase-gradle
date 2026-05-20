@@ -30,7 +30,7 @@ class CompositeContextSteps {
             budgetGraphify = graphifyPct / 100.0,
             budgetOverhead = overheadPct / 100.0
         )
-        val workspaceRoot = File(".").absoluteFile
+        val workspaceRoot = File(".").absoluteFile.resolve("../../../..").normalize()
 
         val builder = CompositeContextBuilder(workspaceRoot, store, pipeline, config)
         composite = builder.build(question)

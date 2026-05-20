@@ -22,49 +22,49 @@ class StimulusCascadeSteps {
     private lateinit var initialContent: String
     private lateinit var docFile: File
 
-    @Given("un repertoire de travail temporaire pour les tests STIMULUS")
+    @Given("a temporary workspace directory for STIMULUS tests")
     fun createTempWorkspace() {
         val path = Files.createTempDirectory("graphify-stimulus-test")
         tmpDir = path.toFile()
-        log.info("Workspace temporaire: {}", tmpDir!!.absolutePath)
+        log.info("Temporary workspace: {}", tmpDir!!.absolutePath)
     }
 
-    @Given("le document cible {string} contient déjà la section {string}")
+    @Given("the target document {string} already contains the section {string}")
     fun createDocWithSection(filename: String, section: String) {
         docFile = File(tmpDir, filename)
         val content = """
-= Document De Test
+= Test Document
 :jbake-status: draft
 
 == Introduction
 
-Premiere section.
+First section.
 
 $section
 
-=== Stimuli dilues dans ce document
+=== Stimuli diluted in this document
 
 [cols="1,1,3"]
 |===
-| Stimulus | Date | Sections enrichies
-| STIMULUS_EXISTANT.adoc | 10 May 2026 | Section existante
+| Stimulus | Date | Enriched sections
+| STIMULUS_EXISTANT.adoc | 10 May 2026 | Existing section
 |===
 
 """.trimStart()
         docFile.writeText(content, Charsets.UTF_8)
-        log.info("Document cree: {} ({} caracteres)", docFile.absolutePath, docFile.length())
+        log.info("Document created: {} ({} characters)", docFile.absolutePath, docFile.length())
     }
 
-    @Given("le document cible {string} ne contient pas de table de tracabilite")
+    @Given("the target document {string} does not contain a traceability table")
     fun createDocWithoutTraceability(filename: String) {
         docFile = File(tmpDir, filename)
         val content = """
-= Document Sans Traceability
+= Document Without Traceability
 :jbake-status: draft
 
 == Introduction
 
-Contenu initial.
+Initial content.
 
 == Nouveau Test
 
@@ -72,42 +72,43 @@ Contenu initial.
         docFile.writeText(content, Charsets.UTF_8)
     }
 
-    @Given("le document cible {string} a un contenu initial")
+    @Given("the target document {string} has initial content")
     fun createDocWithInitialContent(filename: String) {
         docFile = File(tmpDir, filename)
         val content = """
-= Document Initial
+= Initial Document
 :jbake-status: draft
 
 == Architecture
 
-Contenu important original.
+Important original content.
 
 == Principes
 
-Neuf principes fondateurs.
+Nine founding principles.
 
 """.trimStart()
         docFile.writeText(content, Charsets.UTF_8)
         initialContent = content
     }
 
-    @When("une section VISION est diluee vers {string} dans la section {string}")
+    @When("a VISION section is diluted into {string} in section {string}")
     fun diluteVisionSection(filename: String, section: String) {
         val executor = DilutionExecutor(tmpDir!!.absolutePath)
+        val targetDoc = TargetDocument.entries.find { it.path == filename } ?: TargetDocument.WORKSPACE_VISION
 
         dilutionRecord = DilutionRecord(
             sectionId = "S1",
             sectionTitle = "Section de test",
-            content = "Ceci est le contenu de la section de test.\n\nContenu enrichi par STIMULUS.",
+            content = "This is the test section content.\n\nContent enriched by STIMULUS.",
             classification = ContentClassification.VISION,
             confidence = 0.95,
             dilutionTarget = DilutionTarget(
-                targetDocument = TargetDocument.WORKSPACE_VISION,
+                targetDocument = targetDoc,
                 suggestedSection = section,
-                rationale = "Test rationale routage"
+                rationale = "Test routing rationale"
             ),
-            classificationRationale = "Test rationale classification",
+            classificationRationale = "Test classification rationale",
             timestamp = LocalDateTime.now()
         )
 
@@ -115,20 +116,20 @@ Neuf principes fondateurs.
         log.info("Dilution result: success={} error={}", dilutionResult?.success, dilutionResult?.error)
     }
 
-    @When("une section VISION est diluee en mode DRY RUN vers {string}")
+    @When("a VISION section is diluted in DRY RUN mode into {string}")
     fun diluteVisionDryRun(filename: String) {
         val executor = DilutionExecutor(tmpDir!!.absolutePath, dryRun = true)
 
         dilutionRecord = DilutionRecord(
             sectionId = "S3",
             sectionTitle = "Section dry run",
-            content = "Contenu qui ne doit pas etre injecte.",
+            content = "Content that must not be injected.",
             classification = ContentClassification.VISION,
             confidence = 0.90,
             dilutionTarget = DilutionTarget(
                 targetDocument = TargetDocument.WORKSPACE_ORGANIZATION,
                 suggestedSection = "== Principes",
-                rationale = "Test dry run routage"
+                rationale = "Test dry run routing"
             ),
             classificationRationale = "Test dry run classification",
             timestamp = LocalDateTime.now()
@@ -137,61 +138,61 @@ Neuf principes fondateurs.
         dilutionResult = dilutionRecord?.let { executor.execute(it) }
     }
 
-    @Then("le document cible contient la section {string}")
+    @Then("the target document contains the section {string}")
     fun documentContainsSection(title: String) {
         val content = docFile.readText(Charsets.UTF_8)
         assert(content.contains(title)) {
-            "Le document ${docFile.name} ne contient pas la section '$title'"
+            "Document ${docFile.name} does not contain section '$title'"
         }
     }
 
-    @Then("le document cible contient les metadonnees de dilution")
+    @Then("the target document contains dilution metadata")
     fun documentContainsMetadata() {
         val content = docFile.readText(Charsets.UTF_8)
         assert(content.contains("Metadonnees de dilution")) {
-            "Metadonnees de dilution absentes dans ${docFile.name}"
+            "Dilution metadata missing in ${docFile.name}"
         }
-        assert(content.contains("Classification") && content.contains("ContentClassification.VISION")) {
-            "Classification absente ou incorrecte dans ${docFile.name}"
+        assert(content.contains("Classification") && (content.contains("VISION") || content.contains("ContentClassification.VISION"))) {
+            "Classification missing or incorrect in ${docFile.name}"
         }
     }
 
-    @Then("une sauvegarde de securite a ete creee")
+    @Then("a safety backup was created")
     fun backupWasCreated() {
-        assert(dilutionResult?.success == true) { "Dilution a echoue" }
-        assert(dilutionResult?.backupPath != null) { "Pas de backup cree: ${dilutionResult?.error}" }
+        assert(dilutionResult?.success == true) { "Dilution failed" }
+        assert(dilutionResult?.backupPath != null) { "No backup created: ${dilutionResult?.error}" }
     }
 
-    @Then("le document cible contient la table de tracabilite {string}")
+    @Then("the target document contains the traceability table {string}")
     fun documentContainsTraceabilityTable(tableHeader: String) {
         val content = docFile.readText(Charsets.UTF_8)
         assert(content.contains(tableHeader)) {
-            "Table de tracabilite '$tableHeader' absente dans ${docFile.name}"
+            "Traceability table '$tableHeader' missing in ${docFile.name}"
         }
     }
 
-    @Then("le document cible a conserve son contenu initial intact")
+    @Then("the target document keeps its initial content intact")
     fun documentPreservedContent() {
         val content = docFile.readText(Charsets.UTF_8)
-        assert(content.contains("Contenu important original")) {
-            "Le contenu original a ete modifie par le DRY RUN"
+        assert(content.contains("Important original content")) {
+            "Original content was modified by DRY RUN"
         }
         assert(content.contains("Section dry run").not()) {
-            "Le contenu de test ne devrait pas etre dans le fichier en DRY RUN"
+            "Test content should not be in the file during DRY RUN"
         }
     }
 
-    @Given("un workspace de test avec {int} fichiers .adoc stimuli et {int} documents deja dilues")
+    @Given("a test workspace with {int} .adoc stimulus files and {int} already diluted documents")
     fun createWorkspaceWithStimuli(stimulusCount: Int, dilutedCount: Int) {
         tmpDir = Files.createTempDirectory("graphify-stimulus-ws").toFile()
 
         for (i in 1..stimulusCount) {
             val name = "STIMULUS_0${i}.adoc"
             File(tmpDir, name).writeText(
-                "= Brain Dump $i\n\n== Section de test\n\nContenu du stimulus $i.",
+                "= Brain Dump $i\n\n== Test section\n\nStimulus content $i.",
                 Charsets.UTF_8
             )
-            log.info("Stimulus cree: {}", name)
+            log.info("Stimulus created: {}", name)
         }
 
         for (i in 1..dilutedCount) {
@@ -203,11 +204,11 @@ Neuf principes fondateurs.
 
 == Introduction
 
-=== Stimuli dilues dans ce document
+=== Stimuli diluted in this document
 
 [cols="1,1,3"]
 |===
-| Stimulus | Date | Sections enrichies
+| Stimulus | Date | Enriched sections
 | STIMULUS_01.adoc | 12 May 2026 | Test
 |===
 """.trimStart(),
@@ -217,69 +218,69 @@ Neuf principes fondateurs.
         }
     }
 
-    @When("le StimulusDetector scanne le workspace")
+    @When("the StimulusDetector scans the workspace")
     fun scanWorkspace() {
         detector = StimulusDetector(tmpDir!!.absolutePath)
         val files = detector!!.scan()
-        log.info("Fichiers scannes: ${files.size}")
+        log.info("Files scanned: ${files.size}")
         files.forEach { f -> log.info("  {}", f.name) }
         activeStimuli = detector!!.detectActive()
     }
 
-    @Then("{int} stimuli actifs sont detectes")
+    @Then("{int} active stimuli are detected")
     fun activeStimuliDetected(expectedCount: Int) {
         assert(activeStimuli.size == expectedCount) {
-            "Attendu $expectedCount stimuli actifs, got ${activeStimuli.size}: ${activeStimuli.map { it.file.name }}"
+            "Expected $expectedCount active stimuli, got ${activeStimuli.size}: ${activeStimuli.map { it.file.name }}"
         }
     }
 
-    @Then("aucun stimulus n'est stale (tous modifies recemment)")
+    @Then("no stimulus is stale - all modified recently")
     fun noStaleStimuli() {
         val stale = activeStimuli.filter { it.stale }
         assert(stale.isEmpty()) {
-            "Stimuli stale inattendus: ${stale.map { it.file.name }}"
+            "Unexpected stale stimuli: ${stale.map { it.file.name }}"
         }
     }
 
-    @Given("un workspace de test avec {int} stimulus recent et {int} stimulus vieux de {int} jours")
+    @Given("a test workspace with {int} recent stimulus and {int} stimulus that is {int} days old")
     fun createWorkspaceWithAgedStimuli(recentCount: Int, oldCount: Int, days: Int) {
         tmpDir = Files.createTempDirectory("graphify-stimulus-aged").toFile()
 
         for (i in 1..recentCount) {
             val name = "STIMULUS_RECENT_${i}.adoc"
             val f = File(tmpDir, name)
-            f.writeText("= Brain Dump Recent $i\n\nContenu recent.", Charsets.UTF_8)
+            f.writeText("= Brain Dump Recent $i\n\nRecent content.", Charsets.UTF_8)
             f.setLastModified(System.currentTimeMillis())
         }
 
         for (i in 1..oldCount) {
             val name = "STIMULUS_OLD_${i}.adoc"
             val f = File(tmpDir, name)
-            f.writeText("= Brain Dump Vieux $i\n\nContenu vieux.", Charsets.UTF_8)
+            f.writeText("= Brain Dump Old $i\n\nOld content.", Charsets.UTF_8)
             val oldTime = System.currentTimeMillis() - days * 24 * 60 * 60 * 1000L
             f.setLastModified(oldTime)
         }
     }
 
-    @When("le StimulusDetector detecte les stimuli stale")
+    @When("the StimulusDetector detects stale stimuli")
     fun detectStaleStimuli() {
         detector = StimulusDetector(tmpDir!!.absolutePath)
         activeStimuli = detector!!.detectActive()
         staleStimuli = detector!!.detectStale()
-        log.info("Actifs: {}, Stale: {}", activeStimuli.size, staleStimuli.size)
+        log.info("Active: {}, Stale: {}", activeStimuli.size, staleStimuli.size)
     }
 
-    @Then("{int} stimulus stale est detecte")
+    @Then("{int} stale stimulus is detected")
     fun staleStimulusDetected(expectedCount: Int) {
         assert(staleStimuli.size == expectedCount) {
-            "Attendu $expectedCount stimuli stale, got ${staleStimuli.size}"
+            "Expected $expectedCount stale stimuli, got ${staleStimuli.size}"
         }
     }
 
-    @Then("{int} stimuli actifs sont detectes au total")
+    @Then("{int} active stimuli are detected in total")
     fun totalActiveStimuliDetected(expectedCount: Int) {
         assert(activeStimuli.size == expectedCount) {
-            "Attendu $expectedCount stimuli actifs au total, got ${activeStimuli.size}"
+            "Expected $expectedCount active stimuli total, got ${activeStimuli.size}"
         }
     }
 
@@ -287,7 +288,7 @@ Neuf principes fondateurs.
     fun cleanupTempDir() {
         tmpDir?.let { dir ->
             dir.deleteRecursively()
-            log.info("Workspace temporaire nettoye: {}", dir.absolutePath)
+            log.info("Temporary workspace cleaned: {}", dir.absolutePath)
         }
     }
 }

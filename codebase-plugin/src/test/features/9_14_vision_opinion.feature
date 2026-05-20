@@ -4,7 +4,7 @@ Feature: US-9.14 --- Segregation Vision/Opinion
   So that content can be properly segregated before dilution and publication
 
   Scenario: Test sections dataset is well-defined
-    Given the vision/opinion test sections dataset
+    Given the vision opinion test sections dataset
     Then there are exactly 10 test sections
     And exactly 5 sections are expected VISION
     And exactly 5 sections are expected OPINION
@@ -12,7 +12,7 @@ Feature: US-9.14 --- Segregation Vision/Opinion
     And each test section has a valid expected classification
 
   Scenario: VisionOpinionClassifier is instantiable
-    Then the vision/opinion classifier can be instantiated
+    Then the vision opinion classifier can be instantiated
     And the classifier has the correct system prompt with classification criteria
 
   Scenario: Classification JSON export produces valid format

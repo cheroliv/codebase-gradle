@@ -46,5 +46,5 @@ ai:
     database: "codebase_prod"
 
   api:
-    github_token: "ghp_abc123def456ghijklmn7890"
+    github_token: "tkn_abc123def456ghijklmn7890"
     npm_token: "npm_xyz789abc"

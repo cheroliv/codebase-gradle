@@ -1,39 +1,39 @@
 @epic10 @stimulus
-Feature: EPIC 10 STIMULUS — DilutionExecutor injection dans les documents racine
+Feature: EPIC 10 STIMULUS — DilutionExecutor injection into root documents
 
   Background:
-    Given un repertoire de travail temporaire pour les tests STIMULUS
+    Given a temporary workspace directory for STIMULUS tests
 
   @unit
-  Scenario: S1 — Dilution d'une section VISION dans un document cible existant
-    Given le document cible "WORKSPACE_VISION.adoc" contient deja la section "== Stimuli dilues"
-    When une section VISION est diluee vers "WORKSPACE_VISION.adoc" dans la section "== Session du Test"
-    Then le document cible contient la section "=== Section de test"
-    And le document cible contient les metadonnees de dilution
-    And une sauvegarde de securite a ete creee
+  Scenario: S1 — Dilute a VISION section into an existing target document
+    Given the target document "WORKSPACE_VISION.adoc" already contains the section "== Stimuli dilues"
+    When a VISION section is diluted into "WORKSPACE_VISION.adoc" in section "== Session du Test"
+    Then the target document contains the section "=== Section de test"
+    And the target document contains dilution metadata
+    And a safety backup was created
 
   @unit
-  Scenario: S2 — Dilution d'une section dans un document sans table de tracabilite
-    Given le document cible "WHAT_THE_GAMES_BEEN_MISSING.adoc" ne contient pas de table de tracabilite
-    When une section VISION est diluee vers "WHAT_THE_GAMES_BEEN_MISSING.adoc" dans la section "== Nouveau Test"
-    Then le document cible contient la table de tracabilite "=== Stimuli dilues dans ce document"
+  Scenario: S2 — Dilute a section into a document without traceability table
+    Given the target document "WHAT_THE_GAMES_BEEN_MISSING.adoc" does not contain a traceability table
+    When a VISION section is diluted into "WHAT_THE_GAMES_BEEN_MISSING.adoc" in section "== Nouveau Test"
+    Then the target document contains the traceability table "=== Stimuli diluted in this document"
 
   @unit
-  Scenario: S3 — DRY RUN ne modifie pas le fichier original
-    Given le document cible "WORKSPACE_ORGANIZATION.adoc" a un contenu initial
-    When une section VISION est diluee en mode DRY RUN vers "WORKSPACE_ORGANIZATION.adoc"
-    Then le document cible a conserve son contenu initial intact
+  Scenario: S3 — DRY RUN does not modify the original file
+    Given the target document "WORKSPACE_ORGANIZATION.adoc" has initial content
+    When a VISION section is diluted in DRY RUN mode into "WORKSPACE_ORGANIZATION.adoc"
+    Then the target document keeps its initial content intact
 
   @unit
-  Scenario: S4 — Detection de stimuli actifs dans workspace
-    Given un workspace de test avec 3 fichiers .adoc stimuli et 2 documents deja dilues
-    When le StimulusDetector scanne le workspace
-    Then 3 stimuli actifs sont detectes
-    And aucun stimulus n'est stale (tous modifies recemment)
+  Scenario: S4 — Detection of active stimuli in workspace
+    Given a test workspace with 3 .adoc stimulus files and 2 already diluted documents
+    When the StimulusDetector scans the workspace
+    Then 3 active stimuli are detected
+    And no stimulus is stale - all modified recently
 
   @unit
-  Scenario: S5 — Detection de stimuli stale (> 2 jours)
-    Given un workspace de test avec 1 stimulus recent et 1 stimulus vieux de 5 jours
-    When le StimulusDetector detecte les stimuli stale
-    Then 1 stimulus stale est detecte
-    And 2 stimuli actifs sont detectes au total
+  Scenario: S5 — Detection of stale stimuli (> 2 days)
+    Given a test workspace with 1 recent stimulus and 1 stimulus that is 5 days old
+    When the StimulusDetector detects stale stimuli
+    Then 1 stale stimulus is detected
+    And 2 active stimuli are detected in total
