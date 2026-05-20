@@ -1,23 +1,30 @@
-= PROMPT_REPRISE — Mission Session 046 EPIC G Publication Maven Central/Portal
-:date: 2026-05-19
+= PROMPT_REPRISE — Mission Session 049
+:date: 2026-05-21
 
 == Contexte
 
-Session 045 fermee — EPIC V-4 termine :
-- 8/8 JUnit5 PASS + 5/5 Cucumber @epic_v_4 PASS
-- Fix jsonlEscape(\n,\r,\t,\\,\") dans VibecodingTask.kt — audit.jsonl valide meme avec erreurs LLM multilignes
-- Regression : 31/31 unit + 27/27 Cucumber V-0..V-3 PASS
-- EPIC V = 15/15 pts — TERMINE
+Session 048 : Fix compilation planner — Bug smart cast VibecodingTask.kt:72
+(`state.error` propriété publique module externe → `?.let{}`).
+Aucun conflit annotations koog/Gradle. 44 tests totaux planner (41 PASS,
+2 pre-existants Ollama limit). 9/9 tests VibecodingTaskIntegration PASS.
+codebase-plugin + planner-plugin publiés en mavenLocal.
 
-== Mission session 046
+== Architecture actuelle
 
-EPIC G — Publication Maven Central + Gradle Plugin Portal pour cccp-education :
-1. Publier codebase-gradle sur Maven Central + Gradle Plugin Portal
-2. Verifier que le groupId education.cccp est actif sur les deux plateformes
-3. CI signing + publication automatisee
+- codebase (N1) : ToolRegistry + tools + KoogAugmentedContextGraph + VibecodingState (conservé)
+- planner (N2) : VibecodingTask + VibecodingGraph (import codebase.koog.*)
+- Flux : generatePlan (planner) → plan.execute() (vibecode) → tools (codebase)
+- Vibrations fonctionnelles : dryRun + audit JSONL + exec_shell + exec_gradle
 
-== Etat du workspace
+== Mission session 049
 
-- `codebase-plugin` : compile OK, 39/39 JUnit5 PASS (31 + 8), 32/32 Cucumber PASS (27 + 5)
-- EPIC V : 15/15 pts TERMINE
-- EPIC L : 8/8 pts TERMINE
+Option B — Cleanup post-migration
+. Supprimer physiquement VibecodingGraph.kt + VibecodingTask.kt du codebase-plugin
+  (déjà supprimés du git index session 047, à vérifier nettoyage disque)
+. Nettoyer les imports résiduels codebase.koog.* si plus utilisés
+. Commit + push codebase-gradle
+
+Option C — EPIC L finalisation (koog+langchain4j)
+. Migrer les tests Cucumber restants L-3 (pgvector down cascade)
+. Validation complète EPIC L (6/8 → 8/8 pts)
+. Compilation + tests planner-plugin (41/44 actuel, cible 44/44)

@@ -1,0 +1,51 @@
+= Session 048 — Fix Compilation Planner + Test Integration Vibecode
+:date: 2026-05-20
+:type: bugfix+test
+
+== Contexte
+
+Session 047 avait migre VibecodingTask + VibecodingGraph de codebase (N1) vers planner (N2).
+Codebase compilait (55/55 PASS), planner bloqué.
+
+== Actions
+
+. Diagnostic : Erreur smart cast Kotlin sur `state.error` dans `VibecodingTask.kt:72`
+  (propriété publique d'un autre module codebase-plugin → Kotlin refuse le smart cast).
+  Aucun conflit `org.jetbrains:annotations` entre koog 0.8.0 et Gradle 9.5.0.
+
+. Fix : `state.error?.let { "\"${jsonlEscape(it)}\"" } ?: "null"` (ligne 72)
+
+. Compilation planner-plugin : OK (0 conflit de dépendances)
+
+. Publication codebase-plugin en mavenLocal : OK
+
+. Publication planner-plugin en mavenLocal : OK
+
+. Fix `DecomposeIntentionPluginTest` : le test utilisait `cccp.education.planner`
+  au lieu de `education.cccp.planner` (ID enregistré dans PlanningPlugin).
+
+. Creation de `VibecodingTaskIntegrationTest.kt` — 9 tests ProjectBuilder :
+  - vibecode task registered by planning plugin
+  - vibecode task has generate group
+  - vibecode task executes in dryRun with write_file plan
+  - vibecode task creates audit dir on execution
+  - vibecode task writes session audit with error field
+  - vibecode with intention writes it in audit
+  - vibecode with dryRun false still produces audit
+  - vibecode with zero maxActions finishes immediately
+  - vibecode task is registered with correct interface type
+
+== Résultats
+
+- Planner compile OK (0 conflit annotations)
+- 44 tests totaux planner-plugin (41 PASS, 2 echecs pre-existants Ollama weekly limit)
+- 9/9 tests VibecodingTaskIntegrationTest PASS (ProjectBuilder)
+- Architecture N1→N2 vibecode validée
+
+== Leçons
+
+- Le conflit `org.jetbrains:annotations` (koog 0.8.0 / Gradle 9.5.0) n'est pas
+  apparu — la resolution Gradle a priorise la version 26.0.2-1 de koog sans
+  conflit visible. Aucune action necessaire.
+- Smart cast sur propriété publique d'un autre module = erreur Kotlin par design.
+  `?.let{}` est le pattern idiomatique.

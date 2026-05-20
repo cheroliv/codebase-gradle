@@ -1,6 +1,7 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : 62 scenarios Cucumber cumulatifs (30 EPIC 9 + 4 EPIC 2/4 @wip + 7 L-3 + 4 V-2 + 11 V-3 + 1 V-1 + 5 V-4) + 63 tests JUnit5 PASS (8 EPIC 10 + 19 EPIC K + 5 L-3 + 17 V-2 + 6 V-0/1 + 8 V-4). EPIC V : 39/39 JUnit5 PASS + 32/32 Cucumber PASS (V-0..V-4). EPIC V = 15/15 pts TERMINE.
+_Statut_ : 62 scenarios Cucumber cumulatifs (30 EPIC 9 + 4 EPIC 2/4 @wip + 7 L-3 + 4 V-2 + 11 V-3 + 1 V-1 + 5 V-4) + 63 tests JUnit5 PASS (8 EPIC 10 + 19 EPIC K + 5 L-3 + 17 V-2 + 6 V-0/1 + 8 V-4) + *7 VibecodingLoopTest* (session 047). EPIC V : 39/39 JUnit5 PASS + 32/32 Cucumber PASS (V-0..V-4). Vibecoding : 55/55 PASS total. EPIC V = 15/15 pts TERMINE.
+_Test integration planner (session 048)_ : 9 tests VibecodingTaskIntegrationTest PASS (ProjectBuilder pour planner-plugin). 41/44 tests planner total PASS (2 pre-existants Ollama weekly limit).
 
 | Session | Fichiers testes | Couverture | Notes
 | 045 | `epic_v_4_integration.feature` (Cucumber 5) + `VibecodingIntegrationTest.kt` (JUnit5 8) + `EpicV4CucumberRunner.kt` | 8/8 JUnit5 + 5/5 Cucumber PASS | EPIC V-4 : Test end-to-end VibecodingTask sur projet reel ProjectBuilder. Fix jsonlEscape(\n,\r,\t,\\\,") dans VibecodingTask.kt. EPIC V = 15/15 TERMINE.
