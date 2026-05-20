@@ -11,7 +11,9 @@ data class VibecodingState(
     val classification: String = "",
     val lastToolResult: String = "",
     val error: String? = null,
-    val finished: Boolean = false
+    val finished: Boolean = false,
+    val executedTasks: List<String> = emptyList(),
+    val currentTaskDescription: String = ""
 ) {
     val isFinal: Boolean get() = finished || iteration >= maxActions
 

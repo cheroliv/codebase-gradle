@@ -16,7 +16,7 @@ import dev.langchain4j.model.ollama.OllamaChatModel
 import kotlinx.coroutines.runBlocking
 import java.time.Duration
 
-// === Données (indépendantes de langgraph4j — migrées depuis codebase.langgraph.Plan) ===
+// === Données (indépendantes — migrées depuis l'ancien orchestrateur langgraph4j) ===
 
 data class Plan(
     val title: String,
@@ -63,7 +63,7 @@ data class PlanState(
  * - **langchain4j** : appels LLM (OllamaChatModel deepseek-v4)
  * - **pgvector/embeddings/vector stores** : scope opérationnel langchain4j (L-2)
  *
- * Remplace [codebase.langgraph.PlanningGraph] (langgraph4j StateGraph).
+ * Remplace l'ancien orchestrateur langgraph4j (désormais supprimé).
  */
 class KoogPlanningGraph {
 

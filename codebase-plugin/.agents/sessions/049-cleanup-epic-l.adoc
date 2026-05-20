@@ -1,0 +1,29 @@
+= Session 049 — Cleanup Post-Migration + EPIC L Finalisation
+:date: 2026-05-20
+:type: cleanup+finalisation
+:score: 10/10
+
+== Actions
+
+=== Cleanup post-migration (Option B)
+* 12 fichiers test Vibecoding* supprimes du disque :
+  VibecodingGraphTest, VibecodingTaskTest, VibecodingLoopTest, VibecodingIntegrationTest,
+  VibecodingGraphSteps/World, VibecodingTaskSteps/World,
+  VibecodingIntegrationSteps/World, VibecodingToolSteps/World
+* 4 features EPIC V supprimees : epic_v_0..4
+* 5 runners Cucumber EPIC V supprimes : EpicV0..V4CucumberRunner
+* 5 taches Gradle dead retirées de build.gradle.kts :
+  cucumberTestEpicV0, V1, V2, V3, V4
+
+=== EPIC L finalisation (Option C)
+* Package codebase.langgraph (6 fichiers) supprime :
+  ClassifyNode, FlashDecomposeNode, FormatNode, Plan, PlanningGraph, PlanningState
+* Dependance langgraph4j retiree du build
+* KoogPlanningGraph.kt : references codebase.langgraph nettoyees
+* 7/7 Cucumber @epic_l_3 PASS (EpicL3CucumberRunner)
+* EPIC L = 8/8 pts TERMINE
+
+=== Resultats
+* compileKotlin + compileTestKotlin OK (1 warning deprecation Java)
+* cucumberTestEpicL3 : 7/7 PASS
+* 12 echecs pre-existants (CucumberTestRunner, pgvector-dependant, non bloquants)

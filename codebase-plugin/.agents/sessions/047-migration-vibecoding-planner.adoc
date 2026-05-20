@@ -1,0 +1,43 @@
+= Session 047 — Migration Vibecoding codebase→planner (N1→N2)
+:date: 2026-05-20
+:duration: ~4h
+
+== Contexte
+
+EPIC V Vibecoding TERMINE (15/15 pts) en codebase-gradle (N1).
+Backlog decision : migrer VibecodingTask + VibecodingGraph → planner-gradle (N2).
+Codebase conserve ToolRegistry + tools + KoogAugmentedContextGraph (N1).
+
+== Actions
+
+. TDD — VibecodingLoopTest.kt (7 nouveaux tests : boucle executeToolsNode, parsePlanTasks, parseToolCall, dryRun/real mode, sandbox)
+. VibecodingGraph refactored — ToolRegistry injecte, executeToolsNode implemente parsing Plan.epics→tasks→toolRegistry.execute()
+. execute() skip buildContext→classify→plan si plan deja fourni (mode autonome)
+. VibecodingState etendu — executedTasks, currentTaskDescription
+. Nodes DSL koog connectes aux methodes privees (TODO retires)
+. Codebase nettoye — VibecodingGraph.kt + VibecodingTask.kt supprimes
+. Planner migre — planning/vibecoding/ package cree (import codebase.koog.*)
+. Koog 0.8.0 + codebase-plugin dep ajoutes au catalog planner
+. PlanningPlugin enregistre tache vibecode
+. GLOBAL_CODE_REVIEW.adoc maj v8 (section 15) — score 3.0→3.2/5
+
+== Resultats
+
+- 55/55 tests vibecoding PASS (10 Graph + 8 Integration + 30 Task + 7 Loop)
+- Codebase compile OK post-nettoyage
+- Planner : compilation EN COURS (probleme resolution transitive koog/codebase-plugin)
+- Ollama UP (deepseek-v4-pro, qwen3.5, kimi-k2)
+
+== Bloqueurs
+
+- Planner-gradle : impossible de resoudre education.cccp:codebase-plugin:0.0.1
+  a cause du conflit org.jetbrains:annotations (koog 26.0.2-1 vs Gradle/Kotlin 13.0/23.0)
+  Le fix settings.gradle.kts (dependencyResolutionManagement + mavenLocal) ne suffit pas.
+  A reprendre session 048.
+
+== Lecons
+
+- Gradle 9.5.0 + kotlin 2.3.20 + koog 0.8.0 creent un conflit de version annotations
+  quand koog est transitive d'un plugin Gradle applique via plugins {}
+- Solution probable : republier codebase-plugin avec exclusions koog en compileOnly
+  ou utiliser un BOM intermediaire (workspace-bom)

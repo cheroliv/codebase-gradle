@@ -8,25 +8,32 @@ class OpencodeInjector {
     private val log = LoggerFactory.getLogger(OpencodeInjector::class.java)
 
     fun inject(context: CompositeContext): String {
+        val channels = context.toChannels()
+        return injectChannelList(channels)
+    }
+
+    fun injectChannels(channels: List<ContextChannel>): String {
+        return injectChannelList(channels)
+    }
+
+    fun injectChannels(channels: List<ContextChannel>, budget: ChannelBudget): String {
+        return injectChannelList(budget.applyBudget(channels))
+    }
+
+    private fun injectChannelList(channels: List<ContextChannel>): String {
         val sb = StringBuilder()
 
-        sb.appendLine("[RÈGLES_EAGER] Contexte de gouvernance et règles absolues des boroughs")
-        sb.appendLine(context.eagerSection)
-        sb.appendLine()
-
-        sb.appendLine("[CONTEXTE_RAG] Résultats sémantiques depuis pgvector (cosine similarity)")
-        sb.appendLine(context.ragSection)
-        sb.appendLine()
-
-        sb.appendLine("[RELATIONS_GRAPHIFY] Graphe de dépendances connaissances entre projets")
-        sb.appendLine(context.graphifySection)
+        for (channel in channels) {
+            sb.appendLine(channel.sectionHeader)
+            sb.appendLine(channel.content)
+            sb.appendLine()
+        }
 
         val output = sb.toString()
-        log.info("OpencodeInjector: injected {} chars (EAGER={}, RAG={}, Graphify={})",
+        log.info("OpencodeInjector: injected {} chars across {} channels (active={})",
             output.length,
-            context.eagerSection.length,
-            context.ragSection.length,
-            context.graphifySection.length)
+            channels.size,
+            channels.count { it.isNotEmpty() })
 
         return output
     }

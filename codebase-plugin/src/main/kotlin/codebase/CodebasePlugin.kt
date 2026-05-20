@@ -1,6 +1,5 @@
 package codebase
 
-import codebase.koog.VibecodingTask
 import codebase.rag.AssembleWorkspaceContextTask
 import codebase.rag.PlanIntentionTask
 import codebase.rag.PrepareContextTask
@@ -41,18 +40,6 @@ class CodebasePlugin : Plugin<Project> {
             it.workspaceRoot.set(project.rootDir)
             it.ragQuestion.set(project.providers.gradleProperty("ragQuestion").orElse("architecture du workspace"))
             it.outputFile.set(project.layout.buildDirectory.file("plans/${project.rootDir.name}-plan.txt"))
-        }
-
-        project.tasks.register(
-            "vibecode",
-            VibecodingTask::class.java
-        ) {
-            it.group = "generate"
-            it.description = "Vibecoding agent — koog autonomous loop (context → plan → execute). Dry-run, maxActions 10. Audit trail JSONL."
-            it.workspaceRoot.set(project.rootDir)
-            it.intention.set(project.providers.gradleProperty("intention").orElse(""))
-            it.dryRun.set(project.providers.gradleProperty("dryRun").map { it.toBoolean() }.orElse(false))
-            it.maxActions.set(project.providers.gradleProperty("maxActions").map { it.toInt() }.orElse(10))
         }
     }
 }

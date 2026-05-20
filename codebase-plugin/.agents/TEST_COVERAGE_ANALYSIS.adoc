@@ -1,7 +1,6 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut_ : 62 scenarios Cucumber cumulatifs (30 EPIC 9 + 4 EPIC 2/4 @wip + 7 L-3 + 4 V-2 + 11 V-3 + 1 V-1 + 5 V-4) + 63 tests JUnit5 PASS (8 EPIC 10 + 19 EPIC K + 5 L-3 + 17 V-2 + 6 V-0/1 + 8 V-4) + *7 VibecodingLoopTest* (session 047). EPIC V : 39/39 JUnit5 PASS + 32/32 Cucumber PASS (V-0..V-4). Vibecoding : 55/55 PASS total. EPIC V = 15/15 pts TERMINE.
-_Test integration planner (session 048)_ : 9 tests VibecodingTaskIntegrationTest PASS (ProjectBuilder pour planner-plugin). 41/44 tests planner total PASS (2 pre-existants Ollama weekly limit).
+_Statut session 049_ : Tests EPIC V + Vibecoding* migres de codebase vers planner-gradle (session 047). Nettoyage complet des tests orphelins + package langgraph. 7/7 Cucumber @epic_l_3 PASS. compileKotlin + compileTestKotlin OK. 12 echecs pre-existants CucumberTestRunner (pgvector-dependant, non bloquants). EPIC L = 8/8 TERMINE.
 
 | Session | Fichiers testes | Couverture | Notes
 | 045 | `epic_v_4_integration.feature` (Cucumber 5) + `VibecodingIntegrationTest.kt` (JUnit5 8) + `EpicV4CucumberRunner.kt` | 8/8 JUnit5 + 5/5 Cucumber PASS | EPIC V-4 : Test end-to-end VibecodingTask sur projet reel ProjectBuilder. Fix jsonlEscape(\n,\r,\t,\\\,") dans VibecodingTask.kt. EPIC V = 15/15 TERMINE.
@@ -85,4 +84,12 @@ _Test integration planner (session 048)_ : 9 tests VibecodingTaskIntegrationTest
 
 == Prochaine etape
 
-Session 046 — EPIC G Publication Maven Central + Gradle Plugin Portal (cccp-education).
+Session 050 — A definir.
+
+== Notes 049
+* Tous les tests EPIC V (V-0..V-4) migres vers planner-gradle (session 047)
+* Features EPIC V (epic_v_0..4.feature) supprimees de codebase
+* Cucumber runners EPIC V (EpicV0..V4CucumberRunner) supprimes
+* Tests Vibecoding* JUnit5 + Cucumber supprimes (reference planner)
+* Package codebase.langgraph supprime — plus aucun import langgraph4j
+* Dependance langgraph4j retiree du build

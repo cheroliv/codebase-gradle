@@ -9,7 +9,17 @@ data class CompositeContext(
     val ragSection: String,
     val graphifySection: String,
     val config: CompositeContextConfig
-)
+) {
+    fun toChannels(): List<ContextChannel> = listOf(
+        ContextChannel.Eager(eagerSection),
+        ContextChannel.Rag(ragSection),
+        ContextChannel.Graphify(graphifySection),
+        ContextChannel.Resource("")
+    )
+
+    fun channelsWithBudget(budget: ChannelBudget): List<ContextChannel> =
+        budget.applyBudget(toChannels())
+}
 
 class CompositeContextBuilder(
     private val workspaceRoot: File,

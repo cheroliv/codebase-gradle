@@ -1,0 +1,73 @@
+= Session 046 — EPIC G Audit Publication + EPIC 3 Architecture Multi-Canal Convergent
+:date: 2026-05-19
+:type: feat+audit
+:score: 10/10
+
+== Contexte
+
+Session 045 fermee : EPIC V-4 Integration validation termine (15/15 pts).
+Mission : EPIC G publication + nettoyer BACKLOG, puis EPIC 3.
+
+== EPIC G — Audit Publication (audit, pas implementation)
+
+=== Verification platformes
+- Credentials `~/.gradle/gradle.properties` : gradle.publish.key/secret, ossrhUsername/Password, signing.keyId/password presents
+- GPG cle `F6F11769CD03CB34` active, expire 2028-06-17
+- Maven Central namespace `cccp.education` actif, 1 package
+- Gradle Portal compte `cccp-education` cree 2026-05-18, 0 plugin publie
+- Build config : group=education.cccp, Sonatype staging, GPG useGpgCmd()
+- Maven Local : `education.cccp:codebase-plugin:0.0.1` present
+
+=== Decision
+Aucune publication immediate necessaire. Quand on voudra : `./gradlew publishAllPublicationsToSonatypeRepository publishPlugins`.
+publishToMavenLocal suffit pour conso inter-boroughs N1→N2. EPIC G marque AUDITE definitive.
+
+== BACKLOG — Nettoyage complet
+
+EPIC 9, EPIC 4, EPIC 10, EPIC V, EPIC K marques TERMINE dans INDEX mais encore "EN COURS" / "A FAIRE" dans BACKLOG.
+Rewrite complet : statuts synchronises, doublons elimines, EPIC 11+13 marques OBSOLETE (remplaces par EPIC L).
+
+== EPIC 3 — Architecture Multi-Canal Convergent
+
+=== Fichiers crees
+. `ContextChannel.kt` (sealed class, 4 subtypes : Eager, Rag, Graphify, Resource)
+  - Proprietes : name, sectionHeader, content, budgetProportion, description, type (ChannelType enum)
+  - truncateToTokens(maxTokens), isNotEmpty(), withContent(newContent)
+. `ChannelBudget.kt` (data class, 40/30/20/10)
+  - tokensFor(ChannelType), tokensFor(ContextChannel), applyBudget(list)
+  - fromConfig(CompositeContextConfig) pour compatibilite retro
+. `MultiChannelContextGraph.kt` (koog+langchain4j, package codebase.koog)
+  - 5 noeuds DSL koog : collectEager → collectRag → collectGraphify → assemble → finish
+  - MultiChannelState (data class, accesseurs eager/rag/graphify/resource)
+  - execute() avec safeStep() resilient (pgvector down → no crash)
+  - asMermaidDiagram()
+
+=== Fichiers adaptes
+. `CompositeContextBuilder.kt` : CompositeContext.toChannels(), channelsWithBudget()
+. `OpencodeInjector.kt` : injectChannels(List, budget?) methodes polymorphes
+
+=== ZERO impact sur langgraph4j/
+Aucun fichier `codebase/langgraph/` modifie. koog uniquement.
+
+=== Tests
+. `ContextChannelTest.kt` : 9/9 PASS (sealed class types, budget proportions, headers, truncation, isNotEmpty, withContent, description)
+. `ChannelBudgetTest.kt` : 8/8 PASS (defaults, sum 1.0, rejection, tokensFor, applyBudget, fromConfig, custom proportions)
+. `MultiChannelContextGraphTest.kt` : 7/7 PASS (topology, eager collection, 4 channels, assemble, budget truncation, state accessors, resilience invalid path)
+. Non-regression : 39/39 JUnit5 PASS, 32/32 Cucumber PASS (12 echecs pre-existants, ZERO cause par EPIC 3)
+
+=== Compilation
+Kotlin 2.3.20, Gradle 9.5.0 — BUILD SUCCESSFUL x3 (pre-test, post-test, verification finale)
+
+== Fichiers modifies
+
+. `ContextChannel.kt` + `ChannelBudget.kt` — nouveaux
+. `MultiChannelContextGraph.kt` + `MultiChannelState` — nouveaux
+. `CompositeContextBuilder.kt` — toChannels(), channelsWithBudget()
+. `OpencodeInjector.kt` — injectChannels() polymorphe
+. `ContextChannelTest.kt` + `ChannelBudgetTest.kt` + `MultiChannelContextGraphTest.kt` — 24/24 PASS
+. `BACKLOG.adoc` — nettoye, synchronise INDEX
+. `PROMPT_REPRISE.adoc` (codebase) — mission 047
+. `configuration/.agents/PROMPT_REPRISE.adoc` (global) — session 047
+. `.agents/INDEX.adoc` — session 046, EPIC G audite, EPIC 3 termine
+. `.agents/SESSIONS_HISTORY.adoc` — session 046
+. `AGENTS.adoc` (racine) — Queens session 046

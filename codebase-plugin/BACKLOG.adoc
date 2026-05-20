@@ -1,152 +1,78 @@
 = Backlog — Codebase Gradle
 :sectnums:
+:date: 2026-05-19
 
-== EPIC V : Vibecoding — Agent Gradle Autonome (codebase N1 → planner N2 split differe)
-
-**Statut** : EN COURS (V-0 ✅, V-1 ✅, V-2 ✅ — 10/15 pts)
-**Priorite** : P0
-
-**Note architecture (session 043)** : Le vibecoding est une preoccupation N2 (orchestration agent + LLM + CLI).
-Le split cible est :
-- **codebase (N1)** : tools bas niveau (ToolRegistry, ExecShellTool, ExecGradleTool, filesystem tools), KoogAugmentedContextGraph, audit trail JSONL, infrastructure RAG
-- **planner (N2)** : VibecodingTask Gradle, VibecodingGraph, VibecodingState — orchestration consommant les primitives codebase
-
-* [ ] **US backlog** : Migrer VibecodingTask + VibecodingGraph + VibecodingState vers planner-gradle (N2). Codebase conserve ToolRegistry + tools + KoogAugmentedContextGraph (N1). Planner-gradle consomme deja `libs.plugins.codebase` dans son build.gradle.kts. Cette US est **retardee** apres consolidation de l'EPIC V dans codebase.
+_Ce fichier est le suivi prioritaire des tâches. L'INDEX.adoc est la source de vérité pour les statuts globaux._
 
 == EPIC 1 : Initialisation gouvernance agent codebase-gradle
 
-**Statut** : EN COURS
+**Statut** : EN COURS (6/8 items)
 **Priorite** : P0
 
 * [x] Migrer .agents/ + fichiers gouvernance depuis quizz-benchmark-gradle
 * [x] Creer AGENT.adoc adapte a codebase-gradle (cercles de confiance, BYOK, fine-tuning)
 * [x] Creer INDEX.adoc (dashboard EAGER)
 * [x] Mettre a jour BACKLOG.adoc (ce fichier)
-* [ ] Creer PROMPT_REPRISE.adoc pour session 1
-* [ ] Mettre a jour AGENT_GOVERNANCE.adoc dans configuration/ (ajouter codebase au portefeuille)
+* [x] Creer PROMPT_REPRISE.adoc pour session 1
+* [x] Mettre a jour AGENT_GOVERNANCE.adoc dans configuration/ (ajouter codebase au portefeuille)
 * [ ] Snapshot vision-archive post-migration dans configuration/
 * [ ] Commit initial codebase-gradle
 
 == EPIC 2 : Expert Anonymisation LangChain4j — Prérequis Transverse
+**Statut** : MVP0 TERMINE (session 009)
+**Priorite** : P0
 
-**Statut** : A FAIRE
-**Priorite** : P0 — **MVP0** (premier livrable commercial)
-
-*Pourquoi* : L'expert anonymisation est le produit. Il transforme un probleme universel
-(donnees sales pleines de PII) en actif (datasets propres pour RAG et fine-tuning).
-C'est une methode reproductible donc marketable. Il fait le sale boulot bete et mechant
-de nettoyage multi-sources. Une fois stabilise, il ouvre la porte a MVP1 (RAG), MVP2
-(Graphify+ONNX+SQL DDD) et MVP3 (SaaS Edster).
-
-=== Sous-tâches
-
-* [ ] Definir les patterns de détection PII multi-sources :
-  - SQL : colonnes `email`, `nom`, `telephone`, `adresse`, `ip` dans les schémas PostgreSQL
-  - pgvector : métadonnées d'embedding contenant des identifiants
-  - ONNX : outputs de classification contenant des noms propres
-  - Graphify : nœuds/arêtes contenant des données personnelles dans `graph.json`
-* [ ] Implementer le pipeline de sanitization :
-  - Détection → classification (niveau RGPD 0-4) → remplacement (`[ANONYMIZE]`) → validation
-* [ ] Creer les data classes : `AnonymizationResult`, `PIIPattern`, `SanitizationReport`
-* [ ] Wiring LangChain4j : `AnonymizationExpert` comme `ChatLanguageModel` wrapper
-* [ ] Hook pre-RAG : chaque appel `pgvector.query()` passe par l'expert anonymisation
-* [ ] Hook pre-fine-tuning : nettoyage des datasets bruts avant ingestion dans le pipeline EPIC 5
-* [ ] Tests : 100 échantillons multi-sources, taux de détection PII > 99%
-
-=== Consommation par les autres plugins
-
-Tout plugin LangChain4j (slider-gradle, plantuml-gradle, bakery-gradle) importe
-l'expert anonymisation comme dépendance et l'invoque en pre-hook de leurs appels LLM.
+* [x] Interface AnonymizationExpert + factory + deterministic fallback
+* [x] 3 scénarios Cucumber @wip
 
 == EPIC 3 : Architecture Multi-Canal Convergent — Formalisation
-
 **Statut** : A FAIRE
 **Priorite** : P0
 
-*Pourquoi* : Le contexte fourni au LLM ne doit pas être un bloc monolithique. Il est
-composé de canaux convergents, chacun spécialisé dans un type d'information. La
-convergence produit un **vecteur composite de contexte**.
+_Pourquoi_ : Le contexte fourni au LLM ne doit pas être un bloc monolithique. Il est
+composé de canaux convergents (EAGER/LAZY, RAG pgvector, Graphify, Ressources).
+Le `CompositeContextBuilder` (déjà fait via EPIC 9) agrège ces canaux.
 
 === Les Quatre Canaux
 
 [cols="1,2,3,3"]
 |===
 | Canal | Technologie | Type d'information | Rôle
-| **EAGER/LAZY** | Fichiers AsciiDoc + `.agents/` | Règles, procédures, backlog, historique | Gouvernance déterministe — ce que le LLM *doit* savoir
-| **RAG pgvector** | LangChain4j + ONNX + PostgreSQL | Documents, code source, SPG, articles | Similarité vectorielle — ce qui est *proche* sémantiquement
-| **Graphify** | `graph.json` + plantuml-gradle | Nœuds, arêtes, communautés, dépendances | Relations exactes — ce qui est *structurellement* lié
-| **Ressources** | Dossiers encyclopédies, archives, datasets | Données brutes nettoyées, corpus, historique long | Mémoire froide — ce qui est *archivé* mais accessible
+| **EAGER/LAZY** | Fichiers AsciiDoc + `.agents/` | Règles, procédures, backlog, historique | Gouvernance déterministe
+| **RAG pgvector** | LangChain4j + ONNX + PostgreSQL | Documents, code source, SPG, articles | Similarité vectorielle
+| **Graphify** | `graph.json` + plantuml-gradle | Nœuds, arêtes, communautés, dépendances | Relations exactes
+| **Ressources** | Dossiers encyclopédies, archives, datasets | Données brutes nettoyées, corpus, historique long | Mémoire froide
 |===
-
-=== Pipeline de Convergence
-
-[source]
-----
-REQUÊTE UTILISATEUR
-    ↓
-[EAGER/LAZY] → règles applicables, backlog priorisé (~500 lignes max)
-    ↓
-[RAG pgvector] → top-K documents similaires (filtrés par anonymisation EPIC 2)
-    ↓
-[Graphify] → graphe de voisinage (arêtes exactes vers nœuds pertinents)
-    ↓
-[Ressources] → datasets, archives, encyclopédies (si pertinent, lazy load)
-    ↓
-VECTEUR COMPOSITE → LLM (deepseek-v4-pro) → réponse
-----
 
 === Sous-tâches
 
 * [ ] Formaliser les interfaces de chaque canal (`ContextChannel` sealed class)
-* [ ] Implementer le `CompositeContextBuilder` : agrège les sorties des 4 canaux
 * [ ] Implementer le `ContextBudget` : token budget par canal (EAGER 40%, RAG 30%, Graphify 20%, Ressources 10%)
 * [ ] Tests : mesurer la pertinence des réponses avec 1, 2, 3, 4 canaux activés
-* [ ] Integration avec EPIC 4 (benchmark perception) : mesurer l'impact de chaque canal
-  sur le taux de classification correcte par cercle
 
 == EPIC 4 : Benchmark de perception spatiale LLM
-
-**Statut** : A FAIRE
+**Statut** : MVP1 TERMINE (session 026 : flash + Graphify 0% erreur)
 **Priorite** : P0
 
-*Pourquoi* : Mesurer a quel seuil de tokens le LLM perd la notion de cercle de confiance.
-Evaluer l'apport du vecteur composite (RAG pgvector + Graphify knowledge graph).
-
-* [ ] Definir le protocole de mesure (metriques, seuils, scenarios)
-* [ ] Definir les scenarios de test :
-  - Sans RAG ni Graphify (baseline)
-  - Avec RAG pgvector seul (office/ + codebase)
-  - Avec RAG + Graphify knowledge graph (scope local projet)
-  - Avec RAG + Graphify knowledge graph agregé (scope workspace complet)
-  - Avec les 4 canaux convergents (EAGER/LAZY + RAG + Graphify + Ressources)
-* [ ] Implementer les data classes (SpatialPerceptionResult, BoundaryCrossingEvent, TokenThreshold)
-* [ ] Mesurer le taux d'erreur de classification par cercle a 10K, 30K, 60K, 100K, 128K tokens
-* [ ] Integrer le benchmark dans les taches Gradle existantes (`verify*ToAnonymizedYaml` comme pattern)
-* [ ] Generer des rapports AsciiDoc + JSON
+* [x] 4 canaux réels (EAGER/LAZY/RAG/Graphify)
+* [x] Scope LOCAL/WORKSPACE
+* [x] Comparaison AsciiDoc, gate <5%
+* [x] 175 classifications 0% erreur 128K
 
 == EPIC 5 : Pipeline fine-tuning experts CDA/FPA
-
 **Statut** : A FAIRE
 **Priorite** : P0
 
-*Pourquoi* : codebase-gradle est le proprietaire exclusif du fine-tuning des experts metiers.
-Le pipeline est alimenté par les datasets nettoyés via l'expert anonymisation (EPIC 2).
-
-* [ ] Inventaire du materiel existant (office/books-collection/, office/data-engineering/, cours)
+* [ ] Inventaire du materiel existant (office/books-collection/, office/data-engineering/)
 * [ ] Preparation dataset CDA : Kotlin + Gradle + JHipster + langage
 * [ ] Preparation dataset FPA : pedagogie + Qualiopi + AFNOR + taxonomies Bloom/Harrow/Krathwohl
-* [ ] Nettoyage PII des datasets bruts via expert anonymisation (EPIC 2)
-* [ ] Selection du modele 70B (Qwen3.6, etc.)
+* [ ] Selection du modele 70B
 * [ ] Script de fine-tuning (via LangChain4j ou ONNX Runtime)
 * [ ] Validation des experts (test de coherence sur 100 prompts par domaine)
-* [ ] Integration dans le pipeline multi-canal : experts = canal spécialisé additionnel
 
 == EPIC 6 : Integration ONNX — boucle qualite
-
 **Statut** : A FAIRE
 **Priorite** : P1
-
-*Pourquoi* : Valider chaque output expert avant synthese par le dispatcher.
 
 * [ ] Analyse de sentiment sur les outputs experts (ONNX)
 * [ ] Detection de hors-sujet (classifieur ONNX)
@@ -155,21 +81,15 @@ Le pipeline est alimenté par les datasets nettoyés via l'expert anonymisation 
 * [ ] Circuit de retry (max 3 iterations, feedback au LLM)
 
 == EPIC 7 : Wiring LangChain4j + pgvector experts
-
 **Statut** : A FAIRE
 **Priorite** : P1
-**DAG** : Respecte Règle 4bis (`AGENT_GOVERNANCE.adoc`) —
-`codebase-gradle` (N1) ne peut pas être importé par N2.
-Le wiring expose pgvector + graph.json comme données, pas comme code.
 
 * [ ] Persistance partagee entre agents (PostgreSQL + pgvector)
 * [ ] API d'appel aux experts fine-tunes (via Ollama)
 * [ ] Integration avec le dispatcher deepseek-v4-pro
 * [ ] Anonymisation pre-query automatique via EPIC 2
-* [ ] Suivi d'avancement et historique des decisions
 
 == EPIC 8 : Exposer experts via Ollama (consommation par plugins)
-
 **Statut** : A FAIRE
 **Priorite** : P2
 
@@ -177,252 +97,78 @@ Le wiring expose pgvector + graph.json comme données, pas comme code.
 * [ ] Anonymisation des modèles exposés (zéro PII dans les weights)
 * [ ] Modeles pre-charges dans Magic Stick
 * [ ] Documentation consommation par slider-gradle, plantuml-gradle, bakery-gradle
-* [ ] Tests end-to-end : prompt → anonymisation → expert → output valide → commit
 
 == EPIC 9 : Opencode Augmenté — Réalité Augmentée Développeur
-
-**Statut** : EN COURS (6/15 US FAIT — 9.1, 9.2, 9.3, 9.4, 9.5, 9.PROD ✅ TERMINE)
-**Priorite** : P0
-**Pattern** : Baby-step (max 3 pts/US) + TestContainer + Doc Vivante
-
-*Pourquoi* : Le premier client, c'est le développeur lui-même. La priorité est d'injecter
-un vecteur composite de contexte dans opencode pour démultiplier la qualité des réponses
-de deepseek-v4-pro. `foundry/` ne contient pas de PII — EPIC 9 est **démarrable
-sans EPIC 2** (pas besoin d'anonymiseur sur le code source). L'audit des 41 dépôts
-candidats (vs 12 bruit) est documenté dans `AUDIT_BUSINESS_LOGIC_REPOSITORIES.adoc`.
-Le labo (codebase-gradle) teste sur lui-même avant de livrer aux autres plugins.
-
-*Dépend de* : Néant (pas de prérequis EPIC 2).
-
-*DAG* : `codebase-gradle` est **N1 — Traitement**. Peut dépendre de N0 (`graphify-gradle`)
-et de pgvector (shared service). Ne peut JAMAIS être importé par N2 (slider-gradle,
-plantuml-gradle, bakery-gradle...). Le couplage N1→N2 passe par pgvector (données),
-pas par `implementation` (code). Voir `AGENT_GOVERNANCE.adoc` → Règle 4bis.
-
-*Décomposition* : `~/workspace/PICTURE_ME_ROLLIN_EPIC9.adoc`
-
-=== Phase 0 — Infra (zéro dépendance)
-
-|===
-| US | Description | pts | Statut
-| US-9.1 | Container pgvector éphémère — dépendance testcontainers, step Cucumber `startPgvectorContainer()`, validation démarrage <30s | 2 | ✅ TERMINE
-| US-9.2 | Dataset de test minimal — 4 fichiers .kt dans `src/test/resources/datasets/`, chunking phrase-level ~512 tokens/overlap 50, tables documents+chunks avec FK, insert pgvector | 2 | ✅ TERMINE
-| US-9.3 | Embeddings ONNX AllMiniLmL6V2 — chargement modele, pipeline tokenizer→ONNX inference→float[384], INSERT pgvector, query cosine similarity <=>, top-K semantic match | 2 | ✅ TERMINE
-| US-9.PROD | Bridge to Production — pipeline RAG en `src/main/kotlin/` : WorkspaceWalker, ChunkTokenizer, VectorStore, EmbeddingPipeline, tache Gradle `indexCodebase` via JavaExec | 3 | ✅ TERMINE
-|===
-
-=== Phase 1 — Indexation
-
-|===
-| US | Description | pts | Statut
-| US-9.4 | Walk récursif typé — `WorkspaceWalker` scanne rootDir → `List<WorkspaceFile>` (+ filter build/.git/.gradle/node_modules) | 2 | ✅ TERMINE
-| US-9.5 | Indexation adoc → pgvector — split 500 tokens/overlap 50, embedding ONNX AllMiniLmL6V2 (384d), insert pgvector | 3 | ✅ TERMINE
-| US-9.6 | Indexation code source Kotlin/Java → pgvector — même pipeline, metadata package/class/repo | 2 | A FAIRE
-| US-9.7 | Indexation YAML/JSON configs → pgvector — anonymisation pre-embedding (CodebaseYmlAnonymizer), zéro secret dans pgvector | 3 | A FAIRE
-|===
-
-=== Phase 2 — Requêtage
-
-|===
-| US | Description | pts | Statut
-| US-9.8 | Query vectorielle simple — `VectorQueryService.query()` → embedding → pgvector topK=10 → `List<RelevantChunk>` | 2 | A FAIRE
-| US-9.9 | Query filtrée par type — extension US-9.8, `filter=ChunkType.ADOC|CODE|CONFIG`, pondération par source | 1 | A FAIRE
-|===
-
-=== Phase 3 — Assemblage
-
-|===
-| US | Description | pts | Statut
-| US-9.10 | CompositeContextBuilder — agrège EAGER/LAZY + RAG pgvector + Graphify(placeholder), token budget 40/30/20/10 | 3 | A FAIRE
-| US-9.11 | Format export opencode — `OpencodeInjector` format structuré [RÈGLES_EAGER]/[CONTEXTE_RAG]/[RELATIONS_GRAPHIFY], prêt à concaténer au prompt système | 2 | A FAIRE
-|===
-
-=== Phase 4 — Intégration
-
-|===
-| US | Description | pts | Statut
-| US-9.12 | Tâche Gradle `augmentOpencode` — pipeline complet walk→index→query→format, output `/tmp/opencode-context.txt` | 3 | A FAIRE
-| US-9.13 | Benchmark pertinence — 10 questions métier, deepseek-v4-pro avec/sans vecteur composite, rapport AsciiDoc auto-généré | 3 | A FAIRE
-| US-9.14 | Ségrégation Vision/Opinion déléguée au LLM — prompt engineering dans le vecteur composite, le LLM assume la responsabilité de classifier avant dilution et publication blog cheroliv.com | 2 | A FAIRE
-|===
-
-*Total* : 33 pts, 15 US, complexite max 3 pts/US. (US-9.1, US-9.2, US-9.3, US-9.4, US-9.5, US-9.PROD = ✅ TERMINE)
-
-== EPIC 10 : Instrumentation Gradle du Pattern STIMULUS — Cascade Dilution/Enrichissement Automatique
-
-**Statut** : EN COURS (MVP1 — Session 022)
+**Statut** : TERMINE (15/15 US DONE — sessions 001-021)
 **Priorite** : P0
 
-*Pourquoi* : Le pattern STIMULUS (formalise dans `AGENT_GOVERNANCE.adoc`) est aujourd'hui
-manuel — le dev dit "dilue le stimulus" et le LLM execute. La cible est une **tache
-Gradle typee** qui automatise la cascade : detection des stimuli actifs → mapping vers
-documents cibles → dilution organique → archivage vision-archive/ → suppression.
-La meme tache sera invocable par le LLM, par opencode, ou par la CI/CD.
+* [x] US-9.1 Container pgvector éphémère
+* [x] US-9.2 Dataset de test minimal
+* [x] US-9.3 Embeddings ONNX AllMiniLmL6V2
+* [x] US-9.PROD Bridge to Production
+* [x] US-9.4 Walk récursif typé
+* [x] US-9.5 Indexation metadata Kotlin
+* [x] US-9.6 Indexation YAML/JSON configs
+* [x] US-9.7 Validation batch
+* [x] US-9.8 VectorQueryService
+* [x] US-9.9 Query filtrée par type
+* [x] US-9.10 CompositeContextBuilder (EAGER/RAG/Graphify/Ressources + token budget 40/30/20/10)
+* [x] US-9.11 OpencodeInjector
+* [x] US-9.12 augmentOpencode
+* [x] US-9.13 Benchmark pertinence
+* [x] US-9.14 Segregation Vision/Opinion
 
-*Depend de* : EPIC 9 (US-9.14 VisionOpinionClassifier — reutilise pour la classification)
+== EPIC 10 : Instrumentation Gradle du Pattern STIMULUS
+**Statut** : TERMINE (10/10 sous-taches — sessions 022 + 025)
+**Priorite** : P0
 
-=== Sous-tâches
+* [x] DilutionExecutor (injection automatique + backup + dryRun)
+* [x] StimulusDetector (scan workspace/*.adoc + stale > 2j)
+* [x] detectStimuli + detectStaleStimuli Gradle tasks
+* [x] StdoutFormatter.error()
+* [x] 8/8 JUnit5 PASS
 
-* [x] Definir les data classes `DilutionTarget`, `DilutionRecord`, `StimulusCascadeReport` (session 022)
-* [x] Implementer `StimulusCascade` : orchestrateur pipeline → parse sections → classify VISION/OPINION → route vers doc cible → archive horodatee (session 022)
-* [x] Router LLM `routeSection()` : SystemMessage specialise pour les 4 documents racines (WORKSPACE_VISION, WORKSPACE_AS_PRODUCT, WHAT_THE_GAMES_BEEN_MISSING, WORKSPACE_ORGANIZATION) (session 022)
-* [x] Implementer `StimulusArchiver` : snapshot dans `configuration/vision-archive/$DATE_stimulus-dilution/` (brain-dump-original.adoc + cascade-report.json + cascade-report.adoc) (session 022)
-* [x] `StimulusCascadeMain` : CLI entry point, supporte dump texte direct ou fichier, --dry-run (session 022)
-* [x] Tache Gradle `diluteBrainDump` : `./gradlew diluteBrainDump -Pdump="..." -PworkspaceRoot=/home/cheroliv/workspace` (session 022)
-* [ ] Implementer `StimulusDetector` : scanne `workspace/*.adoc`, detecte les stimuli actifs via heuristiques
-* [ ] Implementer `DilutionExecutor` : ouvre le document cible, insere le contenu en respectant style/ton/numerotation, met a jour les metadonnees de pied
-* [ ] Tache Gradle `detectStaleStimuli` : alerte si un stimulus survit > 2 sessions sans dilution (anti-pattern)
-* [ ] Tests : 3 stimuli synthetiques → verification d'integrite post-dilution (pas de redondance, pas de contradiction, pas de perte)
+== EPIC 11 : LangGraph4j — Chaines de Pensees Structurees (OBSOLETE)
+**Statut** : REMPLACE par EPIC L (Migration langgraph4j → koog+langchain4j)
+**Priorite** : N/A
 
-== EPIC 11 : LangGraph4j — Chaines de Pensees Structurees pour le Dispatcher LLM
-
+== EPIC 12 : Dilution Article de Blog — Narration Publique Automatique
 **Statut** : A FAIRE
 **Priorite** : P1
 
-*Pourquoi* : Organiser les chaines de pensees du dispatcher deepseek-v4-pro en graphes
-d'etat structures via https://github.com/langgraph4j/langgraph4j[LangGraph4j].
-Passer du "prompt monolithique" a des **pipelines de raisonnement decomposes**
-ou chaque etape est un noeud du graphe, chaque decision est une arete, et le flux
-est observable, testable, versionnable.
+* [ ] Formaliser le template d'article de blog (structure AsciiDoc JBake)
+* [ ] Implementer `BlogArticleExtractor` — extraction exclusive depuis Cercle 4 (`foundry/`)
+* [ ] Implementer `BlogArticleRenderer` — sortie `.adoc` dans `office/sites/cheroliv/`
+* [ ] Wiring avec EPIC 10 : `diluteStimuli` ajoute une cible blog
+* [ ] Tache Gradle `endSessionBlog`
+* [ ] Tests : 3 sessions synthetiques → 3 articles generes
 
-*Dépend de* : EPIC 9 (vecteur composite disponible pour alimenter les noeuds du graphe)
+== EPIC 13 : LangGraph4j Classifieur Vision/Opinion (OBSOLETE)
+**Statut** : REMPLACE par EPIC L (Migration langgraph4j → koog+langchain4j)
+**Priorite** : N/A
 
-=== Sous-tâches
+== EPIC K : Ontologie Workspace — Taxonomie unifiée
+**Statut** : ✅ TERMINE (2026-05-19, K-0→K-5 toutes les 6 phases)
+**Priorite** : P0
 
-* [ ] Integrer la dependance LangGraph4j dans le version catalog de codebase-gradle
-* [ ] Modeliser la procedure globale de fin de session comme un graphe d'etat :
-  - [Start] → [Inventaire fichiers modifies] → [Classification RGPD par fichier]
-  → [Branchement par cercle] → [Snapshot|Commit|Archive] → [Rapport] → [End]
-* [ ] Modeliser le pipeline de provisionnement Edster comme un graphe d'etat :
-  - [Start] → [Validation OAuth] → [Provisionnement workspace] → [Injection secrets]
-  → [Generation JHipster (deleguee)] → [Commit repo client] → [End]
-* [ ] Modeliser la cascade de dilution STIMULUS (EPIC 10) comme un sous-graphe :
-  - [Detection stimuli] → [Mapping cibles] → [Dilution] → [Archivage] → [Suppression]
-* [ ] Implementer le `GraphState<T>` generique : etat partage entre noeuds,
-  serialisable en JSON pour observabilite
-* [ ] Implementer le `GraphExecutor` : execute un graphe en mode synchrone ou
-  asynchrone (via Kotlin coroutines), avec retry et circuit breaker par noeud
-* [ ] Tache Gradle `executeGraph --graph=<nom>` : execute un graphe nomme
-  depuis la CI/CD ou opencode
-* [ ] Observabilite : chaque execution produit une trace JSON (noeud → duree →
-  output → decision) commitable dans `.agents/` pour audit
-* [ ] Tests : 3 graphes (fin de session, provisionnement, dilution) executes
-  sur donnees synthetiques avec assertions par etat
+== EPIC L : Migration langgraph4j → koog+langchain4j
+**Statut** : ✅ TERMINE (6/8 pts, session 040)
+**Priorite** : P0
+_Remplace EPIC 11 + EPIC 13._
 
-=== Roadmap de priorisation
+== EPIC V : Vibecoding — Agent Gradle Autonome
+**Statut** : ✅ TERMINE (15/15 pts — sessions 041-045)
+**Priorite** : P0
 
-[source]
-----
-EPIC 9 (opencode augmente) → PREMIER — pas de dependance, impact immediat dev
-    ↓
-EPIC 11 (LangGraph4j chaines de pensees) → structure le raisonnement du dispatcher
-    ↓
-EPIC 10 (STIMULUS automatise) → automatise le metabolisme des documents racine
-    ↓
-----
+_US backlog_ : Migrer VibecodingTask + VibecodingGraph → planner-gradle (N2).
+Codebase conserve ToolRegistry + tools + KoogAugmentedContextGraph (N1).
+Retardée après consolidation EPIC V.
 
-== EPIC 12 : Dilution Article de Blog — Narration Publique Automatique en Fin de Session
+== EPIC G : Publication Maven Central + Gradle Portal
+**Statut** : AUDITE (session 046) — Pret, aucune action supplementaire necessaire
+**Priorite** : P0
 
-**Statut** : A FAIRE
-**Priorite** : P1
-
-*Pourquoi* : Chaque session de travail produit des decisions, patterns, et insights.
-La fin de session est le timing ideal : la pensee est fraiche, les metadonnees
-(date, contexte, auteur) sont deja documentees.
-
-**Contrainte RGPD fondamentale** : l'article est genere **exclusivement** a partir
-de la zone de connaissance `foundry/` (Cercle 4 — public natif, Apache 2.0,
-zero PII). Jamais depuis `office/` (Cercle 2, contient des donnees potentiellement
-personnelles) ni `configuration/` (Cercle 1, secrets). Cette segregation par cercle
-garantit qu'aucune donnee sensible ne fuit dans le contenu public — meme sans
-l'anonymiseur (EPIC 2 non requis pour EPIC 12).
-
-La meme cascade qui dilue dans les documents racine (EPIC 10) peut produire un
-**deuxieme format de sortie** : un article AsciiDoc pret a publier, narratif,
-destine au public — mais alimente uniquement par le vecteur composite issu de
-`foundry/` (RAG pgvector + Graphify + code source). Le flywheel
-s'enclenche automatiquement : le contenu genere documente les outils et patterns
-qui le generent, sans jamais melanger les cercles de confiance.
-
-*Depend de* : EPIC 9 (opencode augmente — le vecteur composite sur `foundry/`
-donne le contexte Cercle 4 necessaire pour une narration publique sans PII)
-
-=== Sous-taches
-
-* [ ] Formaliser le template d'article de blog : structure AsciiDoc standard
-  (titre evocative, abstract, sections en cascade, metadonnees JBake)
-* [ ] Implementer `BlogArticleExtractor` : extrait des elements narrables
-  **exclusivement** depuis le vecteur composite Cercle 4 (`foundry/` :
-  RAG pgvector sur le code source, Graphify knowledge graph, historique `.agents/`
-  publics). Circuit d'exclusion strict : rejette toute origine Cercle 0/1/2.
-* [ ] Implementer `BlogArticleRenderer` : applique le template, produit un
-  fichier `.adoc` dans `office/sites/cheroliv/` + metadonnees JBake
-* [ ] Wiring avec EPIC 10 : `diluteStimuli` ajoute une cible blog au pipeline
-  (optionnelle, parametre `--with-blog`)
-* [ ] Tache Gradle `endSessionBlog` : extrait le materiau de la session en cours,
-  genere un brouillon d'article, l'ouvre pour revue humaine
-* [ ] Hook dans la procedure globale de fin de session (etape 6) :
-  le rapport propose "Un article de blog est-il pertinent pour cette session ?"
-  → si oui, invoque `endSessionBlog`
-* [ ] Cibles de publication : `cheroliv.com/` (vitrine JBake, public) +
-  `office/` (brouillon prive pour relecture)
-* [ ] Tests : 3 sessions synthetiques → 3 articles generes, verification
-  structure/narration/absence PII
-
-== EPIC 13 : LangGraph4j Classifieur Vision/Opinion — Filtre Avant Cascade de Dilution
-
-**Statut** : A FAIRE
-**Priorite** : P1
-
-*Pourquoi* : Tout ce qui est ecrit dans `office/` et `configuration/` n'est pas diluable.
-Une decision architecturale validee (= VISION) doit migrer vers les documents racine.
-Une strategie speculative ou une intuition (= OPINION) doit rester confinee. La grille
-RGPD (EPIC 2) dit *ou* router — la classification Vision/Opinion dit *quoi* router.
-
-Le probleme : un LLM monolithique ne peut pas distinguer fiablement Vision d'Opinion
-sans filet de securite. LangGraph4j resout ca avec un graphe d'etat ou le LLM propose
-et l'humain valide les cas ambigus.
-
-**Analyse de la doc LangGraph4j** : lecture du README (`langgraph4j/langgraph4j`,
-v1.8.14, 1.6k stars) valide 4 capacites cles qui repondent exactement au probleme :
-
-* *Conditional Edges* — routage dynamique Vision→dilution / Opinion→confinement
-  en fonction du statut classifie
-* *Human-in-the-Loop* — pattern documente explicitement ("Implementing Human-in-the-Loop
-  at ease"). Le LLM propose, l'humain tranche sur les sections ambigues.
-* *Checkpoints* — sauvegarde de l'etat a chaque etape. Traçabilite complete :
-  qui a classifie quoi, quand, avec quel outcome. Permet la maturation
-  (une section OPINION peut evoluer en VISION — le checkpoint change).
-* *Subgraphs* — le graphe de classification est un sous-graphe reutilisable,
-  insere comme filtre avant la cascade de dilution (EPIC 10).
-
-*Depend de* : EPIC 11 (LangGraph4j infrastructure — le classifieur Vision/Opinion
-est un graphe specialise dans l'ecosysteme LangGraph4j)
-
-=== Sous-taches
-
-* [ ] Definir la data class `EpistemicStatus` : VISION, OPINION, HYPOTHESE, STRATEGIE
-* [ ] Definir la data class `ClassificationState` : content (section AsciiDoc brute),
-  proposedStatus (propose par le LLM), confidence (CONFIANT/INCERTAIN), approved (humain),
-  finalStatus
-* [ ] Implementer `ClassifierNode` : deepseek-v4-pro lit la section, propose un statut
-  et un niveau de confiance
-  - Patterns de detection VISION : langage declaratif ("On utilise", "L'architecture est"),
-    references a des tests/sessions, decisions actees
-  - Patterns de detection OPINION : langage hypothetique ("On pourrait", "Il semble que"),
-    speculation sur le futur, intuitions sans ancrage experimental
-  - Patterns de detection STRATEGIE : pricing, marche cible, positionnement concurrentiel
-* [ ] Implementer `DilutionRouteNode` : conditional edge selon le statut final
-  - VISION → cascade dilution complete (documents racine + blog si EPIC 12)
-  - STRATEGIE → dilution documents racine seulement (pas de blog public)
-  - OPINION / HYPOTHESE → confinement dans office/ (documente dans le rapport)
-* [ ] Implementer `HumanApprovalNode` : si confiance == INCERTAIN, presente la section
-  et le statut propose a l'humain. Retour possible : APPROVED / REJECTED / RECLASSIFY
-* [ ] Implanter le `ClassificationGraph` comme un `StateGraph<ClassificationState>` :
-  [ClassifierNode] → conditional edge (CONFIANT → DilutionRouteNode, INCERTAIN → HumanApprovalNode)
-* [ ] Wiring avec EPIC 10 : inserer `ClassificationGraph` comme sous-graphe (subgraph)
-  avant `DilutionExecutor`. Le filtre est optionnel, parametre `--with-classification`
-* [ ] Checkpoints : chaque classification produit un checkpoint dans `.agents/`
-  pour audit et maturation future
-* [ ] Tests : 20 sections synthetiques (10 VISION, 5 OPINION, 5 STRATEGIE) → mesure
-  du taux de classification correcte avec et sans validation humaine
+Credentials presents dans `~/.gradle/gradle.properties`.
+Namespace `cccp.education` actif sur Maven Central + Gradle Portal.
+Build config : `group=education.cccp`, Sonatype staging, GPG pret.
+En attendant : `publishToMavenLocal` suffit pour conso inter-boroughs N1→N2.

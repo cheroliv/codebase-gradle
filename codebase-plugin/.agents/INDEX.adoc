@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-20 (Fix compilation planner + test integration vibecode. Session 048.)
-_Session terminee_ : 048 — Fix smart cast VibecodingTask.kt:72 (?.let). Aucun conflit annotations koog/Gradle. 9/9 tests ProjectBuilder vibecode PASS. Plugin ID planner corrige. Publie mavenLocal. 41/44 tests planner PASS (2 pre-existants Ollama limit).
+_Derniere mise a jour_ : 2026-05-20 (Session 049 — Cleanup post-migration + EPIC L finalisation 8/8 pts)
+_Session terminee_ : 049 — Cleanup 12 tests Vibecoding* + 4 features EPIC V + 5 runners + 5 taches Gradle dead. Package codebase.langgraph supprime + dependance langgraph4j retiree. 7/7 Cucumber @epic_l_3 PASS. EPIC L = 8/8 TERMINE.
 
 '''
 == REGLES ABSOLUES (resume)
@@ -35,6 +35,7 @@ _Session terminee_ : 048 — Fix smart cast VibecodingTask.kt:72 (?.let). Aucun 
 
 |===
 | # | Date | Type | Sujet | Score
+| 049 | 2026-05-20 | cleanup+finalisation | Cleanup post-migration (12 tests Vibecoding* + 4 features EPIC V + 5 runners + 5 taches Gradle dead) + EPIC L finalisation (package langgraph supprime + dependance langgraph4j retiree). 7/7 Cucumber @epic_l_3 PASS. EPIC L = 8/8 TERMINE. | 10/10
 | 046 | 2026-05-19 | audit | EPIC G Audit publication — Credentials verifies, namespace cccp.education actif sur Maven Central + Portal. Build config pret (group=education.cccp, Sonatype staging, GPG). publishToMavenLocal suffit pour conso N1→N2. BACKLOG nettoye. | 10/10
 | 045 | 2026-05-19 | feat | EPIC V-4 Integration validation — Test end-to-end VibecodingTask sur projet reel ProjectBuilder. 8/8 JUnit5 + 5/5 Cucumber @epic_v_4 PASS. Fix jsonlEscape dans VibecodingTask.kt. 15/15 pts EPIC V. | 10/10
 | 044 | 2026-05-19 | feat | EPIC V-3 Security constraints — Sandbox workspaceRoot + dryRun guard + audit trail (AuditEntry). 30/30 JUnit5 + 11/11 Cucumber @epic_v_3 PASS. 12/15 pts EPIC V. | 10/10
@@ -94,7 +95,7 @@ _Session terminee_ : 048 — Fix smart cast VibecodingTask.kt:72 (?.let). Aucun 
 | EPIC 12 | Dilution Article de Blog automatique | A FAIRE | P1
 | EPIC 13 | LangGraph4j Classifieur Vision/Opinion | A FAIRE | P1
 | EPIC K | Ontologie Workspace — Taxonomie unifiée (4 verbes, format pivot, convention over configuration) | ✅ TERMINE (2026-05-19). K-0→K-5 toutes les 6 phases terminées. | P0
-| EPIC L | Migration langgraph4j → koog+langchain4j — DSL Kotlin JetBrains/koog (`ai.koog:koog-agents:0.8.0`). Koog = orchestrateur uniquement, langchain4j = exécutant (LLM/RAG/pgvector) préservé. 3 sous-EPICs restructurés (L-0→L-3, ~8 pts). L-0 ✅ (dépendances + test unitaire DSL). Remplace EPIC 11+11bis+13. | ✅ TERMINE — L-0 ✅, L-1 ✅, L-2 ✅, L-3 ✅ (session 040). 7/7 Cucumber @epic_l_3 PASS. 6/8 pts.
+| EPIC L | Migration langgraph4j → koog+langchain4j — DSL Kotlin JetBrains/koog (`ai.koog:koog-agents:0.8.0`). Koog = orchestrateur uniquement, langchain4j = exécutant (LLM/RAG/pgvector) préservé. 4 sous-EPICs (L-0→L-4, 8 pts). | ✅ TERMINE (2026-05-20). L-0 ✅ dependances, L-1 ✅ KoogPlanningGraph, L-2 ✅ KoogAugmentedContextGraph wrapper pgvector, L-3 ✅ execute() + 7/7 Cucumber, L-4 ✅ Cleanup package langgraph + dependance langgraph4j. 8/8 pts.
 | EPIC V | *Vibecoding* — Remplacer opencode par VibecodingTask Gradle (agent koog autonome : LLM + filesystem + shell koog). 7 tools (5 built-in + ExecShellTool + ExecGradleTool). pipeline buildContext→classify→plan→executeTools. 5 sous-EPICs (V-0→V-4, 15 pts). | ✅ TERMINE (2026-05-19). V-0 ✅, V-1 ✅, V-2 ✅, V-3 ✅, V-4 ✅. 15/15 pts. | P0
 | EPIC G | Publication Maven Central + Gradle Portal — groupId education.cccp, namespace cccp-education. | ✅ AUDITE (2026-05-19). Credentials presents, namespace actif sur Maven Central + Portal. Zéro action supplementaire necessaire. publishToMavenLocal suffit pour conso N1→N2. | P0
 |===

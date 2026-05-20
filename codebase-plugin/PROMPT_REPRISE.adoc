@@ -1,30 +1,40 @@
-= PROMPT_REPRISE — Mission Session 049
+= PROMPT_REPRISE — Mission Session 050
 :date: 2026-05-21
 
 == Contexte
 
-Session 048 : Fix compilation planner — Bug smart cast VibecodingTask.kt:72
-(`state.error` propriété publique module externe → `?.let{}`).
-Aucun conflit annotations koog/Gradle. 44 tests totaux planner (41 PASS,
-2 pre-existants Ollama limit). 9/9 tests VibecodingTaskIntegration PASS.
-codebase-plugin + planner-plugin publiés en mavenLocal.
+Session 049 : Cleanup post-migration + EPIC L finalisation.
+* 12 fichiers test Vibecoding* + 4 features EPIC V + 5 runners + 5 taches Gradle dead retires
+* Package codebase.langgraph (6 fichiers) supprime + dependance langgraph4j retiree
+* 7/7 Cucumber @epic_l_3 PASS. EPIC L = 8/8 pts TERMINE.
+* compileKotlin + compileTestKotlin OK
+* Commit + push codebase-gradle
 
 == Architecture actuelle
 
-- codebase (N1) : ToolRegistry + tools + KoogAugmentedContextGraph + VibecodingState (conservé)
+- codebase (N1) : ToolRegistry + tools + KoogAugmentedContextGraph + KoogPlanningGraph + MultiChannelContextGraph + VibecodingState
 - planner (N2) : VibecodingTask + VibecodingGraph (import codebase.koog.*)
-- Flux : generatePlan (planner) → plan.execute() (vibecode) → tools (codebase)
-- Vibrations fonctionnelles : dryRun + audit JSONL + exec_shell + exec_gradle
+- Zero langgraph4j residual dans codebase-gradle
+- koog-agents:0.8.0 = orchestrateur unique
 
-== Mission session 049
+== Mission session 050
 
-Option B — Cleanup post-migration
-. Supprimer physiquement VibecodingGraph.kt + VibecodingTask.kt du codebase-plugin
-  (déjà supprimés du git index session 047, à vérifier nettoyage disque)
-. Nettoyer les imports résiduels codebase.koog.* si plus utilisés
-. Commit + push codebase-gradle
+. A DEFINIR
 
-Option C — EPIC L finalisation (koog+langchain4j)
-. Migrer les tests Cucumber restants L-3 (pgvector down cascade)
-. Validation complète EPIC L (6/8 → 8/8 pts)
-. Compilation + tests planner-plugin (41/44 actuel, cible 44/44)
+== EPIC L — Statut TERMINE
+[INFO]
+====
+EPIC L (Migration langgraph4j → koog+langchain4j) est TERMINE a 8/8 pts.
+L-0 ✅ dependances koog
+L-1 ✅ KoogPlanningGraph DSL
+L-2 ✅ KoogAugmentedContextGraph wrapper pgvector
+L-3 ✅ execute() partage lambdas + 7/7 Cucumber PASS
+L-4 ✅ Cleanup codebase.langgraph + dependance langgraph4j (session 049)
+====
+
+== EPIC V — Migre vers planner-gradle
+[INFO]
+====
+VibecodingTask + VibecodingGraph ont migre de codebase (N1) vers planner (N2).
+Tous les tests EPIC V resides maintenant dans planner-gradle.
+====
