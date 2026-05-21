@@ -1,5 +1,6 @@
 package codebase.benchmark
 
+import codebase.benchmark.BenchmarkReportExporter.exportAsciiDoc
 import java.io.File
 
 object BenchmarkReportExportMain {
@@ -14,13 +15,10 @@ object BenchmarkReportExportMain {
             return
         }
 
-        val json = inputFile.readText()
-        val adoc = BenchmarkReportExporter.exportAsciiDoc(json, scenarioId)
 
-        val outputDir = inputFile.parentFile
-        val adocFile = File(outputDir, "report-$scenarioId.adoc")
-        adocFile.writeText(adoc)
-
-        println(adocFile.absolutePath)
+        File(inputFile.parentFile, "report-$scenarioId.adoc").apply {
+            writeText(exportAsciiDoc(inputFile.readText(), scenarioId))
+            println(absolutePath)
+        }
     }
 }

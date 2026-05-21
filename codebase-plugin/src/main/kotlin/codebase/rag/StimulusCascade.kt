@@ -1,5 +1,6 @@
 package codebase.rag
 
+import codebase.rag.StdoutFormatter.ctx
 import dev.langchain4j.data.message.SystemMessage
 import dev.langchain4j.data.message.UserMessage
 import dev.langchain4j.model.chat.request.ChatRequest
@@ -10,7 +11,9 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.LocalDateTime.now
 import java.time.format.DateTimeFormatter
+import kotlin.text.Charsets.UTF_8
 
 enum class TargetDocument(val path: String, val label: String) {
     WORKSPACE_VISION("WORKSPACE_VISION.adoc", "Vision & Architecture"),
@@ -33,7 +36,7 @@ data class DilutionRecord(
     val confidence: Double,
     val dilutionTarget: DilutionTarget?,
     val classificationRationale: String,
-    val timestamp: LocalDateTime = LocalDateTime.now()
+    val timestamp: LocalDateTime = now()
 )
 
 data class StimulusCascadeReport(
@@ -43,7 +46,7 @@ data class StimulusCascadeReport(
     val visionCount: Int = 0,
     val opinionCount: Int = 0,
     val dilutedCount: Int = 0,
-    val timestamp: LocalDateTime = LocalDateTime.now()
+    val timestamp: LocalDateTime = now()
 )
 
 class StimulusCascade(
@@ -89,14 +92,14 @@ Pour le contenu fourni, reponds UNIQUEMENT au format JSON (sans texte avant ni a
 
     fun execute(brainDump: String): StimulusCascadeReport {
         val sourceHash = sha256(brainDump)
-        val timestamp = LocalDateTime.now()
+        val timestamp = now()
 
         StdoutFormatter.plan("Parsing des sections du brain dump...")
         val rawSections = parseSections(brainDump)
 
-        StdoutFormatter.ctx("${rawSections.size} sections identifiees")
+        ctx("${rawSections.size} sections identifiees")
         for (s in rawSections) {
-            StdoutFormatter.ctx("  [${s.id}] ${s.title}")
+            ctx("  [${s.id}] ${s.title}")
         }
         StdoutFormatter.separator()
 
@@ -117,12 +120,12 @@ Pour le contenu fourni, reponds UNIQUEMENT au format JSON (sans texte avant ni a
             val record = when (result.classification) {
                 ContentClassification.VISION -> {
                     visionCount++
-                    StdoutFormatter.ctx("[${section.id}] VISION (${"%.2f".format(result.confidence)}) → routage vers document cible...")
+                    ctx("[${section.id}] VISION (${"%.2f".format(result.confidence)}) → routage vers document cible...")
 
                     val target = routeSection(section)
                     dilutedCount++
 
-                    StdoutFormatter.ctx("  Cible : ${target.targetDocument.path} → ${target.suggestedSection}")
+                    ctx("  Cible : ${target.targetDocument.path} → ${target.suggestedSection}")
 
                     val rec = DilutionRecord(
                         sectionId = section.id,
@@ -149,7 +152,7 @@ Pour le contenu fourni, reponds UNIQUEMENT au format JSON (sans texte avant ni a
                 }
                 ContentClassification.OPINION -> {
                     opinionCount++
-                    StdoutFormatter.ctx("[${section.id}] OPINION (${"%.2f".format(result.confidence)}) → confinement (pas de dilution)")
+                    ctx("[${section.id}] OPINION (${"%.2f".format(result.confidence)}) → confinement (pas de dilution)")
 
                     DilutionRecord(
                         sectionId = section.id,
@@ -187,7 +190,7 @@ Pour le contenu fourni, reponds UNIQUEMENT au format JSON (sans texte avant ni a
             val archivePath = archiveReport(report)
             StdoutFormatter.result("Archive : $archivePath")
         } else {
-            StdoutFormatter.ctx("DRY RUN — pas d'archivage effectif")
+            ctx("DRY RUN — pas d'archivage effectif")
         }
 
         return report
@@ -426,7 +429,7 @@ Contenu : ${section.content.take(2000)}
 
     private fun sha256(input: String): String {
         val md = MessageDigest.getInstance("SHA-256")
-        val digest = md.digest(input.toByteArray(Charsets.UTF_8))
+        val digest = md.digest(input.toByteArray(UTF_8))
         return BigInteger(1, digest).toString(16).padStart(64, '0')
     }
 }

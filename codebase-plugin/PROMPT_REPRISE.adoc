@@ -1,33 +1,17 @@
-= PROMPT_REPRISE — Mission Session 051
+= PROMPT_REPRISE — Mission Session 052
 :date: 2026-05-21
 
 == Contexte
 
-Session 050 : Debug .gradlew check — 12→3 echecs (75% de resolution).
-* Gherkin 100% anglais sur tous les features
-* EPIC 10 StimulusCascadeSteps + feature recrits en anglais
-* Compilation OK, zero erreur
-* 3 echecs residuels : pgvector flaky entre scenarios Cucumber (container s'arrete)
+Session 051 : Fix 3 echecs residuels pgvector (locale FR, header exact-match, YAML exclus du tokenize).
+* `cucumberTest` → BUILD SUCCESSFUL (0 failure). Fin du debogage.
+* Prochaine mission a definir.
 
 == Architecture actuelle
 
 - codebase (N1) : ToolRegistry + koog DSL + MultiChannelContextGraph + CompositeContext + OpencodeInjector
-- planner (N2) : VibecodingTask + VibecodingGraph (consomme codebase via mavenLocal)
+- Les 3 echecs pgvector sont fixes : locale `Locale.US`, regex `-?`, `startsWith(header)`, YAML inclus
 
-== Mission session 051
+== Mission session 052
 
-. Fix les 3 echecs pgvector residuels (US-9.10, US-9.11, US-9.9) — cycle de vie container Testcontainers
-. A DEFINIR
-
-== EPIC L — Statut TERMINE
-[INFO]
-====
-EPIC L (Migration langgraph4j → koog+langchain4j) est TERMINE a 8/8 pts.
-====
-
-== EPIC V — Statut TERMINE
-[INFO]
-====
-VibecodingTask + VibecodingGraph migres codebase (N1) → planner (N2).
-15/15 pts EPIC V.
-====
+. A DEFINIR — tous les EPICs L et V termines. Aucun echec test residuel.

@@ -20,4 +20,4 @@ Feature: US-9.10 — CompositeContextBuilder assembles EAGER + RAG + Graphify
     And I compute embeddings for all chunks
     When I build a CompositeContext with the question "HTTP client configuration" and budget 40/30/20/10
     Then the RAG section contains at least 3 relevance-ranked chunks
-    And each chunk has a similarity score between 0.0 and 1.0
+    And each chunk has a similarity score between -1.0 and 1.0

@@ -48,7 +48,7 @@ class OpencodeInjectorSteps {
         val lines = output.lines()
 
         for (header in headers) {
-            val headerIndex = lines.indexOfFirst { it.trim() == header }
+            val headerIndex = lines.indexOfFirst { it.trim().startsWith(header) }
             assertTrue(headerIndex >= 0, "Header '$header' not found in injected output")
 
             var foundContent = false

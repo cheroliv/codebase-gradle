@@ -13,6 +13,7 @@ import codebase.rag.CompositeContextConfig
 import codebase.rag.ContextChannel
 import codebase.rag.EmbeddingPipeline
 import codebase.rag.OpencodeInjector
+import java.util.Locale
 import codebase.rag.PgVectorConfig
 import codebase.rag.VectorQueryService
 import codebase.rag.VectorStore
@@ -110,7 +111,7 @@ class MultiChannelContextGraph {
             val queryService = VectorQueryService(store, embeddingPipeline)
             val ragResults = queryService.query(state.intention, topK = 10)
             ragResults.joinToString("\n") { r ->
-                "[sim=${"%.3f".format(r.similarity)}] ${r.text.take(300)}"
+                "[sim=${"%.3f".format(Locale.US, r.similarity)}] ${r.text.take(300)}"
             }
         } catch (e: Exception) {
             log.warn("[collectRag] pgvector unavailable: {}", e.message)

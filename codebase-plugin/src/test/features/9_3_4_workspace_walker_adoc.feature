@@ -16,7 +16,7 @@ Feature: US-9.3 & US-9.4 — WorkspaceWalker + Indexation adoc
   Scenario: Index both Kotlin and AsciiDoc files into pgvector
     When I tokenize all dataset files into sentence-level chunks
     And I insert the documents and chunks into the pgvector database
-    Then the documents table has exactly 6 rows
+    Then the documents table has exactly 9 rows
     And the chunks table has more than 0 rows
     When I compute embeddings for all chunks
     Then every chunk has a non-null embedding of dimension 384

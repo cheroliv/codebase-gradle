@@ -61,7 +61,7 @@ class WorkspaceWalkerSteps {
     fun `tokenize all files including adoc`() {
         val datasetDir = java.io.File(ctx.DATASETS_DIR)
         val files = datasetDir.listFiles { f ->
-            f.isFile && (f.name.endsWith(".kt") || f.name.endsWith(".adoc"))
+            f.isFile && (f.name.endsWith(".kt") || f.name.endsWith(".adoc") || f.name.endsWith(".yml") || f.name.endsWith(".yaml") || f.name.endsWith(".json"))
         }?.sortedBy { it.name } ?: throw AssertionError("No files found in ${ctx.DATASETS_DIR}")
 
         ctx.fileChunks.clear()

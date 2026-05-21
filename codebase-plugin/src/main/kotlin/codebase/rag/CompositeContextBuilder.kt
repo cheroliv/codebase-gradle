@@ -3,6 +3,7 @@ package codebase.rag
 import codebase.walker.WorkspaceWalker
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.util.Locale
 
 data class CompositeContext(
     val eagerSection: String,
@@ -46,7 +47,7 @@ class CompositeContextBuilder(
         val truncatedRag = try {
             val ragResults = queryService.query(ragQuestion, topK = 10)
             val ragContent = ragResults.joinToString("\n") { r ->
-                "[sim=${"%.3f".format(r.similarity)}] ${r.text.take(300)}"
+                "[sim=${"%.3f".format(Locale.US, r.similarity)}] ${r.text.take(300)}"
             }
             truncateTokens(ragContent, config.ragTokens)
         } catch (e: Exception) {

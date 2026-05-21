@@ -1,6 +1,6 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut session 049_ : Tests EPIC V + Vibecoding* migres de codebase vers planner-gradle (session 047). Nettoyage complet des tests orphelins + package langgraph. 7/7 Cucumber @epic_l_3 PASS. compileKotlin + compileTestKotlin OK. 12 echecs pre-existants CucumberTestRunner (pgvector-dependant, non bloquants). EPIC L = 8/8 TERMINE.
+_Statut session 051_ : Fix 3 echecs residuels pgvector (locale FR, header exact-match, YAML exclus). `cucumberTest` → BUILD SUCCESSFUL (0 failure). Plus aucun echec residuel.
 
 | Session | Fichiers testes | Couverture | Notes
 | 045 | `epic_v_4_integration.feature` (Cucumber 5) + `VibecodingIntegrationTest.kt` (JUnit5 8) + `EpicV4CucumberRunner.kt` | 8/8 JUnit5 + 5/5 Cucumber PASS | EPIC V-4 : Test end-to-end VibecodingTask sur projet reel ProjectBuilder. Fix jsonlEscape(\n,\r,\t,\\\,") dans VibecodingTask.kt. EPIC V = 15/15 TERMINE.

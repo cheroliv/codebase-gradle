@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-20 (Session 050 — Debug .gradlew check 12→3 echecs)
-_Session terminee_ : 050 — Debug .gradlew check (12→3 echecs, 75% resolution). Gherkin 100% anglais. Fix workspaceRoot, invoke object Kotlin, slash Cucumber vision/opinion, ghp_ dans dataset, DilutionExecutor EN. 8 fichiers modifies. 3 echecs pgvector residuels.
+_Derniere mise a jour_ : 2026-05-21 (Session 051 — Fix 3 echecs pgvector → 100% resolution)
+_Session terminee_ : 051 — Fix 3 echecs residuels pgvector (locale FR `Locale.US`, header `startsWith`, YAML inclus dans tokenize). 7 fichiers modifies. `cucumberTest` → BUILD SUCCESSFUL (0 failure).
 
 '''
 == REGLES ABSOLUES (resume)
@@ -35,6 +35,7 @@ _Session terminee_ : 050 — Debug .gradlew check (12→3 echecs, 75% resolution
 
 |===
 | # | Date | Type | Sujet | Score
+| 051 | 2026-05-21 | debug | Fix 3 echecs residuels pgvector (locale, header, YAML). `cucumberTest` BUILD SUCCESSFUL. | 10/10
 | 050 | 2026-05-20 | debug | Debug .gradlew check — 12→3 echecs (75% resolution). Gherkin 100% anglais. 8 fichiers. | 9/10
 | 049 | 2026-05-20 | cleanup+finalisation | Cleanup post-migration (12 tests Vibecoding* + 4 features EPIC V + 5 runners + 5 taches Gradle dead) + EPIC L finalisation (package langgraph supprime + dependance langgraph4j retiree). 7/7 Cucumber @epic_l_3 PASS. EPIC L = 8/8 TERMINE. | 10/10
 | 046 | 2026-05-19 | audit | EPIC G Audit publication — Credentials verifies, namespace cccp.education actif sur Maven Central + Portal. Build config pret (group=education.cccp, Sonatype staging, GPG). publishToMavenLocal suffit pour conso N1→N2. BACKLOG nettoye. | 10/10

@@ -76,7 +76,7 @@ class CompositeContextSteps {
     fun `chunks have valid similarity scores`(min: Double, max: Double) {
         val c = composite
         assertNotNull(c, "CompositeContext was not built")
-        val simRegex = Regex("""\[sim=(\d+\.\d+)\]""")
+        val simRegex = Regex("""\[sim=(-?\d+\.\d+)\]""")
         c.ragSection.lines().filter { it.startsWith("[sim=") }.forEach { line ->
             val score = simRegex.find(line)?.groupValues?.get(1)?.toDoubleOrNull()
             assertNotNull(score, "Missing similarity score in chunk: ${line.take(80)}")

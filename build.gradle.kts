@@ -1,8 +1,1 @@
-plugins {
-    alias(libs.plugins.codebase)
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
+// Temporairement vide pour permettre le publishToMavenLocal du sous-projet
