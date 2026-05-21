@@ -1,0 +1,32 @@
+= Session 052 — Nettoyage Couverture Cucumber
+:date: 2026-05-21
+:area: codebase-gradle/codebase-plugin
+:score: 10/10
+
+== Résumé
+
+Nettoyage complet de la couverture Cucumber dans codebase-plugin. 3 correctifs ciblés :
+
+1. **Runner EpicL3CucumberRunner restreint** : `@SelectClasspathResource("features")` → `FEATURES_PROPERTY_NAME = "src/test/features/epic_l_3_augmented_planning.feature"`. Fin des 57 SKIPPED dupliqués (bruit + risque EOFException).
+
+2. **EPIC 4 activé** : retrait de `@wip` sur `epic_4_benchmark_perception.feature`. Les 4 scénarios sont purement computationnels (BenchmarkProtocolSteps.kt : listes hardcodées + divisions) — zéro dépendance Ollama. 4/4 PASS.
+
+3. **Exclusion `@epic_l_3` du runner principal** : ajout de `not @epic_l_3` dans le filtre de `CucumberTestRunner`. Les 7 scénarios koog+langchain4j ne tournent plus que dans `EpicL3CucumberRunner` (via `cucumberTestEpicL3`).
+
+== Fichiers modifiés
+
+- `src/test/kotlin/codebase/scenarios/EpicL3CucumberRunner.kt` : restriction au seul fichier feature @epic_l_3
+- `src/test/kotlin/codebase/scenarios/CucumberTestRunner.kt` : ajout `not @epic_l_3` au filtre
+- `src/test/features/epic_4_benchmark_perception.feature` : retrait `@wip`
+- `.agents/TEST_COVERAGE_ANALYSIS.adoc` : mise à jour statut session 052
+- `.agents/INDEX.adoc` : ajout session 052
+
+== Résultats
+
+- `cucumberTest` : **62 PASSED, 0 FAILED, 10 SKIPPED intentionnels** (3 EPIC 2 @wip + 7 @epic_l_3 délégués)
+- `cucumberTestEpicL3` : 7/7 PASS
+- Temps d'exécution : 1m58s (vs >3min avant avec les 57 SKIPPED)
+
+== Reliquats
+
+- EPIC 2 (3 scénarios) toujours `@wip` : dépend Ollama, rate-limit atteint. Débloqué quand le quota Ollama sera réinitialisé ou si on implémente un mock/fake AnonymizationExpert.

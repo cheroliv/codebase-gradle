@@ -17,12 +17,11 @@ import org.junit.platform.suite.api.Suite
  */
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("features")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "codebase.scenarios")
 @ConfigurationParameter(
     key = PLUGIN_PROPERTY_NAME,
     value = "pretty, html:build/reports/cucumber-epic-l3.html, json:build/reports/cucumber-epic-l3.json"
 )
-@ConfigurationParameter(key = FEATURES_PROPERTY_NAME, value = "src/test/features")
+@ConfigurationParameter(key = FEATURES_PROPERTY_NAME, value = "src/test/features/epic_l_3_augmented_planning.feature")
 @ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "@epic_l_3")
 class EpicL3CucumberRunner

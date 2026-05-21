@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 052 | 2026-05-21 | cleanup | Nettoyage couverture Cucumber : runner EpicL3CucumberRunner restreint au seul fichier `epic_l_3_augmented_planning.feature` (−57 SKIPPED dupliqués). EPIC 4 activé (`@wip` retiré, BenchmarkProtocolSteps pur computationnel, 4/4 PASS). `@epic_l_3` exclu du runner principal. Bilan : **62 PASSED, 0 FAILED, 10 SKIPPED intentionnels** (3 EPIC 2 @wip + 7 @epic_l_3 délégués). `cucumberTestEpicL3` = 7/7 PASS. 3 fichiers modifiés. | 10/10
 | 051 | 2026-05-21 | debug | Fix 3 echecs pgvector residuels : (1) locale `Locale.US` + regex `-?` pour `sim=0,297`→`sim=-0.005`, (2) `startsWith(header)` pour header `[RÈGLES_EAGER]`, (3) YAML/JSON inclus dans tokenize + doc count 6→9. 7 fichiers modifies. `cucumberTest` → BUILD SUCCESSFUL (0 failure). | 10/10
 | 050 | 2026-05-20 | debug | Debug .gradlew check — 12→3 echecs (75% resolution). Gherkin 100% anglais (EPIC 10 + US-9.14). Fix workspaceRoot, invoke object, slash Cucumber, ghp_ dataset, DilutionExecutor EN. 8 fichiers modifies. 3 residuels pgvector flaky. | 9/10
 | 049 | 2026-05-20 | cleanup+finalisation | Cleanup post-migration (12 tests Vibecoding* + 4 features EPIC V + 5 runners + 5 taches Gradle) + EPIC L finalisation (package langgraph supprime + dependance langgraph4j retiree). 7/7 Cucumber @epic_l_3 PASS. EPIC L = 8/8 TERMINE. compileKotlin OK. | 10/10

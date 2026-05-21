@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-21 (Session 051 — Fix 3 echecs pgvector → 100% resolution)
-_Session terminee_ : 051 — Fix 3 echecs residuels pgvector (locale FR `Locale.US`, header `startsWith`, YAML inclus dans tokenize). 7 fichiers modifies. `cucumberTest` → BUILD SUCCESSFUL (0 failure).
+_Derniere mise a jour_ : 2026-05-21 (Session 052 — Nettoyage couverture Cucumber)
+_Session terminee_ : 052 — Nettoyage couverture Cucumber : `EpicL3CucumberRunner` restreint au seul fichier `epic_l_3_augmented_planning.feature` (−57 SKIPPED dupliqués). EPIC 4 activé (`@wip` retiré, 4/4 PASS). `@epic_l_3` exclu du runner principal. Bilan : **62 PASSED, 0 FAILED, 10 SKIPPED intentionnels**. `cucumberTestEpicL3` = 7/7 PASS. Session 051 : Fix 3 echecs residuels pgvector (locale FR `Locale.US`, header `startsWith`, YAML inclus dans tokenize).
 
 '''
 == REGLES ABSOLUES (resume)
@@ -35,6 +35,7 @@ _Session terminee_ : 051 — Fix 3 echecs residuels pgvector (locale FR `Locale.
 
 |===
 | # | Date | Type | Sujet | Score
+| 052 | 2026-05-21 | cleanup | Nettoyage couverture Cucumber : runner dedupe (−57 SKIPPED), EPIC 4 active (4/4 PASS), 62 PASSED/0 FAILED/10 SKIPPED intentionnels. | 10/10
 | 051 | 2026-05-21 | debug | Fix 3 echecs residuels pgvector (locale, header, YAML). `cucumberTest` BUILD SUCCESSFUL. | 10/10
 | 050 | 2026-05-20 | debug | Debug .gradlew check — 12→3 echecs (75% resolution). Gherkin 100% anglais. 8 fichiers. | 9/10
 | 049 | 2026-05-20 | cleanup+finalisation | Cleanup post-migration (12 tests Vibecoding* + 4 features EPIC V + 5 runners + 5 taches Gradle dead) + EPIC L finalisation (package langgraph supprime + dependance langgraph4j retiree). 7/7 Cucumber @epic_l_3 PASS. EPIC L = 8/8 TERMINE. | 10/10

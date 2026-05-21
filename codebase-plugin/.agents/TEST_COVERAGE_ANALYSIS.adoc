@@ -1,6 +1,6 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut session 051_ : Fix 3 echecs residuels pgvector (locale FR, header exact-match, YAML exclus). `cucumberTest` → BUILD SUCCESSFUL (0 failure). Plus aucun echec residuel.
+_Statut session 052_ : Nettoyage couverture Cucumber. Runner `EpicL3CucumberRunner` restreint au seul fichier `epic_l_3_augmented_planning.feature` (fin des 57 SKIPPED dupliqués). EPIC 4 activé (`@wip` retiré — 0 dépendance Ollama, pur computationnel). `@epic_l_3` exclu du runner principal. Bilan : **62 PASSED, 0 FAILED, 10 SKIPPED intentionnels** (3 EPIC 2 @wip Ollama + 7 @epic_l_3 délégués à EpicL3CucumberRunner).
 
 | Session | Fichiers testes | Couverture | Notes
 | 045 | `epic_v_4_integration.feature` (Cucumber 5) + `VibecodingIntegrationTest.kt` (JUnit5 8) + `EpicV4CucumberRunner.kt` | 8/8 JUnit5 + 5/5 Cucumber PASS | EPIC V-4 : Test end-to-end VibecodingTask sur projet reel ProjectBuilder. Fix jsonlEscape(\n,\r,\t,\\\,") dans VibecodingTask.kt. EPIC V = 15/15 TERMINE.

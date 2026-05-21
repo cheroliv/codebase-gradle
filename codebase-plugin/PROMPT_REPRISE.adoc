@@ -1,17 +1,20 @@
-= PROMPT_REPRISE — Mission Session 052
+= PROMPT_REPRISE — Mission Session 052 (terminée)
 :date: 2026-05-21
+:max-lines: 70
 
-== Contexte
+== Session 052 terminée — Nettoyage couverture Cucumber
 
-Session 051 : Fix 3 echecs residuels pgvector (locale FR, header exact-match, YAML exclus du tokenize).
-* `cucumberTest` → BUILD SUCCESSFUL (0 failure). Fin du debogage.
-* Prochaine mission a definir.
+1. Runner EpicL3CucumberRunner restreint au seul fichier `epic_l_3_augmented_planning.feature` (fin des 57 SKIPPED dupliqués)
+2. EPIC 4 activé : `@wip` retiré, 4/4 PASS (BenchmarkProtocolSteps pur computationnel)
+3. `@epic_l_3` exclu du runner principal
+4. Bilan : **62 PASSED, 0 FAILED, 10 SKIPPED intentionnels**
 
 == Architecture actuelle
 
 - codebase (N1) : ToolRegistry + koog DSL + MultiChannelContextGraph + CompositeContext + OpencodeInjector
-- Les 3 echecs pgvector sont fixes : locale `Locale.US`, regex `-?`, `startsWith(header)`, YAML inclus
+- Runners : CucumberTestRunner (tous sauf @wip/@integration/@epic_l_3) + EpicL3CucumberRunner (@epic_l_3 seul)
+- Build : `cucumberTest` ~2min, `cucumberTestEpicL3` ~50s
 
-== Mission session 052
+== Prochaine session (053)
 
-. A DEFINIR — tous les EPICs L et V termines. Aucun echec test residuel.
+A définir — backlog disponible : EPIC 2 (3 @wip Ollama), EPIC 5 (fine-tuning), EPIC 6 (ONNX)

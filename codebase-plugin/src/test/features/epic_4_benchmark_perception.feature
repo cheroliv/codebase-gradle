@@ -1,4 +1,4 @@
-@epic4 @wip
+@epic4
 Feature: EPIC 4 - Benchmark de perception spatiale LLM
 
   As a workspace developer
