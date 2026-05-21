@@ -135,6 +135,39 @@ class VibecodingGraphTest {
             "Classification should be 'simple' without pgvector: '${result.classification}'")
     }
 
+    // ---- V-3 : Sécurité ----
+
+    @Test
+    fun `execute should stop when startTime exceeds timeout even with a plan`() {
+        val nowMs = System.currentTimeMillis()
+        val fakePlan = Plan(
+            title = "timeout-test",
+            epics = listOf(
+                Epic(name = "E1", description = "test", points = 1, userStories = listOf(
+                    UserStory(description = "US1", tasks = listOf(
+                        Task(description = "task1", gradleTask = "tasks")
+                    ))
+                ))
+            ),
+            totalPoints = 1,
+            estimatedSessions = "1"
+        )
+        val state = VibecodingState(
+            intention = "Timeout test",
+            workspaceRoot = "/tmp",
+            sessionTimeoutSeconds = 1,
+            sessionStartTimeMs = nowMs - 2000, // déjà 2s au-dessus du timeout 1s
+            maxActions = 100,
+            plan = fakePlan,
+            planJson = "{}"
+        )
+        val result = vibecodingGraph.execute(state)
+        assertTrue(result.error != null,
+            "Should have error when timeout exceeded (error=${result.error})")
+        assertTrue(result.error!!.contains("Timeout", ignoreCase = true),
+            "Error message should mention timeout, got: ${result.error}")
+    }
+
     // ---- Fin clean ----
 
     @Test

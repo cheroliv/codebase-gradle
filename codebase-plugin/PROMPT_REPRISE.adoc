@@ -1,35 +1,32 @@
-= PROMPT_REPRISE — Mission Session 053 (terminée)
+= PROMPT_REPRISE — Mission Session 054 (terminée)
 :date: 2026-05-21
 :max-lines: 70
 
-== Session 053 terminée — Cleanup langgraph4j résiduel + Reconnexion Vibecoding
+== Session 054 terminée — EPIC V-3 Sécurité Vibecoding + V-4 Intégration
 
-=== Phase 1 : Cleanup langgraph4j (7 baby steps TDD)
-1. `libs.versions.toml` — version/lib/bundle `langgraph4j` supprimés ✅
-2. `build.gradle.kts` — commentaire nettoyé ✅
-3. `BACKLOG.adoc` — EPICs 11/13 obsolètes supprimés ✅
-4. `INDEX.adoc` — EPIC 11/13 retirés, EPIC L mis à jour 8/8 ✅
-5. `KoogPlanningGraph.kt` — 4 commentaires nettoyés ✅
-6. Résultat : **zéro dépendance/zéro import/zéro déclaration langgraph4j** dans le projet actif ✅
+=== V-3 : Contraintes de sécurité (7 cycles TDD)
+1. `ToolRegistry.kt` — MAX_READ_FILE_SIZE = 10 MB, MAX_OUTPUT_CHARS = 8000, AuditEntry.workspaceRoot ✅
+2. `VibecodingState.kt` — sessionTimeoutSeconds = 300, sessionStartTimeMs ✅
+3. `VibecodingGraph.kt` — isTimedOut() au démarrage + dans la boucle, buildContextNode préserve plan existant, executePlanTasks() mode dryRun/real ✅
+4. `VibecodingTask.kt` — option CLI `--sessionTimeout` ✅
+5. Nouveaux tests : ToolRegistryTest (max file size + audit workspaceRoot), VibecodingGraphTest (+timeout), VibecodingTaskTest (+sessionTimeout)
 
-=== Phase 2 : Reconnexion Vibecoding (TDD complet)
-1. `VibecodingGraph.kt` — nouveau graphe koog à 3 nœuds réels (buildContext→executeAction→checkProgress) avec boucle d'exécution, plus de stubs, plus d'orchestration manuelle ✅
-2. `VibecodingTask.kt` — tâche Gradle `vibecode` avec audit JSONL + dryRun ✅
-3. `CodebasePlugin.kt` — enregistrement tâche `vibecode` ✅
-4. `VibecodingGraphTest` (JUnit5) — 9 tests : structure, exécution, dryRun, maxActions, résilience ✅
-5. `VibecodingTaskTest` (JUnit5) — 7 tests : configuration, defaults, audit, ProjectBuilder ✅
-6. `epic_v_vibecoding.feature` (Cucumber BDD) — 7 scénarios : dryRun, intention, maxActions, résilience, mermaid ✅
-7. Tests : VibecodingGraphTest 9/9 + VibecodingTaskTest 7/7 + Cucumber 72/72 (10 skipped) + EpicL3 7/7 = **95 tests, 0 failure** ✅
+=== V-4 : Intégration golden path (2 cycles TDD)
+1. `VibecodingGraph.kt` — buildContextNode préserve plan déjà injecté (dryRun multi-tâches) ✅
+2. Cucumber @epic_v_4 : golden path 3 tâches dryRun + multi-tour 5 tâches 10 itérations ✅
+3. Nouveaux tests : VibecodingSteps (+4 steps @epic_v_3, +2 steps @epic_v_4), epic_v_vibecoding.feature (+4 scénarios)
 
-=== Architecture actuelle
-- codebase (N1) : ToolRegistry + koog DSL + VibecodingGraph + VibecodingTask + CodebasePlugin
-- 12 patterns koog disponibles dans `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc`
-- Build propre : `test` + `cucumberTest` + `cucumberTestEpicL3` tout vert
+=== Résultat final
+- JUnit5 koog : tous verts (aucune régression)
+- CucumberTestRunner : 10/10 scénarios vibecoding PASS
+- EpicL3CucumberRunner : 7/7 PASS
+- Cucumber global : BUILD SUCCESSFUL
 
-== Prochaine session (054)
+== Prochaine session (055)
 
-Backlog disponible :
+Backlog :
+- V-4 restant : scénario erreur récupérable, scénario timeout cross-borough
 - EPIC 5 (fine-tuning CDA/FPA — P0)
 - EPIC 6 (ONNX — P1)
 - EPIC 12 (Dilution Article Blog — P1)
-- Nouvel EPIC basé sur patterns koog (Self-Reflection, MapReduce, Memory Tiers, etc.)
+- Test réel cross-borough : `./gradlew vibecode --intention="Run planner-gradle tests"`

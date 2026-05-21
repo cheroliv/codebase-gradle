@@ -44,6 +44,11 @@ abstract class VibecodingTask : DefaultTask() {
     @get:Option(option = "maxActions", description = "Nombre maximum d'actions à exécuter")
     abstract val maxActions: Property<Int>
 
+    @get:Input
+    @get:Optional
+    @get:Option(option = "sessionTimeout", description = "Timeout global de la session en secondes (défaut 300)")
+    abstract val sessionTimeoutSeconds: Property<Int>
+
     @get:Internal
     abstract val workspaceRoot: DirectoryProperty
 
@@ -56,6 +61,7 @@ abstract class VibecodingTask : DefaultTask() {
         intention.convention("")
         dryRun.convention(false)
         maxActions.convention(10)
+        sessionTimeoutSeconds.convention(300)
     }
 
     @TaskAction
@@ -76,7 +82,8 @@ abstract class VibecodingTask : DefaultTask() {
             intention = intention.get(),
             workspaceRoot = root.absolutePath,
             dryRun = auditedDryRun,
-            maxActions = maxActions.get()
+            maxActions = maxActions.get(),
+            sessionTimeoutSeconds = sessionTimeoutSeconds.get()
         )
 
         val result = graph.execute(state)

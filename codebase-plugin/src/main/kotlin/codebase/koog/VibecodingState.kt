@@ -5,6 +5,8 @@ data class VibecodingState(
     val workspaceRoot: String,
     val dryRun: Boolean = false,
     val maxActions: Int = 10,
+    val sessionTimeoutSeconds: Int = 300,
+    val sessionStartTimeMs: Long = System.currentTimeMillis(),
     val iteration: Int = 0,
     val planJson: String = "",
     val plan: Plan? = null,

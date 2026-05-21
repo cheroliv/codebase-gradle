@@ -40,3 +40,28 @@ Feature: Pipeline Vibecoding — koog autonomous loop
     Then the vibecoding result state is not null
     And vibecoding had no error
     And the vibecoding iteration count is greater than or equal to 0
+
+  @epic_v_3
+  Scenario: Path traversal outside workspaceRoot is blocked
+    When I attempt vibecoding path traversal outside workspace root "/tmp"
+    Then a vibecoding SecurityException is thrown
+    And the vibecoding error contains "outside workspaceRoot"
+
+  @epic_v_3
+  Scenario: File larger than 10MB is rejected
+    When I attempt vibecoding read of a file larger than 10 MB in workspace "/tmp"
+    Then a vibecoding SecurityException is thrown
+    And the vibecoding error contains "10 MB"
+
+  @epic_v_4
+  Scenario: Golden path — agent executes a multi-task plan in dryRun
+    When I execute vibecoding with a 3-task plan and maxActions 5 in dryRun
+    Then vibecoding had no error
+    And exactly 3 vibecoding tasks are marked as executed
+
+  @epic_v_4
+  Scenario: Multi-tour — agent executes all tasks across multiple iterations
+    When I execute vibecoding with a 5-task plan and maxActions 10 in dryRun
+    Then vibecoding had no error
+    And exactly 5 vibecoding tasks are marked as executed
+    And the vibecoding iteration count is greater than or equal to 5

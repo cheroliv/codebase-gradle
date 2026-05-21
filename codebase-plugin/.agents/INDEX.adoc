@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-21 (Session 053 — Cleanup langgraph4j + Vibecoding reconnecté)
-_Session en cours_ : 053 — Nettoyage final langgraph4j (7 baby steps TDD) + Reconnexion Vibecoding : `VibecodingGraph.kt` (graphe koog réel, 3 nœuds, plus de stubs), `VibecodingTask.kt` (tâche Gradle vibecode), `CodebasePlugin` (wiring tâche vibecode). Tests : VibecodingGraphTest 9/9 ✅, VibecodingTaskTest 7/7 ✅, Cucumber epic_v 7/7 ✅ (total 95 tests, 0 failure).`
+_Derniere mise a jour_ : 2026-05-21 (Session 054 — EPIC V-3 Sécurité + V-4 Intégration golden path)
+_Session en cours_ : 055 — À définir. Backlog : V-4 scénario erreur récupérable, EPIC 5 (fine-tuning), EPIC 6 (ONNX), EPIC 12 (Dilution Blog).
 
 '''
 == REGLES ABSOLUES (resume)
@@ -35,6 +35,8 @@ _Session en cours_ : 053 — Nettoyage final langgraph4j (7 baby steps TDD) + Re
 
 |===
 | # | Date | Type | Sujet | Score
+| 054 | 2026-05-21 | feat+integration | EPIC V-3 Securite (max file 10MB, timeout, audit workspaceRoot) + V-4 Integration golden path (dryRun multi-taches). 9 cycles TDD. 10/10 Cucumber vibecoding PASS. Zero regression. | 9/10
+| 053 | 2026-05-21 | cleanup+feat | Cleanup langgraph4j residuel + Reconnexion Vibecoding | 10/10
 | 052 | 2026-05-21 | cleanup | Nettoyage couverture Cucumber : runner dedupe (−57 SKIPPED), EPIC 4 active (4/4 PASS), 62 PASSED/0 FAILED/10 SKIPPED intentionnels. | 10/10
 | 051 | 2026-05-21 | debug | Fix 3 echecs residuels pgvector (locale, header, YAML). `cucumberTest` BUILD SUCCESSFUL. | 10/10
 | 050 | 2026-05-20 | debug | Debug .gradlew check — 12→3 echecs (75% resolution). Gherkin 100% anglais. 8 fichiers. | 9/10

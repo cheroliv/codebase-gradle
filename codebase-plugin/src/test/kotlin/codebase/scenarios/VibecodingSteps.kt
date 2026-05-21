@@ -6,6 +6,8 @@ import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertEquals
 
 /**
  * Step Definitions Cucumber pour le pipeline VibecodingGraph.
@@ -133,5 +135,101 @@ class VibecodingSteps(private val world: VibecodingWorld) {
     fun `vibecoding iteration count is ge`(min: Int) {
         val iter = world.resultState?.iteration ?: -1
         assertTrue(iter >= min, "Iteration $iter should be >= $min")
+    }
+
+    // ── @epic_v_3 : Sécurité ──
+
+    @When("I attempt vibecoding path traversal outside workspace root {string}")
+    fun `attempt path traversal outside workspace`(workspaceRoot: String) {
+        world.securityException = assertThrows(SecurityException::class.java) {
+            world.graph.toolRegistry.execute(
+                toolName = "read_file",
+                arguments = mapOf("path" to "../../../etc/passwd"),
+                workspaceRoot = workspaceRoot
+            )
+        }
+    }
+
+    @Then("a vibecoding SecurityException is thrown")
+    fun `security exception is thrown`() {
+        assertNotNull(world.securityException, "SecurityException should have been thrown")
+    }
+
+    @Then("the vibecoding error contains {string}")
+    fun `vibecoding error contains`(expected: String) {
+        val msg = world.securityException?.message
+        assertTrue(msg != null && msg.contains(expected, ignoreCase = true),
+            "Error should contain '$expected', got: $msg")
+    }
+
+    @When("I attempt vibecoding read of a file larger than 10 MB in workspace {string}")
+    fun `attempt read of large file`(workspaceRoot: String) {
+        val wsDir = java.io.File(workspaceRoot)
+        wsDir.mkdirs()
+        val largeFile = java.io.File(wsDir, "large-over-10mb.bin")
+        val tenMbPlusOne = (10 * 1024 * 1024) + 1
+        largeFile.outputStream().use { out ->
+            var written = 0
+            val buf = ByteArray(8192)
+            while (written < tenMbPlusOne) {
+                val chunk = minOf(buf.size, tenMbPlusOne - written)
+                out.write(buf, 0, chunk)
+                written += chunk
+            }
+        }
+        world.securityException = assertThrows(SecurityException::class.java) {
+            world.graph.toolRegistry.execute(
+                toolName = "read_file",
+                arguments = mapOf("path" to largeFile.absolutePath),
+                workspaceRoot = workspaceRoot
+            )
+        }
+    }
+
+    // ── @epic_v_4 : Intégration ──
+
+    @When("I execute vibecoding with a {int}-task plan and maxActions {int} in dryRun")
+    fun `execute vibecoding with multi task plan`(taskCount: Int, maxActions: Int) {
+        val tasks = (1..taskCount).map { i ->
+            codebase.koog.Task(
+                description = "Task $i: verify build",
+                gradleTask = "tasks"
+            )
+        }
+        val fakePlan = codebase.koog.Plan(
+            title = "test-plan",
+            epics = listOf(
+                codebase.koog.Epic(
+                    name = "EPIC-1",
+                    description = "Test epic",
+                    points = taskCount,
+                    userStories = listOf(
+                        codebase.koog.UserStory(
+                            description = "US-1",
+                            tasks = tasks
+                        )
+                    )
+                )
+            ),
+            totalPoints = taskCount,
+            estimatedSessions = "1"
+        )
+        val state = VibecodingState(
+            intention = "Execute ${taskCount}-task plan",
+            workspaceRoot = "/tmp",
+            dryRun = true,
+            maxActions = maxActions,
+            plan = fakePlan,
+            planJson = "{}"
+        )
+        world.resultState = world.graph.execute(state)
+    }
+
+    @Then("exactly {int} vibecoding tasks are marked as executed")
+    fun `vibecoding tasks executed count`(expected: Int) {
+        val state = world.resultState
+        assertNotNull(state, "Result state must not be null")
+        assertEquals(expected, state.executedTasks.size,
+            "Expected $expected executed tasks, got ${state.executedTasks.size}: ${state.executedTasks}")
     }
 }

@@ -49,6 +49,24 @@ class VibecodingTaskTest {
     }
 
     @Test
+    fun `task should have default session timeout of 300 seconds`() {
+        val project = ProjectBuilder.builder().build()
+        val task = project.tasks.register("vibecode", VibecodingTask::class.java).get()
+
+        assertEquals(300, task.sessionTimeoutSeconds.get())
+    }
+
+    @Test
+    fun `task should accept custom session timeout`() {
+        val project = ProjectBuilder.builder().build()
+        val task = project.tasks.register("vibecode", VibecodingTask::class.java) {
+            it.sessionTimeoutSeconds.set(60)
+        }.get()
+
+        assertEquals(60, task.sessionTimeoutSeconds.get())
+    }
+
+    @Test
     fun `task should have a toolRegistry`() {
         val project = ProjectBuilder.builder().build()
         val task = project.tasks.register("vibecode", VibecodingTask::class.java).get()

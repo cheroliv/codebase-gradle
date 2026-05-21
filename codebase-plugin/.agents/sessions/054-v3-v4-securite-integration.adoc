@@ -1,0 +1,66 @@
+= Session 054 — EPIC V-3 Sécurité Vibecoding + V-4 Intégration Cross-Borough
+:date: 2026-05-21
+:score: 9/10
+:project: codebase-gradle/codebase-plugin
+:epic: V-3, V-4
+:borough: Queens
+
+== Résumé
+
+Session entièrement en TDD (9 cycles RED→GREEN). EPIC V-3 (contraintes de sécurité
+vibecoding) et V-4 (intégration golden path) terminés. Zéro régression — tous les tests
+JUnit5 + Cucumber + EpicL3 passent.
+
+== Cycles TDD
+
+[cols="1,3,2,2"]
+|===
+| # | Test | Type | Résultat
+| 1 | `read_file` rejette fichiers > 10 MB | JUnit5 | 🟢
+| 2 | `VibecodingState.sessionTimeoutSeconds = 300` | JUnit5 | 🟢
+| 3 | `AuditEntry.workspaceRoot` injecté dans les entrées d'audit | JUnit5 | 🟢
+| 4 | Timeout effectif dans `VibecodingGraph.execute()` (démarrage + boucle) | JUnit5 | 🟢
+| 5 | `VibecodingTask.sessionTimeoutSeconds` option CLI `--sessionTimeout` | JUnit5 | 🟢
+| 6 | Cucumber — path traversal hors workspaceRoot bloqué | BDD | 🟢
+| 7 | Cucumber — fichier > 10 MB rejeté avec SecurityException | BDD | 🟢
+| 8 | Cucumber V-4 — golden path 3 tâches dryRun, 5 maxActions | BDD | 🟢
+| 9 | Cucumber V-4 — multi-tour 5 tâches, 10 itérations dryRun | BDD | 🟢
+|===
+
+== Fichiers modifiés (code source)
+
+|===
+| Fichier | Changement
+| `ToolRegistry.kt` | `MAX_READ_FILE_SIZE = 10 MB`, `MAX_OUTPUT_CHARS = 8000`, `AuditEntry.workspaceRoot`
+| `VibecodingState.kt` | + `sessionTimeoutSeconds = 300`, + `sessionStartTimeMs`
+| `VibecodingGraph.kt` | `isTimedOut()` au démarrage + dans la boucle, `buildContextNode` préserve plan existant, `executePlanTasks()` dryRun/real mode
+| `VibecodingTask.kt` | + propriété abstraite `sessionTimeoutSeconds` avec option `--sessionTimeout`
+|===
+
+== Fichiers modifiés (tests)
+
+|===
+| Fichier | Changement
+| `ToolRegistryTest.kt` | Nouveau — 2 tests (max file size, workspaceRoot dans audit)
+| `VibecodingGraphTest.kt` | +1 test timeout
+| `VibecodingTaskTest.kt` | +2 tests sessionTimeout
+| `VibecodingWorld.kt` | + `sessionTimeoutSeconds`, + `securityException`
+| `VibecodingSteps.kt` | +4 steps @epic_v_3 + 2 steps @epic_v_4
+| `epic_v_vibecoding.feature` | +2 scénarios @epic_v_3, +2 scénarios @epic_v_4
+|===
+
+== Résultat final des tests
+
+* JUnit5 koog : tous verts (aucune régression)
+* CucumberTestRunner : 10/10 scénarios vibecoding PASS (7 existants + 3 nouveaux V-3/V-4)
+* EpicL3CucumberRunner : 7/7 PASS
+* Cucumber global : BUILD SUCCESSFUL
+
+== Prochaine session (055)
+
+Backlog :
+- V-4 restant : scénario erreur récupérable, scénario timeout cross-borough
+- EPIC 5 (fine-tuning CDA/FPA)
+- EPIC 6 (ONNX)
+- EPIC 12 (Dilution Article Blog)
+- Test réel cross-borough : `./gradlew vibecode --intention="Run planner-gradle tests"`

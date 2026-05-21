@@ -19,8 +19,10 @@ class VibecodingWorld {
     var intention: String = ""
     var maxActions: Int = 10
     var dryRun: Boolean = false
+    var sessionTimeoutSeconds: Int = 300
     var resultState: VibecodingState? = null
     var mermaidDiagram: String = ""
+    var securityException: SecurityException? = null
 
     val graph: VibecodingGraph by lazy {
         VibecodingGraph(

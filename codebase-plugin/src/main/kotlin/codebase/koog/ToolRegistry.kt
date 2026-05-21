@@ -18,13 +18,18 @@ data class AuditEntry(
     val arguments: Map<String, String>,
     val dryRun: Boolean,
     val result: String,
-    val error: String? = null
+    val error: String? = null,
+    val workspaceRoot: String = ""
 )
 
 class ToolRegistry(
     private val tools: MutableMap<String, ToolInfo> = mutableMapOf(),
     private val auditTrail: MutableList<AuditEntry> = mutableListOf()
 ) {
+    companion object {
+        const val MAX_READ_FILE_SIZE: Long = 10 * 1024 * 1024 // 10 MB
+        const val MAX_OUTPUT_CHARS: Int = 8000
+    }
     init {
         register(ToolInfo("read_file", "Read the contents of a file at the given path"))
         register(ToolInfo("write_file", "Write content to a file at the given path"))
@@ -57,13 +62,13 @@ class ToolRegistry(
         val result = try {
             executeInternal(toolName, arguments, workspaceRoot, dryRun)
         } catch (e: SecurityException) {
-            auditTrail.add(AuditEntry(start, toolName, arguments, dryRun, result = "", error = e.message))
+            auditTrail.add(AuditEntry(start, toolName, arguments, dryRun, result = "", error = e.message, workspaceRoot = workspaceRoot))
             throw e
         } catch (e: Exception) {
-            auditTrail.add(AuditEntry(start, toolName, arguments, dryRun, result = "", error = e.message))
+            auditTrail.add(AuditEntry(start, toolName, arguments, dryRun, result = "", error = e.message, workspaceRoot = workspaceRoot))
             throw e
         }
-        auditTrail.add(AuditEntry(start, toolName, arguments, dryRun, result = result.take(500)))
+        auditTrail.add(AuditEntry(start, toolName, arguments, dryRun, result = result.take(500), workspaceRoot = workspaceRoot))
         return result
     }
 
@@ -73,7 +78,13 @@ class ToolRegistry(
                 val path = arguments["path"] ?: throw IllegalArgumentException("read_file requires 'path'")
                 val file = resolvePath(path, workspaceRoot)
                 if (!file.exists()) throw IllegalStateException("File not found: ${file.absolutePath}")
-                file.readText().take(8000)
+                val maxSize = MAX_READ_FILE_SIZE
+                if (file.length() > maxSize) {
+                    throw SecurityException(
+                        "File too large: ${file.length()} bytes exceeds 10 MB limit (${file.absolutePath})"
+                    )
+                }
+                file.readText().take(MAX_OUTPUT_CHARS)
             }
             "write_file" -> {
                 val path = arguments["path"] ?: throw IllegalArgumentException("write_file requires 'path'")

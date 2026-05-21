@@ -74,6 +74,12 @@ class VibecodingGraph(
             return initialState.finish()
         }
 
+        // Vérification timeout avant de démarrer
+        if (isTimedOut(initialState)) {
+            log.warn("[VibecodingGraph] Session timed out before starting (elapsed=${elapsedSeconds(initialState)}s, timeout=${initialState.sessionTimeoutSeconds}s)")
+            return initialState.withError("Timeout: session exceeded ${initialState.sessionTimeoutSeconds}s (elapsed ${elapsedSeconds(initialState)}s)")
+        }
+
         // Étape 1 : buildContext
         var state = try {
             buildContextNode(initialState)
@@ -86,6 +92,13 @@ class VibecodingGraph(
 
         // Étape 2 : boucle d'exécution
         while (!state.finished && !state.isFinal && state.error == null) {
+            // Vérification timeout à chaque itération
+            if (isTimedOut(state)) {
+                log.warn("[VibecodingGraph] Session timed out during loop (elapsed=${elapsedSeconds(state)}s > timeout=${state.sessionTimeoutSeconds}s, iteration=${state.iteration})")
+                state = state.withError("Timeout: session exceeded ${state.sessionTimeoutSeconds}s at iteration ${state.iteration}")
+                return state
+            }
+
             state = try {
                 executeActionNode(state)
             } catch (e: Exception) {
@@ -110,6 +123,11 @@ class VibecodingGraph(
      * le contexte est vide mais le pipeline continue (mode résilient).
      */
     private fun buildContextNode(state: VibecodingState): VibecodingState {
+        // Si le state a déjà un plan (injecté directement), on le conserve
+        if (state.plan != null) {
+            log.info("[VibecodingGraph] State already has a plan — skipping buildContext")
+            return state
+        }
         if (augmentedGraph == null) {
             log.info("[VibecodingGraph] No augmented graph — skipping buildContext")
             return state.withPlan(planJson = "", plan = null, classification = "simple")
@@ -142,13 +160,15 @@ class VibecodingGraph(
      * Sans plan : incrémente et continue (mode résilient).
      */
     private fun executeActionNode(state: VibecodingState): VibecodingState {
+        // dryRun : parcourt les tâches du plan mais sans exécution réelle
         if (state.dryRun) {
-            log.info("[VibecodingGraph] dryRun iteration ${state.iteration + 1}/${state.maxActions}")
-            return state.nextIteration().copy(
-                lastToolResult = "DRY RUN: iteration ${state.iteration + 1}"
-            )
+            return executePlanTasks(state, realExecution = false)
         }
 
+        return executePlanTasks(state, realExecution = true)
+    }
+
+    private fun executePlanTasks(state: VibecodingState, realExecution: Boolean): VibecodingState {
         // Cherche la prochaine tâche à exécuter dans le plan
         val plan = state.plan
         // Si pas de plan ou plan vide, on itère simplement (mode résilient)
@@ -211,5 +231,15 @@ class VibecodingGraph(
         if (noWorkRemaining && state.iteration > 0) return state.finish()
 
         return state
+    }
+
+    // ── Timeout helpers ──
+
+    private fun isTimedOut(state: VibecodingState): Boolean {
+        return elapsedSeconds(state) > state.sessionTimeoutSeconds
+    }
+
+    private fun elapsedSeconds(state: VibecodingState): Long {
+        return (System.currentTimeMillis() - state.sessionStartTimeMs) / 1000
     }
 }
