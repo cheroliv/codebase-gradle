@@ -148,7 +148,7 @@ object BenchmarkReportExporter {
         sb.appendLine("| ID | Cercle | Extrait (debut)")
         sb.appendLine("| C0-strategie | C0 | WORKSPACE_AS_PRODUCT.adoc")
         sb.appendLine("| C1-tokens | C1 | configuration/codebase.yml")
-        sb.appendLine("| C2-pedagogie | C2 | office/metiers/FPA/SPG_A2SP.adoc")
+        sb.appendLine("| C2-pedagogie | C2 | office/formations/kit-pedagogique.adoc")
         sb.appendLine("| C2-livre | C2 | office/books-collection/kotlin-in-action.pdf")
         sb.appendLine("| C3-closed | C3 | foundry/private/proprietary-algo/")
         sb.appendLine("| C4-plugin | C4 | foundry/public/plantuml-gradle/")

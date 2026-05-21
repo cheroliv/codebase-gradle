@@ -10,36 +10,6 @@ import kotlin.test.*
 class MetadataUnitTest {
 
     @Test
-    fun `fromJson should parse SPGMetadata correctly`() {
-        val json = """{"type":"SPG","source":"manhattan","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":["queens","graphify"],"sessions":24,"modules":["accueil","core"],"competences":["C1","C2"]}"""
-
-        val meta = Metadata.fromJson(json)
-
-        assertIs<SPGMetadata>(meta)
-        assertEquals("manhattan", meta.source)
-        assertEquals("SPG", meta.type)
-        assertEquals("1.0", meta.version)
-        assertEquals("pro", meta.model)
-        assertEquals(listOf("queens", "graphify"), meta.dependencies)
-        assertEquals(24, meta.sessions)
-        assertEquals(listOf("accueil", "core"), meta.modules)
-        assertEquals(listOf("C1", "C2"), meta.competences)
-    }
-
-    @Test
-    fun `fromJson should parse SPDMetadata correctly`() {
-        val json = """{"type":"SPD","source":"newark","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"flash","dependencies":["manhattan"],"sessionNumber":5,"duree":"3h","prerequis":["SPG validé"],"objectifs":["maîtriser Kotlin"]}"""
-
-        val meta = Metadata.fromJson(json)
-
-        assertIs<SPDMetadata>(meta)
-        assertEquals("newark", meta.source)
-        assertEquals(5, meta.sessionNumber)
-        assertEquals("3h", meta.duree)
-        assertEquals(listOf("SPG validé"), meta.prerequis)
-    }
-
-    @Test
     fun `fromJson should parse QuizMetadata correctly`() {
         val json = """{"type":"Quiz","source":"bronx","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[],"questions":15,"bareme":20,"dureeMax":"30min"}"""
 
@@ -66,43 +36,58 @@ class MetadataUnitTest {
 
     @Test
     fun `fromJson should parse PDFMetadata correctly`() {
-        val json = """{"type":"PDF","source":"brooklyn","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[],"pages":240,"taille":"15MB","sourceCorpus":"AFNOR"}"""
+        val json = """{"type":"PDF","source":"brooklyn","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[],"pages":240,"taille":"15MB","sourceCorpus":"tech-ref"}"""
 
         val meta = Metadata.fromJson(json)
 
         assertIs<PDFMetadata>(meta)
         assertEquals(240, meta.pages)
         assertEquals("15MB", meta.taille)
-        assertEquals("AFNOR", meta.sourceCorpus)
+        assertEquals("tech-ref", meta.sourceCorpus)
     }
 
     @Test
-    fun `fromJson should throw on unknown type`() {
+    fun `fromJson should parse unknown type as UnknownMetadata`() {
         val json = """{"type":"INCONNU","source":"test","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[]}"""
 
-        assertThrows<Exception> { Metadata.fromJson(json) }
+        val meta = Metadata.fromJson(json)
+
+        assertIs<UnknownMetadata>(meta)
+        assertEquals("INCONNU", meta.type)
+    }
+
+    @Test
+    fun `fromJson should parse SPG type as UnknownMetadata in codebase`() {
+        val json = """{"type":"SPG","source":"newark","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[],"sessions":24}"""
+
+        val meta = Metadata.fromJson(json)
+
+        assertIs<UnknownMetadata>(meta)
+        assertEquals("SPG", meta.type)
     }
 
     @Test
     fun `fromFile should read metadata from a file`(@TempDir tempDir: Path) {
-        val json = """{"type":"SPG","source":"manhattan","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[],"sessions":24}"""
+        val json = """{"type":"Plan","source":"codebase","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[],"epics":2,"totalPoints":8,"classification":"simple","estimatedSessions":"1-2"}"""
         val file = File(tempDir.toFile(), "metadata.json")
         file.writeText(json)
 
         val meta = Metadata.fromFile(file)
 
-        assertIs<SPGMetadata>(meta)
-        assertEquals(24, meta.sessions)
+        assertIs<PlanMetadata>(meta)
+        assertEquals(2, meta.epics)
     }
 
     @Test
-    fun `SPGMetadata should have empty defaults for missing fields`() {
-        val json = """{"type":"SPG","source":"test","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[],"sessions":10}"""
+    fun `PlanMetadata should have correct defaults`() {
+        val json = """{"type":"Plan","source":"codebase","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[],"epics":2,"totalPoints":8,"classification":"simple","estimatedSessions":"1-2"}"""
 
         val meta = Metadata.fromJson(json)
 
-        assertIs<SPGMetadata>(meta)
-        assertEquals(emptyList(), meta.modules)
-        assertEquals(emptyList(), meta.competences)
+        assertIs<PlanMetadata>(meta)
+        assertEquals(2, meta.epics)
+        assertEquals(8, meta.totalPoints)
+        assertEquals("simple", meta.classification)
+        assertEquals("1-2", meta.estimatedSessions)
     }
 }

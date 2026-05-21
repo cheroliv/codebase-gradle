@@ -53,7 +53,7 @@ object TestSections {
         ),
         ContentSection(
             "V4-codebase-role",
-            "codebase-gradle est le propriétaire exclusif du pipeline de fine-tuning des experts métiers CDA et FPA. Il centralise la gestion BYOK (7 providers LLM avec clés nommées et expiration), l'anonymisation YAML multi-plugins, et le chatbot Javelit avec enrichissement RAG. Sa position dans le DAG (N2, consommateur de pgvector N1) lui permet d'être le hub d'intelligence du workspace, transformant la matière première documentaire en modèles LLM spécialisés consommables par tous les autres plugins.",
+            "codebase-gradle est le propriétaire exclusif du pipeline de fine-tuning des experts spécialisés. Il centralise la gestion BYOK (7 providers LLM avec clés nommées et expiration), l'anonymisation YAML multi-plugins, et le chatbot Javelit avec enrichissement RAG. Sa position dans le DAG (N2, consommateur de pgvector N1) lui permet d'être le hub d'intelligence du workspace, transformant la matière première documentaire en modèles LLM spécialisés consommables par tous les autres plugins.",
             ContentClassification.VISION
         ),
         ContentSection(

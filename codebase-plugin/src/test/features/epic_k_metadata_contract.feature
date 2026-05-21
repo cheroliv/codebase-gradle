@@ -12,16 +12,15 @@ Feature: EPIC K — Contrat metadata.json inter-borough (format pivot)
 
   # --- Scénarios de succès ---
 
-  Scenario: Valid SPG metadata passes validation
+  Scenario: Valid Plan metadata passes validation
     Given a file "metadata.json" with content:
       """
-      {"type":"SPG","source":"manhattan","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"deepseek-v4-pro","dependencies":["queens","graphify"],"sessions":24}
+      {"type":"Plan","source":"codebase","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"deepseek-v4-pro","dependencies":["queens","graphify"],"epics":3,"totalPoints":21,"classification":"complexe","estimatedSessions":"3-5"}
       """
-    When I validate "metadata.json" expecting type "SPG" and version "1.0"
+    When I validate "metadata.json" expecting type "Plan" and version "1.0"
     Then the validation result is VALID
-    And the parsed metadata type is "SPG"
-    And the parsed metadata source is "manhattan"
-    And the parsed metadata sessions count is 24
+    And the parsed metadata type is "Plan"
+    And the parsed metadata source is "codebase"
 
   Scenario: Valid Plan metadata passes validation without version check
     Given a file "plan-metadata.json" with content:
@@ -36,7 +35,7 @@ Feature: EPIC K — Contrat metadata.json inter-borough (format pivot)
   Scenario: Same major version is accepted (1.5 vs 1.0 consumer)
     Given a file "metadata.json" with content:
       """
-      {"type":"SPG","source":"manhattan","version":"1.5","generatedAt":"2026-05-18T19:00:00Z","model":"deepseek-v4-pro","dependencies":[],"sessions":24}
+      {"type":"Plan","source":"codebase","version":"1.5","generatedAt":"2026-05-18T19:00:00Z","model":"deepseek-v4-pro","dependencies":[],"epics":3,"totalPoints":21,"classification":"complexe","estimatedSessions":"3-5"}
       """
     When I validate "metadata.json" expecting version "1.0"
     Then the validation result is VALID
@@ -62,7 +61,7 @@ Feature: EPIC K — Contrat metadata.json inter-borough (format pivot)
   Scenario: Version mismatch returns invalid (major 2 vs consumer 1)
     Given a file "metadata.json" with content:
       """
-      {"type":"SPG","source":"manhattan","version":"2.0","generatedAt":"2026-05-18T19:00:00Z","model":"deepseek-v4-pro","dependencies":[],"sessions":24}
+      {"type":"Plan","source":"codebase","version":"2.0","generatedAt":"2026-05-18T19:00:00Z","model":"deepseek-v4-pro","dependencies":[],"epics":3,"totalPoints":21,"classification":"complexe","estimatedSessions":"3-5"}
       """
     When I validate "metadata.json" expecting version "1.0"
     Then the validation result is INVALID
@@ -72,16 +71,16 @@ Feature: EPIC K — Contrat metadata.json inter-borough (format pivot)
   Scenario: Type mismatch returns invalid
     Given a file "metadata.json" with content:
       """
-      {"type":"SPG","source":"manhattan","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"deepseek-v4-pro","dependencies":[],"sessions":24}
+      {"type":"Plan","source":"codebase","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"deepseek-v4-pro","dependencies":[],"epics":3,"totalPoints":21,"classification":"complexe","estimatedSessions":"3-5"}
       """
-    When I validate "metadata.json" expecting type "SPD"
+    When I validate "metadata.json" expecting type "Quiz"
     Then the validation result is INVALID
     And the reason contains "Type inattendu"
 
   Scenario: Blank dependency returns invalid
     Given a file "metadata.json" with content:
       """
-      {"type":"SPG","source":"manhattan","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"deepseek-v4-pro","dependencies":["   ","graphify"],"sessions":24}
+      {"type":"Plan","source":"codebase","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"deepseek-v4-pro","dependencies":["   ","graphify"],"epics":3,"totalPoints":21,"classification":"complexe","estimatedSessions":"3-5"}
       """
     When I validate "metadata.json"
     Then the validation result is INVALID

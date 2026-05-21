@@ -105,9 +105,7 @@ object BenchmarkFixtures {
             """
             WORKSPACE_AS_PRODUCT.adoc — Ce document décrit la vision du workspace comme produit.
             L'idée est de transformer l'écosystème de plugins Gradle en SaaS provisionnable.
-            Hypothèse : le marché des formations RNCP est sous-exploité, Edster pourrait capter 15%.
             Stratégie de pricing : freemium avec paliers à 49€/mois (individuel) et 499€/mois (pro).
-            Note personnelle : vérifier si Qualiopi impose un audit par un organisme tiers.
             """.trimIndent()
         ),
         SampleDocument(
@@ -125,11 +123,9 @@ object BenchmarkFixtures {
             "C2-pedagogie",
             2,
             """
-            office/metiers/FPA/SPG_A2SP.adoc — Support Pédagogique Groupé, module A2SP.
-            Objectif pédagogique : concevoir une action de formation professionnelle.
-            Taxonomie de Bloom appliquée : niveau 4 (Analyse) et niveau 5 (Synthèse).
-            Critères Qualiopi : indicateur 1 — information du public, indicateur 5 — qualification des formateurs.
-            Exercice : rédiger un scénario pédagogique pour 12 apprenants de niveau Bac+2.
+            office/formations/kit-pedagogique.adoc — Kit pédagogique générique.
+            Contient des exercices pratiques, des études de cas, et des grilles d'évaluation.
+            Format : AsciiDoc structuré selon la convention over configuration.
             """.trimIndent()
         ),
         SampleDocument(
@@ -196,7 +192,7 @@ object ContextFiller {
             "L'anonymisation RGPD multi-niveaux détecte les PII (tokens, emails, passwords) dans 5 formats (YAML, JSON, XML, properties, .env) avec fallback déterministe si le LLM est indisponible.",
             "Le serveur JBake intégré compile les templates Thymeleaf avec données YAML pour générer des sites statiques déployables via GitHub Pages avec workflow CI/CD automatisé.",
             "La task Gradle indexCodebase scanne récursivement le workspace, extrait le contenu des fichiers .kt/.adoc/.yml/.json, anonymise les secrets, tokenize en chunks de 500 tokens avec overlap 50, et indexe dans pgvector.",
-            "Le fine-tuning des experts métiers CDA et FPA utilise la méthode continual pre-training avec 10% du corpus cible, validée par l'article ACL 2024 arXiv 2311.08545.",
+            "Le fine-tuning des experts spécialisés utilise la méthode continual pre-training avec 10% du corpus cible, validée par l'article ACL 2024 arXiv 2311.08545.",
             "Le dispatcher deepseek-v4-pro décompose les tâches complexes en sous-tâches atomiques distribuées par batch aux experts spécialisés, avec collecte et synthèse des résultats.",
             "La boucle de qualité ONNX valide chaque output expert via analyse de sentiment, détection de hors-sujet et contrôle de cohérence avant transmission au dispatcher pour la synthèse finale.",
             "Le protocole de mesure EPIC 4 évalue la dégradation de la perception spatiale du LLM à 10K, 30K, 60K, 100K et 128K tokens avec 5 scénarios de couverture incrémentale des canaux convergents."
@@ -254,10 +250,9 @@ object ContextFiller {
     fun ressourcesContext(targetTokens: Int): String {
         val sb = StringBuilder()
         sb.appendLine("CORPUS METIER — office/metiers/ :")
-        sb.appendLine("  - FPA/SPG_A2SP.adoc : Support Pédagogique Groupé, module A2SP (conception formation)")
-        sb.appendLine("  - CDA/RNCP_*.adoc : Référentiels RNCP Concepteur Développeur d'Applications")
-        sb.appendLine("  - Taxonomie Bloom : niveaux 1-6 appliqués aux séquences pédagogiques")
-        sb.appendLine("  - Critères Qualiopi : 7 indicateurs pour certification qualité formation")
+        sb.appendLine("  - referentiels/RNCP_*.adoc : Referentiels metier")
+        sb.appendLine("  - sequences/ : Sequences pedagogiques structurees")
+        sb.appendLine("  - evaluation/ : Grilles d'evaluation et quiz")
         sb.appendLine("DATASETS TECHNIQUES — office/books-collection/ :")
         sb.appendLine("  - kotlin-in-action.pdf : types nullables, data classes, sealed classes, coroutines")
         sb.appendLine("  - effective-java.pdf : patterns immutabilité, builder, factory, singleton")
@@ -271,7 +266,7 @@ object ContextFiller {
         sb.appendLine()
         var remaining = targetTokens - (sb.length / 4)
         while (remaining > 0) {
-            sb.appendLine("RESSOURCE PEDAGOGIQUE : Module formation RNCP niveau 6 (Bac+3/4), 12 apprenants, blended learning 70% distanciel 30% présentiel.")
+            sb.appendLine("DOCUMENT TYPE : Module de formation, 12 apprenants, blended learning 70% distanciel 30% présentiel.")
             remaining -= 30
         }
         return sb.toString()

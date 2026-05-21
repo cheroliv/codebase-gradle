@@ -9,16 +9,16 @@ import kotlin.test.*
 class MetadataValidatorUnitTest {
 
     @Test
-    fun `validate should return Valid for correct SPG metadata`(@TempDir tempDir: Path) {
-        val json = """{"type":"SPG","source":"manhattan","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":["queens"],"sessions":24}"""
+    fun `validate should return Valid for correct metadata`(@TempDir tempDir: Path) {
+        val json = """{"type":"Plan","source":"codebase","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":["queens"],"epics":3,"totalPoints":21,"classification":"complexe","estimatedSessions":"3-5"}"""
         val file = File(tempDir.toFile(), "metadata.json")
         file.writeText(json)
 
-        val result = MetadataValidator.validate(file, expectedVersion = "1.0", expectedType = "SPG")
+        val result = MetadataValidator.validate(file, expectedVersion = "1.0", expectedType = "Plan")
 
         assertIs<MetadataValidator.ValidationResult.Valid>(result)
-        assertIs<SPGMetadata>(result.metadata)
-        assertEquals(24, result.metadata.sessions)
+        assertIs<PlanMetadata>(result.metadata)
+        assertEquals(3, result.metadata.epics)
     }
 
     @Test
@@ -44,7 +44,7 @@ class MetadataValidatorUnitTest {
 
     @Test
     fun `validate should return Invalid for version mismatch`(@TempDir tempDir: Path) {
-        val json = """{"type":"SPG","source":"test","version":"2.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[],"sessions":24}"""
+        val json = """{"type":"Plan","source":"codebase","version":"2.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[],"epics":3,"totalPoints":21,"classification":"complexe","estimatedSessions":"3-5"}"""
         val file = File(tempDir.toFile(), "metadata.json")
         file.writeText(json)
 
@@ -56,7 +56,7 @@ class MetadataValidatorUnitTest {
 
     @Test
     fun `validate should accept same major version`(@TempDir tempDir: Path) {
-        val json = """{"type":"SPG","source":"test","version":"1.5","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[],"sessions":24}"""
+        val json = """{"type":"Plan","source":"codebase","version":"1.5","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[],"epics":3,"totalPoints":21,"classification":"complexe","estimatedSessions":"3-5"}"""
         val file = File(tempDir.toFile(), "metadata.json")
         file.writeText(json)
 
@@ -67,11 +67,11 @@ class MetadataValidatorUnitTest {
 
     @Test
     fun `validate should return Invalid for type mismatch`(@TempDir tempDir: Path) {
-        val json = """{"type":"SPG","source":"test","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[],"sessions":24}"""
+        val json = """{"type":"Plan","source":"codebase","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":[],"epics":3,"totalPoints":21,"classification":"complexe","estimatedSessions":"3-5"}"""
         val file = File(tempDir.toFile(), "metadata.json")
         file.writeText(json)
 
-        val result = MetadataValidator.validate(file, expectedType = "SPD")
+        val result = MetadataValidator.validate(file, expectedType = "Quiz")
 
         assertIs<MetadataValidator.ValidationResult.Invalid>(result)
         assertTrue(result.reason.contains("Type inattendu"))
@@ -79,7 +79,7 @@ class MetadataValidatorUnitTest {
 
     @Test
     fun `validate should return Invalid for blank dependency`(@TempDir tempDir: Path) {
-        val json = """{"type":"SPG","source":"test","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":["queens","  "],"sessions":24}"""
+        val json = """{"type":"Plan","source":"codebase","version":"1.0","generatedAt":"2026-05-18T19:00:00Z","model":"pro","dependencies":["queens","  "],"epics":3,"totalPoints":21,"classification":"complexe","estimatedSessions":"3-5"}"""
         val file = File(tempDir.toFile(), "metadata.json")
         file.writeText(json)
 

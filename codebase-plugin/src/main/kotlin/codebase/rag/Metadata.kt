@@ -10,8 +10,6 @@ import java.time.Instant
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes(
-    JsonSubTypes.Type(value = SPGMetadata::class, name = "SPG"),
-    JsonSubTypes.Type(value = SPDMetadata::class, name = "SPD"),
     JsonSubTypes.Type(value = QuizMetadata::class, name = "Quiz"),
     JsonSubTypes.Type(value = PlanMetadata::class, name = "Plan"),
     JsonSubTypes.Type(value = PDFMetadata::class, name = "PDF")
@@ -29,38 +27,26 @@ sealed class Metadata {
             .registerKotlinModule()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-        fun fromJson(json: String): Metadata = mapper.readValue(json)
+        fun fromJson(json: String): Metadata {
+            return try {
+                mapper.readValue(json)
+            } catch (e: Exception) {
+                // Fallback for unknown metadata types from other boroughs
+                val node = mapper.readTree(json)
+                UnknownMetadata(
+                    source = node.get("source")?.textValue() ?: "",
+                    version = node.get("version")?.textValue() ?: "",
+                    generatedAt = node.get("generatedAt")?.textValue() ?: "",
+                    model = node.get("model")?.textValue() ?: "",
+                    dependencies = node.get("dependencies")?.map { it.textValue() } ?: emptyList(),
+                    type = node.get("type")?.textValue() ?: "Unknown"
+                )
+            }
+        }
         fun fromFile(file: java.io.File): Metadata = fromJson(file.readText())
 
         fun now(): String = Instant.now().toString()
     }
-}
-
-data class SPGMetadata(
-    override val source: String,
-    override val version: String,
-    override val generatedAt: String,
-    override val model: String,
-    override val dependencies: List<String>,
-    val sessions: Int,
-    val modules: List<String> = emptyList(),
-    val competences: List<String> = emptyList()
-) : Metadata() {
-    override val type: String = "SPG"
-}
-
-data class SPDMetadata(
-    override val source: String,
-    override val version: String,
-    override val generatedAt: String,
-    override val model: String,
-    override val dependencies: List<String>,
-    val sessionNumber: Int,
-    val duree: String = "",
-    val prerequis: List<String> = emptyList(),
-    val objectifs: List<String> = emptyList()
-) : Metadata() {
-    override val type: String = "SPD"
 }
 
 data class QuizMetadata(
@@ -102,3 +88,12 @@ data class PDFMetadata(
 ) : Metadata() {
     override val type: String = "PDF"
 }
+
+data class UnknownMetadata(
+    override val source: String,
+    override val version: String,
+    override val generatedAt: String,
+    override val model: String,
+    override val dependencies: List<String>,
+    override val type: String
+) : Metadata()

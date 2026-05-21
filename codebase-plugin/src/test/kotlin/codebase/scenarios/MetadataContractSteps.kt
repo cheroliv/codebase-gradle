@@ -3,7 +3,6 @@ package codebase.scenarios
 import codebase.rag.Metadata
 import codebase.rag.MetadataValidator
 import codebase.rag.PlanMetadata
-import codebase.rag.SPGMetadata
 import io.cucumber.java.Before
 import io.cucumber.java.en.And
 import io.cucumber.java.en.Given
@@ -108,15 +107,6 @@ class MetadataContractSteps {
         val valid = validationResult as? MetadataValidator.ValidationResult.Valid
             ?: throw AssertionError("Expected VALID but got $validationResult")
         assertEquals(expectedSource, valid.metadata.source)
-    }
-
-    @And("the parsed metadata sessions count is {int}")
-    fun `parsed sessions count`(expectedSessions: Int) {
-        val valid = validationResult as? MetadataValidator.ValidationResult.Valid
-            ?: throw AssertionError("Expected VALID but got $validationResult")
-        val spg = valid.metadata as? SPGMetadata
-            ?: throw AssertionError("Expected SPGMetadata but got ${valid.metadata::class.simpleName}")
-        assertEquals(expectedSessions, spg.sessions)
     }
 
     @And("the parsed metadata classification is {string}")
