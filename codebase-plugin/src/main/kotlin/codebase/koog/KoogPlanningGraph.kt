@@ -16,7 +16,7 @@ import dev.langchain4j.model.ollama.OllamaChatModel
 import kotlinx.coroutines.runBlocking
 import java.time.Duration
 
-// === Données (indépendantes — migrées depuis l'ancien orchestrateur langgraph4j) ===
+// === Données du plan ===
 
 data class Plan(
     val title: String,
@@ -42,7 +42,7 @@ data class Task(
     val gradleTask: String
 )
 
-// === État du graphe (indépendant de langgraph4j — ex-PlanningState) ===
+// === État du graphe ===
 
 data class PlanState(
     val intention: String = "",
@@ -63,7 +63,7 @@ data class PlanState(
  * - **langchain4j** : appels LLM (OllamaChatModel deepseek-v4)
  * - **pgvector/embeddings/vector stores** : scope opérationnel langchain4j (L-2)
  *
- * Remplace l'ancien orchestrateur langgraph4j (désormais supprimé).
+ * Remplacé l'ancien orchestrateur externe (langgraph4j, supprimé).
  */
 class KoogPlanningGraph {
 
@@ -143,7 +143,7 @@ private val proModel: ChatModel by lazy {
 private val mapper = jacksonObjectMapper()
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-// === Logique métier (pur langchain4j, pas de koog ni langgraph4j) ===
+// === Logique métier (langchain4j LLM) ===
 
 private fun classifyIntention(intention: String, context: CompositeContext?): String {
     val ragContext = context?.ragSection?.take(1500) ?: "(aucun contexte)"

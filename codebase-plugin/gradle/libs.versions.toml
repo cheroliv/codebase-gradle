@@ -5,7 +5,6 @@ kotlinx-serial = "1.7.3"
 jackson = "2.21.2"
 langchain4j = "1.14.1"
 langchain4j-beta = "1.14.1-beta24"
-langgraph4j = "1.8.16"
 koog = "0.8.0"
 testcontainers = "1.21.4"
 cucumber = "7.34.3"
@@ -39,8 +38,6 @@ r2dbc-postgresql = { module = "org.postgresql:r2dbc-postgresql", version.ref = "
 r2dbc-pool = { module = "io.r2dbc:r2dbc-pool", version.ref = "r2dbc-pool" }
 r2dbc-spi = { module = "io.r2dbc:r2dbc-spi", version.ref = "r2dbc-spi" }
 koog-agents = { module = "ai.koog:koog-agents", version.ref = "koog" }
-langgraph4j-core = { module = "org.bsc.langgraph4j:langgraph4j-core", version.ref = "langgraph4j" }
-langgraph4j-langchain4j = { module = "org.bsc.langgraph4j:langgraph4j-langchain4j", version.ref = "langgraph4j" }
 mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
 mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serial" }
@@ -73,10 +70,6 @@ arrow = [
 ]
 koog = [
     "koog-agents",
-]
-langgraph4j = [
-    "langgraph4j-core",
-    "langgraph4j-langchain4j",
 ]
 
 [plugins]

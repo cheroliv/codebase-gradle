@@ -1,20 +1,35 @@
-= PROMPT_REPRISE — Mission Session 052 (terminée)
+= PROMPT_REPRISE — Mission Session 053 (terminée)
 :date: 2026-05-21
 :max-lines: 70
 
-== Session 052 terminée — Nettoyage couverture Cucumber
+== Session 053 terminée — Cleanup langgraph4j résiduel + Reconnexion Vibecoding
 
-1. Runner EpicL3CucumberRunner restreint au seul fichier `epic_l_3_augmented_planning.feature` (fin des 57 SKIPPED dupliqués)
-2. EPIC 4 activé : `@wip` retiré, 4/4 PASS (BenchmarkProtocolSteps pur computationnel)
-3. `@epic_l_3` exclu du runner principal
-4. Bilan : **62 PASSED, 0 FAILED, 10 SKIPPED intentionnels**
+=== Phase 1 : Cleanup langgraph4j (7 baby steps TDD)
+1. `libs.versions.toml` — version/lib/bundle `langgraph4j` supprimés ✅
+2. `build.gradle.kts` — commentaire nettoyé ✅
+3. `BACKLOG.adoc` — EPICs 11/13 obsolètes supprimés ✅
+4. `INDEX.adoc` — EPIC 11/13 retirés, EPIC L mis à jour 8/8 ✅
+5. `KoogPlanningGraph.kt` — 4 commentaires nettoyés ✅
+6. Résultat : **zéro dépendance/zéro import/zéro déclaration langgraph4j** dans le projet actif ✅
 
-== Architecture actuelle
+=== Phase 2 : Reconnexion Vibecoding (TDD complet)
+1. `VibecodingGraph.kt` — nouveau graphe koog à 3 nœuds réels (buildContext→executeAction→checkProgress) avec boucle d'exécution, plus de stubs, plus d'orchestration manuelle ✅
+2. `VibecodingTask.kt` — tâche Gradle `vibecode` avec audit JSONL + dryRun ✅
+3. `CodebasePlugin.kt` — enregistrement tâche `vibecode` ✅
+4. `VibecodingGraphTest` (JUnit5) — 9 tests : structure, exécution, dryRun, maxActions, résilience ✅
+5. `VibecodingTaskTest` (JUnit5) — 7 tests : configuration, defaults, audit, ProjectBuilder ✅
+6. `epic_v_vibecoding.feature` (Cucumber BDD) — 7 scénarios : dryRun, intention, maxActions, résilience, mermaid ✅
+7. Tests : VibecodingGraphTest 9/9 + VibecodingTaskTest 7/7 + Cucumber 72/72 (10 skipped) + EpicL3 7/7 = **95 tests, 0 failure** ✅
 
-- codebase (N1) : ToolRegistry + koog DSL + MultiChannelContextGraph + CompositeContext + OpencodeInjector
-- Runners : CucumberTestRunner (tous sauf @wip/@integration/@epic_l_3) + EpicL3CucumberRunner (@epic_l_3 seul)
-- Build : `cucumberTest` ~2min, `cucumberTestEpicL3` ~50s
+=== Architecture actuelle
+- codebase (N1) : ToolRegistry + koog DSL + VibecodingGraph + VibecodingTask + CodebasePlugin
+- 12 patterns koog disponibles dans `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc`
+- Build propre : `test` + `cucumberTest` + `cucumberTestEpicL3` tout vert
 
-== Prochaine session (053)
+== Prochaine session (054)
 
-A définir — backlog disponible : EPIC 2 (3 @wip Ollama), EPIC 5 (fine-tuning), EPIC 6 (ONNX)
+Backlog disponible :
+- EPIC 5 (fine-tuning CDA/FPA — P0)
+- EPIC 6 (ONNX — P1)
+- EPIC 12 (Dilution Article Blog — P1)
+- Nouvel EPIC basé sur patterns koog (Self-Reflection, MapReduce, Memory Tiers, etc.)

@@ -1,0 +1,66 @@
+= Session 053 — Cleanup langgraph4j + Reconnexion Vibecoding
+:date: 2026-05-21
+:area: codebase-gradle/codebase-plugin
+:score: 10/10
+
+== Résumé
+
+Deux phases en TDD/BDD baby steps (95 tests, 0 failure).
+
+=== Phase 1 : Cleanup langgraph4j résiduel (7 baby steps)
+
+1. **libs.versions.toml** : version `1.8.16`, 2 libs (`langgraph4j-core`, `langgraph4j-langchain4j`), 1 bundle supprimés
+2. **build.gradle.kts** : commentaire langgraph4j nettoyé
+3. **BACKLOG.adoc** : EPICs 11 (chaines de pensées) et 13 (classifieur Vision/Opinion) supprimés
+4. **INDEX.adoc** : lignes EPIC 11/13 retirées, EPIC L mis à jour 8/8 pts
+5. **KoogPlanningGraph.kt** : 4 commentaires langgraph4j nettoyés
+6. Tests de régression : JUnit5 + Cucumber BUILD SUCCESSFUL
+7. Résultat : **zéro dépendance, zéro import, zéro déclaration langgraph4j** dans le projet actif
+
+=== Phase 2 : Reconnexion Vibecoding (TDD complet)
+
+L'ancien `VibecodingGraph.kt` avait des nœuds koog stubs (TODOs) et une orchestration manuelle. `VibecodingTask.kt` et les tests/features/runners avaient été supprimés en session 049 (cleanup post-migration).
+
+Nouveaux artefacts créés :
+
+1. **`VibecodingGraph.kt`** — graphe koog à 3 nœuds réels : `buildContext` (via KoogAugmentedContextGraph, résilient sans pgvector), `executeAction` (via ToolRegistry), `checkProgress` (boucle loop/finish). Plus de stubs, plus d'orchestration manuelle.
+2. **`VibecodingTask.kt`** — tâche Gradle `vibecode` avec propriétés `intention`, `dryRun`, `maxActions`, audit JSONL.
+3. **`CodebasePlugin.kt`** — enregistrement de la tâche `vibecode`.
+4. **`VibecodingGraphTest`** (JUnit5) — 9 tests : structure Mermaid, exécution, dryRun, maxActions, résilience.
+5. **`VibecodingTaskTest`** (JUnit5) — 7 tests : configuration, defaults, audit, ProjectBuilder.
+6. **`epic_v_vibecoding.feature`** (Cucumber) — 7 scénarios BDD : dryRun, intention, maxActions, résilience, mermaid.
+7. **`VibecodingWorld.kt`** + **`VibecodingSteps.kt`** — infrastructure PicoContainer.
+
+== Fichiers créés
+
+- `src/main/kotlin/codebase/koog/VibecodingGraph.kt`
+- `src/main/kotlin/codebase/koog/VibecodingTask.kt`
+- `src/test/kotlin/codebase/koog/VibecodingGraphTest.kt`
+- `src/test/kotlin/codebase/koog/VibecodingTaskTest.kt`
+- `src/test/features/epic_v_vibecoding.feature`
+- `src/test/kotlin/codebase/scenarios/VibecodingWorld.kt`
+- `src/test/kotlin/codebase/scenarios/VibecodingSteps.kt`
+
+== Fichiers modifiés
+
+- `gradle/libs.versions.toml` : suppression langgraph4j
+- `build.gradle.kts` : commentaire nettoyé
+- `BACKLOG.adoc` : EPIC 11/13 supprimés
+- `.agents/INDEX.adoc` : EPIC 11/13 retirés, header mis à jour
+- `src/main/kotlin/codebase/koog/KoogPlanningGraph.kt` : 4 commentaires nettoyés
+- `src/main/kotlin/codebase/CodebasePlugin.kt` : ajout tâche `vibecode`
+- `.agents/PROMPT_REPRISE.adoc` : mis à jour pour session 054
+
+== Résultats
+
+- `test` (JUnit5) : VibecodingGraphTest 9/9 + VibecodingTaskTest 7/7 = **16/16 PASS**
+- `cucumberTest` : **72/72 PASS** (10 skipped)
+- `cucumberTestEpicL3` : **7/7 PASS**
+- **Total : 95 tests, 0 failure**
+
+== Reliquats
+
+- EPIC 2 (3 scénarios @wip AnonymizationExpert) : toujours dépendant Ollama
+- EPIC 5 (fine-tuning CDA/FPA) : P0, non démarré
+- EPIC 6 (ONNX) : P1, non démarré
+- EPIC 12 (Dilution Article Blog) : P1, non démarré

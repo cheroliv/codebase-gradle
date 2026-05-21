@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-21 (Session 052 — Nettoyage couverture Cucumber)
-_Session terminee_ : 052 — Nettoyage couverture Cucumber : `EpicL3CucumberRunner` restreint au seul fichier `epic_l_3_augmented_planning.feature` (−57 SKIPPED dupliqués). EPIC 4 activé (`@wip` retiré, 4/4 PASS). `@epic_l_3` exclu du runner principal. Bilan : **62 PASSED, 0 FAILED, 10 SKIPPED intentionnels**. `cucumberTestEpicL3` = 7/7 PASS. Session 051 : Fix 3 echecs residuels pgvector (locale FR `Locale.US`, header `startsWith`, YAML inclus dans tokenize).
+_Derniere mise a jour_ : 2026-05-21 (Session 053 — Cleanup langgraph4j + Vibecoding reconnecté)
+_Session en cours_ : 053 — Nettoyage final langgraph4j (7 baby steps TDD) + Reconnexion Vibecoding : `VibecodingGraph.kt` (graphe koog réel, 3 nœuds, plus de stubs), `VibecodingTask.kt` (tâche Gradle vibecode), `CodebasePlugin` (wiring tâche vibecode). Tests : VibecodingGraphTest 9/9 ✅, VibecodingTaskTest 7/7 ✅, Cucumber epic_v 7/7 ✅ (total 95 tests, 0 failure).`
 
 '''
 == REGLES ABSOLUES (resume)
@@ -94,11 +94,9 @@ _Session terminee_ : 052 — Nettoyage couverture Cucumber : `EpicL3CucumberRunn
 | EPIC 7 | Wiring LangChain4j + pgvector experts | A FAIRE | P1
 | EPIC 8 | Exposer experts via Ollama (consommation plugins) | A FAIRE | P2
 | EPIC 10 | Instrumentation STIMULUS — cascade automatique | TERMINE (10/10 sous-taches, session 025) | P0
-| EPIC 11 | LangGraph4j — chaines de pensees | A FAIRE | P1
 | EPIC 12 | Dilution Article de Blog automatique | A FAIRE | P1
-| EPIC 13 | LangGraph4j Classifieur Vision/Opinion | A FAIRE | P1
 | EPIC K | Ontologie Workspace — Taxonomie unifiée (4 verbes, format pivot, convention over configuration) | ✅ TERMINE (2026-05-19). K-0→K-5 toutes les 6 phases terminées. | P0
-| EPIC L | Migration langgraph4j → koog+langchain4j — DSL Kotlin JetBrains/koog (`ai.koog:koog-agents:0.8.0`). Koog = orchestrateur uniquement, langchain4j = exécutant (LLM/RAG/pgvector) préservé. 4 sous-EPICs (L-0→L-4, 8 pts). | ✅ TERMINE (2026-05-20). L-0 ✅ dependances, L-1 ✅ KoogPlanningGraph, L-2 ✅ KoogAugmentedContextGraph wrapper pgvector, L-3 ✅ execute() + 7/7 Cucumber, L-4 ✅ Cleanup package langgraph + dependance langgraph4j. 8/8 pts.
+| EPIC L | Migration langgraph4j → koog — koog DSL (`ai.koog:koog-agents:0.8.0`) remplace langgraph4j comme orchestrateur. langchain4j préservé pour LLM/RAG/pgvector. 4 sous-EPICs (L-0→L-4, 8 pts). | ✅ TERMINE (2026-05-21). L-0→L-4 8/8 pts. Session 053 : dernier cleanup catalog/build/docs. Zéro dépendance ni référence langgraph4j dans le projet. | P0
 | EPIC V | *Vibecoding* — Remplacer opencode par VibecodingTask Gradle (agent koog autonome : LLM + filesystem + shell koog). 7 tools (5 built-in + ExecShellTool + ExecGradleTool). pipeline buildContext→classify→plan→executeTools. 5 sous-EPICs (V-0→V-4, 15 pts). | ✅ TERMINE (2026-05-19). V-0 ✅, V-1 ✅, V-2 ✅, V-3 ✅, V-4 ✅. 15/15 pts. | P0
 | EPIC G | Publication Maven Central + Gradle Portal — groupId education.cccp, namespace cccp-education. | ✅ AUDITE (2026-05-19). Credentials presents, namespace actif sur Maven Central + Portal. Zéro action supplementaire necessaire. publishToMavenLocal suffit pour conso N1→N2. | P0
 |===

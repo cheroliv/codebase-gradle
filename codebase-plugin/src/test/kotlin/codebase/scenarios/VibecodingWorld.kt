@@ -1,0 +1,31 @@
+package codebase.scenarios
+
+import codebase.koog.ToolRegistry
+import codebase.koog.VibecodingGraph
+import codebase.koog.VibecodingState
+
+/**
+ * World Object injecté par PicoContainer dans toutes les Steps Cucumber
+ * de type vibecoding.
+ *
+ * Pattern aligné sur AugmentedPlanningWorld :
+ * - Injection par constructeur dans les Steps
+ * - État mutable partagé entre les scénarios
+ * - PicoContainer crée une nouvelle instance par scénario → pas besoin de reset()
+ * - VibecodingGraph sans graphe augmenté (pas de pgvector/Ollama)
+ */
+class VibecodingWorld {
+
+    var intention: String = ""
+    var maxActions: Int = 10
+    var dryRun: Boolean = false
+    var resultState: VibecodingState? = null
+    var mermaidDiagram: String = ""
+
+    val graph: VibecodingGraph by lazy {
+        VibecodingGraph(
+            augmentedGraph = null,
+            toolRegistry = ToolRegistry()
+        )
+    }
+}

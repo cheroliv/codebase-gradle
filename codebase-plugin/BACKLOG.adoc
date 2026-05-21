@@ -128,10 +128,6 @@ Le `CompositeContextBuilder` (déjà fait via EPIC 9) agrège ces canaux.
 * [x] StdoutFormatter.error()
 * [x] 8/8 JUnit5 PASS
 
-== EPIC 11 : LangGraph4j — Chaines de Pensees Structurees (OBSOLETE)
-**Statut** : REMPLACE par EPIC L (Migration langgraph4j → koog+langchain4j)
-**Priorite** : N/A
-
 == EPIC 12 : Dilution Article de Blog — Narration Publique Automatique
 **Statut** : A FAIRE
 **Priorite** : P1
@@ -143,18 +139,14 @@ Le `CompositeContextBuilder` (déjà fait via EPIC 9) agrège ces canaux.
 * [ ] Tache Gradle `endSessionBlog`
 * [ ] Tests : 3 sessions synthetiques → 3 articles generes
 
-== EPIC 13 : LangGraph4j Classifieur Vision/Opinion (OBSOLETE)
-**Statut** : REMPLACE par EPIC L (Migration langgraph4j → koog+langchain4j)
-**Priorite** : N/A
-
 == EPIC K : Ontologie Workspace — Taxonomie unifiée
 **Statut** : ✅ TERMINE (2026-05-19, K-0→K-5 toutes les 6 phases)
 **Priorite** : P0
 
 == EPIC L : Migration langgraph4j → koog+langchain4j
-**Statut** : ✅ TERMINE (6/8 pts, session 040)
+**Statut** : ✅ TERMINE (8/8 pts, sessions 034-049)
 **Priorite** : P0
-_Remplace EPIC 11 + EPIC 13._
+_A remplacé les anciens EPIC 11 + EPIC 13._
 
 == EPIC V : Vibecoding — Agent Gradle Autonome
 **Statut** : ✅ TERMINE (15/15 pts — sessions 041-045)
