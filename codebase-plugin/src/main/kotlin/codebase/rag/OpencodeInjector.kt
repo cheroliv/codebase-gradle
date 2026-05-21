@@ -1,5 +1,8 @@
 package codebase.rag
 
+import cccp.vibecoding.contracts.context.ChannelBudget
+import cccp.vibecoding.contracts.context.CompositeContext
+import cccp.vibecoding.contracts.context.ContextChannel
 import org.slf4j.LoggerFactory
 import java.io.File
 
@@ -24,7 +27,7 @@ class OpencodeInjector {
         val sb = StringBuilder()
 
         for (channel in channels) {
-            sb.appendLine(channel.sectionHeader)
+            sb.appendLine("--- ${channel.source} ---")
             sb.appendLine(channel.content)
             sb.appendLine()
         }
@@ -33,7 +36,7 @@ class OpencodeInjector {
         log.info("OpencodeInjector: injected {} chars across {} channels (active={})",
             output.length,
             channels.size,
-            channels.count { it.isNotEmpty() })
+            channels.count { it.content.isNotEmpty() })
 
         return output
     }

@@ -1,5 +1,7 @@
 package codebase.koog
 
+import cccp.vibecoding.contracts.registry.ToolRegistry
+import cccp.vibecoding.contracts.state.VibecodingState
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
@@ -89,7 +91,7 @@ abstract class VibecodingTask : DefaultTask() {
         val result = graph.execute(state)
 
         // Écriture de l'audit de session
-        val errorValue = if (result.error != null) "\"${jsonlEscape(result.error)}\"" else "null"
+        val errorValue = result.error?.let { "\"${jsonlEscape(it)}\"" } ?: "null"
         val sessionEntry = buildString {
             append("{\"timestamp\":\"${Instant.now()}\"")
             append(",\"iteration\":${result.iteration}")

@@ -1,26 +1,11 @@
 package codebase.rag
 
+import cccp.vibecoding.contracts.context.CompositeContext
+import cccp.vibecoding.contracts.context.CompositeContextConfig
 import codebase.walker.WorkspaceWalker
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.Locale
-
-data class CompositeContext(
-    val eagerSection: String,
-    val ragSection: String,
-    val graphifySection: String,
-    val config: CompositeContextConfig
-) {
-    fun toChannels(): List<ContextChannel> = listOf(
-        ContextChannel.Eager(eagerSection),
-        ContextChannel.Rag(ragSection),
-        ContextChannel.Graphify(graphifySection),
-        ContextChannel.Resource("")
-    )
-
-    fun channelsWithBudget(budget: ChannelBudget): List<ContextChannel> =
-        budget.applyBudget(toChannels())
-}
 
 class CompositeContextBuilder(
     private val workspaceRoot: File,

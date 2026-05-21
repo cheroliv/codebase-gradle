@@ -1,8 +1,8 @@
 package codebase.rag
 
-import codebase.koog.AugmentedState
+import cccp.vibecoding.contracts.plan.Plan
+import cccp.vibecoding.contracts.state.AugmentedState
 import codebase.koog.KoogAugmentedContextGraph
-import codebase.koog.Plan
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
@@ -112,8 +112,9 @@ abstract class PlanIntentionTask : DefaultTask() {
             sb.appendLine()
             sb.appendLine("JSON brut reçu du LLM :")
             sb.appendLine(result.planJson)
-        } else if (result.plan != null) {
-            val plan = result.plan as Plan
+        } else {
+            val plan = result.plan
+            if (plan != null) {
             sb.appendLine("Titre    : ${plan.title}")
             sb.appendLine("EPICs    : ${plan.epics.size}")
             sb.appendLine("Points   : ${plan.totalPoints}")
@@ -132,10 +133,11 @@ abstract class PlanIntentionTask : DefaultTask() {
                     sb.appendLine()
                 }
             }
-        } else {
+            } else {
             sb.appendLine("Aucun plan généré (ni erreur, ni résultat).")
             if (result.planError != null) {
                 sb.appendLine("Cause : ${result.planError}")
+            }
             }
         }
         return sb.toString()

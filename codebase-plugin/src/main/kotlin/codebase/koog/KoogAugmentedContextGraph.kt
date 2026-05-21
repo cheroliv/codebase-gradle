@@ -1,14 +1,15 @@
 package codebase.koog
 
+import cccp.vibecoding.contracts.context.CompositeContext
+import cccp.vibecoding.contracts.context.CompositeContextConfig
+import cccp.vibecoding.contracts.state.AugmentedState
 import ai.koog.agents.core.agent.asMermaidDiagram
 import ai.koog.agents.core.agent.entity.AIAgentGraphStrategy
 import ai.koog.agents.core.agent.entity.ToolSelectionStrategy
 import ai.koog.agents.core.dsl.builder.forwardTo
 import ai.koog.agents.core.dsl.builder.node
 import ai.koog.agents.core.dsl.builder.strategy
-import codebase.rag.CompositeContext
 import codebase.rag.CompositeContextBuilder
-import codebase.rag.CompositeContextConfig
 import codebase.rag.EmbeddingPipeline
 import codebase.rag.PgVectorConfig
 import kotlinx.coroutines.runBlocking

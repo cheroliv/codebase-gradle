@@ -1,5 +1,6 @@
 package codebase.rag
 
+import cccp.vibecoding.contracts.context.CompositeContextConfig
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty

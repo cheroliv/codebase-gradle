@@ -15,6 +15,7 @@ version = libs.plugins.codebase.get().version
 kotlin.jvmToolchain(24)
 
 repositories {
+    mavenLocal()
     mavenCentral()
     gradlePluginPortal()
 }
@@ -27,6 +28,7 @@ dependencies {
     implementation(libs.bundles.r2dbc)
     implementation(libs.bundles.arrow)
     implementation(libs.bundles.koog) // koog orchestrateur — remplace langgraph4j (EPIC L)
+    implementation("education.cccp:vibecoding-contracts:0.1.0")
     implementation(libs.jackson.module.kotlin)
     implementation(libs.jackson.dataformat.yaml)
     implementation(libs.kotlinx.serialization.json)

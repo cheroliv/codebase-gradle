@@ -1,25 +1,24 @@
 package codebase.koog
 
+import cccp.vibecoding.contracts.context.ChannelBudget
+import cccp.vibecoding.contracts.context.CompositeContextConfig
+import cccp.vibecoding.contracts.context.ContextChannel
 import ai.koog.agents.core.agent.asMermaidDiagram
 import ai.koog.agents.core.agent.entity.AIAgentGraphStrategy
 import ai.koog.agents.core.agent.entity.ToolSelectionStrategy
 import ai.koog.agents.core.dsl.builder.forwardTo
 import ai.koog.agents.core.dsl.builder.node
 import ai.koog.agents.core.dsl.builder.strategy
-import codebase.rag.ChannelBudget
-import codebase.rag.ChannelType
 import codebase.rag.CompositeContextBuilder
-import codebase.rag.CompositeContextConfig
-import codebase.rag.ContextChannel
 import codebase.rag.EmbeddingPipeline
 import codebase.rag.OpencodeInjector
-import java.util.Locale
 import codebase.rag.PgVectorConfig
 import codebase.rag.VectorQueryService
 import codebase.rag.VectorStore
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.util.Locale
 
 data class MultiChannelState(
     val intention: String,
@@ -29,10 +28,10 @@ data class MultiChannelState(
     val assembledContext: String = "",
     val error: String? = null
 ) {
-    val eager: ContextChannel? get() = channels.find { it.type == ChannelType.EAGER }
-    val rag: ContextChannel? get() = channels.find { it.type == ChannelType.RAG }
-    val graphify: ContextChannel? get() = channels.find { it.type == ChannelType.GRAPHIFY }
-    val resource: ContextChannel? get() = channels.find { it.type == ChannelType.RESOURCE }
+    val eager: ContextChannel? get() = channels.find { it is ContextChannel.Eager }
+    val rag: ContextChannel? get() = channels.find { it is ContextChannel.Rag }
+    val graphify: ContextChannel? get() = channels.find { it is ContextChannel.Graphify }
+    val resource: ContextChannel? get() = channels.find { it is ContextChannel.Resource }
 }
 
 class MultiChannelContextGraph {
@@ -76,9 +75,9 @@ class MultiChannelContextGraph {
         state = safeStep(state) { assembleNode(it) }
 
         log.info("MultiChannelContextGraph: assembled {} channels -> {} chars (budget={} tokens)",
-            state.channels.count { it.isNotEmpty() },
+            state.channels.count { it.content.isNotEmpty() },
             state.assembledContext.length,
-            state.budget.totalTokenBudget)
+            ContextChannel.DEFAULT_TOKEN_BUDGET)
 
         return state
     }

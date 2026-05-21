@@ -1,12 +1,17 @@
 package codebase.koog
 
+import cccp.vibecoding.contracts.context.CompositeContext
+import cccp.vibecoding.contracts.plan.Plan
+import cccp.vibecoding.contracts.plan.PlanState
+import cccp.vibecoding.contracts.plan.Epic
+import cccp.vibecoding.contracts.plan.UserStory
+import cccp.vibecoding.contracts.plan.Task
 import ai.koog.agents.core.agent.asMermaidDiagram
 import ai.koog.agents.core.agent.entity.AIAgentGraphStrategy
 import ai.koog.agents.core.agent.entity.ToolSelectionStrategy
 import ai.koog.agents.core.dsl.builder.forwardTo
 import ai.koog.agents.core.dsl.builder.node
 import ai.koog.agents.core.dsl.builder.strategy
-import codebase.rag.CompositeContext
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -16,42 +21,7 @@ import dev.langchain4j.model.ollama.OllamaChatModel
 import kotlinx.coroutines.runBlocking
 import java.time.Duration
 
-// === Données du plan ===
-
-data class Plan(
-    val title: String,
-    val epics: List<Epic>,
-    val totalPoints: Int,
-    val estimatedSessions: String
-)
-
-data class Epic(
-    val name: String,
-    val description: String,
-    val points: Int,
-    val userStories: List<UserStory>
-)
-
-data class UserStory(
-    val description: String,
-    val tasks: List<Task>
-)
-
-data class Task(
-    val description: String,
-    val gradleTask: String
-)
-
-// === État du graphe ===
-
-data class PlanState(
-    val intention: String = "",
-    val compositeContext: CompositeContext? = null,
-    val classification: String = "",
-    val planJson: String = "",
-    val plan: Plan? = null,
-    val error: String? = null
-)
+// === Données du plan (importées de cccp.vibecoding.contracts.plan) ===
 
 // === Orchestrateur koog + langchain4j ===
 
