@@ -52,11 +52,17 @@ class OpencodeInjectorSteps {
             assertTrue(headerIndex >= 0, "Header '$header' not found in injected output")
 
             var foundContent = false
-            for (i in (headerIndex + 1) until lines.size) {
-                if (headers.any { h -> lines[i].trim().contains(h) }) break
-                if (lines[i].isNotBlank()) {
-                    foundContent = true
-                    break
+            val headerLine = lines[headerIndex]
+            val afterHeaderOnSameLine = headerLine.substringAfter(header).trim()
+            if (afterHeaderOnSameLine.isNotBlank()) {
+                foundContent = true
+            } else {
+                for (i in (headerIndex + 1) until lines.size) {
+                    if (headers.any { h -> lines[i].trim().contains(h) }) break
+                    if (lines[i].isNotBlank()) {
+                        foundContent = true
+                        break
+                    }
                 }
             }
             assertTrue(foundContent, "No non-empty content after header '$header'")

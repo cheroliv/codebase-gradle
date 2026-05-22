@@ -2,6 +2,7 @@
 
 |===
 | Session | EPIC | Livrable
+| 055 | Bugfix | Fix 4 Cucumber résiduels (OpencodeInjector content-on-header-line + prepare_context strings trop spécifiques) + Audit EPIC L (zéro langgraph4j confirmé) + Cross-borough vibecode couvert par Cucumber epic_v. 209/209 PASS (126 JUnit5+76 Cucumber+7 EpicL3), 0 failure.
 | 051 | Debug pgvector | Fix 3 echecs residuels : locale `Locale.US` + regex `-?` pour sim, `startsWith(header)` pour header `[RÈGLES_EAGER]`, YAML/JSON inclus dans tokenize. 7 fichiers modifies. `cucumberTest` → BUILD SUCCESSFUL (0 failure).
 | 049 | Cleanup + L-4 | Nettoyage post-migration (12 tests Vibecoding* + 4 features EPIC V + 5 runners + 5 taches Gradle dead retires). Package codebase.langgraph (6 fichiers) supprime. Dependance langgraph4j retiree du build. 7/7 Cucumber @epic_l_3 PASS. EPIC L = 8/8 TERMINE.
 | 048 | Bugfix | Fix compilation planner — Smart cast line 72 (?.let). Fix DecomposeIntentionPluginTest. 9 tests vibecode ProjectBuilder PASS.

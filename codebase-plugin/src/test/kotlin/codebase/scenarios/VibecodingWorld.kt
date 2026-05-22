@@ -1,8 +1,8 @@
 package codebase.scenarios
 
-import codebase.koog.ToolRegistry
+import cccp.vibecoding.contracts.registry.ToolRegistry
+import cccp.vibecoding.contracts.state.VibecodingState
 import codebase.koog.VibecodingGraph
-import codebase.koog.VibecodingState
 
 /**
  * World Object injecté par PicoContainer dans toutes les Steps Cucumber

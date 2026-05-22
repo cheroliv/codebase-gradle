@@ -1,0 +1,85 @@
+= Session 055 — Fix 4 Cucumber résiduels + Audit EPIC L + Cross-borough
+:date: 2026-05-22
+:type: bugfix+audit
+:score: 10/10
+
+== Contexte
+
+Départ : 205/209 PASS, 4 Cucumber en échec depuis le câblage cross-borough
+codex→codebase→planner (session 051). PROMPT_REPRISE listait encore EPIC L
+alors que INDEX.adoc le déclarait TERMINE depuis la session 049.
+
+== Mission
+
+. Fix des 4 tests Cucumber résiduels (0 failure)
+. Vérifier statut EPIC L (contradiction INDEX/PROMPT_REPRISE)
+. Tests cross-borough vibecode
+
+== Actions
+
+=== 1. Fix Cucumber 9_11 — OpencodeInjectorSteps "No non-empty content after [RELATIONS_GRAPHIFY]"
+
+*Cause* : `OpencodeInjectorSteps.kt:55` — la boucle skip le contenu sur la
+même ligne que l'en-tête. Quand Graphify n'a qu'une ligne de contenu, la
+ligne suivante est l'en-tête Docs → break immédiat.
+
+*Fix* : Vérifier d'abord le contenu sur la même ligne après l'en-tête
+(`substringAfter(header).trim()`), puis seulement descendre dans les
+lignes suivantes.
+
+=== 2. Fix Cucumber prepare_context (3 scénarios) — strings trop spécifiques
+
+*Cause* : Les tests vérifiaient `"[RÈGLES_EAGER] Contexte de gouvernance"`
+et `"[CONTEXTE_RAG] Résultats sémantiques"` — strings qui ne sont jamais
+dans le contenu réel (l'en-tête `[CONTEXTE_RAG]` est suivi des chunks RAG,
+pas d'une sous-description).
+
+*Fix* : Aligner les assertions feature avec ce que `OpencodeInjector` produit
+réellement : `"[RÈGLES_EAGER]"` et `"[CONTEXTE_RAG]"` sans suffixe descriptif.
+
+Fichiers modifiés :
+- `src/test/kotlin/codebase/scenarios/OpencodeInjectorSteps.kt` (+9 lignes)
+- `src/test/features/prepare_context.feature` (3 lignes modifiées)
+
+=== 3. Audit EPIC L
+
+`grep -r "langgraph4j\|langgraph" src/main/` → zéro résultat.
+INDEX.adoc Session 049 confirme : "package langgraph supprime + dependance
+langgraph4j retiree. EPIC L = 8/8 TERMINE." PROMPT_REPRISE était périmé.
+
+=== 4. Tests cross-borough
+
+`./gradlew test cucumberTestEpicL3` → BUILD SUCCESSFUL.
+209 tests (126 JUnit5 + 76 Cucumber + 7 EpicL3), 0 failure, 10 skipped
+intentionnels (3 EPIC 2 @wip + 7 @epic_l_3).
+
+La tâche `vibecode` est disponible uniquement quand codebase-plugin est
+appliqué à un projet extérieur (pas d'auto-application). Les Cucumber
+`epic_v_vibecoding` (11 scénarios) couvrent déjà le vibecoding.
+
+== Résultat
+
+76/76 Cucumber PASS (CucumberTestRunner)
+7/7 EpicL3 PASS
+126/126 JUnit5 PASS
+209/209 tests PASS, 0 failure
+
+== Fichiers modifiés
+
+- `src/test/kotlin/codebase/scenarios/OpencodeInjectorSteps.kt`
+- `src/test/features/prepare_context.feature`
+- `PROMPT_REPRISE.adoc`
+- `.agents/INDEX.adoc`
+- `.agents/SESSIONS_HISTORY.adoc`
+- `.agents/TEST_COVERAGE_ANALYSIS.adoc`
+- `.agents/archives/COMPLETED_TASKS_ARCHIVE_MAI_2026.adoc`
+- `.agents/sessions/055-fix-4-cucumber.adoc` (ce fichier)
+
+== Leçons
+
+- Les tests prepare_context introduits en session 051 n'avaient probablement
+  jamais été validés avec le contenu réel du buildScoped/OpencodeInjector.
+- Toujours vérifier le contenu ligne-même de l'en-tête dans une boucle
+  de parsing de sections formatées.
+- La contradiction PROMPT_REPRISE/INDEX.adoc sur EPIC L montre qu'il faut
+  systématiquement re-vérifier l'INDEX avant de travailler.

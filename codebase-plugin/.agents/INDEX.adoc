@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-22 (Session 051 — Cablage cross-borough codex→codebase→planner)
-_Session en cours_ : 055 — À définir. Backlog : EPIC L, cross-borough tests.
+_Derniere mise a jour_ : 2026-05-22 (Session 055 — Fix 4 Cucumber + Audit EPIC L + Cross-borough. 209/209 PASS.)
+_Session en cours_ : 056 — À définir. Backlog : EPIC 5, EPIC 6, EPIC 12.
 
 '''
 == REGLES ABSOLUES (resume)
@@ -35,7 +35,7 @@ _Session en cours_ : 055 — À définir. Backlog : EPIC L, cross-borough tests.
 
 |===
 | # | Date | Type | Sujet | Score
-| 055 | — | — | À définir | —
+| 055 | 2026-05-22 | bugfix+audit | Fix 4 Cucumber résiduels (OpencodeInjector content-on-header + prepare_context strings) + Audit EPIC L (zéro langgraph4j) + Cross-borough vibecode. 209/209 PASS. | 10/10
 | 054 | 2026-05-21 | feat+integration | EPIC V-3 Securite (max file 10MB, timeout, audit workspaceRoot) + V-4 Integration golden path (dryRun multi-taches). 9 cycles TDD. 10/10 Cucumber vibecoding PASS. Zero regression. | 9/10
 | 053 | 2026-05-21 | cleanup+feat | Cleanup langgraph4j residuel + Reconnexion Vibecoding | 10/10
 | 052 | 2026-05-21 | cleanup | Nettoyage couverture Cucumber : runner dedupe (−57 SKIPPED), EPIC 4 active (4/4 PASS), 62 PASSED/0 FAILED/10 SKIPPED intentionnels. | 10/10

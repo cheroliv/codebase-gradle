@@ -1,5 +1,11 @@
 package codebase.koog
 
+import cccp.vibecoding.contracts.plan.Epic
+import cccp.vibecoding.contracts.plan.Plan
+import cccp.vibecoding.contracts.plan.Task as PlanTask
+import cccp.vibecoding.contracts.plan.UserStory
+import cccp.vibecoding.contracts.registry.ToolRegistry
+import cccp.vibecoding.contracts.state.VibecodingState
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -145,7 +151,7 @@ class VibecodingGraphTest {
             epics = listOf(
                 Epic(name = "E1", description = "test", points = 1, userStories = listOf(
                     UserStory(description = "US1", tasks = listOf(
-                        Task(description = "task1", gradleTask = "tasks")
+                        PlanTask(description = "task1", gradleTask = "tasks")
                     ))
                 ))
             ),

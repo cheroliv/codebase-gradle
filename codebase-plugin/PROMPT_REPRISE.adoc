@@ -1,23 +1,24 @@
-= PROMPT_REPRISE — Session 055 (à venir)
-:session: 055
-:date: 2026-05-22
+= PROMPT_REPRISE — Session 056 (à venir)
+:session: 056
+:date: 2026-05-23
 :status: PRET
 :max-lines: 70
 
 == Mission
 
-Prochaine session disponible
+Prochaine session disponible.
 
-== Contexte fin de session 051
+== Contexte fin de session 055
 
-- Cablage cross-borough codex→codebase→planner terminé
-- codex (doc-pipeline) injecté comme dépendance N1 dans codebase
-- Canal DOCS (5e canal, 10% budget) ajouté : ChannelType.DOCS, ContextChannel.Docs, docsSection
-- KoogPlanningGraph remplacé par IntentionPlanner.plan() (planner)
-- 205/209 tests PASS (4 Cucumber préexistants)
+- 4 tests Cucumber résiduels fixés (OpencodeInjector content-on-header-line
+  + prepare_context strings trop spécifiques)
+- EPIC L vérifié TERMINE (zéro référence langgraph4j dans le projet)
+- Tests cross-borough : vibecode couvert par Cucumber epic_v (11 scénarios)
+- 209/209 PASS (126 JUnit5 + 76 Cucumber + 7 EpicL3), 0 failure
 
 == Prochaines priorités
 
-- EPIC L : Migration langgraph4j → koog+langchain4j
-- Fix des 4 tests Cucumber résiduels (infrastructure)
-- Tests cross-borough : `./gradlew vibecode --intention="..."` avec pgvector
+- EPIC 5 : Pipeline fine-tuning experts CDA/FPA
+- EPIC 6 : Intégration ONNX boucle qualité
+- EPIC 12 : Dilution Article de Blog automatique
+- Backlog : voir INDEX.adoc pour la roadmap complète

@@ -1,6 +1,10 @@
 package codebase.scenarios
 
-import codebase.koog.VibecodingState
+import cccp.vibecoding.contracts.plan.Epic
+import cccp.vibecoding.contracts.plan.Plan
+import cccp.vibecoding.contracts.plan.Task as PlanTask
+import cccp.vibecoding.contracts.plan.UserStory
+import cccp.vibecoding.contracts.state.VibecodingState
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
@@ -191,20 +195,20 @@ class VibecodingSteps(private val world: VibecodingWorld) {
     @When("I execute vibecoding with a {int}-task plan and maxActions {int} in dryRun")
     fun `execute vibecoding with multi task plan`(taskCount: Int, maxActions: Int) {
         val tasks = (1..taskCount).map { i ->
-            codebase.koog.Task(
+            PlanTask(
                 description = "Task $i: verify build",
                 gradleTask = "tasks"
             )
         }
-        val fakePlan = codebase.koog.Plan(
+        val fakePlan = Plan(
             title = "test-plan",
             epics = listOf(
-                codebase.koog.Epic(
+                Epic(
                     name = "EPIC-1",
                     description = "Test epic",
                     points = taskCount,
                     userStories = listOf(
-                        codebase.koog.UserStory(
+                        UserStory(
                             description = "US-1",
                             tasks = tasks
                         )

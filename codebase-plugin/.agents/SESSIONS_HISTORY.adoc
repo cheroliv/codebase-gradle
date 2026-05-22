@@ -2,7 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
-| 055 | 2026-05-22 | cross-borough | Cablage codex→codebase→planner. 3 étapes : (1) codex dependency dans codebase, (2) canal DOCS 10% budget, (3) remplacement KoogPlanningGraph par IntentionPlanner (planner). 205/209 PASS. | 9/10
+| 055 | 2026-05-22 | bugfix+audit | Fix 4 Cucumber résiduels (OpencodeInjector content-on-header-line + prepare_context strings trop spécifiques) + Audit EPIC L (zéro langgraph4j confirmé) + Cross-borough vibecode couvert par Cucumber epic_v. 209/209 PASS (126 JUnit5 + 76 Cucumber + 7 EpicL3). | 10/10
 | 054 | 2026-05-21 | feat+integration | EPIC V-3 Securite + V-4 Integration. 9 cycles TDD. 10/10 Cucumber vibecoding PASS. | 9/10
 | 053 | 2026-05-21 | cleanup+feat | Cleanup langgraph4j résiduel (7 baby steps TDD : libs.versions.toml, build.gradle.kts, BACKLOG, INDEX, KoogPlanningGraph comments, tests) + Reconnexion Vibecoding (VibecodingGraph koog réel 3 nœuds, VibecodingTask, CodebasePlugin wiring, VibecodingGraphTest 9/9, VibecodingTaskTest 7/7, epic_v_vibecoding.feature 7 scénarios BDD). **95 tests, 0 failure**. | 10/10
 | 052 | 2026-05-21 | cleanup | Nettoyage couverture Cucumber : runner EpicL3CucumberRunner restreint au seul fichier `epic_l_3_augmented_planning.feature` (−57 SKIPPED dupliqués). EPIC 4 activé (`@wip` retiré, BenchmarkProtocolSteps pur computationnel, 4/4 PASS). `@epic_l_3` exclu du runner principal. Bilan : **62 PASSED, 0 FAILED, 10 SKIPPED intentionnels** (3 EPIC 2 @wip + 7 @epic_l_3 délégués). `cucumberTestEpicL3` = 7/7 PASS. 3 fichiers modifiés. | 10/10
