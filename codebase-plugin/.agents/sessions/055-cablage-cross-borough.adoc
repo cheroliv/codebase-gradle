@@ -1,0 +1,58 @@
+= Session 055 — Cablage cross-borough codex→codebase→planner
+:session: 055
+:date: 2026-05-22
+:boroughs: Queens (codebase), Brooklyn (codex), Manhattan (planner)
+:status: TERMINEE
+:type: EPIC M (cross-borough integration)
+
+== Objectif
+
+Cabler codex (Brooklyn) dans codebase (Queens), puis codebase dans planner (Manhattan)
+pour fermer la boucle agentique : codex retrieval → composite context → planner LLM → plan exécuté.
+
+== Changements effectues
+
+=== Step 1 — Inject codex-plugin comme dependance N1
+
+- Ajout `implementation(libs.doc.pipeline)` dans `codebase-plugin/build.gradle.kts`
+- Ajout `education.cccp:doc-pipeline:0.1.0-SNAPSHOT` dans le version catalog
+- `CodexVectorStore` accessible dans `CompositeContextBuilder` via constructeur optionnel
+
+=== Step 2 — Canal DOCS (5eme canal, 10% budget)
+
+- Ajout `ChannelType.DOCS` dans l'enum
+- Ajout `ContextChannel.Docs` sealed variant (budget 0.10, header `CONTEXTE_DOCS`)
+- Ajout `docsSection` dans `CompositeContextConfig` (budgetDocs=0.10, budgetOverhead=0.0)
+- Ajout `docsSection` dans `CompositeContext` data class
+- Ajout `budgetDocs` dans `ChannelBudget` (budgetDocs=0.10, budgetResource=0.0)
+- `CompositeContextBuilder` : nouvelle methode `loadDocsContext()` qui appelle `CodexVectorStore.searchBlocking()`
+- `MultiChannelContextGraph` : nouveau noeud `collectDocsNode()` + `docs` accessor dans `MultiChannelState`
+
+=== Step 3 — Remplacer KoogPlanningGraph par IntentionPlanner
+
+- `planner-plugin/IntentionPlanner.kt` : ajout overload `plan()` acceptant `eagerContext/ragContext/graphifyContext/docsContext` + overload SLF4J (sans Gradle Logger)
+- `codebase/rag/PlannerIntegration.kt` : supprime `KoogPlanningGraph`, appelle `IntentionPlanner.plan()` directement
+- `codebase/koog/KoogPlanningGraph.kt` : marque comme supprime (commentaire), logique transferee dans planner
+- `codebase/koog/KoogAugmentedContextGraph.kt` : `planNode()` appelle `PlannerIntegration.plan()` au lieu de `planningGraph.execute()`
+
+== Tests
+
+- 209 tests, 205 PASS, 4 preexistants (Cucumber infrastructure)
+- Tous les tests unitaires VibecodingContracts, ChannelBudget, ContextChannel, MultiChannelContextGraph PASS
+- Cross-borough compile verification : doc-pipeline + planner-plugin dans le classpath de codebase-plugin
+
+== Dependences resolves
+
+[cols="2,3"]
+|===
+| Borough | GAV
+| codex (Brooklyn)
+| `education.cccp:doc-pipeline:0.1.0-SNAPSHOT`
+| planner (Manhattan)
+| `education.cccp:planner-plugin:0.0.1`
+|===
+
+== Prochaine session
+
+- EPIC L : Migration langgraph4j → koog+langchain4j
+- US-9.11 Cucumber step defs a mettre a jour pour nouveau format injecteur

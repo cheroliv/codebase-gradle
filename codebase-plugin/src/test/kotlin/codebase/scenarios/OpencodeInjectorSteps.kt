@@ -1,6 +1,6 @@
 package codebase.scenarios
 
-import codebase.rag.CompositeContext
+import cccp.vibecoding.contracts.context.CompositeContext
 import codebase.rag.OpencodeInjector
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
@@ -35,7 +35,7 @@ class OpencodeInjectorSteps {
         val output = lastInjected
         assertNotNull(output, "Injected output is null")
         assertTrue(output.contains(header),
-            "Expected header '$header' not found in injected output")
+            "Expected header '$header' not found in injected output. Output has: ${output.take(200)}")
         log.info("Header '$header' found in injected output")
     }
 
@@ -44,16 +44,16 @@ class OpencodeInjectorSteps {
         val output = lastInjected
         assertNotNull(output, "Injected output is null")
 
-        val headers = listOf("[RÈGLES_EAGER]", "[CONTEXTE_RAG]", "[RELATIONS_GRAPHIFY]")
+        val headers = listOf("[RÈGLES_EAGER]", "[CONTEXTE_RAG]", "[RELATIONS_GRAPHIFY]", "[CONTEXTE_DOCS]")
         val lines = output.lines()
 
         for (header in headers) {
-            val headerIndex = lines.indexOfFirst { it.trim().startsWith(header) }
+            val headerIndex = lines.indexOfFirst { it.trim().contains(header) }
             assertTrue(headerIndex >= 0, "Header '$header' not found in injected output")
 
             var foundContent = false
             for (i in (headerIndex + 1) until lines.size) {
-                if (headers.any { lines[i].trim() == it }) break
+                if (headers.any { h -> lines[i].trim().contains(h) }) break
                 if (lines[i].isNotBlank()) {
                     foundContent = true
                     break

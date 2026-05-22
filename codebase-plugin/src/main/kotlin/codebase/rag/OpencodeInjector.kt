@@ -27,8 +27,8 @@ class OpencodeInjector {
         val sb = StringBuilder()
 
         for (channel in channels) {
-            sb.appendLine("--- ${channel.source} ---")
-            sb.appendLine(channel.content)
+            val label = if (channel.sectionHeader.isNotBlank()) "[${channel.sectionHeader}]" else channel.source
+            sb.appendLine("[$label] ${channel.content.trimStart()}")
             sb.appendLine()
         }
 

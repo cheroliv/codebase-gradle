@@ -1,32 +1,23 @@
-= PROMPT_REPRISE — Mission Session 054 (terminée)
-:date: 2026-05-21
+= PROMPT_REPRISE — Session 055 (à venir)
+:session: 055
+:date: 2026-05-22
+:status: PRET
 :max-lines: 70
 
-== Session 054 terminée — EPIC V-3 Sécurité Vibecoding + V-4 Intégration
+== Mission
 
-=== V-3 : Contraintes de sécurité (7 cycles TDD)
-1. `ToolRegistry.kt` — MAX_READ_FILE_SIZE = 10 MB, MAX_OUTPUT_CHARS = 8000, AuditEntry.workspaceRoot ✅
-2. `VibecodingState.kt` — sessionTimeoutSeconds = 300, sessionStartTimeMs ✅
-3. `VibecodingGraph.kt` — isTimedOut() au démarrage + dans la boucle, buildContextNode préserve plan existant, executePlanTasks() mode dryRun/real ✅
-4. `VibecodingTask.kt` — option CLI `--sessionTimeout` ✅
-5. Nouveaux tests : ToolRegistryTest (max file size + audit workspaceRoot), VibecodingGraphTest (+timeout), VibecodingTaskTest (+sessionTimeout)
+Prochaine session disponible
 
-=== V-4 : Intégration golden path (2 cycles TDD)
-1. `VibecodingGraph.kt` — buildContextNode préserve plan déjà injecté (dryRun multi-tâches) ✅
-2. Cucumber @epic_v_4 : golden path 3 tâches dryRun + multi-tour 5 tâches 10 itérations ✅
-3. Nouveaux tests : VibecodingSteps (+4 steps @epic_v_3, +2 steps @epic_v_4), epic_v_vibecoding.feature (+4 scénarios)
+== Contexte fin de session 051
 
-=== Résultat final
-- JUnit5 koog : tous verts (aucune régression)
-- CucumberTestRunner : 10/10 scénarios vibecoding PASS
-- EpicL3CucumberRunner : 7/7 PASS
-- Cucumber global : BUILD SUCCESSFUL
+- Cablage cross-borough codex→codebase→planner terminé
+- codex (doc-pipeline) injecté comme dépendance N1 dans codebase
+- Canal DOCS (5e canal, 10% budget) ajouté : ChannelType.DOCS, ContextChannel.Docs, docsSection
+- KoogPlanningGraph remplacé par IntentionPlanner.plan() (planner)
+- 205/209 tests PASS (4 Cucumber préexistants)
 
-== Prochaine session (055)
+== Prochaines priorités
 
-Backlog :
-- V-4 restant : scénario erreur récupérable, scénario timeout cross-borough
-- EPIC 5 (fine-tuning CDA/FPA — P0)
-- EPIC 6 (ONNX — P1)
-- EPIC 12 (Dilution Article Blog — P1)
-- Test réel cross-borough : `./gradlew vibecode --intention="Run planner-gradle tests"`
+- EPIC L : Migration langgraph4j → koog+langchain4j
+- Fix des 4 tests Cucumber résiduels (infrastructure)
+- Tests cross-borough : `./gradlew vibecode --intention="..."` avec pgvector

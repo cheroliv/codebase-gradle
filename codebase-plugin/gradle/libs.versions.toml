@@ -1,5 +1,7 @@
 [versions]
 codebase = "0.0.1"
+doc-pipeline = "0.1.0-SNAPSHOT"
+planner = "0.0.1"
 kotlin = "2.3.20"
 kotlinx-serial = "1.7.3"
 jackson = "2.21.2"
@@ -19,7 +21,9 @@ arrow = "2.2.2"
 plugin-publish = "2.1.0"
 
 [libraries]
+doc-pipeline = { module = "education.cccp:doc-pipeline", version.ref = "doc-pipeline" }
 jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
+planner-plugin = { module = "education.cccp:planner-plugin", version.ref = "planner" }
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 langchain4j = { module = "dev.langchain4j:langchain4j", version.ref = "langchain4j" }
 langchain4j-pgvector = { module = "dev.langchain4j:langchain4j-pgvector", version.ref = "langchain4j-beta" }

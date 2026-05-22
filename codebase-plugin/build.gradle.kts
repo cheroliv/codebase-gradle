@@ -26,9 +26,15 @@ dependencies {
     implementation(gradleKotlinDsl())
     implementation(libs.bundles.langchain4j.rag)
     implementation(libs.bundles.r2dbc)
+    implementation(libs.doc.pipeline)
+    implementation(libs.planner.plugin)
     implementation(libs.bundles.arrow)
-    implementation(libs.bundles.koog) // koog orchestrateur — remplace langgraph4j (EPIC L)
-    implementation("education.cccp:vibecoding-contracts:0.1.0")
+    implementation(libs.koog.agents) {
+        // Exclusion nécessaire : koog 26.0.2-1 conflict with Kotlin embedded 13.0
+        // quand codebase-plugin est appliqué comme plugin par codex-gradle
+        exclude(group = "org.jetbrains", module = "annotations")
+    }
+    // vibecoding-contracts now lives in codebase source tree: cccp.vibecoding.contracts
     implementation(libs.jackson.module.kotlin)
     implementation(libs.jackson.dataformat.yaml)
     implementation(libs.kotlinx.serialization.json)

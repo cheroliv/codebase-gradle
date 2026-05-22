@@ -3,6 +3,7 @@ package codebase.rag
 import cccp.vibecoding.contracts.context.CompositeContext
 import cccp.vibecoding.contracts.context.CompositeContextConfig
 import codebase.walker.WorkspaceWalker
+import codex.store.CodexVectorStore
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.Locale
@@ -11,7 +12,8 @@ class CompositeContextBuilder(
     private val workspaceRoot: File,
     private val vectorStore: VectorStore,
     private val embeddingPipeline: EmbeddingPipeline,
-    private val config: CompositeContextConfig = CompositeContextConfig()
+    private val config: CompositeContextConfig = CompositeContextConfig(),
+    private val codexStore: CodexVectorStore? = null
 ) {
     private val log = LoggerFactory.getLogger(CompositeContextBuilder::class.java)
     private val queryService = VectorQueryService(vectorStore, embeddingPipeline)
@@ -43,12 +45,32 @@ class CompositeContextBuilder(
         val graphifyContent = loadGraphifyStats()
         val truncatedGraphify = truncateTokens(graphifyContent, config.graphifyTokens)
 
+        val truncatedDocs = loadDocsContext(ragQuestion)
+
         return CompositeContext(
             eagerSection = truncatedEager,
             ragSection = truncatedRag,
             graphifySection = truncatedGraphify,
+            docsSection = truncatedDocs,
             config = config
         )
+    }
+
+    private fun loadDocsContext(query: String): String {
+        if (codexStore == null) return "[Doc] CodexVectorStore non configure — corpus documentaire indisponible"
+        return try {
+            val results = codexStore.searchBlocking(query, topK = 5)
+            if (results.isEmpty()) return "[Doc] Aucun resultat dans le corpus codex"
+            results.joinToString("\n\n") { r ->
+                buildString {
+                    appendLine("[Doc] source=${r.sourceDocument} section=${r.sectionPath} sim=${"%.3f".format(Locale.US, r.similarity)}")
+                    appendLine(r.chunkText.take(500))
+                }
+            }
+        } catch (e: Exception) {
+            log.warn("Codex store query failed: {}", e.message)
+            "[Doc] CodexVectorStore indisponible — ${e.message}"
+        }
     }
 
     private fun collectEagerForBorough(boroughName: String): String {

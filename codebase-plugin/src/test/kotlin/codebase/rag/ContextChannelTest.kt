@@ -1,5 +1,7 @@
 package codebase.rag
 
+import cccp.vibecoding.contracts.context.ChannelType
+import cccp.vibecoding.contracts.context.ContextChannel
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -10,11 +12,12 @@ class ContextChannelTest {
     @Test
     fun `sealed class has all four channel types`() {
         val all = ContextChannel.all()
-        assertEquals(4, all.size)
+        assertEquals(5, all.size)
         assertEquals(ChannelType.EAGER, all[0].type)
         assertEquals(ChannelType.RAG, all[1].type)
         assertEquals(ChannelType.GRAPHIFY, all[2].type)
         assertEquals(ChannelType.RESOURCE, all[3].type)
+        assertEquals(ChannelType.DOCS, all[4].type)
     }
 
     @Test
@@ -34,6 +37,10 @@ class ContextChannelTest {
         val resource = ContextChannel.Resource()
         assertEquals(0.10, resource.budgetProportion)
         assertEquals("Ressources", resource.name)
+
+        val docs = ContextChannel.Docs()
+        assertEquals(0.10, docs.budgetProportion)
+        assertEquals("Codex/Docs", docs.name)
     }
 
     @Test
@@ -49,6 +56,9 @@ class ContextChannelTest {
 
         val resource = ContextChannel.Resource("content")
         assertTrue(resource.sectionHeader.contains("RESSOURCES_COLD"))
+
+        val docs = ContextChannel.Docs("content")
+        assertTrue(docs.sectionHeader.contains("CONTEXTE_DOCS"))
     }
 
     @Test
@@ -104,5 +114,9 @@ class ContextChannelTest {
         val resource = ContextChannel.Resource()
         assertTrue(resource.description.contains("Mémoire"))
         assertTrue(resource.description.contains("froide"))
+
+        val docs = ContextChannel.Docs()
+        assertTrue(docs.description.contains("Corpus"))
+        assertTrue(docs.description.contains("documentaire"))
     }
 }

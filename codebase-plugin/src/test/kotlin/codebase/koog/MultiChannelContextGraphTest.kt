@@ -1,8 +1,8 @@
 package codebase.koog
 
-import codebase.rag.ChannelBudget
-import codebase.rag.ChannelType
-import codebase.rag.ContextChannel
+import cccp.vibecoding.contracts.context.ChannelBudget
+import cccp.vibecoding.contracts.context.ChannelType
+import cccp.vibecoding.contracts.context.ContextChannel
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -46,11 +46,12 @@ class MultiChannelContextGraphTest {
         )
         val result = graph.execute(state)
 
-        assertEquals(4, result.channels.size, "Should have 4 channels")
+        assertEquals(5, result.channels.size, "Should have 5 channels")
         assertEquals(ChannelType.EAGER, result.channels[0].type)
         assertEquals(ChannelType.RAG, result.channels[1].type)
         assertEquals(ChannelType.GRAPHIFY, result.channels[2].type)
-        assertEquals(ChannelType.RESOURCE, result.channels[3].type)
+        assertEquals(ChannelType.DOCS, result.channels[3].type)
+        assertEquals(ChannelType.RESOURCE, result.channels[4].type)
     }
 
     @Test
@@ -80,7 +81,7 @@ class MultiChannelContextGraphTest {
         val result = graph.execute(state)
 
         val totalContentLength = result.channels.sumOf { it.content.length }
-        val maxExpectedChars = budget.eagerTokens * 4 + budget.ragTokens * 4 + budget.graphifyTokens * 4 + budget.resourceTokens * 4
+        val maxExpectedChars = budget.eagerTokens * 4 + budget.ragTokens * 4 + budget.graphifyTokens * 4 + budget.docsTokens * 4 + budget.resourceTokens * 4
         assertTrue(totalContentLength <= maxExpectedChars + 100,
             "Total content ($totalContentLength) should be within budget ($maxExpectedChars)")
     }

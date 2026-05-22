@@ -1,8 +1,8 @@
 package codebase.scenarios
 
+import cccp.vibecoding.contracts.context.CompositeContextConfig
 import codebase.rag.ChunkTokenizer
 import codebase.rag.CompositeContextBuilder
-import codebase.rag.CompositeContextConfig
 import codebase.rag.EmbeddingPipeline
 import codebase.rag.OpencodeInjector
 import codebase.rag.VectorStore
@@ -82,9 +82,10 @@ class PrepareContextUnitTest {
 
         val result = OpencodeInjector().inject(composite)
 
-        assertTrue(result.contains("EAGER]"), "Missing EAGER header")
-        assertTrue(result.contains("CONTEXTE_RAG]"), "Missing RAG header")
-        assertTrue(result.contains("RELATIONS_GRAPHIFY]"), "Missing Graphify header")
+        assertTrue(result.contains("[RÈGLES_EAGER]"), "Missing EAGER header")
+        assertTrue(result.contains("[CONTEXTE_RAG]"), "Missing RAG header")
+        assertTrue(result.contains("[RELATIONS_GRAPHIFY]"), "Missing Graphify header")
+        assertTrue(result.contains("[CONTEXTE_DOCS]"), "Missing Docs header")
     }
 
     @Test
@@ -100,8 +101,10 @@ class PrepareContextUnitTest {
         assertTrue(output.isFile, "Output file should exist")
         assertTrue(output.length() > 100, "Output should be > 100 bytes, got ${output.length()}")
         val content = output.readText()
-        assertTrue(content.contains("EAGER]"), "Missing EAGER section")
-        assertTrue(content.contains("CONTEXTE_RAG]"), "Missing RAG section")
+        assertTrue(content.contains("[RÈGLES_EAGER]"), "Missing EAGER section")
+        assertTrue(content.contains("[CONTEXTE_RAG]"), "Missing RAG section")
+        assertTrue(content.contains("[RELATIONS_GRAPHIFY]"), "Missing Graphify section")
+        assertTrue(content.contains("[CONTEXTE_DOCS]"), "Missing Docs section")
     }
 
     @Test

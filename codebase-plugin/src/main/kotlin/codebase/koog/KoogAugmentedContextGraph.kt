@@ -12,6 +12,7 @@ import ai.koog.agents.core.dsl.builder.strategy
 import codebase.rag.CompositeContextBuilder
 import codebase.rag.EmbeddingPipeline
 import codebase.rag.PgVectorConfig
+import codex.store.CodexVectorStore
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -39,7 +40,6 @@ import java.io.File
 class KoogAugmentedContextGraph {
 
     private val log = LoggerFactory.getLogger(KoogAugmentedContextGraph::class.java)
-    private val planningGraph = KoogPlanningGraph()
 
     /**
      * Graphe koog déclaratif — utilisé pour la visualisation Mermaid et l'intégration future
@@ -137,7 +137,7 @@ class KoogAugmentedContextGraph {
     }
 
     /**
-     * Nœud 3 : plan — décomposition en EPICs via KoogPlanningGraph.
+     * Nœud 3 : plan — décomposition en EPICs via IntentionPlanner (planner-gradle).
      * Appelé par le graphe koog ET par execute() — pas de duplication.
      */
     private fun planNode(state: AugmentedState): AugmentedState {
@@ -148,7 +148,7 @@ class KoogAugmentedContextGraph {
                 error = "ContextBuildFailed"
             )
         } else {
-            val planState = planningGraph.execute(state.intention, ctx)
+            val planState = codebase.rag.PlannerIntegration.plan(state.intention, ctx)
             state.copy(
                 planJson = planState.planJson,
                 plan = planState.plan,
@@ -171,7 +171,8 @@ class KoogAugmentedContextGraph {
         }
 
         val pipeline = EmbeddingPipeline(store)
-        val builder = CompositeContextBuilder(rootDir, store, pipeline, config)
+        val codexStore = CodexVectorStore()
+        val builder = CompositeContextBuilder(rootDir, store, pipeline, config, codexStore)
         return builder.build(question)
     }
 

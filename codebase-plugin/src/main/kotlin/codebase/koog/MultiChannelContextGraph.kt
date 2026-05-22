@@ -9,12 +9,12 @@ import ai.koog.agents.core.agent.entity.ToolSelectionStrategy
 import ai.koog.agents.core.dsl.builder.forwardTo
 import ai.koog.agents.core.dsl.builder.node
 import ai.koog.agents.core.dsl.builder.strategy
-import codebase.rag.CompositeContextBuilder
 import codebase.rag.EmbeddingPipeline
 import codebase.rag.OpencodeInjector
 import codebase.rag.PgVectorConfig
 import codebase.rag.VectorQueryService
 import codebase.rag.VectorStore
+import codex.store.CodexVectorStore
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -32,6 +32,7 @@ data class MultiChannelState(
     val rag: ContextChannel? get() = channels.find { it is ContextChannel.Rag }
     val graphify: ContextChannel? get() = channels.find { it is ContextChannel.Graphify }
     val resource: ContextChannel? get() = channels.find { it is ContextChannel.Resource }
+    val docs: ContextChannel? get() = channels.find { it is ContextChannel.Docs }
 }
 
 class MultiChannelContextGraph {
@@ -54,6 +55,10 @@ class MultiChannelContextGraph {
             collectGraphifyNode(state)
         }
 
+        val collectDocs by node<MultiChannelState, MultiChannelState> { state ->
+            collectDocsNode(state)
+        }
+
         val assemble by node<MultiChannelState, MultiChannelState> { state ->
             assembleNode(state)
         }
@@ -61,7 +66,8 @@ class MultiChannelContextGraph {
         edge(nodeStart forwardTo collectEager onCondition { _ -> true } transformed { it })
         edge(collectEager forwardTo collectRag onCondition { _ -> true } transformed { it })
         edge(collectRag forwardTo collectGraphify onCondition { _ -> true } transformed { it })
-        edge(collectGraphify forwardTo assemble onCondition { _ -> true } transformed { it })
+        edge(collectGraphify forwardTo collectDocs onCondition { _ -> true } transformed { it })
+        edge(collectDocs forwardTo assemble onCondition { _ -> true } transformed { it })
         edge(assemble forwardTo nodeFinish onCondition { _ -> true } transformed { it })
     }
 
@@ -71,6 +77,8 @@ class MultiChannelContextGraph {
         state = safeStep(state) { collectRagNode(it) }
 
         state = safeStep(state) { collectGraphifyNode(it) }
+
+        state = safeStep(state) { collectDocsNode(it) }
 
         state = safeStep(state) { assembleNode(it) }
 
@@ -127,9 +135,25 @@ class MultiChannelContextGraph {
         return state.copy(channels = state.channels + channel)
     }
 
+    private fun collectDocsNode(state: MultiChannelState): MultiChannelState {
+        val content = try {
+            val codexStore = CodexVectorStore()
+            val results = codexStore.searchBlocking(state.intention, topK = 5)
+            if (results.isEmpty()) "[Docs] Aucun resultat dans le corpus codex"
+            else results.joinToString("\n\n") { r ->
+                "[Docs] source=${r.sourceDocument} section=${r.sectionPath} sim=${"%.3f".format(Locale.US, r.similarity)}\n${r.chunkText.take(500)}"
+            }
+        } catch (e: Exception) {
+            log.warn("[collectDocs] codex store unavailable: {}", e.message)
+            "[Docs] CodexVectorStore indisponible — ${e.message}"
+        }
+        val channel = ContextChannel.Docs(content).truncateToTokens(state.budget.docsTokens)
+        return state.copy(channels = state.channels + channel)
+    }
+
     private fun assembleNode(state: MultiChannelState): MultiChannelState {
-        val channel = ContextChannel.Resource("").truncateToTokens(state.budget.resourceTokens)
-        val allChannels = state.channels + channel
+        val resourceChannel = ContextChannel.Resource("").truncateToTokens(state.budget.resourceTokens)
+        val allChannels = state.channels + resourceChannel
         val injector = OpencodeInjector()
         val assembled = injector.injectChannels(allChannels)
         return state.copy(channels = allChannels, assembledContext = assembled)

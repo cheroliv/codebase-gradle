@@ -1,8 +1,8 @@
 package codebase.scenarios
 
-import codebase.rag.CompositeContext
+import cccp.vibecoding.contracts.context.CompositeContext
+import cccp.vibecoding.contracts.context.CompositeContextConfig
 import codebase.rag.CompositeContextBuilder
-import codebase.rag.CompositeContextConfig
 import codebase.rag.EmbeddingPipeline
 import codebase.rag.VectorStore
 import io.cucumber.java.en.Then
@@ -20,7 +20,7 @@ class CompositeContextSteps {
     private var composite: CompositeContext? = null
 
     @When("I build a CompositeContext with the question {string} and budget {int}\\/{int}\\/{int}\\/{int}")
-    fun `build CompositeContext`(question: String, eagerPct: Int, ragPct: Int, graphifyPct: Int, overheadPct: Int) {
+    fun `build CompositeContext`(question: String, eagerPct: Int, ragPct: Int, graphifyPct: Int, docsPct: Int) {
         val store = VectorStore(ctx.jdbcUrl(), ctx.jdbcUser(), ctx.jdbcPassword())
         val pipeline = EmbeddingPipeline(store)
         val config = CompositeContextConfig(
@@ -28,7 +28,8 @@ class CompositeContextSteps {
             budgetEagerLazy = eagerPct / 100.0,
             budgetRag = ragPct / 100.0,
             budgetGraphify = graphifyPct / 100.0,
-            budgetOverhead = overheadPct / 100.0
+            budgetDocs = docsPct / 100.0,
+            budgetOverhead = 0.0
         )
         val workspaceRoot = File(".").absoluteFile.resolve("../../../..").normalize()
 
@@ -36,8 +37,8 @@ class CompositeContextSteps {
         composite = builder.build(question)
         CompositeContextHolder.set(composite!!)
 
-        log.info("CompositeContext built: EAGER={} chars, RAG={} chars, Graphify={} chars",
-            composite!!.eagerSection.length, composite!!.ragSection.length, composite!!.graphifySection.length)
+        log.info("CompositeContext built: EAGER={} chars, RAG={} chars, Graphify={} chars, Docs={} chars",
+            composite!!.eagerSection.length, composite!!.ragSection.length, composite!!.graphifySection.length, composite!!.docsSection.length)
     }
 
     @Then("the composite context has EAGER, RAG, and Graphify sections")
@@ -50,16 +51,16 @@ class CompositeContextSteps {
         log.info("All 3 sections populated")
     }
 
-    @Then("the token budget totals {int} with split {int} EAGER, {int} RAG, {int} Graphify, {int} overhead")
-    fun `token budget split`(total: Int, eager: Int, rag: Int, graphify: Int, overhead: Int) {
+    @Then("the token budget totals {int} with split {int} EAGER, {int} RAG, {int} Graphify, {int} docs")
+    fun `token budget split`(total: Int, eager: Int, rag: Int, graphify: Int, docs: Int) {
         val c = composite
         assertNotNull(c, "CompositeContext was not built")
         assertEquals(total, c.config.totalTokenBudget, "Total token budget mismatch")
         assertEquals(eager, c.config.eagerLazyTokens, "EAGER token budget mismatch")
         assertEquals(rag, c.config.ragTokens, "RAG token budget mismatch")
         assertEquals(graphify, c.config.graphifyTokens, "Graphify token budget mismatch")
-        assertEquals(overhead, c.config.overheadTokens, "Overhead token budget mismatch")
-        log.info("Token budget verified: $total total, $eager/$rag/$graphify/$overhead split")
+        assertEquals(docs, c.config.docsTokens, "Docs token budget mismatch")
+        log.info("Token budget verified: $total total, $eager/$rag/$graphify/$docs split")
     }
 
     @Then("the RAG section contains at least {int} relevance-ranked chunks")

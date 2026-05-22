@@ -1,6 +1,6 @@
-Feature: US-9.10 — CompositeContextBuilder assembles EAGER + RAG + Graphify
+Feature: US-9.10 — CompositeContextBuilder assembles EAGER + RAG + Graphify + Docs
   As a developer
-  I want to build a composite context aggregating EAGER/LAZY files, RAG pgvector results, and Graphify stats
+  I want to build a composite context aggregating EAGER/LAZY files, RAG pgvector results, Graphify stats, and Codex docs
   So that I can feed opencode with a coherent multi-channel context
 
   Background:
@@ -12,7 +12,7 @@ Feature: US-9.10 — CompositeContextBuilder assembles EAGER + RAG + Graphify
     And I compute embeddings for all chunks
     When I build a CompositeContext with the question "repository tasks database" and budget 40/30/20/10
     Then the composite context has EAGER, RAG, and Graphify sections
-    And the token budget totals 8000 with split 3200 EAGER, 2400 RAG, 1600 Graphify, 800 overhead
+    And the token budget totals 8000 with split 3200 EAGER, 2400 RAG, 1600 Graphify, 800 docs
 
   Scenario: CompositeContext RAG section returns semantically relevant content
     When I tokenize all dataset files into sentence-level chunks
