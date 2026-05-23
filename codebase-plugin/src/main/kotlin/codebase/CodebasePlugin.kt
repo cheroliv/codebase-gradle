@@ -1,6 +1,7 @@
 package codebase
 
 import codebase.koog.VibecodingTask
+import codebase.quality.QualityGateTask
 import codebase.rag.AssembleWorkspaceContextTask
 import codebase.rag.PlanIntentionTask
 import codebase.rag.PrepareContextTask
@@ -53,6 +54,20 @@ class CodebasePlugin : Plugin<Project> {
             it.intention.set(project.providers.gradleProperty("intention").orElse(""))
             it.dryRun.set(project.providers.gradleProperty("dryRun").map { it.toBoolean() }.orElse(false))
             it.maxActions.set(project.providers.gradleProperty("maxActions").map { it.toInt() }.orElse(10))
+        }
+
+        project.tasks.register(
+            "qualityGate",
+            QualityGateTask::class.java
+        ) {
+            it.group = "validate"
+            it.description = "Quality gate — validates expert LLM outputs (sentiment + off-topic + PII residual checks)"
+            it.output.set(project.providers.gradleProperty("output").orElse(""))
+            it.domain.set(project.providers.gradleProperty("domain").orElse("CDA"))
+            it.minAcceptableScore.set(project.providers.gradleProperty("minScore").map { it.toDouble() }.orElse(0.60))
+            it.enableSentimentCheck.set(project.providers.gradleProperty("enableSentiment").map { it.toBoolean() }.orElse(true))
+            it.enableOffTopicCheck.set(project.providers.gradleProperty("enableOffTopic").map { it.toBoolean() }.orElse(true))
+            it.enablePiiCheck.set(project.providers.gradleProperty("enablePii").map { it.toBoolean() }.orElse(true))
         }
     }
 }

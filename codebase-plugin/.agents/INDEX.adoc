@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-22 (Session 055 — Fix 4 Cucumber + Audit EPIC L + Cross-borough. 209/209 PASS.)
-_Session en cours_ : 056 — À définir. Backlog : EPIC 5, EPIC 6, EPIC 12.
+_Derniere mise a jour_ : 2026-05-23 (Session 056 — EPIC 6 Intégration ONNX boucle qualité TERMINE. 86 tests PASS (78 JUnit5 + 8 Cucumber), 0 failure.)
+_Session en cours_ : 057 — À définir. Backlog : EPIC 5, EPIC 12.
 
 '''
 == REGLES ABSOLUES (resume)
@@ -93,7 +93,7 @@ _Session en cours_ : 056 — À définir. Backlog : EPIC 5, EPIC 6, EPIC 12.
 | EPIC 3 | Architecture Multi-Canal Convergent — Interfaces sealed class ContextChannel (Eager/Rag/Graphify/Resource), ChannelBudget, MultiChannelContextGraph koog+langchain4j | ✅ TERMINE (2026-05-19). 9/9 ContextChannelTest + 8/8 ChannelBudgetTest + 7/7 MultiChannelContextGraphTest PASS. CompositeContextBuilder.toChannels(), OpencodeInjector polymorphe. | P0
 | EPIC 4 | Benchmark de perception spatiale LLM | MVP1 TERMINE (session 026 : flash + Graphify reel 0% erreur) | P0
 | EPIC 5 | Pipeline fine-tuning experts CDA/FPA | A FAIRE | P0
-| EPIC 6 | Integration ONNX — boucle qualite | A FAIRE | P1
+| EPIC 6 | Intégration ONNX boucle qualité — 3 checkers déterministes (sentiment, off-topic CDA/FPA, PII résiduelle) + QualityGate + QualityRetryCircuit (max 3 retries, feedback LLM) + QualityGateTask Gradle. Package codebase/quality/. Interface QualityChecker (fun interface) prête pour plug ONNX réel quand modèles fine-tunés disponibles (EPIC 5). | ✅ TERMINE (2026-05-23). Session 056. 78 JUnit5 + 8 Cucumber = 86 tests PASS, 0 failure, 0 régression. | P1
 | EPIC 7 | Wiring LangChain4j + pgvector experts | A FAIRE | P1
 | EPIC 8 | Exposer experts via Ollama (consommation plugins) | A FAIRE | P2
 | EPIC 10 | Instrumentation STIMULUS — cascade automatique | TERMINE (10/10 sous-taches, session 025) | P0
@@ -128,17 +128,15 @@ _Session en cours_ : 056 — À définir. Backlog : EPIC 5, EPIC 6, EPIC 12.
 
 |===
 | Projet | Chemin | Sessions | Derniere maj
-| plantuml-gradle | `foundry/OSS/plantuml-gradle/plantuml-plugin/` | ~138 | 2026-05-01
-| magic-stick | `foundry/OSS/magic-stick/` | 64+ | 2026-04
-| cheroliv.com | `foundry/OSS/cheroliv.com/` | ~18 | 2026-04
-| bakery-gradle | `foundry/OSS/bakery-gradle/bakery-plugin/` | ~13+ | 2026-04
-| jhipster-gradle-plugins | `foundry/OSS/jhipster-gradle-plugins/` | 6 | 2026-04
-| newpipe-gradle | `foundry/OSS/newpipe-gradle/newpipe-plugin/` | ~11 | 2026-04
-| codebase-gradle | `foundry/public/codebase-gradle/codebase-plugin/` | 28 | 2026-05-14
-| graphify-gradle | `foundry/OSS/graphify-gradle/graphify-plugin/` | 1 (bootstrap) | 2026-05-09
-| notebook-gradle | `foundry/OSS/notebook-gradle/` | 0 (bootstrap) | 2026-05-05
-| waiter-gradle | `foundry/OSS/waiter-gradle/` | 0 (bootstrap) | 2026-05-11
-| training-gradle | `foundry/OSS/training-gradle/` | 0 (bootstrap) | 2026-05-12
+| plantuml-gradle | `foundry/public/plantuml-gradle/plantuml-plugin/` | ~138 | 2026-05-01
+| codex-gradle | `foundry/public/codex-gradle/` | 26 | 2026-05-22
+| planner-gradle | `foundry/public/planner-gradle/` | 50 | 2026-05-22
+| training-gradle | `foundry/public/training-gradle/training-plugin/` | ~10 | 2026-05-14
+| quizz-benchmark | `foundry/public/quizz-benchmark-gradle/quizz-benchmark-plugin/` | 6 | 2026-05-11
+| engine | `foundry/public/engine/` | 17 | 2026-05-19
+| capsule-gradle | `foundry/public/capsule-gradle/capsule-plugin/` | 11 | 2026-05-19
+| workspace-gradle | `foundry/public/workspace-gradle/` | 1 | 2026-05-17
+| waiter-gradle | `foundry/public/waiter-gradle/` | 0 (bootstrap) | 2026-05-11
 |===
 
 Voir aussi : `TAXONOMIE_WORKSPACE.adoc` (racine workspace) pour l'ontologie complete.
