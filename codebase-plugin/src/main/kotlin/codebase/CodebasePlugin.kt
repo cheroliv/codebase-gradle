@@ -3,6 +3,7 @@ package codebase
 import codebase.koog.VibecodingTask
 import codebase.quality.QualityGateTask
 import codebase.rag.AssembleWorkspaceContextTask
+import codebase.rag.CodebaseCompositeContextTask
 import codebase.rag.PlanIntentionTask
 import codebase.rag.PrepareContextTask
 import org.gradle.api.Plugin
@@ -68,6 +69,20 @@ class CodebasePlugin : Plugin<Project> {
             it.enableSentimentCheck.set(project.providers.gradleProperty("enableSentiment").map { it.toBoolean() }.orElse(true))
             it.enableOffTopicCheck.set(project.providers.gradleProperty("enableOffTopic").map { it.toBoolean() }.orElse(true))
             it.enablePiiCheck.set(project.providers.gradleProperty("enablePii").map { it.toBoolean() }.orElse(true))
+        }
+
+        val trainingPluginDir = project.rootDir.parentFile.parentFile
+            .resolve("private/training-gradle/training-plugin")
+        project.tasks.register(
+            "generateCompositeContext",
+            CodebaseCompositeContextTask::class.java
+        ) { task ->
+            task.group = "generate"
+            task.description = "Contexte composite N1+N2 : CodexVectorStore (codex) + training-gradle (AFNOR/REAC) → composite-context.json"
+            task.query.set(project.providers.gradleProperty("query").orElse("architecture du workspace"))
+            task.topK.set(project.providers.gradleProperty("topK").orElse("10"))
+            task.trainingProjectDir.set(trainingPluginDir.absolutePath)
+            task.outputFile.set(project.layout.buildDirectory.file("codebase/composite-context.json"))
         }
     }
 }

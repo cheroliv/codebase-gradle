@@ -12,3 +12,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "codebase-gradle"
+
+include(":codebase-plugin")
