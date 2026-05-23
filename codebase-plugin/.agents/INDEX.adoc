@@ -24,7 +24,7 @@ _Session en cours_ : 057 — À définir. Backlog : EPIC 5, EPIC 12.
 | Phase | Livrable | Statut | Boroughs
 | K-0 | Document Jardin Secret — TAXONOMIE_WORKSPACE.adoc | ✅ 2026-05-18 | Workspace root
 | K-1 | Renommage 4 verbes (GENERER/COLLECTER/TRANSFORMER/DÉPLOYER) | ✅ 2026-05-19 | Tous N2
-| K-2 | Format pivot — Metadata.kt + metadataExpectedPath engine | ✅ 2026-05-19 | 4 boroughs + engine
+| K-2 | Format pivot — Metadata.kt + metadataExpectedPath runner-gradle | ✅ 2026-05-19 | 4 boroughs + runner-gradle
 | K-3 | Configuration par domaine — CodebaseExtension | ✅ 2026-05-18 | Codebase
 | K-4 | Convention over configuration SPG→SPD | ✅ 2026-05-19 | Newark (training 018) + Manhattan (planner 019)
 | K-5 | Documentation — MàJ INDEX.adoc boroughs | ✅ TERMINE (2026-05-19) | Gouvernance
@@ -42,7 +42,7 @@ _Session en cours_ : 057 — À définir. Backlog : EPIC 5, EPIC 12.
 | 051 | 2026-05-22 | cross-borough | Cablage codex→codebase→planner — DOCS canal 10%, IntentionPlanner remplace KoogPlanningGraph, codex dependency. 205/209 PASS. | 9/10
 | 050 | 2026-05-20 | debug | Debug .gradlew check — 12→3 echecs (75% resolution). Gherkin 100% anglais. 8 fichiers. | 9/10
 | 049 | 2026-05-20 | cleanup+finalisation | Cleanup post-migration (12 tests Vibecoding* + 4 features EPIC V + 5 runners + 5 taches Gradle dead) + EPIC L finalisation (package langgraph supprime + dependance langgraph4j retiree). 7/7 Cucumber @epic_l_3 PASS. EPIC L = 8/8 TERMINE. | 10/10
-| 046 | 2026-05-19 | audit | EPIC G Audit publication — Credentials verifies, namespace cccp.education actif sur Maven Central + Portal. Build config pret (group=education.cccp, Sonatype staging, GPG). publishToMavenLocal suffit pour conso N1→N2. BACKLOG nettoye. | 10/10
+| 046 | 2026-05-19 | audit | EPIC G Audit publication — Credentials verifies, namespace education.cccp actif sur Maven Central + Portal. Build config pret (group=education.cccp, Sonatype staging, GPG). publishToMavenLocal suffit pour conso N1→N2. BACKLOG nettoye. | 10/10
 | 045 | 2026-05-19 | feat | EPIC V-4 Integration validation — Test end-to-end VibecodingTask sur projet reel ProjectBuilder. 8/8 JUnit5 + 5/5 Cucumber @epic_v_4 PASS. Fix jsonlEscape dans VibecodingTask.kt. 15/15 pts EPIC V. | 10/10
 | 044 | 2026-05-19 | feat | EPIC V-3 Security constraints — Sandbox workspaceRoot + dryRun guard + audit trail (AuditEntry). 30/30 JUnit5 + 11/11 Cucumber @epic_v_3 PASS. 12/15 pts EPIC V. | 10/10
 | 043 | 2026-05-19 | feat | EPIC V-2 VibecodingTask — ToolRegistry (7 tools) + VibecodingTask Gradle (vibecode task, audit trail JSONL). 17/17 JUnit5 + 4/4 Cucumber @epic_v_2 PASS. 10/15 pts EPIC V. | 10/10
@@ -52,7 +52,7 @@ _Session en cours_ : 057 — À définir. Backlog : EPIC 5, EPIC 12.
 | 032 | 2026-05-19 | refactor | EPIC K K-1 Renommage taxonomie — `prepareContext`→`collectFromCodebase`, `assembleWorkspaceContext`→`collectCompositeContext`, `planIntention`→`generatePlan` (groupes collect/generate, 6 fichiers modifiés, compile OK) | 10/10
 | 031 | 2026-05-18 | feat+deploy | Déploiement codebase-plugin sur 10 boroughs N2 (catalog TOML + mavenLocal) + Fix Jackson mismatch quizz-benchmark (2.18.2→2.19.1 + dedup) | 8/10
 | 030 | 2026-05-18 | feat+tests | Cadrage agile 7 ateliers + Tests JUnit5 PrepareContextTask (5 PASS) + assembleWorkspaceContext task | 9/10
-| 029 | 2026-05-18 | feat+architecture | Bootstrapping Pipeline Contexte Augmente per Borough : PrepareContextTask + buildScoped + CodebasePlugin.apply() non-vide + opencode.json branche + engine.sh cleanup + GCR v7. Compilation+publication OK, test codex-gradle OK | 8/10
+| 029 | 2026-05-18 | feat+architecture | Bootstrapping Pipeline Contexte Augmente per Borough : PrepareContextTask + buildScoped + CodebasePlugin.apply() non-vide + opencode.json branche + runner.sh cleanup + GCR v7. Compilation+publication OK, test codex-gradle OK | 8/10
 | 028 | 2026-05-14 | architecture | Split architecture : racine consommateur 6 lignes + codebase-plugin autonome (gradlew, settings, libs.versions.toml, buildSrc, src, tests, .agents/), publishToMavenLocal OK, article 0124 | 10/10
 | 027 | 2026-05-14 | infra | CI Template — .github/workflows/test.yml (JDK 24, Gradle, JUnit), build OK, EPIC F cross-boroughs | 10/10
 | 026 | 2026-05-13 | feat | Benchmark Flash + Graphify — deepseek-v4-flash:cloud sur instance B, OLLAMA_BASE_URL/MODEL env vars, fix @JsonIgnoreProperties office/graph.json (21174n/22286e), benchmark-output/ (+.gitignore), 175 classifications 0% erreur, gate MVP1 PASS | 10/10
@@ -133,7 +133,7 @@ _Session en cours_ : 057 — À définir. Backlog : EPIC 5, EPIC 12.
 | planner-gradle | `foundry/public/planner-gradle/` | 50 | 2026-05-22
 | training-gradle | `foundry/public/training-gradle/training-plugin/` | ~10 | 2026-05-14
 | quizz-benchmark | `foundry/public/quizz-benchmark-gradle/quizz-benchmark-plugin/` | 6 | 2026-05-11
-| engine | `foundry/public/engine/` | 17 | 2026-05-19
+| runner-gradle | `foundry/public/runner-gradle/` | 17 | 2026-05-19
 | capsule-gradle | `foundry/public/capsule-gradle/capsule-plugin/` | 11 | 2026-05-19
 | workspace-gradle | `foundry/public/workspace-gradle/` | 1 | 2026-05-17
 | waiter-gradle | `foundry/public/waiter-gradle/` | 0 (bootstrap) | 2026-05-11

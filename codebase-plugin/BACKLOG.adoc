@@ -161,6 +161,6 @@ Retardée après consolidation EPIC V.
 **Priorite** : P0
 
 Credentials presents dans `~/.gradle/gradle.properties`.
-Namespace `cccp.education` actif sur Maven Central + Gradle Portal.
+Namespace `education.cccp` actif sur Maven Central + Gradle Portal.
 Build config : `group=education.cccp`, Sonatype staging, GPG pret.
 En attendant : `publishToMavenLocal` suffit pour conso inter-boroughs N1→N2.

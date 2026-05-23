@@ -13,7 +13,7 @@ Mission : EPIC G publication + nettoyer BACKLOG, puis EPIC 3.
 === Verification platformes
 - Credentials `~/.gradle/gradle.properties` : gradle.publish.key/secret, ossrhUsername/Password, signing.keyId/password presents
 - GPG cle `F6F11769CD03CB34` active, expire 2028-06-17
-- Maven Central namespace `cccp.education` actif, 1 package
+- Maven Central namespace `education.cccp` actif, 1 package
 - Gradle Portal compte `cccp-education` cree 2026-05-18, 0 plugin publie
 - Build config : group=education.cccp, Sonatype staging, GPG useGpgCmd()
 - Maven Local : `education.cccp:codebase-plugin:0.0.1` present
