@@ -1,7 +1,7 @@
 package codebase.rag
 
-import cccp.vibecoding.contracts.context.ChannelType
-import cccp.vibecoding.contracts.context.ContextChannel
+import education.cccp.contracts.context.ChannelType
+import education.cccp.contracts.context.ContextChannel
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

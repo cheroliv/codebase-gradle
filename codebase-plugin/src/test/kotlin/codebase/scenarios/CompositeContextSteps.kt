@@ -1,7 +1,7 @@
 package codebase.scenarios
 
-import cccp.vibecoding.contracts.context.CompositeContext
-import cccp.vibecoding.contracts.context.CompositeContextConfig
+import education.cccp.contracts.context.CompositeContext
+import education.cccp.contracts.context.CompositeContextConfig
 import codebase.rag.CompositeContextBuilder
 import codebase.rag.EmbeddingPipeline
 import codebase.rag.VectorStore

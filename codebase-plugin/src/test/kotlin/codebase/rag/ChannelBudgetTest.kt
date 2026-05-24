@@ -1,9 +1,9 @@
 package codebase.rag
 
-import cccp.vibecoding.contracts.context.ChannelBudget
-import cccp.vibecoding.contracts.context.ChannelType
-import cccp.vibecoding.contracts.context.CompositeContextConfig
-import cccp.vibecoding.contracts.context.ContextChannel
+import education.cccp.contracts.context.ChannelBudget
+import education.cccp.contracts.context.ChannelType
+import education.cccp.contracts.context.CompositeContextConfig
+import education.cccp.contracts.context.ContextChannel
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.math.abs

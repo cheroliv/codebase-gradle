@@ -1,7 +1,7 @@
 package codebase.koog
 
-import cccp.vibecoding.contracts.context.CompositeContext
-import cccp.vibecoding.contracts.context.CompositeContextConfig
+import education.cccp.contracts.context.CompositeContext
+import education.cccp.contracts.context.CompositeContextConfig
 import cccp.vibecoding.contracts.state.AugmentedState
 import ai.koog.agents.core.agent.asMermaidDiagram
 import ai.koog.agents.core.agent.entity.AIAgentGraphStrategy

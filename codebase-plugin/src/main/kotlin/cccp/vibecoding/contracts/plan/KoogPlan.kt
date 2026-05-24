@@ -1,6 +1,6 @@
 package cccp.vibecoding.contracts.plan
 
-import cccp.vibecoding.contracts.context.CompositeContext
+import education.cccp.contracts.context.CompositeContext
 
 /**
  * Plan de décomposition — structure de données pure.

@@ -28,6 +28,9 @@ dependencies {
     implementation(libs.bundles.r2dbc)
     implementation(libs.doc.pipeline)
     implementation(libs.planner.plugin)
+
+    // N0 codebase contracts — source unique de vérité (ContextChannel, ChannelBudget, CompositeContext, CompositeContextConfig)
+    implementation("education.cccp:codebase-contracts:0.1.0")
     implementation(libs.bundles.arrow)
     implementation(libs.koog.agents) {
         // Exclusion nécessaire : koog 26.0.2-1 conflict with Kotlin embedded 13.0

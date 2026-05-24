@@ -1,6 +1,6 @@
 package codebase.scenarios
 
-import cccp.vibecoding.contracts.context.CompositeContext
+import education.cccp.contracts.context.CompositeContext
 import codebase.rag.OpencodeInjector
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When

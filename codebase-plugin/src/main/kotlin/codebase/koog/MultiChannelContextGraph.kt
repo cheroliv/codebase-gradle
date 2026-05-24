@@ -1,8 +1,8 @@
 package codebase.koog
 
-import cccp.vibecoding.contracts.context.ChannelBudget
-import cccp.vibecoding.contracts.context.CompositeContextConfig
-import cccp.vibecoding.contracts.context.ContextChannel
+import education.cccp.contracts.context.ChannelBudget
+import education.cccp.contracts.context.CompositeContextConfig
+import education.cccp.contracts.context.ContextChannel
 import ai.koog.agents.core.agent.asMermaidDiagram
 import ai.koog.agents.core.agent.entity.AIAgentGraphStrategy
 import ai.koog.agents.core.agent.entity.ToolSelectionStrategy

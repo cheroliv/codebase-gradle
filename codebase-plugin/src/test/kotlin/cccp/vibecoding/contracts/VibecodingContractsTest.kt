@@ -5,10 +5,10 @@ import cccp.vibecoding.contracts.plan.Plan
 import cccp.vibecoding.contracts.plan.Epic
 import cccp.vibecoding.contracts.plan.UserStory
 import cccp.vibecoding.contracts.plan.Task
-import cccp.vibecoding.contracts.context.CompositeContext
-import cccp.vibecoding.contracts.context.CompositeContextConfig
-import cccp.vibecoding.contracts.context.ContextChannel
-import cccp.vibecoding.contracts.context.ChannelBudget
+import education.cccp.contracts.context.CompositeContext
+import education.cccp.contracts.context.CompositeContextConfig
+import education.cccp.contracts.context.ContextChannel
+import education.cccp.contracts.context.ChannelBudget
 import cccp.vibecoding.contracts.registry.ToolRegistry
 import cccp.vibecoding.contracts.registry.ToolInfo
 import cccp.vibecoding.contracts.registry.AuditEntry

@@ -1,6 +1,6 @@
 package cccp.vibecoding.contracts.state
 
-import cccp.vibecoding.contracts.context.CompositeContext
+import education.cccp.contracts.context.CompositeContext
 import cccp.vibecoding.contracts.plan.Plan
 
 /**

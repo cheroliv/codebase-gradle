@@ -1,7 +1,7 @@
 package codebase.rag
 
-import cccp.vibecoding.contracts.context.CompositeContext
-import cccp.vibecoding.contracts.context.CompositeContextConfig
+import education.cccp.contracts.context.CompositeContext
+import education.cccp.contracts.context.CompositeContextConfig
 import codebase.walker.WorkspaceWalker
 import codex.store.CodexVectorStore
 import org.slf4j.LoggerFactory

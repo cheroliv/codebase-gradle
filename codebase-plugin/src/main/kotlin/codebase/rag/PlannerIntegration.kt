@@ -1,6 +1,6 @@
 package codebase.rag
 
-import cccp.vibecoding.contracts.context.CompositeContext
+import education.cccp.contracts.context.CompositeContext
 import cccp.vibecoding.contracts.plan.Plan
 import cccp.vibecoding.contracts.plan.PlanState
 import cccp.vibecoding.contracts.state.AugmentedState

@@ -1,6 +1,6 @@
 package codebase.rag
 
-import cccp.vibecoding.contracts.context.CompositeContextConfig
+import education.cccp.contracts.context.CompositeContextConfig
 import org.slf4j.LoggerFactory
 import java.io.File
 
