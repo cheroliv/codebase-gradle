@@ -7,7 +7,9 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.work.DisableCachingByDefault
 
+@DisableCachingByDefault(because = "Quality gate validation — rule engine, non-cacheable")
 abstract class QualityGateTask : DefaultTask() {
 
     @get:Input

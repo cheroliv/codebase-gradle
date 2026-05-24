@@ -1,0 +1,31 @@
+= Session 066 — Améliorations VibecodingTask
+:session: 066
+:date: 2026-05-25
+:status: TERMINÉ
+
+== Résumé
+
+Améliorations de la tâche VibecodingTask pour mieux gérer le caching et la non-déterminisme des appels LLM.
+
+== Actions réalisées
+
+1. ✅ Ajout de l'annotation @DisableCachingByDefault à VibecodingTask
+2. ✅ Mise à jour des dépendances dans build.gradle.kts
+3. ✅ Mise à jour des versions dans libs.versions.toml
+
+== Détails techniques
+
+- Ajout de l'import `org.gradle.work.DisableCachingByDefault`
+- Annotation de la classe VibecodingTask avec `@DisableCachingByDefault(because = "Vibecoding LLM agent — non-deterministic LLM calls, non-cacheable")`
+- Mise à jour des dépendances Gradle pour assurer la compatibilité
+
+== Fichiers modifiés
+
+- codebase-plugin/src/main/kotlin/codebase/koog/VibecodingTask.kt
+- codebase-plugin/build.gradle.kts
+- codebase-plugin/gradle/libs.versions.toml
+- gradle/libs.versions.toml
+
+== Justification
+
+Les appels LLM sont non-déterministes par nature, donc le caching Gradle n'est pas approprié pour cette tâche. L'annotation explicite empêche les comportements inattendus liés au caching.

@@ -6,8 +6,10 @@ plugins {
     `java-library`
     `maven-publish`
     `java-gradle-plugin`
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.publish)
+    // Gradle 9.5.1 : alias(libs.plugins.kotlin.jvm) et publish hors scope dans plugins {} d'un sous-projet
+    // Workaround : versions explicites
+    id("org.jetbrains.kotlin.jvm") version "2.3.20"
+    id("com.gradle.plugin-publish") version "2.1.0"
 }
 
 group = "education.cccp"

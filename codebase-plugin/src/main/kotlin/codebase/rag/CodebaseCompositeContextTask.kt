@@ -9,9 +9,11 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import java.time.Instant
 
+@DisableCachingByDefault(because = "pgvector RAG + Codex VectorStore — external dependencies, non-cacheable")
 abstract class CodebaseCompositeContextTask : DefaultTask() {
 
     @get:Input

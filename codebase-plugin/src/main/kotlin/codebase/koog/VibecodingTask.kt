@@ -10,6 +10,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import java.time.Instant
 
@@ -29,6 +30,7 @@ import java.time.Instant
  * ./gradlew vibecode --intention="Refactor the DAG N1→N2→N3" --maxActions=20
  * ```
  */
+@DisableCachingByDefault(because = "Vibecoding LLM agent — non-deterministic LLM calls, non-cacheable")
 abstract class VibecodingTask : DefaultTask() {
 
     @get:Input
