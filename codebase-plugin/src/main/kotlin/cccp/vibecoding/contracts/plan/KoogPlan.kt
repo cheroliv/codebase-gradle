@@ -1,9 +1,13 @@
 package cccp.vibecoding.contracts.plan
 
+import education.cccp.contracts.agent.Epic
+import education.cccp.contracts.agent.UserStory
+import education.cccp.contracts.agent.GradleTask
 import education.cccp.contracts.context.CompositeContext
 
 /**
  * Plan de décomposition — structure de données pure.
+ * Utilise les types Epic/UserStory/GradleTask du N0 (agent-contracts).
  * Extraite de codebase.koog.KoogPlanningGraph dans N0 pour partage N1→N2 sans violation DAG.
  */
 data class Plan(
@@ -11,23 +15,6 @@ data class Plan(
     val epics: List<Epic>,
     val totalPoints: Int,
     val estimatedSessions: String
-)
-
-data class Epic(
-    val name: String,
-    val description: String,
-    val points: Int,
-    val userStories: List<UserStory>
-)
-
-data class UserStory(
-    val description: String,
-    val tasks: List<Task>
-)
-
-data class Task(
-    val description: String,
-    val gradleTask: String
 )
 
 /**

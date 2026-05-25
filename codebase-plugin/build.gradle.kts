@@ -33,6 +33,10 @@ dependencies {
 
     // N0 codebase contracts — source unique de vérité (ContextChannel, ChannelBudget, CompositeContext, CompositeContextConfig)
     implementation("education.cccp:codebase-contracts:0.1.0")
+    // N0 agent contracts — Epic, UserStory, GradleTask, AgentState (partagés cross-borough)
+    implementation("education.cccp:agent-contracts:0.1.0")
+    // N0 vibecoding contracts — ToolRegistry, ExecShellTool, ExecGradleTool, ToolkitIsMissingException
+    implementation("education.cccp:vibecoding-contracts:0.1.0")
     implementation(libs.bundles.arrow)
     implementation(libs.koog.agents) {
         // Exclusion nécessaire : koog 26.0.2-1 conflict with Kotlin embedded 13.0

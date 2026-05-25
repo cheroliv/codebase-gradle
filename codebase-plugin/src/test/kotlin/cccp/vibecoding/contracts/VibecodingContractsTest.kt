@@ -2,17 +2,17 @@ package cccp.vibecoding.contracts
 
 import cccp.vibecoding.contracts.state.VibecodingState
 import cccp.vibecoding.contracts.plan.Plan
-import cccp.vibecoding.contracts.plan.Epic
-import cccp.vibecoding.contracts.plan.UserStory
-import cccp.vibecoding.contracts.plan.Task
+import education.cccp.contracts.agent.Epic
+import education.cccp.contracts.agent.UserStory
+import education.cccp.contracts.agent.GradleTask
 import education.cccp.contracts.context.CompositeContext
 import education.cccp.contracts.context.CompositeContextConfig
 import education.cccp.contracts.context.ContextChannel
 import education.cccp.contracts.context.ChannelBudget
-import cccp.vibecoding.contracts.registry.ToolRegistry
-import cccp.vibecoding.contracts.registry.ToolInfo
-import cccp.vibecoding.contracts.registry.AuditEntry
-import cccp.vibecoding.contracts.tools.ToolkitIsMissingException
+import education.cccp.contracts.vibecoding.registry.ToolRegistry
+import education.cccp.contracts.vibecoding.registry.ToolInfo
+import education.cccp.contracts.vibecoding.registry.AuditEntry
+import education.cccp.contracts.vibecoding.tools.ToolkitIsMissingException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.File
@@ -81,7 +81,7 @@ class VibecodingContractsTest {
 
     @Test
     fun `Plan with full hierarchy`() {
-        val task = Task(description = "Write tests", gradleTask = ":test")
+        val task = GradleTask(description = "Write tests", gradleTask = ":test")
         val story = UserStory(description = "Add tests", tasks = listOf(task))
         val epic = Epic(name = "EPIC-1", description = "Implement feature", points = 5, userStories = listOf(story))
         val plan = Plan(title = "MVP", epics = listOf(epic), totalPoints = 5, estimatedSessions = "2")

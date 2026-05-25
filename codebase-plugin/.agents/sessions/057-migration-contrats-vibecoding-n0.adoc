@@ -1,0 +1,77 @@
+= Rapport Session 057 — Migration Contrats Vibecoding N1→N0 + DAG BOM
+:date: 2026-05-26
+:session: 057
+:statut: DONE
+
+== Résumé
+
+Migration partielle des contrats vibecoding du package `cccp.vibecoding.contracts`
+(codebase-plugin, couche N1) vers `workspace-bom` (couche N0).
+
+== Stratégie adoptée
+
+Seuls les fichiers **sans dépendance circulaire** vers `cccp.vibecoding.contracts.plan.Plan`
+(N1) ont migrés :
+- `tools/ExecShellTool.kt` → `education.cccp.contracts.vibecoding.tools`
+- `tools/ExecGradleTool.kt` → `education.cccp.contracts.vibecoding.tools`
+- `tools/ToolkitIsMissingException.kt` → `education.cccp.contracts.vibecoding.tools`
+- `registry/ToolRegistry.kt` → `education.cccp.contracts.vibecoding.registry`
+
+`state/VibecodingState.kt`, `state/AugmentedState.kt` et `plan/KoogPlan.kt` restent
+en N1 car ils dépendent de `cccp.vibecoding.contracts.plan.Plan`.
+
+`KoogPlan.kt` adopte désormais les types `Epic`, `UserStory`, `GradleTask`
+depuis `agent-contracts` (N0) au lieu de définir ses propres data classes.
+
+== Modifications
+
+=== Workspace-bom
+
+- Nouveau module : `vibecoding-contracts/` (build.gradle.kts + 4 fichiers .kt)
+- Dépendances : `agent-contracts` + `codebase-contracts` + `koog-agents` + `kotlinx-serialization-json`
+- Ajout dans `settings.gradle.kts` : `include("vibecoding-contracts")`
+
+=== Codebase-plugin
+
+- `build.gradle.kts` : ajout `education.cccp:agent-contracts:0.1.0` + `education.cccp:vibecoding-contracts:0.1.0`
+- `KoogPlan.kt` : `Epic`/`UserStory`/`Task` supprimés, imports redirigés vers `agent-contracts`
+- `PlannerIntegration.kt` : `toContractPlan()` utilise `agent-contracts.{Epic, UserStory, GradleTask}`
+- `VibecodingTask.kt` : import `ToolRegistry` redirigé vers N0
+- `VibecodingGraph.kt` : import `ToolRegistry` redirigé vers N0
+- Suppression 4 fichiers N1 : `tools/{ExecShellTool,ExecGradleTool,ToolkitIsMissingException}.kt` + `registry/ToolRegistry.kt`
+
+=== Tests
+
+- 6 fichiers de test mis à jour (imports `cccp.vibecoding.contracts.{registry,tools}` → `education.cccp.contracts.vibecoding.{registry,tools}`)
+- 3 fichiers mis à jour (`Epic`/`UserStory`/`Task` → `agent-contracts`)
+
+== Résultats
+
+- 169 tests JUnit5 + Cucumber : 100% PASS, 0 failure
+- compilation main + test : OK
+- publishToMavenLocal : OK (workspace-bom + codebase-plugin)
+
+== Décisions reportées (backlog session 058)
+
+. *Renommage global* : remplacer `cccp` et `education` dans tout le code source
+  du workspace (packages Kotlin uniquement, pas les identifiants Maven).
+  Touche 11 boroughs, centaines de fichiers. Chantier à part entière.
+. Résidu : `VibecodingState` et `AugmentedState` dépendent encore de
+  `cccp.vibecoding.contracts.plan.Plan` — migration complète impossible
+  sans casser la référence circulaire.
+
+== Commandes exécutées
+
+```bash
+# Workspace-bom
+cd foundry/public/workspace-bom
+./gradlew :vibecoding-contracts:compileKotlin
+./gradlew publishToMavenLocal
+
+# Codebase-plugin
+cd ../codebase-gradle/codebase-plugin
+./gradlew compileKotlin compileTestKotlin
+./gradlew test
+./gradlew cucumberTest
+./gradlew publishToMavenLocal
+```

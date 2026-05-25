@@ -89,15 +89,15 @@ private fun planning.Plan.toContractPlan(): cccp.vibecoding.contracts.plan.Plan 
     cccp.vibecoding.contracts.plan.Plan(
         title = title,
         epics = epics.map { e ->
-            cccp.vibecoding.contracts.plan.Epic(
+            education.cccp.contracts.agent.Epic(
                 name = e.name,
                 description = e.description,
                 points = e.points,
                 userStories = e.userStories.map { us ->
-                    cccp.vibecoding.contracts.plan.UserStory(
+                    education.cccp.contracts.agent.UserStory(
                         description = us.description,
                         tasks = us.tasks.map { t ->
-                            cccp.vibecoding.contracts.plan.Task(
+                            education.cccp.contracts.agent.GradleTask(
                                 description = t.description,
                                 gradleTask = t.gradleTask
                             )

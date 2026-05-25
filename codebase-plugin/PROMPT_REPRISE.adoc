@@ -1,123 +1,65 @@
-= PROMPT_REPRISE — Session 057 — Migration Contrats Vibecoding N1→N0 + DAG BOM
-:session: 057
+= PROMPT_REPRISE — Session 058 — Renommage Global Packages + Fin Nettoyage N1
+:session: 058
 :date: 2026-05-27
 :status: PRET
 :max-lines: 70
-:priorite: P0 (GLOBAL_CODE_REVIEW v12 + ANALYSE_TRANSITION_SYSTEME_AGENTIQUE)
+:priorite: P0
 
 == Mission
 
-Migration des contrats vibecoding `cccp.vibecoding.contracts.*` (7 fichiers)
-de `codebase-plugin` (N1) vers `workspace-bom` (N0). Résolution des collisions avec
-les types déjà existants dans `agent-contracts`. Alignement DAG N0→N1→N2.
+Renommage global des packages `cccp` et `education` dans TOUT le code source
+du workspace, sans toucher aux identifiants Maven (groupId `education.cccp`
+dans les artefacts publiés reste inchangé).
 
-== Contexte — Ce qui bloque
+== Contexte
 
-=== Documenté dans configuration/
+La session 057 a migré 4 fichiers de `cccp.vibecoding.contracts` (N1) vers
+`education.cccp.contracts.vibecoding` (N0). Résidu : les packages `cccp` et
+`education` coexistent dans le code source.
 
-- *GLOBAL_CODE_REVIEW.adoc v12* (2026-05-24) : le vrai produit = boucle de vibecoding.
-  P0 = SessionRepository (~80 lignes) + TokenTracker (~100 lignes). Mais la boucle
-  ne peut pas fonctionner proprement tant que les contrats N0 sont dupliqués en N1.
-- *ANALYSE_TRANSITION_SYSTEME_AGENTIQUE.adoc* §2.1 : Gap n°1 = absence de contrat
-  agentique transverse N0. Décision sessions 057/063/064 : les contrats vibecoding
-  doivent migrer dans workspace-bom comme module N0.
-- *ANALYSE_TRANSITION_SYSTEME_AGENTIQUE.adoc* §4 Phase 1 : créer agent-contracts
-  avec interfaces AgentState, AgentTool, ContextAssembler, PlanExecutor, GradleTaskTool.
+La décision utilisateur est de **supprimer ces deux noms du code source**
+globalement, en une seule passe.
 
-=== Déjà migré dans workspace-bom/N0
+== Périmètre
 
-- ✅ codebase-contracts/ : ContextChannel, ChannelBudget, CompositeContext,
-  CompositeContextConfig (session 064)
-- ✅ agent-contracts/ : AgentState (sealed class 8 phases), AgentTool<T,I>,
-  GradleTaskTool, ContextAssembler, PlanExecutor, PlanSerializer, RelevanceBudget
+- **11 boroughs** : training, planner, codex, codebase, quizz-benchmark,
+  capsule, runner, workspace-gradle, waiter-gradle, plantuml-gradle, magic-stick
+- **Workspace-bom** : agent-contracts, codebase-contracts, vibecoding-contracts
+- **Documentation** : tous les `.adoc` qui mentionnent `education.cccp` ou `cccp`
 
-=== Toujours dans codebase-plugin/N1 (7 fichiers, package cccp.vibecoding.contracts)
+== Règles
 
-- ❌ plan/KoogPlan.kt — Plan, Epic, UserStory, Task, PlanState
-  → CONFLIT : agent-contracts/AgentState.kt a DEJA Epic, UserStory, GradleTask (différents)
-- ❌ state/VibecodingState.kt — état agent vibecoding, pas de conflit
-- ❌ state/AugmentedState.kt — état augmenté koog+langchain4j, pas de conflit
-- ❌ registry/ToolRegistry.kt — registre 7 outils
-  → Dépend de ExecShellTool, ExecGradleTool, ToolkitIsMissingException (ci-dessous)
-- ❌ tools/ExecGradleTool.kt — exécution gradle via ProcessBuilder
-  → CONFLIT : agent-contracts/GradleTaskTool.kt déjà existant (plus riche)
-- ❌ tools/ExecShellTool.kt — exécution shell bash, pas de conflit
-- ❌ tools/ToolkitIsMissingException.kt — exception simple, pas de conflit
+- **Zéro modification** des identifiants Maven publiés (groupId Maven = `education.cccp` reste)
+- **Zéro modification** du Gradle Plugin Portal handle (`cccp-education` reste)
+- Changer uniquement les packages Kotlin dans le code source
+- Baby-step par borough, compile + test après chaque borough
+- Publier chaque borough modifié dans Maven Local
 
-=== Impact sur codebase-plugin
+== Travail restant de la session 057
 
-- `cccp/vibecoding/contracts/plan/KoogPlan.kt` : contient Task (avec description,
-  gradleTask) → utilisé par VibecodingGraph, PlannerIntegration, ToolRegistry
-- `cccp/vibecoding/contracts/state/VibecodingState.kt` : data class avec plan:Plan?
-  → utilisé par VibecodingGraph, VibecodingTask, VibecodingGraphTest
-- `cccp/vibecoding/contracts/state/AugmentedState.kt` : → KoogAugmentedContextGraph
-- `cccp/vibecoding/contracts/registry/ToolRegistry.kt` : → VibecodingGraph,
-  VibecodingTask, tests Cucumber+JUnit5
-- `cccp/vibecoding/contracts/tools/*.kt` : → ToolRegistry
+- Résidu N1 : `state/VibecodingState.kt` et `state/AugmentedState.kt`
+  dépendent encore de `cccp.vibecoding.contracts.plan.Plan`
+  → à traiter dans le cadre du renommage global
 
-== Étapes de la session
+== Ordre suggéré (bottom-up)
 
-=== Étape 1 — Audit des collisions (lecture seule, pas de modif)
+. workspace-bom (3 modules)
+. codebase-plugin (Queens)
+. Les autres boroughs N2 (alphabetique)
+. runner-gradle (New Jersey)
+. Documentation
 
-. Comparer `plan/KoogPlan.kt` (Epic, UserStory, Task) vs
-  `agent-contracts/AgentState.kt` (Epic, UserStory, GradleTask)
-  → décider : fusion, wrapper, ou renommage ?
-. Comparer `tools/ExecGradleTool.kt` vs `agent-contracts/GradleTaskTool.kt`
-  → décider : supprimer ExecGradleTool et adopter GradleTaskTool ?
-
-=== Étape 2 — Créer vibecoding-contracts dans workspace-bom
-
-. Créer `workspace-bom/vibecoding-contracts/build.gradle.kts`
-  (java-library, dep: koog-agents, kotlin-stdlib)
-. Package : `education.cccp.contracts.vibecoding`
-. Fichiers à créer :
-  a. state/VibecodingState.kt (pas de collision)
-  b. state/AugmentedState.kt (pas de collision)
-  c. registry/ToolRegistry.kt (adapter imports ExecGradleTool → GradleTaskTool)
-  d. tools/ExecShellTool.kt (pas de collision)
-  e. tools/ToolkitIsMissingException.kt (pas de collision)
-. Ajouter `include("vibecoding-contracts")` dans settings.gradle.kts
-
-=== Étape 3 — Résoudre la collision plan/Epic
-
-. Option A : supprimer plan/KoogPlan.kt de codebase-plugin,
-  adopter Epic/UserStory/GradleTask de agent-contracts.
-  → impact : remplacer `Task.gradleTask` par `GradleTask.gradleTask` dans
-    PlannerIntegration.toContractPlan() et VibecodingGraph.executePlanTasks()
-. Option B : renommer en VibecodingEpic/VibecodingUserStory/VibecodingTask
-  pour éviter la collision.
-  → impact : toutes les références dans codebase-plugin changent.
-
-=== Étape 4 — Mise à jour codebase-plugin
-
-. Ajouter `implementation("education.cccp:vibecoding-contracts:0.1.0")`
-  dans build.gradle.kts
-. Remplacer imports `cccp.vibecoding.contracts.*` → `education.cccp.contracts.vibecoding.*`
-. Supprimer les 7 fichiers du package cccp/
-. Lancer `./gradlew compileKotlin` → vert
-. Lancer `./gradlew test` → 135 tests PASS
-
-== Commandes pour la session fraîche
+== Commandes
 
 ```bash
-# 1. Publier workspace-bom (si modifié)
+# 1. Publier workspace-bom
 cd foundry/public/workspace-bom
 ./gradlew publishToMavenLocal
 
-# 2. Compiler codebase-plugin (vérifier l'état initial)
-cd ../../codebase-gradle/codebase-plugin
+# 2. Compiler codebase-plugin
+cd ../codebase-gradle/codebase-plugin
 ./gradlew compileKotlin
 
-# 3. Après migration, exécuter tests
-./gradlew test
-./gradlew cucumberTest
+# 3. Tests
+./gradlew test cucumberTest
 ```
-
-== Références critiques (LAZY — à charger si besoin)
-
-- `configuration/GLOBAL_CODE_REVIEW.adoc` v12 — priorités P0
-- `configuration/ANALYSE_TRANSITION_SYSTEME_AGENTIQUE.adoc` — architecture cible
-- `configuration/.agents/sessions/057-analyse-transition-systeme-agentique.adoc` — décisions
-- `foundry/public/workspace-bom/.agents/N0_CONTRACTS.adoc` — règles LLM futurs
-- `foundry/public/workspace-bom/.agents/decisions/ADR-001-multimodule-contrats-n0.adoc`
-- `foundry/public/codebase-gradle/codebase-plugin/.agents/sessions/047-migration-vibecoding-planner.adoc`

@@ -1,9 +1,9 @@
 package codebase.scenarios
 
-import cccp.vibecoding.contracts.plan.Epic
+import education.cccp.contracts.agent.Epic
 import cccp.vibecoding.contracts.plan.Plan
-import cccp.vibecoding.contracts.plan.Task as PlanTask
-import cccp.vibecoding.contracts.plan.UserStory
+import education.cccp.contracts.agent.GradleTask as PlanTask
+import education.cccp.contracts.agent.UserStory
 import cccp.vibecoding.contracts.state.VibecodingState
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then

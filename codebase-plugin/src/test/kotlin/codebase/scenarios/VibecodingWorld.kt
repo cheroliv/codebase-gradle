@@ -1,6 +1,6 @@
 package codebase.scenarios
 
-import cccp.vibecoding.contracts.registry.ToolRegistry
+import education.cccp.contracts.vibecoding.registry.ToolRegistry
 import cccp.vibecoding.contracts.state.VibecodingState
 import codebase.koog.VibecodingGraph
 
