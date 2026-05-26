@@ -1,0 +1,63 @@
+= Session 061 — Migration Flyway Canonique EPIC-V-FLYWAY
+:date: 2026-05-27
+:status: TERMINE
+:score: 10/10
+
+== Contexte
+
+Mise en place d'une migration Flyway canonique (sans dépendance Flyway/Gradle) pour le
+schéma vibecoding. La Session 059 avait créé V1__init_vibecoding.sql chargé manuellement
+via ClassLoader — la Session 061 le place dans un vrai pipeline de migration avec
+gestion de versions.
+
+Méthodologie : ZERO agent parallèle, BDD d'abord, baby-step séquentiel.
+
+== Actions
+
+=== Étape 0 — Pré-requis
+- `./gradlew compileTestKotlin` → BUILD SUCCESSFUL (8s)
+- `./gradlew test` → 29 suites XML, 0 failure, 0 error
+- `./gradlew cucumberTest` → 100 scénarios, 0 failure, 0 error, 10 skipped (@wip)
+- Baseline confirmée : 32/32 JUnit5 + 150/150 Cucumber
+
+=== Étape 1 — MigrationRunner.kt (125 lignes)
+- Classe `MigrationRunner` dans `codebase.koog.session`
+- Table `schema_version` (version VARCHAR, applied_at TIMESTAMPTZ, checksum VARCHAR)
+- Scan classpath `db/migration/V{n}__{description}.sql`
+- Trie par version, ignore les versions déjà appliquées
+- SHA-256 checksum enregistré pour chaque migration
+- Résilience : les fichiers `__undo.sql` sont ignorés
+- `./gradlew compileKotlin` → BUILD SUCCESSFUL (1s)
+
+=== Étape 2 — Adapter SessionRepository.initSchema()
+- Remplacement du bricolage ClassLoader (19 lignes) par `MigrationRunner(connectionFactory).migrate()` (3 lignes)
+- `./gradlew compileKotlin` → BUILD SUCCESSFUL (1s)
+
+=== Étape 3 — Test unitaire MigrationTest (136 lignes)
+- 3 tests JUnit5 avec Testcontainers pgvector/pgvector:pg17
+- `should create tables on first migration` : BDD vierge → migrate → schema_version contient 1 record
+- `should be idempotent` : double migrate → toujours 1 record
+- `should not reapply applied migrations` : migrate → count rows → migrate → count unchanged
+- `./gradlew test --tests MigrationTest` → 3/3 PASS (5s)
+
+=== Étape 4 — Cucumber non-régression
+- 100 Cucumber scénarios : 0 failure, 0 error, 10 skipped (@wip)
+- Full JUnit suite : BUILD SUCCESSFUL
+- Fix régression `cleanDatabase()` : ajout `DROP TABLE IF EXISTS schema_version` dans SessionRepositoryTest.kt
+- `./gradlew test cucumberTest` → BUILD SUCCESSFUL (3m21s)
+
+== Résultats
+
+| Suite | Statut |
+| MigrationRunner.kt | Créé — 125 lignes, idempotent, versionné, checksum SHA-256 |
+| SessionRepository.kt | `initSchema()` → 3 lignes (délégation à MigrationRunner) |
+| SessionRepositoryTest.kt | `cleanDatabase()` → +1 DROP schema_version |
+| MigrationTest.kt | 3/3 PASS (first migration, idempotence, no reapply) |
+| JUnit5 total | ✅ BUILD SUCCESSFUL (29 suites + 3 MigrationTest) |
+| Cucumber | ✅ 100/100 PASS, 0 régression |
+
+Code footprint : ~170 lignes net (4 fichiers). Zéro dépendance Flyway Gradle.
+
+== Prochaine session
+
+Voir PROMPT_REPRISE.adoc Session 062.

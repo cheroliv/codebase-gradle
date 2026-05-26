@@ -74,25 +74,7 @@ private class R2dbcSessionRepository(
     }
 
     override suspend fun initSchema() {
-        val sql = javaClass.classLoader.getResource("db/migration/V1__init_vibecoding.sql")
-            ?.readText()
-            ?: throw IllegalStateException("Migration script V1__init_vibecoding.sql not found on classpath")
-
-        val cleaned = sql.lines()
-            .filter { it.isNotBlank() && !it.trimStart().startsWith("--") }
-            .joinToString("\n")
-
-        val statements = cleaned.split(';')
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-
-        withConnection { conn ->
-            for (stmt in statements) {
-                Mono.from(conn.createStatement(stmt).execute())
-                    .flatMap { Mono.from(it.rowsUpdated) }.defaultIfEmpty(0L)
-                    .awaitSingle()
-            }
-        }
+        MigrationRunner(connectionFactory).migrate()
     }
 
     override suspend fun createSession(

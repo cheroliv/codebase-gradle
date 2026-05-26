@@ -1,8 +1,9 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut session 060_ : Consolidation craftman SessionRepository + Cucumber. Refactor constructeur SessionRecord (suppression secondaire, factory `session()` dans DashboardTest). Couverture : 32/32 JUnit5 PASS, 150/150 Cucumber PASS, 0 regression. BDD→TDD mapping complet vérifié.
+_Statut session 061_ : EPIC-V-FLYWAY terminé. MigrationRunner artisanal (scan classpath V{n}__*.sql, table schema_version, SHA-256, idempotent). 3/3 MigrationTest PASS (Testcontainers pgvector/pgvector:pg17). SessionRepository.initSchema() délégué à MigrationRunner. Fix cleanDatabase() (DROP schema_version). 35/35 JUnit5 + 100/100 Cucumber, 0 régression.
 
-| Session | Fichiers testes | Couverture | Notes
+| Session | Fichiers testés | Couverture | Notes
+| 061 | `MigrationTest.kt` (JUnit5 3) + `SessionRepositoryTest.kt` (fix cleanDatabase) + `MigrationRunner.kt` (nouveau) + `SessionRepository.kt` (refactor initSchema) | 3/3 MigrationTest PASS, 15/15 SessionRepositoryTest PASS (non-régression), 100/100 Cucumber PASS | MigrationRunner 125 lignes, idempotent, versionné, checksum SHA-256. initSchema() 19→3 lignes via MigrationRunner.migrate(). Fix cleanDatabase() ajout DROP schema_version. ZERO régression. |
 | 060 | `SessionRecord.kt` (refactor) + `DashboardTest.kt` (refactor factory) | 9/9 DashboardTest PASS, 15/15 SessionRepositoryTest PASS, 8/8 TokenTrackerTest PASS, 150/150 Cucumber PASS | Suppression constructeur secondaire 9-arg (SessionRecord 58→27 lignes). Factory `session()` dans DashboardTest (21 appels migrés). BDD→TDD : Chaque scénario Cucumber ↔ test JUnit5. ZERO régression. |
 | 058 | Aucun test modifié (imports seulement) | Non régressé | Renommage packages : zéro modification de logique de test. Compilation + execution conservent les résultats antérieurs.
 

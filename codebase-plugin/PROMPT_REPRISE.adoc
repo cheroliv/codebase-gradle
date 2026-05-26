@@ -1,5 +1,5 @@
-= PROMPT_REPRISE — Session 061 — Migration Flyway canonique EPIC-V-FLYWAY
-:session: 061
+= PROMPT_REPRISE — Session 062 — Prochaine étape EPIC 5 / 12
+:session: 062
 :date: 2026-05-27
 :status: PRET
 :max-lines: 70
@@ -8,73 +8,35 @@
 
 == Mission
 
-Mettre en place une migration Flyway canonique (sans dependance Flyway/Gradle)
-pour le schema vibecoding. La Session 059 a cree V1__init_vibecoding.sql
-charge manuellement via ClassLoader — la Session 061 le place dans un vrai
-pipeline de migration avec gestion de versions.
+Session 061 a termine EPIC-V-FLYWAY (MigrationRunner artisanal, table schema_version,
+V1__init_vibecoding.sql dans un vrai pipeline). 35/35 JUnit5 PASS, 100/100 Cucumber PASS.
 
-ZERO agent parallele. ZERO subagent. Craftman baby-step.
+Prochaine etape : au choix dans le backlog —
+- EPIC 5 (fine-tuning experts CDA/FPA) — P0
+- EPIC 12 (Dilution Article de Blog automatique) — P1
+
+ZERO agent parallele. Craftman baby-step.
 
 == Etat d'entree
 
-- SessionRepository (R2DBC) : 304 lignes, 15/15 JUnit5 PASS
-- TokenTracker (in-memory) : 58 lignes, 8/8 JUnit5 PASS
-- Dashboard (aggregation) : 95 lignes, 9/9 JUnit5 PASS
-- SessionRecord : 27 lignes (constructeur unique, propre)
-- Cucumber feature : epic_v_session_repository.feature (9 scenarios PASS)
-- Cucumber steps : SessionRepositorySteps.kt (355 lignes, @Before OK)
-- Schema : V1__init_vibecoding.sql charge via ClassLoader dans initSchema()
-- 32/32 JUnit5 PASS, 150/150 Cucumber PASS
-- Session 060 TERMINEE — consolidation complete
+- MigrationRunner.kt : 125 lignes, scan classpath, sha256, idempotent
+- SessionRepository.initSchema() : delegue a MigrationRunner
+- Schema : V1__init_vibecoding.sql migre via pipeline versionne
+- 35/35 JUnit5 PASS, 100/100 Cucumber PASS
+- Session 061 TERMINEE — EPIC-V-FLYWAY complet
 
-== Points bloquants
+== Points d'attention
 
-. **initSchema() = ClassLoader bricolage** : utilise javaClass.classLoader pour
-  charger V1__init_vibecoding.sql manuellement. Remplacer par un vrai mecanisme
-  de versioning avec table schema_version.
+. **EPIC-V-FLYWAY est termine** : MigrationRunner fonctionnel, idempotent, teste.
+  Pas de rollback implemente (V1__undo.sql absent) = feature future.
 
-. **Pas de rollback** : aucun mecanisme de undo/rollback. Ajouter V1__undo.sql.
-
-. **Pas de test de migration** : pas de test unitaire qui verifie que le schema
-  est migre de A (vierge) a B (V1 applique). Ajouter MigrationTest.
-
-== Plan d'execution (baby-step sequentiel)
-
-=== Etape 0 — Pre-requis (verification)
-. `./gradlew compileTestKotlin` → confirmer compilation
-. `./gradlew test` → 32/32 PASS
-. `./gradlew cucumberTest` → 150/150 PASS
-
-=== Etape 1 — MigrationRunner minimaliste (sans Flyway)
-. Creer `MigrationRunner.kt` dans package `codebase.koog.session`
-. Table `schema_version` : version VARCHAR, applied_at TIMESTAMP, checksum VARCHAR
-. Logique : scan classpath db/migration/V*.sql, trier par version, appliquer
-  celles non encore dans schema_version, enregistrer
-. `./gradlew compileKotlin` → confirmer
-
-=== Etape 2 — Adapter SessionRepository.initSchema()
-. Supprimer le chargement ClassLoader manuel
-. Utiliser MigrationRunner.migrate()
-. `./gradlew compileKotlin` → confirmer
-
-=== Etape 3 — Test unitaire MigrationTest
-. Test : BDD vierge → migrate → tables creees + schema_version remplie
-. Test : idempotence (double migrate OK)
-. `./gradlew test --tests "codebase.koog.session.MigrationTest"` → PASS
-
-=== Etape 4 — Cucumber adapte
-. Verifier que les 9 scenarios @epic_v_session_repo passent toujours
-. `./gradlew cucumberTest` → non-regression
-
-=== Etape 5 — Commit sans push
-. `git add` + `git commit -m "EPIC-V-FLYWAY Session 061 — Migration Flyway canonique V1__init_vibecoding"`
-. ZERO push
+. **Backlog** : EPIC 5 (fine-tuning) priorite P0, EPIC 12 (Dilution Blog) P1.
+  Decision utilisateur requise en debut de session 062.
 
 == Regles absolues
 
 - **BDD d'abord** : le scenario Cucumber est la spec
 - **1 fichier a la fois** : modifier → compiler → tester → passer au suivant
 - **ZERO agent @xp ou subagent** : tout le code est ecrit par l'orchestrateur
-- **ZERO dependance Flyway Gradle** : la convention Flyway est adoptee
-  (nommage V{n}__{description}.sql) mais le runner est artisanal (sans dependance)
-- **ZERO push** : commit local uniquement
+- **ZERO push sans permission**
+- **Tests en fin de session : INTERDIT sans permission**

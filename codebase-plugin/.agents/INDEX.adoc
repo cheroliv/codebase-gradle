@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-27 (Session 060)
-_Session en cours_ : 061 — Migration Flyway canonique EPIC-V-FLYWAY. MigrationRunner artisanal (sans dependance Flyway/Gradle), table schema_version, V1__init_vibecoding.sql pipeline. Base : 32/32 JUnit5 PASS, 150/150 Cucumber PASS. Backlog : EPIC 5, EPIC 12.
+_Derniere mise a jour_ : 2026-05-27 (Session 061)
+_Session en cours_ : 062 — Prochaine etape (EPIC 5 fine-tuning ou EPIC 12 Dilution Blog). Base : 35/35 JUnit5 PASS, 100/100 Cucumber PASS.
 
 '''
 == REGLES ABSOLUES (resume)
@@ -35,6 +35,7 @@ _Session en cours_ : 061 — Migration Flyway canonique EPIC-V-FLYWAY. Migration
 
 |===
 | # | Date | Type | Sujet | Score
+| 061 | 2026-05-27 | feat+infra | EPIC-V-FLYWAY — MigrationRunner artisanal (125 lignes, scan classpath V{n}__*.sql, table schema_version, SHA-256, idempotent). 3/3 MigrationTest PASS (Testcontainers). SessionRepository.initSchema() delegue (19→3 lignes). 35/35 JUnit5, 100/100 Cucumber, 0 regression. | 10/10
 | 060 | 2026-05-27 | consolidation | Consolidation craftman SessionRepository + Cucumber BDD — 3 correctifs : @Before Cucumber (9/9 PASS), constructeur secondaire SessionRecord (supprime, factory session()), couverture BDD→TDD (32/32 JUnit5, 150/150 Cucumber). Commit 3b95ff4. | 10/10
 | 058 | 2026-05-27 | refactor | Renommage global packages cccp/education — workspace-bom (21 fichiers), codebase (4+~25), planner (2), codex (31+2), training-private (1). 0 residu. | 10/10
 | 057 | 2026-05-26 | migration | Migration contrats vibecoding N1→N0 — 4 fichiers → vibecoding-contracts. 169 tests PASS. | 10/10
@@ -104,7 +105,7 @@ _Session en cours_ : 061 — Migration Flyway canonique EPIC-V-FLYWAY. Migration
 | EPIC L | Migration langgraph4j → koog — koog DSL (`ai.koog:koog-agents:0.8.0`) remplace langgraph4j comme orchestrateur. langchain4j préservé pour LLM/RAG/pgvector. 4 sous-EPICs (L-0→L-4, 8 pts). | ✅ TERMINE (2026-05-21). L-0→L-4 8/8 pts. Session 053 : dernier cleanup catalog/build/docs. Zéro dépendance ni référence langgraph4j dans le projet. | P0
 | EPIC V | *Vibecoding* — Remplacer opencode par VibecodingTask Gradle (agent koog autonome : LLM + filesystem + shell koog). 7 tools (5 built-in + ExecShellTool + ExecGradleTool). pipeline buildContext→classify→plan→executeTools. 5 sous-EPICs (V-0→V-4, 15 pts). | ✅ TERMINE (2026-05-19). V-0 ✅, V-1 ✅, V-2 ✅, V-3 ✅, V-4 ✅. 15/15 pts. | P0
 | EPIC-V-SESSION-REPO | *SessionRepository* — Persistance vibecoding R2DBC (PostgreSQL + pgvector). SessionRepository, TokenTracker, Dashboard, Jardin Secret (confidentiality_level). Schema V1__init_vibecoding.sql (Flyway convention sans dependance). 32/32 JUnit5, 150/150 Cucumber. | ✅ TERMINE (2026-05-27). Sessions 059+060. Commit 3b95ff4. | P0
-| EPIC-V-FLYWAY | *Migration Flyway* — MigrationRunner artisanal (sans dependance), table schema_version, gestion versions/rollback V{n}__*.sql. Pipeline initSchema → migrate. | EN COURS (Session 061) | P1
+| EPIC-V-FLYWAY | *Migration Flyway* — MigrationRunner artisanal (sans dependance), table schema_version, gestion versions/rollback V{n}__*.sql. Pipeline initSchema → migrate. | ✅ TERMINE (Session 061). 4 fichiers (MigrationRunner 125l, SessionRepository -16l, MigrationTest 136l 3/3, SessionRepositoryTest +1 fix). | P1
 | EPIC G | Publication Maven Central + Gradle Portal — groupId education.cccp, namespace cccp-education. | ✅ AUDITE (2026-05-19). Credentials presents, namespace actif sur Maven Central + Portal. Zéro action supplementaire necessaire. publishToMavenLocal suffit pour conso N1→N2. | P0
 |===
 

@@ -62,6 +62,7 @@ class SessionRepositoryTest {
             try {
                 Mono.from(conn.createStatement("DROP TABLE IF EXISTS vibecoding_steps").execute()).awaitSingle()
                 Mono.from(conn.createStatement("DROP TABLE IF EXISTS vibecoding_sessions").execute()).awaitSingle()
+                Mono.from(conn.createStatement("DROP TABLE IF EXISTS schema_version").execute()).awaitSingle()
             } finally {
                 Mono.from(conn.close()).subscribe()
             }
