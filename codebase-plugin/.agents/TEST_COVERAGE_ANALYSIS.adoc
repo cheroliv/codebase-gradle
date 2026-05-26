@@ -1,8 +1,9 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut session 058_ : Renommage packages uniquement (imports + packages). Aucune logique de test modifiée. Tests codebase-plugin : JUnit5 + Cucumber PASS (non régressés). Tests codex : 109/112 PASS (3 échecs préexistants).
+_Statut session 060_ : Consolidation craftman SessionRepository + Cucumber. Refactor constructeur SessionRecord (suppression secondaire, factory `session()` dans DashboardTest). Couverture : 32/32 JUnit5 PASS, 150/150 Cucumber PASS, 0 regression. BDD→TDD mapping complet vérifié.
 
 | Session | Fichiers testes | Couverture | Notes
+| 060 | `SessionRecord.kt` (refactor) + `DashboardTest.kt` (refactor factory) | 9/9 DashboardTest PASS, 15/15 SessionRepositoryTest PASS, 8/8 TokenTrackerTest PASS, 150/150 Cucumber PASS | Suppression constructeur secondaire 9-arg (SessionRecord 58→27 lignes). Factory `session()` dans DashboardTest (21 appels migrés). BDD→TDD : Chaque scénario Cucumber ↔ test JUnit5. ZERO régression. |
 | 058 | Aucun test modifié (imports seulement) | Non régressé | Renommage packages : zéro modification de logique de test. Compilation + execution conservent les résultats antérieurs.
 
 | Session | Fichiers testes | Couverture | Notes

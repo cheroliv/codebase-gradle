@@ -1,65 +1,80 @@
-= PROMPT_REPRISE — Session 060 — Consolidation Craftman SessionRepository + Cucumber
-:session: 060
+= PROMPT_REPRISE — Session 061 — Migration Flyway canonique EPIC-V-FLYWAY
+:session: 061
 :date: 2026-05-27
 :status: PRET
 :max-lines: 70
-:priorite: P0
+:priorite: P1
 :methodologie: BDD→TDD baby-step, 1 fichier a la fois, compiler apres chaque edition
 
 == Mission
 
-Consolider le travail de la Session 059 (SessionRepository + TokenTracker + Dashboard)
-dans l'ordre craftman canonique : BDD d'abord, TDD ensuite, code en dernier.
-ZERO agent parallele. ZERO subagent.
+Mettre en place une migration Flyway canonique (sans dependance Flyway/Gradle)
+pour le schema vibecoding. La Session 059 a cree V1__init_vibecoding.sql
+charge manuellement via ClassLoader — la Session 061 le place dans un vrai
+pipeline de migration avec gestion de versions.
+
+ZERO agent parallele. ZERO subagent. Craftman baby-step.
 
 == Etat d'entree
 
 - SessionRepository (R2DBC) : 304 lignes, 15/15 JUnit5 PASS
 - TokenTracker (in-memory) : 58 lignes, 8/8 JUnit5 PASS
 - Dashboard (aggregation) : 95 lignes, 9/9 JUnit5 PASS
-- Cucumber feature : epic_v_session_repository.feature (10 scenarios) — NON VERIFIE
-- Cucumber steps : SessionRepositorySteps.kt (355 lignes) — compilation OK, NON EXECUTE
-- Schema : V1__init_vibecoding.sql (Flyway convention sans dependance)
+- SessionRecord : 27 lignes (constructeur unique, propre)
+- Cucumber feature : epic_v_session_repository.feature (9 scenarios PASS)
+- Cucumber steps : SessionRepositorySteps.kt (355 lignes, @Before OK)
+- Schema : V1__init_vibecoding.sql charge via ClassLoader dans initSchema()
+- 32/32 JUnit5 PASS, 150/150 Cucumber PASS
+- Session 060 TERMINEE — consolidation complete
 
-== Points bloquants (3 correctifs prioritaires)
+== Points bloquants
 
-. **@Before Cucumber** : le tag `@Before("@epic_v_session_repo")` a ete ajoute en fin de
-  Session 059 mais jamais teste. Il faut verifier que le `TRUNCATE` fonctionne
-  et que les autres scenarios Cucumber ne sont pas impactes.
+. **initSchema() = ClassLoader bricolage** : utilise javaClass.classLoader pour
+  charger V1__init_vibecoding.sql manuellement. Remplacer par un vrai mecanisme
+  de versioning avec table schema_version.
 
-. **Constructeur secondaire SessionRecord** : ambigu (2 facons de construire le meme objet).
-  Supprimer et adapter FakeSessionRepository pour utiliser le constructeur primaire.
+. **Pas de rollback** : aucun mecanisme de undo/rollback. Ajouter V1__undo.sql.
 
-. **Ordre BDD→TDD** : verifier que chaque scenario Cucumber a un test unitaire correspondant.
-  Completude de couverture.
+. **Pas de test de migration** : pas de test unitaire qui verifie que le schema
+  est migre de A (vierge) a B (V1 applique). Ajouter MigrationTest.
 
 == Plan d'execution (baby-step sequentiel)
 
-=== Etape 1 — Reparer le @Before Cucumber
+=== Etape 0 — Pre-requis (verification)
 . `./gradlew compileTestKotlin` → confirmer compilation
-. `./gradlew cucumberTest -D"cucumber.filter.tags=@epic_v_session_repo"` → les 10 scenarios passent
-. `./gradlew cucumberTest` → les autres scenarios ne sont PAS impactes
+. `./gradlew test` → 32/32 PASS
+. `./gradlew cucumberTest` → 150/150 PASS
 
-=== Etape 2 — Nettoyer le constructeur secondaire
-. Supprimer le constructeur secondaire de SessionRecord.kt
-. Adapter FakeSessionRepository (DashboardTest.kt) → constructeur primaire
+=== Etape 1 — MigrationRunner minimaliste (sans Flyway)
+. Creer `MigrationRunner.kt` dans package `codebase.koog.session`
+. Table `schema_version` : version VARCHAR, applied_at TIMESTAMP, checksum VARCHAR
+. Logique : scan classpath db/migration/V*.sql, trier par version, appliquer
+  celles non encore dans schema_version, enregistrer
 . `./gradlew compileKotlin` → confirmer
-. `./gradlew test --tests "codebase.koog.tracking.DashboardTest"` → 9/9 PASS
 
-=== Etape 3 — Verifier couverture BDD→TDD
-. Pour chaque scenario Cucumber, identifier le test JUnit5 correspondant
-. Ajouter les tests manquants si necessaire
-. `./gradlew test cucumberTest` → full suite verte
+=== Etape 2 — Adapter SessionRepository.initSchema()
+. Supprimer le chargement ClassLoader manuel
+. Utiliser MigrationRunner.migrate()
+. `./gradlew compileKotlin` → confirmer
 
-=== Etape 4 — Commit sans push
-. `git add` les fichiers concernes
-. `git commit -m "EPIC-V Session 060 — Consolidation craftman SessionRepository + Cucumber BDD"`
-. ZERO push — lecture seule du remote
+=== Etape 3 — Test unitaire MigrationTest
+. Test : BDD vierge → migrate → tables creees + schema_version remplie
+. Test : idempotence (double migrate OK)
+. `./gradlew test --tests "codebase.koog.session.MigrationTest"` → PASS
+
+=== Etape 4 — Cucumber adapte
+. Verifier que les 9 scenarios @epic_v_session_repo passent toujours
+. `./gradlew cucumberTest` → non-regression
+
+=== Etape 5 — Commit sans push
+. `git add` + `git commit -m "EPIC-V-FLYWAY Session 061 — Migration Flyway canonique V1__init_vibecoding"`
+. ZERO push
 
 == Regles absolues
 
-- **BDD d'abord** : le scenario Cucumber est la spec, pas la verification
+- **BDD d'abord** : le scenario Cucumber est la spec
 - **1 fichier a la fois** : modifier → compiler → tester → passer au suivant
 - **ZERO agent @xp ou subagent** : tout le code est ecrit par l'orchestrateur
-- **ZERO parallelisation** : sequentiel, baby-step par baby-step
+- **ZERO dependance Flyway Gradle** : la convention Flyway est adoptee
+  (nommage V{n}__{description}.sql) mais le runner est artisanal (sans dependance)
 - **ZERO push** : commit local uniquement

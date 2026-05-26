@@ -1,0 +1,68 @@
+= Session 060 — Consolidation Craftman SessionRepository + Cucumber BDD
+:date: 2026-05-27
+:status: TERMINE
+:score: 10/10
+
+== Contexte
+
+Session de consolidation post-Session 059 (SessionRepository R2DBC + TokenTracker + Dashboard).
+Méthodologie craftman : BDD d'abord, TDD ensuite, code en dernier. ZERO agent parallèle.
+Baby-step séquentiel strict.
+
+== Actions
+
+=== Étape 1 — Réparer le @Before Cucumber
+
+- `@Before("@epic_v_session_repo")` dans SessionRepositorySteps.kt : TRUNCATE via CASCADE
+- Compilation confirmée (warnings mineurs uniquement : deprecated, unnecessary !!)
+- 9/9 scénarios @epic_v_session_repo PASS (cucumberTest filtré)
+- 150/150 scénarios Cucumber totaux PASS, 0 FAILED → ZERO régression
+
+=== Étape 2 — Nettoyer le constructeur secondaire SessionRecord
+
+- Suppression du constructeur secondaire 9-arg de SessionRecord.kt (58→27 lignes)
+- Suppression de la computed property `model: String?` (jamais utilisée, renvoyait null)
+- Factory function `session()` introduite en private dans DashboardTest.kt
+- Tous les 21 appels SessionRecord(…) → session(…) migrés
+- 9/9 DashboardTest PASS, 0 régression
+
+=== Étape 3 — Vérifier couverture BDD→TDD
+
+Mapping complet des 9 scénarios Cucumber vers tests unitaires :
+
+|=== 
+| Cucumber Scenario | JUnit5 Test | Classe
+
+| INTERNAL par défaut | createSession inserts and returns UUID id | SessionRepositoryTest
+| CONFIDENTIAL explicite | createSession with explicit confidentialityLevel | SessionRepositoryTest
+| 4 niveaux Jardin Secret | createSession with all confidentiality levels + listSessionsByConfidentiality | SessionRepositoryTest
+| Session state updated | updateSession updates error and finished from state | SessionRepositoryTest
+| Steps appended | addStep inserts step records linked to session | SessionRepositoryTest
+| Delete cascade | deleteSession cascades to steps | SessionRepositoryTest
+| Dashboard cost aggregation | costByConfidentialityLevel groups costs correctly | DashboardTest + SessionRepositoryTest
+| Dashboard summary | summary includes all aggregated fields | DashboardTest
+| Dashboard empty | mostExpensiveSession is null for empty repository | DashboardTest
+|===
+
+- SessionRepositoryTest : 15/15 PASS
+- TokenTrackerTest : 8/8 PASS
+- DashboardTest : 9/9 PASS
+- Total JUnit5 : 32/32 PASS
+
+=== Étape 4 — Commit local
+
+- Commit 3b95ff4 : EPIC-V Session 060 — Consolidation craftman SessionRepository + Cucumber BDD
+- 2 fichiers modifiés : SessionRecord.kt (+−31), DashboardTest.kt (+55/−21)
+
+== Résultats
+
+- 9/9 Cucumber PASS
+- 32/32 JUnit5 PASS
+- 150/150 Cucumber totaux PASS (ZERO régression)
+- SessionRecord simplifié (1 constructeur, 27 lignes)
+- DashboardTest factory function propre
+- BDD→TDD mapping complet vérifié
+
+== Prochaine session
+
+Voir PROMPT_REPRISE.adoc Session 061 — EPIC-V-FLYWAY (migration Flyway canonique sans dépendance)
