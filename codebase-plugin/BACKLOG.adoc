@@ -232,6 +232,372 @@ directement en R2DBC. Quand le nombre de migrations depassera 5, importer
 _Contenu de V1_ : sessions, steps, indexes, colonne confidentiality_level
 (aligne sur les 4 cercles du Jardin Secret).
 
+== EPIC W — Auto-discovery Gradle Tasks → ToolRegistry + OpenAPI Spec
+
+**Statut** : IDÉE — À CADRER
+**Priorite** : P1
+**Origine** : Code Review V16 (2026-05-27) — suggestion architecture cross-borough
+
+_Pourquoi_ : Aujourd'hui, le LLM peut appeler `exec_gradle` via ToolRegistry mais ne connaît pas
+le catalogue des tâches disponibles. Chaque plugin Gradle expose des tâches avec `@Input`, `@Option`,
+`@TaskAction` — c'est un schéma exploitable pour du tool calling dynamique.
+
+=== Concept
+
+Le pipeline d'auto-découverte :
+```
+Plugin Gradle (ex: GenerateSPGTask)
+  ↓ @Input, @Option, @TaskAction ← déjà présents dans le code
+  ↓
+Scanner de plugin descriptors → liste des tâches avec leurs paramètres
+  ↓
+Génération OpenAPI Spec (ou schema JSON) depuis le Gradle TaskGraph
+  ↓
+Enregistrement automatique dans ToolRegistry
+  ↓
+LLM découvre et appelle n'importe quelle tâche Gradle sans code supplémentaire
+```
+
+=== Sous-tâches envisagées
+
+* [ ] W-0 : Analyse — Inventaire des schémas de tâches Gradle existants (VibecodingTask, GenerateSPGTask, etc.) et mapping avec le format ToolRegistry
+* [ ] W-1 : Implémenter `TaskSchemaScanner` — inspecte le task graph Gradle, extrait les métadonnées des tâches (inputs, options, description, groupe)
+* [ ] W-2 : Générer un schema structuré (JSON/OpenAPI) depuis les plugin descriptors Gradle
+* [ ] W-3 : Auto-registrer les tâches découvertes dans ToolRegistry au démarrage de VibecodingGraph
+* [ ] W-4 : Exposer le catalogue au LLM via un tool `list_tasks` — l'agent peut requêter les tâches disponibles par groupe, description, mots-clés
+* [ ] W-5 : Mapping `--option` → arguments structurés — le ToolRegistry construit les arguments Gradle depuis la décision LLM
+* [ ] W-6 : Cache des schémas + invalidation à chaud quand un nouveau plugin est appliqué
+
+=== Bénéfice attendu
+
+Le LLM passe de "je peux exécuter `exec_gradle` sur une tâche que l'humain m'a dite"
+à **"je découvre le catalogue, je choisis la tâche adaptée, je construis les arguments, j'exécute"**.
+
+À terme, chaque nouveau plugin Gradle ajouté à un projet est automatiquement
+découvert et exposé au LLM — zero configuration, zero code d'intégration.
+
+C'est le chaînon manquant entre "agent qui lit du code" et "agent qui utilise le métier".
+
+=== Référence
+
+Discussion originale dans Code Review V16 (configuration/GLOBAL_CODE_REVIEW.adoc §23) :
+"Tu pourrais générer un OpenAPI spec depuis le plugin descriptor. Le mapping est quasi direct :
+`--intention="Générer SPG" → ToolRegistry.exec_gradle("generateSPG", args)`"
+
+== EPIC X — Décision Multi-Step : Plan → Execute → Verify → Adapt
+
+**Statut** : IDÉE — À CADRER
+**Priorite** : P1
+**Dépend de** : Boucle autonome V-6 (feedback loop error→replan→retry)
+
+_Pourquoi_ : La boucle actuelle (VibecodingGraph) est linéaire : buildContext → callLLM → executeTools → persistState → checkProgress. Le LLM décide *une action à la fois*. Pas de plan multi-step avec vérification intermédiaire et adaptation.
+
+Le game changing viendra quand l'agent pourra :
+```
+1. PLANIFIER  : "Je dois (a) compiler, (b) tester, (c) corriger les échecs, (d) recompiler"
+2. EXÉCUTER   : Lancer `./gradlew build` via tool calling
+3. VÉRIFIER   : Parser le résultat — "3 tests échouent dans FooTest"
+4. ADAPTER    : "Je lis FooTest, je corrige le bug, je relance"
+5. BOUCLER    : Jusqu'à vert ou abandon après N tentatives
+```
+
+C'est la différence entre un `for` (séquentiel, dépendant de la qualité du LLM à chaque step)
+et un `while` (adaptatif, auto-correctif, avec plan de secours).
+
+=== Sous-tâches envisagées
+
+* [ ] X-0 : Analyse — Audit de la boucle actuelle `VibecodingGraph.execute()` : où insérer le pattern verify→adapt ?
+
+* [ ] X-1 : `VibecodingPlan` — Promouvoir le plan d'un `List<String>` vers une structure multi-step
+      avec dépendances explicites entre les étapes :
+      ```kotlin
+      class VibecodingPlan(
+          val steps: List<VibecodingStep>,
+          val rollbackStrategy: RollbackStrategy = RollbackStrategy.STOP_ON_ERROR
+      )
+      class VibecodingStep(
+          val description: String,
+          val gradleTask: String,
+          val expectedOutput: String,    // "BUILD SUCCESSFUL", "All tests passed", etc.
+          val maxRetries: Int = 3,
+          val verifyHook: String? = null // "grep 'FAILED' build/reports/test-results.txt"
+      )
+      ```
+
+* [ ] X-2 : `TaskResultVerifier` — Parse la sortie d'une tâche Gradle et détermine le verdict :
+      - `SUCCESS` → passer à l'étape suivante
+      - `FAILED` → réessayer (avec ou sans modification)
+      - `BLOCKED` → passer au rollback (dépendance non satisfaite)
+      - `UNKNOWN` → demander au LLM d'interpréter
+
+* [ ] X-3 : Boucle `verify → adapt` — Si une étape échoue, le LLM reçoit :
+      1. Le résultat brut de la tâche (stdout + stderr)
+      2. Les fichiers modifiés depuis le dernier step
+      3. Son plan initial
+      4. Consigne : "Corrige l'erreur et relance, ou change de stratégie"
+      → Intègre un `maxRetries` avec backoff exponentiel (1, 3, 9 tentatives max)
+
+* [ ] X-4 : `RollbackStrategy` — Sur échec définitif :
+      - `STOP_ON_ERROR` — arrête tout (comportement actuel)
+      - `REVERT_AND_CONTINUE` — `git checkout` des fichiers de l'étape, continue
+      - `MARK_SKIPPED` — marque l'étape comme contournée, continue
+      - `FALLBACK_HUMAN` — pause, demande input utilisateur
+
+* [ ] X-5 : Intégration avec le TaskSchemaScanner (EPIC W) — Le LLM utilise le catalogue
+      des tâches pour *construire son plan* avant d'exécuter :
+      ```
+      Contexte : "Je dois générer un SPG à partir du corpus AFNOR"
+      Plan généré :
+        1. collectFromCorpus (collecter les données)
+        2. generateSPG (générer le scénario)
+        3. verifyOutput (vérifier que le SPG est valide — tâche dédiée)
+        4. generateSPD (si SPG valide, générer les 36 SPDs)
+      ```
+
+* [ ] X-6 : Tests — Scénario Cucumber "agent planifie, échoue, adapte, réussit"
+      avec un projet test qui a volontairement un bug à la première compilation
+      (le LLM doit lire l'erreur, corriger la typo, recompiler).
+
+=== Bénéfice attendu
+
+L'agent passe de :
+```
+Exécutant séquentiel : "Je fais une chose, puis je demande quoi faire"
+```
+à :
+```
+Planificateur adaptatif : "Je décide des 5 prochaines étapes, je les exécute,
+je vérifie chaque résultat, je m'adapte si nécessaire, je continue jusqu'au vert"
+```
+
+C'est cette boucle qui transforme un "assistant qui propose du code"
+en **"ingénieur junior qui livre une feature, teste, et corrige les bugs tout seul"**.
+
+La différence entre un outil et un employé.
+
+=== Référence
+
+Discussion originale dans Code Review V16 (configuration/GLOBAL_CODE_REVIEW.adoc §23) :
+"Ce qui manque pour le game changing : décision multi-step (plan → execute → verify → adapt)"
+
+== EPIC Y — Agentic Literature Compiler : Texte Agentique → Chunks → Ontologie → SQL → Gradle Tasks
+
+**Statut** : IDÉE — À CADRER
+**Priorite** : P1
+**Dépend de** : EPIC K (Taxonomie Workspace), EPIC W (TaskSchemaScanner)
+
+_Pourquoi_ : Aujourd'hui, la gouvernance agentique vit dans des fichiers texte (AGENT.adoc,
+INDEX.adoc, SESSIONS_HISTORY, les 10 documents du Jardin Secret, PROMPT_REPRISE, CADRAGE_METHODE...).
+Le LLM les lit via le canal EAGER et *espère* les interpréter correctement.
+
+C'est un système *textuel* : lisible par l'humain, interprété par le LLM,
+mais **pas exécutable** et **pas interopérable**.
+
+Le constat plus large : tout l'écosystème agentique produit de la littérature textuelle
+(prompts systèmes, règles d'agents, instructions Copilot/Cursor, protocoles de cadrage).
+Chaque système réinvente son propre format textuel. Aucun standard.
+
+Cette brique est le **compilateur** qui transforme cette littérature textuelle
+en artefacts exécutables sur le système de contexte augmenté (koog+langchain4j+RAG).
+
+=== Pipeline
+
+```
+Source : Littérature textuelle agentique
+  │
+  ├─ AGENT.adoc (règles, interdictions, protocoles)
+  ├─ INDEX.adoc (roadmap, statuts, backlog)
+  ├─ SESSIONS_HISTORY.adoc (trajectoire)
+  ├─ PROMPT_REPRISE.adoc (contexte de reprise)
+  ├─ Jardin Secret (10 documents racine)
+  ├─ CADRAGE_METHODE_*.adoc (ateliers)
+  └─ Littérature agentique externe (prompts systèmes, règles Copilot, etc.)
+  │
+  ▼
+┌─────────────────────────────────────────────────────┐
+│ 1. CHUNKING                                        │
+│    Segmentation sémantique en unités atomiques      │
+│    - Règle (interdiction, permission, obligation)   │
+│    - Concept (entité, relation, attribut)           │
+│    - Procédure (séquence d'actions)                │
+│    - Métadonnée (statut, priorité, dépendance)      │
+└─────────────────────────────────────────────────────┘
+  │
+  ▼
+┌─────────────────────────────────────────────────────┐
+│ 2. ONTOLOGISATION                                  │
+│    Mapping sur TAXONOMIE_WORKSPACE                  │
+│    - Verbe : GENERER / COLLECTER / TRANSFORMER /    │
+│              DÉPLOYER / INTERDIRE / VALIDER         │
+│    - Domaine : codebase / training / planner / etc. │
+│    - DAG niveau : N0→N4                            │
+│    - Cercle de confiance : 0→4                     │
+│    - Type de chunk : rule / concept / procedure /   │
+│                       metadata / constraint          │
+└─────────────────────────────────────────────────────┘
+  │
+  ▼
+┌─────────────────────────────────────────────────────┐
+│ 3. SQL SCHÉMATISATION                              │
+│    Stockage relationnel avec contraintes            │
+│    Tables : agent_chunks, chunk_relations,          │
+│             chunk_ontologies, chunk_enforcements,   │
+│             chunk_evolution (ligne du temps)        │
+│    Propriétés : parent, poids, version, validité,   │
+│                 source_file, checksum               │
+└─────────────────────────────────────────────────────┘
+  │
+  ▼
+┌─────────────────────────────────────────────────────┐
+│ 4. TRANSFORMATION → GRADLE TASKS                   │
+│    Chaque chunk peut produire :                    │
+│    - Règle → ToolRegistry pre/post hook            │
+│    - Procédure → Plan multi-step (EPIC X)          │
+│    - Concept → Metadata.kt (format pivot)          │
+│    - Contrainte → @DisableCachingByDefault,        │
+│                    validation automatique           │
+│    - Interdiction → Git hook / CI gate             │
+│    - Contexte → Prompt template enrichi            │
+└─────────────────────────────────────────────────────┘
+  │
+  ▼
+┌─────────────────────────────────────────────────────┐
+│ 5. BOUCLE D'ENRICHISSEMENT                         │
+│    L'exécution des tâches enrichit l'ontologie     │
+│    - Nouveaux chunks détectés dans les sessions    │
+│    - Évolution des règles (obsolète, renforcée)    │
+│    - Trajectoire (tel chunk → telle tâche)         │
+│    → Mise à jour semi-automatique du corpus        │
+└─────────────────────────────────────────────────────┘
+```
+
+=== Sous-tâches envisagées
+
+* [ ] Y-0 : Analyse — Inventaire des sources textuelles agentiques du workspace :
+      AGENT.adoc × 11 boroughs, INDEX.adoc × 11, SESSIONS_HISTORY × 11,
+      10 documents Jardin Secret, PROMPT_REPRISE, CADRAGE_METHODE × 8 (waiter),
+      GLOBAL_CODE_REVIEW v1→v16, TAXONOMIE_WORKSPACE.adoc.
+      Objectif : typologie des chunks (règle, concept, procédure, metadata, contrainte).
+
+* [ ] Y-1 : `AgenticChunker` — Analyse un fichier .adoc et le segmente en chunks
+      avec signature sémantique :
+      ```kotlin
+      data class AgenticChunk(
+          val id: String,                // hash SHA-256 du contenu
+          val sourceFile: String,        // AGENT.adoc:42-48
+          val chunkType: ChunkType,      // RULE | CONCEPT | PROCEDURE | METADATA | CONSTRAINT
+          val content: String,           // texte original
+          val verb: TaxonomyVerb?,       // GENERER | COLLECTER | TRANSFORMER | DÉPLOYER | INTERDIRE | VALIDER
+          val domain: String?,           // codebase | training | planner | ...
+          val dagLevel: DagLevel?,       // N0 | N1 | N2 | N3 | N4
+          val circle: Int?,              // 0 | 1 | 2 | 3 | 4
+          val weight: Double,            // importance relative (1.0 = critique, 0.1 = indicatif)
+          val checksum: String           // pour détecter les modifications
+      )
+      ```
+
+* [ ] Y-2 : `AgenticOntologizer` — Mappe chaque chunk sur la TAXONOMIE_WORKSPACE :
+      - Extrait le verbe dominant (patterns regex : "NE DOIT JAMAIS" → INTERDIRE)
+      - Identifie le domaine (patterns : "codebase-plugin", "training-plugin")
+      - Détermine le DAG niveau (patterns : "N1", "N2", "DAG N3")
+      - Calcule le poids (mots-clés : "CRITIQUE", "BLOQUANT", "ABSOLUE" → 1.0)
+      - Résultat : chunk ontologisé, prêt à stocker
+
+* [ ] Y-3 : `AgenticSchema` — Modèle relationnel pgvector pour stocker les chunks :
+      ```sql
+      CREATE TABLE agentic_chunks (
+          id VARCHAR(64) PRIMARY KEY,           -- SHA-256
+          source_file VARCHAR(512) NOT NULL,
+          source_lines VARCHAR(32),             -- "42-48"
+          chunk_type VARCHAR(32) NOT NULL,       -- RULE | CONCEPT | PROCEDURE | METADATA | CONSTRAINT
+          verb VARCHAR(32),                     -- GENERER | COLLECTER | ...
+          domain VARCHAR(64),
+          dag_level VARCHAR(4),                 -- N0 | N1 | N2 | N3 | N4
+          circle INT,
+          weight DOUBLE PRECISION DEFAULT 0.5,
+          content TEXT NOT NULL,
+          embedding vector(384),                -- pour RAG sur les règles
+          checksum VARCHAR(64) NOT NULL,
+          valid_from TIMESTAMP DEFAULT NOW(),
+          valid_until TIMESTAMP,                -- NULL = toujours actif
+          created_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE TABLE chunk_relations (
+          source_id VARCHAR(64) REFERENCES agentic_chunks(id),
+          target_id VARCHAR(64) REFERENCES agentic_chunks(id),
+          relation_type VARCHAR(32),            -- ENFORCES | CONFLICTS_WITH | DEPENDS_ON | REFINES
+          weight DOUBLE PRECISION DEFAULT 1.0
+      );
+      ```
+
+* [ ] Y-4 : `AgenticCompiler` — Transforme un chunk ontologisé en artefact exécutable :
+      - Chunk type=RULE, verb=INTERDIRE, domain=git → ToolRegistry pre-hook `checkGitPermission`
+      - Chunk type=PROCEDURE, verb=GENERER, domain=training → Plan multi-step (EPIC X)
+      - Chunk type=CONSTRAINT, verb=VALIDER, dag=N2 → `@DisableCachingByDefault` + validation
+      - Chunk type=CONCEPT → Metadata.kt (format pivot, taxonomie)
+      - Output : code Gradle généré (ou registre de configuration)
+
+* [ ] Y-5 : `AgenticIngestor` — Pipeline complet d'ingestion :
+      1. Scanner les fichiers .adoc connus (AGENT.adoc, INDEX.adoc, etc.)
+      2. Détecter les changements via checksum
+      3. Chunker les nouveaux contenus
+      4. Ontologiser chaque chunk
+      5. Persister en base
+      6. Compiler → mettre à jour les hooks ToolRegistry
+      7. Reporter les évolutions (N chunks ajoutés, M modifiés, K supprimés)
+
+* [ ] Y-6 : Migration de la littérature agentique externe — Pipeline d'import
+      pour les systèmes textuels non-workspace :
+      - Prompts systèmes Copilot/Cursor → chunks → ontologie → Gradle tasks
+      - Règles d'agents Claude/Gemini → idem
+      - Documentation de frameworks agentiques → idem
+      - Objectif : *tout* texte agentique peut être compilé en tâches Gradle
+        sur le système de contexte augmenté
+
+* [ ] Y-7 : Tests — Scénario Cucumber "une règle écrite dans AGENT.adoc devient
+      une contrainte exécutée par le ToolRegistry" :
+      1. Écrire une règle "INTERDIRE git push sans flag --dry-run" dans un test AGENT.adoc
+      2. Lancer l'AgenticIngestor
+      3. Vérifier que ToolRegistry bloque `exec_gradle("git", "push")`
+      4. Vérifier que `exec_gradle("git", "push --dry-run")` passe
+
+=== Pourquoi c'est la brique la plus stratégique
+
+**1. Elle résout le problème fondamental de la gouvernance agentique.**
+Aujourd'hui, les règles sont des textes que le LLM *devrait* suivre.
+Après EPIC Y, les règles sont des contraintes *exécutées* par le système.
+La différence entre "tu devrais" et "tu ne peux pas".
+
+**2. Elle rend le système auto-descriptif et auto-évolutif.**
+Les chunks ne sont pas statiques. L'exécution des tâches enrichit l'ontologie.
+Les règles obsolètes sont détectées. Les nouvelles règles sont suggérées.
+Le système apprend de sa propre exécution.
+
+**3. C'est le pont entre tous les systèmes agentiques.**
+Le problème actuel : Copilot a ses règles, Cursor a les siennes,
+Claude a ses system prompts, toi t'as tes AGENT.adoc.
+Aucun standard, aucune interopérabilité.
+
+Le pipeline chunk → ontologie → SQL → Gradle task est un **format pivot**.
+N'importe quelle littérature agentique peut être ingérée et transformée
+en tâches Gradle sur le système de contexte augmenté.
+C'est le "compilateur" qui manque à l'écosystème.
+
+**4. C'est la couche manquante entre le texte et l'exécution.**
+Le pipeline actuel (EPIC K → EPIC W → EPIC X) va du texte à la tâche.
+Mais le texte source (AGENT.adoc) reste du texte. Y est le compilateur
+qui rend la boucle entière :
+```
+Texte → Chunk → Ontologie → SQL → Tâche → Exécution → Enrichissement du texte
+```
+
+=== Référence
+
+Discussion originale session code review V16 (2026-05-27) :
+"Migration des systèmes agentiques textuels vers le système de contexte augmenté.
+La littérature textuelle agentique peut être chunkée/ontologisée/SQL schématisée
+et transforme la préconisation agentique en tâche Gradle."
+
 == EPIC G : Publication Maven Central + Gradle Portal
 **Statut** : AUDITE (session 046) — Pret, aucune action supplementaire necessaire
 **Priorite** : P0

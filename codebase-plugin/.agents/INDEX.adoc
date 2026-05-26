@@ -5,7 +5,7 @@ _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
 _Derniere mise a jour_ : 2026-05-27 (Session 070)
-_Session en cours_ : 071 — Cucumber verification + publishToMavenLocal
+_Session en cours_ : 071 — V-6 Feedback Loop + Y-1 AgenticChunker via vibecoding
 _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/` (N=70, multiple de 10)
 
 '''
