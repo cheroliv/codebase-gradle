@@ -1,65 +1,16 @@
-= PROMPT_REPRISE — Session 058 — Renommage Global Packages + Fin Nettoyage N1
-:session: 058
-:date: 2026-05-27
-:status: PRET
+= PROMPT_REPRISE — Session 059 — (à définir)
+:session: 059
+:date: (à définir)
+:status: EN_ATTENTE
 :max-lines: 70
-:priorite: P0
+:priorite: P1
 
 == Mission
 
-Renommage global des packages `cccp` et `education` dans TOUT le code source
-du workspace, sans toucher aux identifiants Maven (groupId `education.cccp`
-dans les artefacts publiés reste inchangé).
+À définir.
 
 == Contexte
 
-La session 057 a migré 4 fichiers de `cccp.vibecoding.contracts` (N1) vers
-`education.cccp.contracts.vibecoding` (N0). Résidu : les packages `cccp` et
-`education` coexistent dans le code source.
-
-La décision utilisateur est de **supprimer ces deux noms du code source**
-globalement, en une seule passe.
-
-== Périmètre
-
-- **11 boroughs** : training, planner, codex, codebase, quizz-benchmark,
-  capsule, runner, workspace-gradle, waiter-gradle, plantuml-gradle, magic-stick
-- **Workspace-bom** : agent-contracts, codebase-contracts, vibecoding-contracts
-- **Documentation** : tous les `.adoc` qui mentionnent `education.cccp` ou `cccp`
-
-== Règles
-
-- **Zéro modification** des identifiants Maven publiés (groupId Maven = `education.cccp` reste)
-- **Zéro modification** du Gradle Plugin Portal handle (`cccp-education` reste)
-- Changer uniquement les packages Kotlin dans le code source
-- Baby-step par borough, compile + test après chaque borough
-- Publier chaque borough modifié dans Maven Local
-
-== Travail restant de la session 057
-
-- Résidu N1 : `state/VibecodingState.kt` et `state/AugmentedState.kt`
-  dépendent encore de `cccp.vibecoding.contracts.plan.Plan`
-  → à traiter dans le cadre du renommage global
-
-== Ordre suggéré (bottom-up)
-
-. workspace-bom (3 modules)
-. codebase-plugin (Queens)
-. Les autres boroughs N2 (alphabetique)
-. runner-gradle (New Jersey)
-. Documentation
-
-== Commandes
-
-```bash
-# 1. Publier workspace-bom
-cd foundry/public/workspace-bom
-./gradlew publishToMavenLocal
-
-# 2. Compiler codebase-plugin
-cd ../codebase-gradle/codebase-plugin
-./gradlew compileKotlin
-
-# 3. Tests
-./gradlew test cucumberTest
-```
+La session 058 a terminé le renommage global des packages cccp/education.
+Zéro résidu dans les packages/imports Kotlin. Prochaines priorités : EPIC 5
+(Pipeline fine-tuning experts CDA/FPA) ou EPIC 12 (Dilution Article de Blog).

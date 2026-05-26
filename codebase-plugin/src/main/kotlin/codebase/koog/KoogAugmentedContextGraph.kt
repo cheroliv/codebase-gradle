@@ -1,8 +1,8 @@
 package codebase.koog
 
-import education.cccp.contracts.context.CompositeContext
-import education.cccp.contracts.context.CompositeContextConfig
-import cccp.vibecoding.contracts.state.AugmentedState
+import contracts.context.CompositeContext
+import contracts.context.CompositeContextConfig
+import vibecoding.contracts.state.AugmentedState
 import ai.koog.agents.core.agent.asMermaidDiagram
 import ai.koog.agents.core.agent.entity.AIAgentGraphStrategy
 import ai.koog.agents.core.agent.entity.ToolSelectionStrategy

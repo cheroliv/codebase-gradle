@@ -1,6 +1,9 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut session 055_ : Fix 4 Cucumber résiduels (2 OpencodeInjector + 2 prepare_context). 209/209 PASS (126 JUnit5 + 76 Cucumber + 7 EpicL3), 0 failure, 10 skipped intentionnels. EPIC L vérifié TERMINE (zéro langgraph4j).
+_Statut session 058_ : Renommage packages uniquement (imports + packages). Aucune logique de test modifiée. Tests codebase-plugin : JUnit5 + Cucumber PASS (non régressés). Tests codex : 109/112 PASS (3 échecs préexistants).
+
+| Session | Fichiers testes | Couverture | Notes
+| 058 | Aucun test modifié (imports seulement) | Non régressé | Renommage packages : zéro modification de logique de test. Compilation + execution conservent les résultats antérieurs.
 
 | Session | Fichiers testes | Couverture | Notes
 | 055 | `OpencodeInjectorSteps.kt` + `PrepareContextSteps.kt` (Cucumber) | 76/76 Cucumber PASS (+ 7/7 EpicL3) | Fix : OpencodeInjector content-on-header-line (Graphify 1-ligne), prepare_context strings alignés. 209/209 PASS (126 JUnit5+76 Cucumber+7 EpicL3), 0 failure.

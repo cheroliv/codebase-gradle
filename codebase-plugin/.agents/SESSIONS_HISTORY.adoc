@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 058 | 2026-05-27 | refactor | Renommage global packages cccp/education — workspace-bom (21 fichiers: education.cccp.contracts.* → contracts.*), codebase-plugin (4+~25: cccp.vibecoding.* → vibecoding.contracts.* + 83 imports), planner-plugin (2: imports education.cccp.* → contracts.*), codex/doc-pipeline (31: cccp/education/codex/ → codex/ + 2 imports), training-private (1: imports). 0 residu package/import. workspace-bom publie Maven Local. Compilation OK tous boroughs. Tests codebase + codex PASS. | 10/10
 | 057 | 2026-05-26 | migration | Migration contrats vibecoding N1→N0 — creation module vibecoding-contracts dans workspace-bom (4 fichiers: ExecShellTool, ExecGradleTool, ToolkitIsMissingException, ToolRegistry). KoogPlan.kt adopte agent-contracts (Epic/UserStory/GradleTask). PlannerIntegration migré vers agent-contracts. 4 fichiers N1 supprimés. 169 tests PASS (162 JUnit5 + 7 EpicL3). | 10/10
 | 056 | 2026-05-23 | feat | EPIC 6 Intégration ONNX boucle qualité — 3 checkers déterministes (sentiment, off-topic CDA/FPA, PII résiduelle) + QualityGate + QualityRetryCircuit (max 3 retries, feedback LLM) + QualityGateTask Gradle. 86 tests PASS (78 JUnit5 + 8 Cucumber), 0 failure. | 10/10
 | 054 | 2026-05-21 | feat+integration | EPIC V-3 Securite + V-4 Integration. 9 cycles TDD. 10/10 Cucumber vibecoding PASS. | 9/10

@@ -1,7 +1,7 @@
 package codebase.koog
 
 import ai.koog.agents.core.agent.asMermaidDiagram
-import cccp.vibecoding.contracts.state.AugmentedState
+import vibecoding.contracts.state.AugmentedState
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

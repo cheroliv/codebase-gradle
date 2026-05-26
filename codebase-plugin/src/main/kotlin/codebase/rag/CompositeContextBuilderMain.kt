@@ -1,6 +1,6 @@
 package codebase.rag
 
-import education.cccp.contracts.context.CompositeContextConfig
+import contracts.context.CompositeContextConfig
 import org.slf4j.LoggerFactory
 import java.io.File
 

@@ -1,6 +1,6 @@
 package codebase.scenarios
 
-import education.cccp.contracts.context.CompositeContextConfig
+import contracts.context.CompositeContextConfig
 import codebase.rag.ChunkTokenizer
 import codebase.rag.CompositeContextBuilder
 import codebase.rag.EmbeddingPipeline

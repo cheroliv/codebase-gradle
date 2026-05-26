@@ -1,7 +1,7 @@
 package codebase.scenarios
 
-import education.cccp.contracts.context.CompositeContext
-import education.cccp.contracts.context.CompositeContextConfig
+import contracts.context.CompositeContext
+import contracts.context.CompositeContextConfig
 import codebase.rag.CompositeContextBuilder
 import codebase.rag.EmbeddingPipeline
 import codebase.rag.VectorStore

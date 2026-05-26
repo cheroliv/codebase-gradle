@@ -1,9 +1,9 @@
-package cccp.vibecoding.contracts.plan
+package vibecoding.contracts.plan
 
-import education.cccp.contracts.agent.Epic
-import education.cccp.contracts.agent.UserStory
-import education.cccp.contracts.agent.GradleTask
-import education.cccp.contracts.context.CompositeContext
+import contracts.agent.Epic
+import contracts.agent.UserStory
+import contracts.agent.GradleTask
+import contracts.context.CompositeContext
 
 /**
  * Plan de décomposition — structure de données pure.

@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-26 (Session 057 — Migration Contrats Vibecoding N1→N0 + DAG BOM. 169 tests PASS.)
-_Session en cours_ : 058 — Renommage Global Packages (cccp/education) + Fin Nettoyage N1. Backlog : EPIC 5, EPIC 12.
+_Derniere mise a jour_ : 2026-05-27 (Session 058 — Renommage Global Packages cccp/education. TERMINE. 0 residu.)
+_Session en cours_ : 059 — (a definir). Backlog : EPIC 5, EPIC 12.
 
 '''
 == REGLES ABSOLUES (resume)
@@ -35,6 +35,7 @@ _Session en cours_ : 058 — Renommage Global Packages (cccp/education) + Fin Ne
 
 |===
 | # | Date | Type | Sujet | Score
+| 058 | 2026-05-27 | refactor | Renommage global packages cccp/education — workspace-bom (21 fichiers), codebase (4+~25), planner (2), codex (31+2), training-private (1). 0 residu. | 10/10
 | 057 | 2026-05-26 | migration | Migration contrats vibecoding N1→N0 — 4 fichiers → vibecoding-contracts. 169 tests PASS. | 10/10
 | 056 | 2026-05-23 | feat | EPIC 6 Intégration ONNX boucle qualité. 86 tests PASS. | 10/10
 | 053 | 2026-05-21 | cleanup+feat | Cleanup langgraph4j residuel + Reconnexion Vibecoding | 10/10

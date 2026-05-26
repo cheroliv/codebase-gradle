@@ -1,0 +1,43 @@
+= Session 058 — Renommage Global Packages cccp/education
+:date: 2026-05-27
+:type: refactor
+:score: 10/10
+:duree: ~2h
+
+== Objectif
+
+Supprimer les segments `cccp` et `education` des packages Kotlin dans tout
+le workspace, sans toucher aux identifiants Maven (`group = "education.cccp"`)
+ni aux plugin IDs Gradle Portal.
+
+== Périmètre
+
+|===
+| Borough | Action | Fichiers
+| workspace-bom (3 modules) | `education.cccp.contracts.*` → `contracts.*` | 21 .kt (déplacés + packages)
+| codebase-plugin (Queens) | `cccp.vibecoding.contracts.*` → `vibecoding.contracts.*` + 83 imports | 4 déplacés + ~25 modifiés
+| planner-plugin (Manhattan) | 6 imports `education.cccp.contracts.context.*` → `contracts.context.*` | 2 modifiés
+| codex/doc-pipeline (Brooklyn) | 31 fichiers déplacés `cccp/education/codex/` → `codex/` + 2 imports | 31 déplacés + 2 modifiés
+| training-gradle (private) | 4 imports `education.cccp.contracts.context.*` → `contracts.context.*` | 1 modifié
+|===
+
+== Résultats
+
+- **0** résidu `package cccp.*` ou `package education.*` dans tout le workspace
+- **0** résidu `import cccp.*` ou `import education.cccp.*`
+- workspace-bom publié en Maven Local avec nouveaux packages `contracts.*`
+- Compilation ✅ sur tous les boroughs modifiés
+- Tests codebase-plugin ✅ (JUnit5 + Cucumber)
+- Tests codex ✅ (109/112 PASS, 3 échecs préexistants)
+
+== Règle respectée
+
+- `group = "education.cccp"` (build.gradle.kts) — inchangé
+- `id("education.cccp.planner")` (plugin IDs) — inchangés
+- Handle Gradle Portal `cccp-education` — inchangé
+
+== Décisions
+
+- Package cible : suppression simple des segments `cccp` et `education`,
+  pas de nouveau préfixe. Ex: `education.cccp.contracts.agent` → `contracts.agent`.
+- Les répertoires physiques suivent les packages (codex corrigé : `cccp/education/codex/` → `codex/`).

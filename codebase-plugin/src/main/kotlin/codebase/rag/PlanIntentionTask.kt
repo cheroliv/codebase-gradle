@@ -1,7 +1,7 @@
 package codebase.rag
 
-import cccp.vibecoding.contracts.plan.Plan
-import cccp.vibecoding.contracts.state.AugmentedState
+import vibecoding.contracts.plan.Plan
+import vibecoding.contracts.state.AugmentedState
 import codebase.koog.KoogAugmentedContextGraph
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty

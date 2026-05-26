@@ -1,8 +1,8 @@
 package codebase.koog
 
-import education.cccp.contracts.context.ChannelBudget
-import education.cccp.contracts.context.CompositeContextConfig
-import education.cccp.contracts.context.ContextChannel
+import contracts.context.ChannelBudget
+import contracts.context.CompositeContextConfig
+import contracts.context.ContextChannel
 import ai.koog.agents.core.agent.asMermaidDiagram
 import ai.koog.agents.core.agent.entity.AIAgentGraphStrategy
 import ai.koog.agents.core.agent.entity.ToolSelectionStrategy

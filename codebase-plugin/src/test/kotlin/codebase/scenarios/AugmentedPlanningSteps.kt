@@ -1,6 +1,6 @@
 package codebase.scenarios
 
-import cccp.vibecoding.contracts.state.AugmentedState
+import vibecoding.contracts.state.AugmentedState
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When

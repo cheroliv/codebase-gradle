@@ -1,9 +1,12 @@
 package codebase.rag
 
-import education.cccp.contracts.context.CompositeContext
-import cccp.vibecoding.contracts.plan.Plan
-import cccp.vibecoding.contracts.plan.PlanState
-import cccp.vibecoding.contracts.state.AugmentedState
+import contracts.agent.Epic
+import contracts.agent.GradleTask
+import contracts.agent.UserStory
+import contracts.context.CompositeContext
+import vibecoding.contracts.plan.Plan
+import vibecoding.contracts.plan.PlanState
+import vibecoding.contracts.state.AugmentedState
 import org.slf4j.LoggerFactory
 import planning.IntentionPlanner
 import planning.PlanningContext
@@ -85,19 +88,19 @@ fun AugmentedState.toPlanMetadata(source: String = "codebase"): PlanMetadata? {
     )
 }
 
-private fun planning.Plan.toContractPlan(): cccp.vibecoding.contracts.plan.Plan =
-    cccp.vibecoding.contracts.plan.Plan(
+private fun planning.Plan.toContractPlan(): vibecoding.contracts.plan.Plan =
+    vibecoding.contracts.plan.Plan(
         title = title,
         epics = epics.map { e ->
-            education.cccp.contracts.agent.Epic(
+            contracts.agent.Epic(
                 name = e.name,
                 description = e.description,
                 points = e.points,
                 userStories = e.userStories.map { us ->
-                    education.cccp.contracts.agent.UserStory(
+                    contracts.agent.UserStory(
                         description = us.description,
                         tasks = us.tasks.map { t ->
-                            education.cccp.contracts.agent.GradleTask(
+                            contracts.agent.GradleTask(
                                 description = t.description,
                                 gradleTask = t.gradleTask
                             )

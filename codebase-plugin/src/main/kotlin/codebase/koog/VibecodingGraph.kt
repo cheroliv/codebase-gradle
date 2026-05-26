@@ -1,8 +1,8 @@
 package codebase.koog
 
-import education.cccp.contracts.vibecoding.registry.ToolRegistry
-import cccp.vibecoding.contracts.state.AugmentedState
-import cccp.vibecoding.contracts.state.VibecodingState
+import contracts.vibecoding.registry.ToolRegistry
+import vibecoding.contracts.state.AugmentedState
+import vibecoding.contracts.state.VibecodingState
 import ai.koog.agents.core.agent.asMermaidDiagram
 import ai.koog.agents.core.agent.entity.AIAgentGraphStrategy
 import ai.koog.agents.core.agent.entity.ToolSelectionStrategy

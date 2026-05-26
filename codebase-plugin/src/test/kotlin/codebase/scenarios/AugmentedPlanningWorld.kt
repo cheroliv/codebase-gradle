@@ -1,6 +1,6 @@
 package codebase.scenarios
 
-import cccp.vibecoding.contracts.state.AugmentedState
+import vibecoding.contracts.state.AugmentedState
 import codebase.koog.KoogAugmentedContextGraph
 import java.io.File
 

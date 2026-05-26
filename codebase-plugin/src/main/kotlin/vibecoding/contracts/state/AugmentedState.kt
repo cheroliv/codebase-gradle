@@ -1,7 +1,7 @@
-package cccp.vibecoding.contracts.state
+package vibecoding.contracts.state
 
-import education.cccp.contracts.context.CompositeContext
-import cccp.vibecoding.contracts.plan.Plan
+import contracts.context.CompositeContext
+import vibecoding.contracts.plan.Plan
 
 /**
  * État augmenté pour le graphe koog+langchain4j.

@@ -1,8 +1,8 @@
 package codebase.rag
 
-import education.cccp.contracts.context.ChannelBudget
-import education.cccp.contracts.context.CompositeContext
-import education.cccp.contracts.context.ContextChannel
+import contracts.context.ChannelBudget
+import contracts.context.CompositeContext
+import contracts.context.ContextChannel
 import org.slf4j.LoggerFactory
 import java.io.File
 

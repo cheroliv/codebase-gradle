@@ -1,7 +1,7 @@
 package codebase.rag
 
-import education.cccp.contracts.context.ChannelType
-import education.cccp.contracts.context.ContextChannel
+import contracts.context.ChannelType
+import contracts.context.ContextChannel
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

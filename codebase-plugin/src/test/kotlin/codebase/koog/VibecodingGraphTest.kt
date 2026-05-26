@@ -1,11 +1,11 @@
 package codebase.koog
 
-import education.cccp.contracts.agent.Epic
-import cccp.vibecoding.contracts.plan.Plan
-import education.cccp.contracts.agent.GradleTask as PlanTask
-import education.cccp.contracts.agent.UserStory
-import education.cccp.contracts.vibecoding.registry.ToolRegistry
-import cccp.vibecoding.contracts.state.VibecodingState
+import contracts.agent.Epic
+import vibecoding.contracts.plan.Plan
+import contracts.agent.GradleTask as PlanTask
+import contracts.agent.UserStory
+import contracts.vibecoding.registry.ToolRegistry
+import vibecoding.contracts.state.VibecodingState
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

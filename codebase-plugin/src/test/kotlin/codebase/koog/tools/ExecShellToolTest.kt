@@ -1,6 +1,6 @@
 package codebase.koog.tools
 
-import education.cccp.contracts.vibecoding.tools.ExecShellTool
+import contracts.vibecoding.tools.ExecShellTool
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

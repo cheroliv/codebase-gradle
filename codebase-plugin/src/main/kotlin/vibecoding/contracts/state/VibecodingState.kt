@@ -1,6 +1,6 @@
-package cccp.vibecoding.contracts.state
+package vibecoding.contracts.state
 
-import cccp.vibecoding.contracts.plan.Plan
+import vibecoding.contracts.plan.Plan
 
 /**
  * État mutable du vibecoding agent.

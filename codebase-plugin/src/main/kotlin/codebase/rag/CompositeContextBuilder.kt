@@ -1,7 +1,7 @@
 package codebase.rag
 
-import education.cccp.contracts.context.CompositeContext
-import education.cccp.contracts.context.CompositeContextConfig
+import contracts.context.CompositeContext
+import contracts.context.CompositeContextConfig
 import codebase.walker.WorkspaceWalker
 import codex.store.CodexVectorStore
 import org.slf4j.LoggerFactory

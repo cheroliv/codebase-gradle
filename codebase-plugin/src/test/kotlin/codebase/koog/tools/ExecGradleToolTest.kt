@@ -1,6 +1,6 @@
 package codebase.koog.tools
 
-import education.cccp.contracts.vibecoding.tools.ExecGradleTool
+import contracts.vibecoding.tools.ExecGradleTool
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue

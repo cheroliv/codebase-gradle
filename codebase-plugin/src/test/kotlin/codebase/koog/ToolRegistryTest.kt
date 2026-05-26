@@ -1,6 +1,6 @@
 package codebase.koog
 
-import education.cccp.contracts.vibecoding.registry.ToolRegistry
+import contracts.vibecoding.registry.ToolRegistry
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
