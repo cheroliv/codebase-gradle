@@ -32,6 +32,10 @@ class TokenTracker(
         return result
     }
 
+    fun trackCompletion(output: String) {
+        completionTokens += completionTokenEstimator(output)
+    }
+
     fun estimatedCost(model: String): Double {
         return Companion.costFor(model, promptTokens, completionTokens)
     }

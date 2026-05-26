@@ -80,6 +80,20 @@ class TokenTrackerTest {
     }
 
     @Test
+    fun `trackCompletion tracks estimated completion tokens without incrementing totalCalls`() {
+        val tracker = TokenTracker()
+        tracker.trackPrompt("What is the answer?")
+        assertEquals(1, tracker.totalCalls)
+        val promptBefore = tracker.promptTokens
+
+        tracker.trackCompletion("The answer is 42.")
+
+        assertEquals(1, tracker.totalCalls, "trackCompletion should not increment totalCalls")
+        assertTrue(tracker.completionTokens > 0, "Completion tokens should be estimated > 0")
+        assertEquals(promptBefore, tracker.promptTokens, "Prompt tokens should not change")
+    }
+
+    @Test
     fun `default estimator produces non-negative token counts`() {
         assertEquals(0, TokenTracker.defaultEstimateTokens(""))
         assertTrue(TokenTracker.defaultEstimateTokens("Hello, world!") > 0)

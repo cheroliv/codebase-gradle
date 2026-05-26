@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 068 | 2026-05-26 | feat | LLM Provider Resolver + --model option + completion tracking. LlmProviderResolver mapping model→provider (Gemma4 pool ROUND_ROBIN, ports 11437-11465). VibecodingTask --model option (empty=deterministic, gemini/deepseek/ollama=LLM). TokenTracker.trackCompletion wired in callLLMNode. 34/34 PASS (6 resolver + 8 task + 11 graph + 9 tracker). | 9/10
 | 065 | 2026-05-27 | feat | EPIC V-6 Cablage Ollama Cloud Docker + ConnectionFactory R2DBC — N0 llm-pool-contracts (LlmInstance/QuotaConfig/LlmInstancePool). OllamaPool rotation ROUND_ROBIN/LEAST_USED. OllamaLlmProvider zero API key. ConnectionFactory dans VibecodingGraph. updateSession persiste TokenTracker. V2 migration. 12/12 JUnit5 + 1/1 Cucumber @epic_v_6 PASS. 0 regression. | 10/10
 | 064 | 2026-05-27 | feat | EPIC V-5 Cablage Gemini + Persistance — LlmProvider fun interface Clean Architecture, GeminiLlmProvider production System.getenv, FakeLlmProvider test, VibecodingGraph 5 noeuds koog callLLM+persistState+createSession+updateSession+TokenTracker.trackPrompt, Cucumber @epic_v_5 PASS. 11/11 JUnit5, 101/101 Cucumber, ZERO regression, ZERO secret. Machine 95%. | 9/10
 | 063 | 2026-05-27 | feat | Configuration LLM YAML + Data class Jackson. LlmConfig.kt (4 data classes, 66l) + llm-config.yml (pattern envVar) + .gitignore + 4/4 tests PASS. | 10/10

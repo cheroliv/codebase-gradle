@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-27 (Session 065)
-_Session en cours_ : 066 — EPIC V-6 Test Integration R2DBC end-to-end. Test VibecodingGraph + ConnectionFactory Testcontainers. Verifier createSession/updateSession/TokenTracker persisted. Cucumber scenario. Base : session 065 (OllamaPool + OllamaLlmProvider + ConnectionFactory injection + V2 migration OK).
+_Derniere mise a jour_ : 2026-05-26 (Session 068)
+_Session en cours_ : 069 — Resume Session + Dashboard CLI. P1: --resume <sessionId> sur VibecodingTask (~60 lignes). P2: Dashboard CLI (~30 lignes). Backlog: pool consolidation. Base: session 068 (LlmProviderResolver + --model option + completion tracking. 34/34 PASS).
 
 '''
 == REGLES ABSOLUES (resume)

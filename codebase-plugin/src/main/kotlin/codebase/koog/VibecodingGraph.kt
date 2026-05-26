@@ -240,6 +240,7 @@ class VibecodingGraph(
 
         return try {
             val response = runBlocking { llmProvider.call(prompt) }
+            tokenTracker.trackCompletion(response)
             log.info("[VibecodingGraph] LLM response: {} chars, first 80: {}", response.length, response.take(80))
 
             state.nextIteration().copy(

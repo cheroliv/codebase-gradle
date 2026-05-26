@@ -1,44 +1,31 @@
-= PROMPT_REPRISE — Session 066 — EPIC V-6 Test Integration R2DBC + VibecodingGraph End-to-End
-:session: 066
-:date: 2026-05-27
-:status: PRET
-:max-lines: 50
-:priorite: P0
-:methodologie: BDD→TDD baby-step, 1 fichier a la fois, compiler apres chaque edition
+= PROMPT_REPRISE — Session 069 : Resume Session + Dashboard CLI + Pool Refactoring
+:session: 069
+:date: 2026-05-26
+:contexte: Session 068 TERMINÉE — LlmProviderResolver + --model option + completion tracking
+:prerequis: Session 068 (7 files, 34/34 tests PASS)
 
-== Mission
+== What was delivered (Session 068)
 
-Terminer EPIC V-6 : test d'integration R2DBC Testcontainers dans VibecodingGraph,
-verifier createSession + updateSession end-to-end avec vrai ConnectionFactory.
+- ✅ LlmProviderResolver.kt — model→provider mapping (Gemma4 pool ROUND_ROBIN, ports 11437-11465)
+- ✅ VibecodingTask --model option (empty = deterministic, "gemini"/"ollama"/"deepseek" = LLM)
+- ✅ TokenTracker.trackCompletion(output) + callLLMNode wired
+- ✅ 34/34 tests PASS (6 resolver + 8 task + 11 graph + 9 tracker)
 
-== Objectifs
+== Objective Session 069 — Complete vibecoding autonomous loop
 
-=== P0 — Test Integration R2DBC + VibecodingGraph
+=== P1 — Resume session --resume <sessionId> (~60 lines)
+Files: VibecodingTask.kt, VibecodingGraph.kt
+- Add @Option(option = "resume") on VibecodingTask
+- Load state via SessionRepository.getSession(sessionId)
+- Reconstruct VibecodingState from SessionRecord
 
-- Test d'integration : VibecodingGraph avec ConnectionFactory Testcontainers
-- Verifier createSession + updateSession + TokenTracker en end-to-end
-- Verifier que les colonnes prompt_tokens, completion_tokens, cost, model sont persistees
-- 1 scenario Cucumber minimum (ou extension @epic_v_6 existant)
+=== P2 — Dashboard CLI (~30 lines)
+Files: VibecodingTask.kt or new DashboardTask.kt
+- Expose Dashboard.summary() as Gradle task output
+- Task: ./gradlew vibecodingDashboard
 
-=== P1 — OllamaPoolKeyAdapter (differé)
+=== Refactoring — LlmProviderResolver pool consolidation
+- OllamaPool with RotationStrategy already tested (@epic_v_6)
+- Backlog: integrate OllamaPool + OllamaLlmProvider properly
 
-- Wrapper resilient pour OllamaProKey — pattern a definir apres test integration R2DBC
-- Pattern : si Ollama renvoie quota exceeded → rotation automatique (deja dans OllamaPool)
-- Article 0120 : montage docker SSH key, pas de token API
-
-== Etat d'entree
-
-- OllamaPool + OllamaLlmProvider fonctionnels (12 tests PASS)
-- llm-pool-contracts N0 publie
-- VibecodingGraph avec ConnectionFactory injectable
-- SessionRepository.updateSession() persiste TokenTracker (prompt/completion/cost/model)
-- V2__add_session_model.sql migration creee
-- 0 regression existant
-
-== Regles absolues
-
-- **ZERO agent @xp ou subagent**
-- **1 fichier a la fois, compile apres chaque edition**
-- **Pas de cles API dans les logs**
-- **Timeout 60s par appel LLM**
-- **Injection par constructeur**
+Code in: foundry/public/codebase-gradle/codebase-plugin/

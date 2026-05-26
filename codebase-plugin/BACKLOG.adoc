@@ -25,6 +25,26 @@ _Ce fichier est le suivi prioritaire des tâches. L'INDEX.adoc est la source de 
 * [x] Interface AnonymizationExpert + factory + deterministic fallback
 * [x] 3 scénarios Cucumber @wip
 
+== EPIC V-7 — Resolver + --model CLI + Completion Tracking (Session 068)
+**Statut** : TERMINE (2026-05-26, 34/34 PASS)
+**Priorite** : P0
+
+* [x] LlmProviderResolver — model→provider mapping (Gemma4 pool ROUND_ROBIN)
+* [x] VibecodingTask --model option (empty=deterministic backward compat)
+* [x] TokenTracker.trackCompletion() wired in callLLMNode
+* [x] Fix VibecodingTaskTest audit JSONL assertion
+
+== EPIC V-8 — Resume Session + Dashboard CLI (Session 069)
+**Statut** : A FAIRE
+**Priorite** : P0
+**Depends on** : EPIC-V-7 (session 068)
+
+* [ ] --resume <sessionId> on VibecodingTask (~60 lines)
+* [ ] Load state via SessionRepository.getSession()
+* [ ] Reconstruct VibecodingState from SessionRecord
+* [ ] Dashboard CLI: ./gradlew vibecodingDashboard (~30 lines)
+* [ ] Refactoring: consolidate LlmProviderResolver pool integration
+
 == EPIC V-6 — Cablage Ollama Cloud Docker + ConnectionFactory R2DBC (Session 065)
 **Statut** : A FAIRE
 **Priorite** : P0

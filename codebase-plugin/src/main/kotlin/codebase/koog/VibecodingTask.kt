@@ -1,5 +1,6 @@
 package codebase.koog
 
+import codebase.koog.llm.LlmProviderResolver
 import contracts.vibecoding.registry.ToolRegistry
 import vibecoding.contracts.state.VibecodingState
 import org.gradle.api.DefaultTask
@@ -25,9 +26,14 @@ import java.time.Instant
  * ./gradlew vibecode --intention="Fix typo in README" --dryRun
  * ```
  *
- * Usage (réel) :
+ * Usage (réel avec LLM) :
  * ```
- * ./gradlew vibecode --intention="Refactor the DAG N1→N2→N3" --maxActions=20
+ * ./gradlew vibecode --intention="Refactor the DAG N1→N2→N3" --model=deepseek --maxActions=20
+ * ```
+ *
+ * Usage (Gemini) :
+ * ```
+ * ./gradlew vibecode --intention="Génère un rapport" --model=gemini --maxActions=10
  * ```
  */
 @DisableCachingByDefault(because = "Vibecoding LLM agent — non-deterministic LLM calls, non-cacheable")
@@ -50,6 +56,11 @@ abstract class VibecodingTask : DefaultTask() {
 
     @get:Input
     @get:Optional
+    @get:Option(option = "model", description = "Modèle LLM (gemini, deepseek, ollama, gpt-oss:120b-cloud, etc.). Défaut: ollama (gpt-oss:120b-cloud)")
+    abstract val model: Property<String>
+
+    @get:Input
+    @get:Optional
     @get:Option(option = "sessionTimeout", description = "Timeout global de la session en secondes (défaut 300)")
     abstract val sessionTimeoutSeconds: Property<Int>
 
@@ -63,6 +74,7 @@ abstract class VibecodingTask : DefaultTask() {
         group = "generate"
         description = "Vibecoding agent — boucle autonome koog (contexte → plan → exécution → audit)"
         intention.convention("")
+        model.convention("")
         dryRun.convention(false)
         maxActions.convention(10)
         sessionTimeoutSeconds.convention(300)
@@ -78,9 +90,16 @@ abstract class VibecodingTask : DefaultTask() {
 
         toolRegistry.clearAudit()
 
+        val tokenTracker = codebase.koog.tracking.TokenTracker()
+        val modelName = model.getOrElse("")
+        val llmProvider = if (modelName.isBlank()) null
+            else LlmProviderResolver.resolve(modelName)
+
         val graph = VibecodingGraph(
             augmentedGraph = KoogAugmentedContextGraph(),
-            toolRegistry = toolRegistry
+            toolRegistry = toolRegistry,
+            llmProvider = llmProvider,
+            tokenTracker = tokenTracker
         )
         val state = VibecodingState(
             intention = intention.get(),

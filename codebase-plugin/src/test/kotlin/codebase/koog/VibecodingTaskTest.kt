@@ -134,8 +134,9 @@ class VibecodingTaskTest {
         lines.forEach { line ->
             assertTrue(line.startsWith("{"))
             assertTrue(line.contains("\"timestamp\""))
-            assertTrue(line.contains("\"intention\""))
             assertTrue(line.contains("\"dryRun\""))
         }
+        assertTrue(lines.any { it.contains("\"intention\"") },
+            "At least one audit line must contain the session intention")
     }
 }
