@@ -30,7 +30,7 @@ ai:
 
   ollama:
     name: "Ollama"
-    baseUrl: "http://localhost:11434"
+    baseUrl: "http://localhost:11437"
     accounts:
       - name: "local"
         email: "local@localhost"

@@ -86,7 +86,7 @@ class VibecodingWorld {
         poolInstances = instanceIds.map { id ->
             LlmInstance(
                 id = id,
-                baseUrl = "http://localhost:11434",  // fake URL pour Cucumber (pas de vrai Ollama)
+                baseUrl = "http://localhost:11437",  // fake URL pour Cucumber (pas de vrai Ollama)
                 model = "gpt-oss:120b-cloud",
                 quota = QuotaConfig(limitValue = 10, thresholdPercent = threshold, resetPolicy = ResetPolicy.NEVER)
             )

@@ -100,7 +100,7 @@ class MigrationTest {
 
         // then: schema_version table exists and contains 1 record
         assertTrue(tableExists("schema_version"), "schema_version table should exist after migration")
-        assertEquals(1L, countRows("schema_version"), "should have 1 migration recorded")
+        assertEquals(2L, countRows("schema_version"), "should have 2 migrations recorded (V1 + V2)")
     }
 
     @Test
@@ -113,7 +113,7 @@ class MigrationTest {
         migrationRunner.migrate()
 
         // then: schema_version still contains only 1 record
-        assertEquals(1L, countRows("schema_version"), "idempotent migration should not duplicate records")
+        assertEquals(2L, countRows("schema_version"), "idempotent migration should not duplicate records (2 migrations: V1 + V2)")
     }
 
     @Test

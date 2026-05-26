@@ -57,7 +57,7 @@ class PertinenceBenchmarkSteps {
     @Then("the pertinence benchmark runner can be instantiated")
     fun `benchmark runner instantiated`() {
         val runner = codebase.rag.PertinenceBenchmarkRunner(
-            baseUrl = "http://localhost:11434",
+            baseUrl = "http://localhost:11437",
             modelName = "deepseek-v4-pro:cloud"
         )
         assertNotNull(runner, "PertinenceBenchmarkRunner should be instantiable")

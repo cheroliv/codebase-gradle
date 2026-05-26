@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Provider Ollama via pool d'instances avec rotation automatique.
@@ -33,8 +34,8 @@ class OllamaLlmProvider(
     private val log = LoggerFactory.getLogger(OllamaLlmProvider::class.java)
     private val timeout = Duration.ofSeconds(60)
 
-    /** Cache des modèles par instance (id → OllamaChatModel) */
-    private val modelCache = mutableMapOf<String, OllamaChatModel>()
+    /** Cache des ChatModels par (baseUrl, model) — thread-safe */
+    private val modelCache = ConcurrentHashMap<String, OllamaChatModel>()
 
     override suspend fun call(prompt: String): String {
         if (pool.size() == 0) {
@@ -73,7 +74,8 @@ class OllamaLlmProvider(
     }
 
     private fun getOrCreateModel(instance: LlmInstance): OllamaChatModel {
-        return modelCache.getOrPut(instance.id) {
+        val cacheKey = cacheKey(instance)
+        return modelCache.getOrPut(cacheKey) {
             log.info("[OllamaLlmProvider] Creating OllamaChatModel: baseUrl={}, model={}", instance.baseUrl, instance.model)
             OllamaChatModel.builder()
                 .baseUrl(instance.baseUrl)
@@ -82,4 +84,9 @@ class OllamaLlmProvider(
                 .build()
         }
     }
+
+    /** 🔥 Exposé pour les tests (package-visible) */
+    internal fun getCachedModel(instance: LlmInstance): OllamaChatModel = getOrCreateModel(instance)
+
+    private fun cacheKey(instance: LlmInstance): String = "${instance.baseUrl}|${instance.model}"
 }

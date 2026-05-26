@@ -67,7 +67,7 @@ class VisionOpinionClassifierSteps {
     @Then("the vision opinion classifier can be instantiated")
     fun `classifier instantiated`() {
         val classifier = VisionOpinionClassifier(
-            baseUrl = "http://localhost:11434",
+            baseUrl = "http://localhost:11437",
             modelName = "deepseek-v4-pro:cloud"
         )
         assertNotNull(classifier, "VisionOpinionClassifier should be instantiable")
@@ -77,7 +77,7 @@ class VisionOpinionClassifierSteps {
     @And("the classifier has the correct system prompt with classification criteria")
     fun `system prompt valid`() {
         val classifier = VisionOpinionClassifier(
-            baseUrl = "http://localhost:11434",
+            baseUrl = "http://localhost:11437",
             modelName = "deepseek-v4-pro:cloud"
         )
 

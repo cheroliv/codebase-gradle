@@ -8,7 +8,7 @@ object VisionOpinionClassifierMain {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val baseUrl = System.getenv("OLLAMA_BASE_URL") ?: "http://localhost:11434"
+        val baseUrl = System.getenv("OLLAMA_BASE_URL") ?: "http://localhost:11437"
         val modelName = System.getenv("PERTINENCE_MODEL") ?: "deepseek-v4-pro:cloud"
         val outputDirPath = args.getOrNull(0) ?: "build/vision-opinion-reports"
 

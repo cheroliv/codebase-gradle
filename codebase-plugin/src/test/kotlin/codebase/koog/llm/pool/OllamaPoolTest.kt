@@ -8,6 +8,34 @@ import kotlin.test.*
 
 class OllamaPoolTest {
 
+    companion object {
+        /** Ports autorisés — plage 11437→11465 (29 ports) */
+        val AUTHORIZED_PORTS = (11437..11465).toList()
+
+        /** 5 modèles autorisés, cyclés sur les 29 ports */
+        val AUTHORIZED_MODELS = listOf(
+            "gpt-oss:120b-cloud",
+            "gpt-oss:20b-cloud",
+            "qwen3-coder-next:cloud",
+            "qwen3-next:80b-cloud",
+            "qwen3-coder:480b-cloud"
+        )
+
+        /** Pool complet : 29 instances, chaque port reçoit un modèle cyclé */
+        fun fullPool(limit: Long = 10, threshold: Int = 50): OllamaPool {
+            val instances = AUTHORIZED_PORTS.mapIndexed { i, port ->
+                val model = AUTHORIZED_MODELS[i % AUTHORIZED_MODELS.size]
+                LlmInstance(
+                    id = "ollama-$port",
+                    baseUrl = "http://localhost:$port",
+                    model = model,
+                    quota = QuotaConfig(limitValue = limit, thresholdPercent = threshold, resetPolicy = ResetPolicy.NEVER)
+                )
+            }
+            return OllamaPool(instances, rotationStrategy = RotationStrategy.ROUND_ROBIN)
+        }
+    }
+
     private fun instance(id: String, port: Int, limit: Long = 10, threshold: Int = 50) =
         LlmInstance(
             id = id,
@@ -18,17 +46,17 @@ class OllamaPoolTest {
 
     @Test
     fun `nextInstance should return the only instance when pool size is 1`() {
-        val pool = OllamaPool(listOf(instance("a", 11434)))
+        val pool = OllamaPool(listOf(instance("a", 11437)))
         assertEquals(1, pool.size())
         val inst = pool.nextInstance()
         assertEquals("a", inst.id)
-        assertEquals("http://localhost:11434", inst.baseUrl)
+        assertEquals("http://localhost:11437", inst.baseUrl)
     }
 
     @Test
     fun `nextInstance should rotate ROUND_ROBIN between two instances`() {
         val pool = OllamaPool(
-            listOf(instance("a", 11434), instance("b", 11435)),
+            listOf(instance("a", 11437), instance("b", 11438)),
             rotationStrategy = RotationStrategy.ROUND_ROBIN
         )
         assertEquals("a", pool.nextInstance().id)
@@ -39,7 +67,7 @@ class OllamaPoolTest {
     @Test
     fun `nextInstance should pick LEAST_USED instance`() {
         val pool = OllamaPool(
-            listOf(instance("a", 11434), instance("b", 11435)),
+            listOf(instance("a", 11437), instance("b", 11438)),
             rotationStrategy = RotationStrategy.LEAST_USED
         )
         // First call — both at 0, picks first
@@ -54,8 +82,8 @@ class OllamaPoolTest {
     fun `nextInstance should skip instance when quota exceeded`() {
         val pool = OllamaPool(
             listOf(
-                instance("a", 11434, limit = 5, threshold = 50),  // 50% de 5 = 2
-                instance("b", 11435, limit = 100, threshold = 80)  // 80% de 100 = 80
+                instance("a", 11437, limit = 5, threshold = 50),  // 50% de 5 = 2
+                instance("b", 11438, limit = 100, threshold = 80)  // 80% de 100 = 80
             ),
             rotationStrategy = RotationStrategy.ROUND_ROBIN
         )
@@ -69,7 +97,7 @@ class OllamaPoolTest {
 
     @Test
     fun `isQuotaExceeded should return true when threshold reached`() {
-        val inst = instance("a", 11434, limit = 10, threshold = 50)
+        val inst = instance("a", 11437, limit = 10, threshold = 50)
         val pool = OllamaPool(listOf(inst))
         repeat(5) { pool.nextInstance() }  // 5 >= 5 → dépassé
         assertTrue(pool.isQuotaExceeded(inst))
@@ -77,12 +105,12 @@ class OllamaPoolTest {
 
     @Test
     fun `resetUsage should clear all counters`() {
-        val pool = OllamaPool(listOf(instance("a", 11434, limit = 5, threshold = 50)))
+        val pool = OllamaPool(listOf(instance("a", 11437, limit = 5, threshold = 50)))
         // limit=5, threshold=50% → seuil=2.5→2 (int arrondi)
         repeat(3) { pool.nextInstance() }  // 3 >= 2 → dépassé
-        assertTrue(pool.isQuotaExceeded(instance("a", 11434, limit = 5, threshold = 50)))
+        assertTrue(pool.isQuotaExceeded(instance("a", 11437, limit = 5, threshold = 50)))
         pool.resetUsage()
-        assertFalse(pool.isQuotaExceeded(instance("a", 11434, limit = 5, threshold = 50)))
+        assertFalse(pool.isQuotaExceeded(instance("a", 11437, limit = 5, threshold = 50)))
     }
 
     @Test
@@ -94,9 +122,40 @@ class OllamaPoolTest {
 
     @Test
     fun `instances should return all instances`() {
-        val instances = listOf(instance("a", 11434), instance("b", 11435))
+        val instances = listOf(instance("a", 11437), instance("b", 11438))
         val pool = OllamaPool(instances)
         assertEquals(2, pool.instances().size)
         assertEquals(instances, pool.instances())
+    }
+
+    @Test
+    fun `full pool should cycle through all 29 ports with 5 authorized models`() {
+        val pool = fullPool()
+        assertEquals(29, pool.size())
+
+        // Vérifie que tous les ports 11437-11465 sont présents
+        val allPorts = pool.instances().map { it.baseUrl.removePrefix("http://localhost:").toInt() }.toSet()
+        for (port in 11437..11465) {
+            assertTrue(port in allPorts, "Port $port missing from pool")
+        }
+
+        // Vérifie que seuls les 5 modèles autorisés sont utilisés
+        val allModels = pool.instances().map { it.model }.toSet()
+        assertEquals(5, allModels.size, "Exactly 5 authorized models should be present")
+        for (authorized in AUTHORIZED_MODELS) {
+            assertTrue(authorized in allModels, "Model $authorized missing from pool")
+        }
+
+        // Vérifie le cycling ROUND_ROBIN sur les 29 ports
+        val first = pool.nextInstance()
+        assertEquals("http://localhost:11437", first.baseUrl)
+
+        // 28 appels suivants → on atteint le dernier port (11465)
+        val last = (2..29).fold<Int, contracts.llmpool.LlmInstance?>(null) { _, _ -> pool.nextInstance() }
+        assertEquals("http://localhost:11465", last?.baseUrl, "29th call should return last port 11465")
+
+        // Le 30ème appel wrappe → retour au premier port
+        val wrapped = pool.nextInstance()
+        assertEquals("http://localhost:11437", wrapped.baseUrl, "30th call should wrap back to 11437")
     }
 }

@@ -7,8 +7,8 @@ import dev.langchain4j.service.UserMessage
 import java.time.Duration
 
 data class ExpertConfig(
-    val baseUrl: String = "http://localhost:11434",
-    val modelName: String = "deepseek-v4-pro:cloud",
+    val baseUrl: String = "http://localhost:11437",
+    val modelName: String = "gpt-oss:20b-cloud",
     val timeoutSeconds: Long = 120
 )
 

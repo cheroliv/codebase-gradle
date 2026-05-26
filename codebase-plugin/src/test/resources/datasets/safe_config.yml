@@ -13,7 +13,7 @@ scoring:
 
 providers:
   ollama:
-    base_url: "http://localhost:11434"
+    base_url: "http://localhost:11437"
     default_model: "gemma4:4b"
   openai:
     enabled: false

@@ -11,7 +11,7 @@ import contracts.llmpool.RotationStrategy
  * Chaque instance correspond à un conteneur Docker Ollama (port distinct, clé SSH distincte).
  * Si le quota d'une instance est dépassé, on passe automatiquement à l'instance suivante.
  *
- * @param instances liste d'instances Ollama (ports 11434→11465+)
+ * @param instances liste d'instances Ollama (ports 11437→11465+)
  * @param rotationStrategy stratégie de rotation (ROUND_ROBIN par défaut)
  */
 class OllamaPool(

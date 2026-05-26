@@ -38,6 +38,28 @@ Ce projet vit dans `foundry/codebase-gradle/` → *cercle 4 (public, Apache 2.0)
 . **BYOK management** : 7 providers LLM, multi-compte, CLI override, scaffold, anonymisation YAML.
 . **Javelit chatbot** : Swing UI + RAG enrichment (`embeds.yml`), snapshot auto-documente.
 
+== Contrat Software Craftsmanship (EAGER)
+
+=== Methodologie — Baby Steps TDD/BDD/DDD
+
+* *TDD/BDD/DDD en baby steps* — test unitaire → test fonctionnel → test Cucumber
+* *Clean Architecture + Clean Code* — pas de shortcuts, pas de code jetable
+* *SEQUENTIEL PUR* — interdiction d'utiliser @xp, subagents, ou parallelisation des taches
+* *1 fichier a la fois* — modifier, valider (compiler + test), puis seulement passer au suivant
+
+=== Instances Ollama — Ports reserves + Rotation
+
+* *11434 a 11436* — PROTEGES, ne jamais modifier, ne jamais toucher
+* *11437 a 11465* — disponibles (29 ports), rotation OBLIGATOIRE sur toute la plage
+* Modeles autorises : gpt-oss:120b-cloud, gpt-oss:20b-cloud, qwen3-coder-next:cloud, qwen3-next:80b-cloud, qwen3-coder:480b-cloud
+* Rotation : distribuer les 5 modeles sur les 29 ports avec cycling automatique
+* Aucun autre modele ni port ne doit etre utilise dans le code
+
+=== Regle d'or
+
+Mieux vaut 5 sessions de 20 minutes qu'une session de 2 heures avec debugging chaos.
+Si la conversation depasse 50 messages ou plus de 3 fichiers modifies en parallele, splitter en nouvelle session.
+
 == Regles Absolues
 
 === Git

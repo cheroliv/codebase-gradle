@@ -29,7 +29,7 @@ object BenchmarkComparisonMain {
         val projectRoot = System.getenv("CODEBASE_PROJECT_ROOT") ?: System.getProperty("user.dir")
         val pgCfg = PgVectorConfig.fromEnv()
         val graphJsonPath = System.getenv("GRAPH_JSON_PATH") ?: "build/graph.json"
-        val baseUrl = System.getenv("OLLAMA_BASE_URL") ?: "http://localhost:11434"
+        val baseUrl = System.getenv("OLLAMA_BASE_URL") ?: "http://localhost:11437"
         val modelName = System.getenv("OLLAMA_MODEL") ?: "deepseek-v4-flash:cloud"
 
         val outputDir = File("benchmark-output")

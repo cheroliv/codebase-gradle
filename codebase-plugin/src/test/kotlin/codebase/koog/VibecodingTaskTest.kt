@@ -1,10 +1,16 @@
 package codebase.koog
 
+import codebase.koog.session.SessionRepository
+import io.r2dbc.postgresql.PostgresqlConnectionConfiguration
+import io.r2dbc.postgresql.PostgresqlConnectionFactory
+import kotlinx.coroutines.runBlocking
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.testcontainers.containers.PostgreSQLContainer
 import java.io.File
+import java.nio.file.Files
 
 /**
  * Tests unitaires pour VibecodingTask — tâche Gradle de vibecoding.
@@ -182,5 +188,74 @@ class VibecodingTaskTest {
         }
         assertTrue(lines.any { it.contains("\"intention\"") },
             "At least one audit line must contain the session intention")
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // EPIC-V integration : E2E VibecodingTask + Testcontainers + SessionRepository
+    // ─────────────────────────────────────────────────────────────────
+
+    companion object {
+        @org.junit.jupiter.api.BeforeAll
+        @JvmStatic
+        fun startContainer() {
+            container.start()
+            val config = PostgresqlConnectionConfiguration.builder()
+                .host(container.host)
+                .port(container.getMappedPort(5432))
+                .database(container.databaseName)
+                .username(container.username)
+                .password(container.password)
+                .build()
+            connectionFactory = PostgresqlConnectionFactory(config)
+            runBlocking { sessionRepo = SessionRepository(connectionFactory!!) }
+            runBlocking { sessionRepo?.initSchema() }
+        }
+
+        @org.junit.jupiter.api.AfterAll
+        @JvmStatic
+        fun stopContainer() {
+            container.stop()
+        }
+
+        private val container: PostgreSQLContainer<Nothing> =
+            PostgreSQLContainer<Nothing>("pgvector/pgvector:pg17").apply {
+                withDatabaseName("codebase_vibecoding_e2e")
+                withUsername("codebase")
+                withPassword("codebase")
+                withReuse(false)
+            }
+
+        private var connectionFactory: PostgresqlConnectionFactory? = null
+        private var sessionRepo: SessionRepository? = null
+    }
+
+    @Test
+    fun `e2e — VibecodingTask with real DB should persist session via ConnectionFactory injection`(
+        @TempDir tempDir: File
+    ) {
+        val project = ProjectBuilder.builder()
+            .withProjectDir(tempDir)
+            .build()
+        val task = project.tasks.register("vibecode", VibecodingTask::class.java) {
+            it.intention.set("E2E test session persistence")
+            it.dryRun.set(true)
+            it.maxActions.set(2)
+            it.workspaceRoot.set(tempDir)
+        }.get()
+
+        // Inject le ConnectionFactory Testcontainers
+        task.connectionFactory = connectionFactory
+
+        // Exécute
+        task.executeVibecoding()
+
+        // Vérifie que la session a été persistée
+        val sessions = runBlocking { sessionRepo?.listSessions(1) }
+        assertNotNull(sessions, "SessionRepository should be available")
+        assertTrue(sessions!!.isNotEmpty(), "E2E: At least one session should be persisted")
+        val session = sessions.first()
+        assertTrue(session.intention.contains("E2E"), "Session intention should contain 'E2E' but was: ${session.intention}")
+        assertEquals(tempDir.absolutePath, session.workspaceRoot, "Workspace root should match tempDir")
+        assertTrue(session.dryRun, "Session should be dryRun=true")
     }
 }

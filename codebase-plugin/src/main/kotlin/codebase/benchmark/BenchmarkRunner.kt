@@ -113,7 +113,7 @@ object BenchmarkFixtures {
             1,
             """
             configuration/codebase.yml — Fichier de configuration contenant des secrets.
-            ollama.baseUrl=http://localhost:11434
+            ollama.baseUrl=http://localhost:11437
             anthropic.defaultKey=chatbot
             anthropic.accounts[0].keys[prod]=sk-ant-api03-xxxxxxxxxxxxx
             github.token=ghp_xxxxxxxxxxxxxxxxxxxx
@@ -278,8 +278,8 @@ object ContextFiller {
  * sur tous les seuils de tokens, et produit un BenchmarkReport.
  */
 class BenchmarkRunner(
-    private val baseUrl: String = "http://localhost:11434",
-    private val modelName: String = "deepseek-v4-pro:cloud",
+    private val baseUrl: String = "http://localhost:11437",
+    private val modelName: String = "gpt-oss:20b-cloud",
     private val timeoutSeconds: Long = 300,
     private val pgJdbcUrl: String? = null,
     private val pgUser: String? = null,

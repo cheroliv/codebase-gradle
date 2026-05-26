@@ -11,7 +11,7 @@ class LlmConfigTest {
         val yaml = """
             ai:
               ollama:
-                baseUrl: "http://localhost:11434"
+                baseUrl: "http://localhost:11437"
                 model: "deepseek-v4-pro:cloud"
               gemini:
                 envVar: "GEMINI_API_KEY"
@@ -24,7 +24,7 @@ class LlmConfigTest {
         assertNotNull(config)
 
         // Ollama
-        assertEquals("http://localhost:11434", config.ai.ollama.baseUrl)
+        assertEquals("http://localhost:11437", config.ai.ollama.baseUrl)
         assertEquals("deepseek-v4-pro:cloud", config.ai.ollama.model)
         assertEquals(null, config.ai.ollama.envVar)
 
@@ -61,11 +61,11 @@ class LlmConfigTest {
         val config = LlmConfig.fromYaml("""
             ai:
               ollama:
-                baseUrl: "http://localhost:11434"
+                baseUrl: "http://localhost:11437"
                 model: "deepseek-v4-pro:cloud"
         """.trimIndent())
 
-        assertEquals("http://localhost:11434", config.ai.ollama.resolveBaseUrl())
+        assertEquals("http://localhost:11437", config.ai.ollama.resolveBaseUrl())
         assertEquals("deepseek-v4-pro:cloud", config.ai.ollama.resolveModel())
     }
 

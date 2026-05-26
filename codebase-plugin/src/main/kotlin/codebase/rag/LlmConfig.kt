@@ -33,7 +33,7 @@ data class AiConfig(
 
 data class OllamaConfig(
     @JsonProperty("baseUrl")
-    val baseUrl: String = "http://localhost:11434",
+    val baseUrl: String = "http://localhost:11437",
 
     @JsonProperty("model")
     val model: String = "deepseek-v4-pro:cloud",

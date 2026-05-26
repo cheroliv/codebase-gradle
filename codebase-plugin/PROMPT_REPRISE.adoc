@@ -1,28 +1,29 @@
-= PROMPT_REPRISE — Session 070 : E2E Integration Test + OllamaLlmProvider Cache Dedup
-:session: 070
+= PROMPT_REPRISE — Session 071 : Cucumber verification + publishToMavenLocal
+:session: 071
 :date: 2026-05-27
-:contexte: Session 069 TERMINÉE — Resume Session + Dashboard CLI + Bugfix ConnectionFactory
-:prerequis: Session 069 (17 new tests, 4 Cucumber PASS)
+:contexte: Session 070 TERMINEE — Cache dedup + E2E VibecodingTask + Nettoyage ports 11434-11436 + Rotation 29 ports
+:prerequis: Session 070 (14/14 VibecodingTaskTest, pool tests PASS, MigrationTest fix)
 
-== What was delivered (Session 069)
+== What was delivered (Session 070)
 
-- ✅ P1 — Resume session via --resume <sessionId>
-- ✅ P2 — Dashboard CLI via ./gradlew vibecodingDashboard
-- ✅ Bugfix — ConnectionFactory now transmitted to VibecodingGraph in normal path too (was only in --resume)
-- ✅ Cucumber @epic_v_7 (2 scenarios) + @epic_v_8 (2 scenarios)
+- P1 — OllamaLlmProvider cache dedup par (baseUrl, model) en ConcurrentHashMap. 2 tests
+- P2 — E2E VibecodingTaskTest avec Testcontainers PostgreSQL. 14/14 PASS
+- Nettoyage 24 fichiers : 11434-11436 → 11437+ (ports proteges)
+- Rotation 29 ports × 5 modeles autorises (OllamaPoolTest.fullPool)
+- MigrationTest fix : 2 migrations V1+V2
+- AGENT.adoc : Contrat Software Craftsmanship EAGER ajoute
 
-== Objective Session 070 — Integration test + Provider cache
+== Objective Session 071
 
-=== E2E — VibecodingTask with real DB (Testcontainers) (~40 lines)
-Files: VibecodingTaskTest.kt
-- Inject Testcontainers ConnectionFactory into VibecodingTask
-- Execute vibecoding (dryRun) → verify session persisted in PostgreSQL
-- Assert SessionRepository.getSession() returns the session after execution
+=== Cucumber verification
+- Lancer cucumberTest pour verifier que les 101+ scenarios Cucumber passent toujours
+- En particulier : @epic_v_7, @epic_v_8, @epic_v_6, @epic_v_5, sessions vibecoding
 
-=== OllamaLlmProvider dedup — cache du OllamaChatModel (~20 lines)
-Files: OllamaLlmProvider.kt
-- Problem: A chaque call(), pool.nextInstance() recrée un OllamaChatModel
-- Fix: Mettre en cache le ChatModel par (baseUrl, model) dans une ConcurrentHashMap
-- Test: OllamaLlmProviderTest — 2 calls → 1 cache hit
+=== publishToMavenLocal
+- ./gradlew publishToMavenLocal pour les consommateurs N2
+
+=== Cleanup final
+- Verifier que llm-config.yml est bien dans le repo (force-add fait en 070)
+- git status clean
 
 Code in: foundry/public/codebase-gradle/codebase-plugin/
