@@ -1,42 +1,50 @@
-= PROMPT_REPRISE — Session 062 — Prochaine étape EPIC 5 / 12
+= PROMPT_REPRISE — Session 062 — Code Review Boucle Vibecoding
 :session: 062
 :date: 2026-05-27
 :status: PRET
 :max-lines: 70
-:priorite: P1
+:priorite: P0
 :methodologie: BDD→TDD baby-step, 1 fichier a la fois, compiler apres chaque edition
 
 == Mission
 
-Session 061 a termine EPIC-V-FLYWAY (MigrationRunner artisanal, table schema_version,
-V1__init_vibecoding.sql dans un vrai pipeline). 35/35 JUnit5 PASS, 100/100 Cucumber PASS.
+Code review globale de la boucle vibecoding pour mesurer la distance
+restante avant une boucle autonome fonctionnelle de bout en bout.
 
-Prochaine etape : au choix dans le backlog —
-- EPIC 5 (fine-tuning experts CDA/FPA) — P0
-- EPIC 12 (Dilution Article de Blog automatique) — P1
+Objectifs :
+- Auditer TOUS les composants vibecoding existants (VibecodingGraph,
+  VibecodingTask, ToolRegistry, SessionRepository, MigrationRunner)
+- Identifier les gaps entre l'etat actuel et une boucle complete :
+  LLM → plan → execute tools → persist state → feedback loop
+- Produire un rapport AsciiDoc avec roadmap priorisee des etapes restantes
+- ZERO code nouveau — lecture, analyse et rapport uniquement
 
-ZERO agent parallele. Craftman baby-step.
+ZERO agent parallele. Lecture seule sauf rapport.
 
 == Etat d'entree
 
-- MigrationRunner.kt : 125 lignes, scan classpath, sha256, idempotent
-- SessionRepository.initSchema() : delegue a MigrationRunner
-- Schema : V1__init_vibecoding.sql migre via pipeline versionne
+- VibecodingGraph.kt : graphe koog buildContext→classify→plan→executeTools→sendToolResult
+- VibecodingTask.kt : tache Gradle vibecode (dryRun, maxActions, audit trail JSONL)
+- ToolRegistry : 7 tools (read_file, write_file, edit_file, list_directory, exit, exec_shell, exec_gradle)
+- VibecodingState : data class (iterations, maxActions, dryRun, planJson, error, finished)
+- SessionRepository : persistance R2DBC (Jardin Secret confidentiality_level)
+- TokenTracker : comptage tokens in-memory
+- Dashboard : aggregation sessions
+- MigrationRunner : pipeline V{n}__*.sql idempotent
 - 35/35 JUnit5 PASS, 100/100 Cucumber PASS
-- Session 061 TERMINEE — EPIC-V-FLYWAY complet
 
-== Points d'attention
+== Questions de la review
 
-. **EPIC-V-FLYWAY est termine** : MigrationRunner fonctionnel, idempotent, teste.
-  Pas de rollback implemente (V1__undo.sql absent) = feature future.
-
-. **Backlog** : EPIC 5 (fine-tuning) priorite P0, EPIC 12 (Dilution Blog) P1.
-  Decision utilisateur requise en debut de session 062.
+. La boucle peut-elle tourner sans intervention humaine ?
+. Quels sont les nœuds manquants dans le graphe koog ?
+. Le feedback loop (error → replan → retry) est-il implemente ?
+. La persistance est-elle complete (state + steps + tokens + audit trail) ?
+. Le contract VibecodingState couvre-t-il tous les etats de la machine ?
+. Quels sont les 3 prochains EPICs critiques pour fermer la boucle ?
 
 == Regles absolues
 
-- **BDD d'abord** : le scenario Cucumber est la spec
-- **1 fichier a la fois** : modifier → compiler → tester → passer au suivant
-- **ZERO agent @xp ou subagent** : tout le code est ecrit par l'orchestrateur
+- **ZERO code** : lecture et analyse uniquement
+- **ZERO agent @xp ou subagent** : l'orchestrateur fait la review
 - **ZERO push sans permission**
-- **Tests en fin de session : INTERDIT sans permission**
+- **Rapport en AsciiDoc** : structure claire, gaps listes, roadmap priorisee
