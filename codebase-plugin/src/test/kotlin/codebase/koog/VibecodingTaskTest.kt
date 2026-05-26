@@ -57,6 +57,24 @@ class VibecodingTaskTest {
     }
 
     @Test
+    fun `task should have resume option defaulting to empty`() {
+        val project = ProjectBuilder.builder().build()
+        val task = project.tasks.register("vibecode", VibecodingTask::class.java).get()
+
+        assertEquals("", task.resume.get())
+    }
+
+    @Test
+    fun `task should accept resume option`() {
+        val project = ProjectBuilder.builder().build()
+        val task = project.tasks.register("vibecode", VibecodingTask::class.java) {
+            it.resume.set("session-abc123")
+        }.get()
+
+        assertEquals("session-abc123", task.resume.get())
+    }
+
+    @Test
     fun `task should accept custom session timeout`() {
         val project = ProjectBuilder.builder().build()
         val task = project.tasks.register("vibecode", VibecodingTask::class.java) {
@@ -112,6 +130,32 @@ class VibecodingTaskTest {
         val auditFile = File(auditDir, "audit.jsonl")
         assertTrue(auditFile.exists(), "Audit file should exist")
         assertTrue(auditFile.readText().isNotBlank(), "Audit file should not be blank")
+    }
+
+    @Test
+    fun `connectionFactory should be nullable and injectable`() {
+        val project = ProjectBuilder.builder().build()
+        val task = project.tasks.register("vibecode", VibecodingTask::class.java).get()
+
+        assertNull(task.connectionFactory, "Should be null by default")
+
+        // Inject sans crash
+        task.connectionFactory = null
+        assertNull(task.connectionFactory)
+    }
+
+    @Test
+    fun `execute should not crash when connectionFactory is null`() {
+        val project = ProjectBuilder.builder().build()
+        val task = project.tasks.register("vibecode", VibecodingTask::class.java) {
+            it.intention.set("Test no CF crash")
+            it.dryRun.set(true)
+            it.maxActions.set(1)
+        }.get()
+
+        // Null par défaut — le path normal doit survivre
+        assertNull(task.connectionFactory)
+        assertDoesNotThrow { task.executeVibecoding() }
     }
 
     @Test

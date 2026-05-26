@@ -1,5 +1,6 @@
 package codebase.koog
 
+import codebase.koog.session.SessionRecord
 import contracts.agent.Epic
 import vibecoding.contracts.plan.Plan
 import contracts.agent.GradleTask as PlanTask
@@ -8,6 +9,7 @@ import contracts.vibecoding.registry.ToolRegistry
 import vibecoding.contracts.state.VibecodingState
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.Instant
 
 /**
  * Tests unitaires pour VibecodingGraph — graphe koog d'exécution autonome.
@@ -187,5 +189,99 @@ class VibecodingGraphTest {
         assertDoesNotThrow {
             vibecodingGraph.execute(state)
         }
+    }
+
+    // ---- P1.2 : Reconstruction VibecodingState depuis SessionRecord ----
+
+    @Test
+    fun `resumeSession should reconstruct VibecodingState from SessionRecord`() {
+        val record = SessionRecord(
+            id = "session-abc123",
+            parentSessionId = null,
+            workspaceRoot = "/tmp/test-resume",
+            intention = "Fix typo in README",
+            dryRun = false,
+            maxActions = 20,
+            classification = "documentation",
+            planJson = """{"title":"Plan","epics":[]}""",
+            promptTokens = 1500L,
+            completionTokens = 800L,
+            cost = 0.0021,
+            error = null,
+            finished = false,
+            iterationCount = 5,
+            confidentialityLevel = "INTERNAL",
+            createdAt = Instant.now().minusSeconds(60),
+            updatedAt = Instant.now()
+        )
+
+        val state = VibecodingGraph.resumeSession(record)
+
+        assertTrue(state.intention.startsWith("[Resume session-abc123]"), "Intention should contain resume marker with session ID")
+        assertTrue(state.intention.contains("Fix typo in README"), "Intention should preserve original intention")
+        assertEquals("/tmp/test-resume", state.workspaceRoot)
+        assertEquals(20, state.maxActions)
+        assertEquals("documentation", state.classification)
+        assertEquals("""{"title":"Plan","epics":[]}""", state.planJson)
+        assertEquals(0, state.iteration, "Resumed session should restart at iteration 0")
+        assertFalse(state.finished, "Unfinished session should not be finished")
+    }
+
+    @Test
+    fun `resumeSession should set maxActions on resumed state`() {
+        val record = SessionRecord(
+            id = "session-def456",
+            parentSessionId = null,
+            workspaceRoot = "/tmp",
+            intention = "Add feature X",
+            dryRun = false,
+            maxActions = 15,
+            classification = "simple",
+            planJson = null,
+            promptTokens = 0L,
+            completionTokens = 0L,
+            cost = 0.0,
+            error = null,
+            finished = false,
+            iterationCount = 3,
+            confidentialityLevel = "INTERNAL",
+            createdAt = Instant.now().minusSeconds(120),
+            updatedAt = Instant.now()
+        )
+
+        val state = VibecodingGraph.resumeSession(record)
+
+        assertEquals(15, state.maxActions)
+        assertEquals(0, state.iteration, "Resumed session should start at iteration 0 in the new graph")
+        assertFalse(state.finished)
+        assertFalse(state.dryRun)
+    }
+
+    @Test
+    fun `resumeSession finished record should produce finished state`() {
+        val record = SessionRecord(
+            id = "fin-789",
+            parentSessionId = null,
+            workspaceRoot = "/tmp",
+            intention = "Finished task",
+            dryRun = false,
+            maxActions = 10,
+            classification = "done",
+            planJson = null,
+            promptTokens = 100L,
+            completionTokens = 50L,
+            cost = 0.0003,
+            error = null,
+            finished = true,
+            iterationCount = 10,
+            confidentialityLevel = "INTERNAL",
+            createdAt = Instant.now().minusSeconds(300),
+            updatedAt = Instant.now()
+        )
+
+        val state = VibecodingGraph.resumeSession(record)
+
+        assertTrue(state.isFinal, "Finished session should be final on resume")
+        assertTrue(state.finished)
     }
 }

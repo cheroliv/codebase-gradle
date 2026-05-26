@@ -79,3 +79,18 @@ Feature: Pipeline Vibecoding — koog autonomous loop
     When the LLM provider is called 5 times
     Then both pool instances "ollama-a" and "ollama-b" are used
     And the quota exceeded flag is raised for instance "ollama-a"
+
+  @epic_v_7
+  Scenario: Resume session reconstructs VibecodingState from SessionRecord
+    Given a SessionRecord with id "resume-001" and intention "Fix typo in README" and maxActions 20
+    When the vibecoding graph resumes that session
+    Then the resumed vibecoding intention contains "resume-001" and "Fix typo in README"
+    And the resumed vibecoding workspace root is "/tmp/test-resume"
+    And the resumed vibecoding maxActions is 20
+    And the resumed vibecoding iteration is 0
+
+  @epic_v_7
+  Scenario: Resume finished session returns finished state
+    Given a SessionRecord with id "fin-999" and intention "Finished task" and maxActions 10 and finished true
+    When the vibecoding graph resumes that session
+    Then the resumed vibecoding state is final

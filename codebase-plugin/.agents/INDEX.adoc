@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-26 (Session 068)
-_Session en cours_ : 069 — Resume Session + Dashboard CLI. P1: --resume <sessionId> sur VibecodingTask (~60 lignes). P2: Dashboard CLI (~30 lignes). Backlog: pool consolidation. Base: session 068 (LlmProviderResolver + --model option + completion tracking. 34/34 PASS).
+_Derniere mise a jour_ : 2026-05-26 (Session 069)
+_Session en cours_ : 070 — E2E Integration Test + OllamaLlmProvider Cache Dedup. E2E: VibecodingTask avec Testcontainers ConnectionFactory reel → verifier session persistee dans PostgreSQL. Provider: cache OllamaChatModel par (baseUrl, model) pour eviter recreation a chaque call(). Base: session 069 (resume + dashboard + ConnectionFactory fix. 17 JUnit5 + 4 Cucumber PASS).
 
 '''
 == REGLES ABSOLUES (resume)
@@ -35,6 +35,8 @@ _Session en cours_ : 069 — Resume Session + Dashboard CLI. P1: --resume <sessi
 
 |===
 | # | Date | Type | Sujet | Score
+| 069 | 2026-05-26 | feat+bugfix | Resume session --resume + Dashboard CLI + ConnectionFactory fix — 17 JUnit5 + 4 Cucumber PASS (2 @epic_v_7, 2 @epic_v_8) | 10/10
+| 068 | 2026-05-26 | feat | LlmProviderResolver model→provider mapping + --model option + completion tracking — 34 tests PASS | 10/10
 | 065 | 2026-05-27 | feat | EPIC V-6 Cablage Ollama Cloud Docker + ConnectionFactory R2DBC — Contrat N0 llm-pool-contracts (LlmInstance/QuotaConfig/LlmInstancePool) publie Maven Local. OllamaPool (rotation ROUND_ROBIN/LEAST_USED, skip quota exceeded). OllamaLlmProvider (LlmProvider, cache OllamaChatModel, timeout 60s, zero API key). ConnectionFactory injecte dans VibecodingGraph. SessionRepository.updateSession persiste TokenTracker (prompt/completion/cost/model). V2__add_session_model migration. 12/12 JUnit5 + 1/1 Cucumber @epic_v_6 PASS. 0 regression. | 10/10
 | 064 | 2026-05-27 | feat | EPIC V-5 Cablage Gemini + Persistance — LlmProvider fun interface (Clean Architecture) + GeminiLlmProvider (production System.getenv) + FakeLlmProvider (test) + VibecodingGraph 5 noeuds (callLLM+persistState) + TokenTracker.trackPrompt + createSession init + Cucumber @epic_v_5 PASS. 11/11 JUnit5, 101/101 Cucumber, ZERO secret, ZERO regression. | 9/10
 | 063 | 2026-05-27 | feat | Configuration LLM YAML + Data class Jackson. LlmConfig.kt (4 data classes, 66l) + llm-config.yml (pattern envVar) + .gitignore + 4/4 tests PASS. | 10/10
@@ -112,6 +114,8 @@ _Session en cours_ : 069 — Resume Session + Dashboard CLI. P1: --resume <sessi
 | EPIC-V-FLYWAY | *Migration Flyway* — MigrationRunner artisanal (sans dependance), table schema_version, gestion versions/rollback V{n}__*.sql. Pipeline initSchema → migrate. | ✅ TERMINE (Session 061). 4 fichiers (MigrationRunner 125l, SessionRepository -16l, MigrationTest 136l 3/3, SessionRepositoryTest +1 fix). | P1
 | EPIC-V-5 | *Cablage Gemini + Persistance* — LlmProvider fun interface + GeminiLlmProvider (production) + FakeLlmProvider (test). VibecodingGraph 5 nœuds koog (callLLM, persistState). TokenTracker cablé. Cucumber @epic_v_5 PASS. | ✅ TERMINE (Session 064). 11/11 JUnit5, 101/101 Cucumber, ZERO secret. Machine a 95%. | P0
 | EPIC-V-6 | *Cablage Ollama Cloud Docker + ConnectionFactory R2DBC* — Contrat N0 llm-pool-contracts publie. OllamaPool rotation instances. OllamaLlmProvider zero API key. ConnectionFactory injecte dans VibecodingGraph. SessionRepository.updateSession persiste TokenTracker. V2 migration. 12/12 JUnit5 + 1/1 Cucumber @epic_v_6 PASS. | EN COURS (Session 066 pour test integration) | P0
+| EPIC-V-7 | *Resume Session* — Option --resume sur VibecodingTask + VibecodingGraph.resumeSession(SessionRecord). 4/4 JUnit5 + 2/2 Cucumber @epic_v_7 PASS. | ✅ TERMINE (Session 069) | P0
+| EPIC-V-8 | *Dashboard CLI* — DashboardTask Gradle (vibecodingDashboard) + enregistrement CodebasePlugin. 3/3 JUnit5 + 2/2 Cucumber @epic_v_8 PASS. | ✅ TERMINE (Session 069) | P0
 | EPIC G | Publication Maven Central + Gradle Portal — groupId education.cccp, namespace cccp-education. | ✅ AUDITE (2026-05-19). Credentials presents, namespace actif sur Maven Central + Portal. Zéro action supplementaire necessaire. publishToMavenLocal suffit pour conso N1→N2. | P0
 |===
 

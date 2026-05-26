@@ -1,11 +1,13 @@
 package codebase.scenarios
 
 import codebase.koog.llm.FakeLlmProvider
+import codebase.koog.session.SessionRecord
 import contracts.agent.Epic
 import vibecoding.contracts.plan.Plan
 import contracts.agent.GradleTask as PlanTask
 import contracts.agent.UserStory
 import vibecoding.contracts.state.VibecodingState
+import codebase.koog.VibecodingGraph
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
@@ -13,6 +15,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertEquals
+import java.time.Instant
 
 /**
  * Step Definitions Cucumber pour le pipeline VibecodingGraph.
@@ -304,5 +307,100 @@ class VibecodingSteps(private val world: VibecodingWorld) {
     @Then("the quota exceeded flag is raised for instance {string}")
     fun `quota exceeded flag raised`(id: String) {
         world.assertQuotaExceeded(id)
+    }
+
+    // ── @epic_v_7 : Resume Session ──
+
+    @Given("a SessionRecord with id {string} and intention {string} and maxActions {int}")
+    fun `session record with id intention maxActions`(id: String, intention: String, maxActions: Int) {
+        world.sessionRecord = SessionRecord(
+            id = id,
+            parentSessionId = null,
+            workspaceRoot = "/tmp/test-resume",
+            intention = intention,
+            dryRun = false,
+            maxActions = maxActions,
+            classification = "simple",
+            planJson = null,
+            promptTokens = 100L,
+            completionTokens = 50L,
+            cost = 0.0,
+            error = null,
+            finished = false,
+            iterationCount = 5,
+            confidentialityLevel = "INTERNAL",
+            createdAt = Instant.now().minusSeconds(60),
+            updatedAt = Instant.now()
+        )
+    }
+
+    @Given("a SessionRecord with id {string} and intention {string} and maxActions {int} and finished true")
+    fun `session record with id intention maxActions finished`(id: String, intention: String, maxActions: Int) {
+        world.sessionRecord = SessionRecord(
+            id = id,
+            parentSessionId = null,
+            workspaceRoot = "/tmp",
+            intention = intention,
+            dryRun = false,
+            maxActions = maxActions,
+            classification = "done",
+            planJson = null,
+            promptTokens = 100L,
+            completionTokens = 50L,
+            cost = 0.0,
+            error = null,
+            finished = true,
+            iterationCount = 10,
+            confidentialityLevel = "INTERNAL",
+            createdAt = Instant.now().minusSeconds(300),
+            updatedAt = Instant.now()
+        )
+    }
+
+    @When("the vibecoding graph resumes that session")
+    fun `vibecoding graph resumes session`() {
+        val record = world.sessionRecord
+        assertNotNull(record, "SessionRecord must be set in the world")
+        world.resumedState = VibecodingGraph.resumeSession(record)
+        assertNotNull(world.resumedState, "Resumed state must not be null")
+    }
+
+    @Then("the resumed vibecoding intention contains {string} and {string}")
+    fun `resumed intention contains sessionId and intention`(sessionId: String, intention: String) {
+        val state = world.resumedState
+        assertNotNull(state, "Resumed state must not be null")
+        assertTrue(state.intention.contains(sessionId),
+            "Intention should contain session ID '$sessionId', got '${state.intention}'")
+        assertTrue(state.intention.contains(intention),
+            "Intention should contain original intention '$intention', got '${state.intention}'")
+    }
+
+    @Then("the resumed vibecoding workspace root is {string}")
+    fun `resumed workspace root`(expected: String) {
+        val state = world.resumedState
+        assertNotNull(state)
+        assertEquals(expected, state.workspaceRoot)
+    }
+
+    @Then("the resumed vibecoding maxActions is {int}")
+    fun `resumed maxActions`(expected: Int) {
+        val state = world.resumedState
+        assertNotNull(state)
+        assertEquals(expected, state.maxActions)
+    }
+
+    @Then("the resumed vibecoding iteration is {int}")
+    fun `resumed iteration`(expected: Int) {
+        val state = world.resumedState
+        assertNotNull(state)
+        assertEquals(expected, state.iteration)
+    }
+
+    @Then("the resumed vibecoding state is final")
+    fun `resumed state is final`() {
+        val state = world.resumedState
+        assertNotNull(state)
+        assertTrue(state.isFinal || state.finished,
+            "Resumed state should be final (isFinal=${state.isFinal}, finished=${state.finished})")
     }
 }

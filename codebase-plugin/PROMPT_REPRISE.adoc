@@ -1,31 +1,28 @@
-= PROMPT_REPRISE — Session 069 : Resume Session + Dashboard CLI + Pool Refactoring
-:session: 069
-:date: 2026-05-26
-:contexte: Session 068 TERMINÉE — LlmProviderResolver + --model option + completion tracking
-:prerequis: Session 068 (7 files, 34/34 tests PASS)
+= PROMPT_REPRISE — Session 070 : E2E Integration Test + OllamaLlmProvider Cache Dedup
+:session: 070
+:date: 2026-05-27
+:contexte: Session 069 TERMINÉE — Resume Session + Dashboard CLI + Bugfix ConnectionFactory
+:prerequis: Session 069 (17 new tests, 4 Cucumber PASS)
 
-== What was delivered (Session 068)
+== What was delivered (Session 069)
 
-- ✅ LlmProviderResolver.kt — model→provider mapping (Gemma4 pool ROUND_ROBIN, ports 11437-11465)
-- ✅ VibecodingTask --model option (empty = deterministic, "gemini"/"ollama"/"deepseek" = LLM)
-- ✅ TokenTracker.trackCompletion(output) + callLLMNode wired
-- ✅ 34/34 tests PASS (6 resolver + 8 task + 11 graph + 9 tracker)
+- ✅ P1 — Resume session via --resume <sessionId>
+- ✅ P2 — Dashboard CLI via ./gradlew vibecodingDashboard
+- ✅ Bugfix — ConnectionFactory now transmitted to VibecodingGraph in normal path too (was only in --resume)
+- ✅ Cucumber @epic_v_7 (2 scenarios) + @epic_v_8 (2 scenarios)
 
-== Objective Session 069 — Complete vibecoding autonomous loop
+== Objective Session 070 — Integration test + Provider cache
 
-=== P1 — Resume session --resume <sessionId> (~60 lines)
-Files: VibecodingTask.kt, VibecodingGraph.kt
-- Add @Option(option = "resume") on VibecodingTask
-- Load state via SessionRepository.getSession(sessionId)
-- Reconstruct VibecodingState from SessionRecord
+=== E2E — VibecodingTask with real DB (Testcontainers) (~40 lines)
+Files: VibecodingTaskTest.kt
+- Inject Testcontainers ConnectionFactory into VibecodingTask
+- Execute vibecoding (dryRun) → verify session persisted in PostgreSQL
+- Assert SessionRepository.getSession() returns the session after execution
 
-=== P2 — Dashboard CLI (~30 lines)
-Files: VibecodingTask.kt or new DashboardTask.kt
-- Expose Dashboard.summary() as Gradle task output
-- Task: ./gradlew vibecodingDashboard
-
-=== Refactoring — LlmProviderResolver pool consolidation
-- OllamaPool with RotationStrategy already tested (@epic_v_6)
-- Backlog: integrate OllamaPool + OllamaLlmProvider properly
+=== OllamaLlmProvider dedup — cache du OllamaChatModel (~20 lines)
+Files: OllamaLlmProvider.kt
+- Problem: A chaque call(), pool.nextInstance() recrée un OllamaChatModel
+- Fix: Mettre en cache le ChatModel par (baseUrl, model) dans une ConcurrentHashMap
+- Test: OllamaLlmProviderTest — 2 calls → 1 cache hit
 
 Code in: foundry/public/codebase-gradle/codebase-plugin/

@@ -1,6 +1,7 @@
 package codebase
 
 import codebase.koog.VibecodingTask
+import codebase.koog.tracking.DashboardTask
 import codebase.quality.QualityGateTask
 import codebase.rag.AssembleWorkspaceContextTask
 import codebase.rag.CodebaseCompositeContextTask
@@ -55,6 +56,14 @@ class CodebasePlugin : Plugin<Project> {
             it.intention.set(project.providers.gradleProperty("intention").orElse(""))
             it.dryRun.set(project.providers.gradleProperty("dryRun").map { it.toBoolean() }.orElse(false))
             it.maxActions.set(project.providers.gradleProperty("maxActions").map { it.toInt() }.orElse(10))
+        }
+
+        project.tasks.register(
+            "vibecodingDashboard",
+            DashboardTask::class.java
+        ) {
+            it.group = "tracking"
+            it.description = "Dashboard vibecoding — résumé sessions, coûts tokens, filtres confidentialité"
         }
 
         project.tasks.register(

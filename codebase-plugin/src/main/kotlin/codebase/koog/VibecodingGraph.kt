@@ -1,6 +1,7 @@
 package codebase.koog
 
 import codebase.koog.llm.LlmProvider
+import codebase.koog.session.SessionRecord
 import codebase.koog.session.SessionRepository
 import codebase.koog.tracking.TokenTracker
 import contracts.vibecoding.registry.ToolRegistry
@@ -186,6 +187,34 @@ class VibecodingGraph(
     }
 
     fun asMermaidDiagram(): String = runBlocking { graph.asMermaidDiagram() }
+
+    // === Companion — helpers statiques ===
+
+    companion object {
+        /**
+         * Reconstruit un [VibecodingState] depuis un [SessionRecord]
+         * pour reprendre une session interrompue (--resume).
+         *
+         * Le state reprend à iteration=0 (le graphe redémarre) mais conserve
+         * le plan, la classification, le workspaceRoot et l'intention.
+         * Si la session était finie, le state est marqué finished.
+         */
+        fun resumeSession(record: SessionRecord): VibecodingState {
+            val intentionWithId = "[Resume ${record.id}] ${record.intention}"
+            return VibecodingState(
+                intention = intentionWithId,
+                workspaceRoot = record.workspaceRoot,
+                dryRun = record.dryRun,
+                maxActions = record.maxActions,
+                iteration = 0,
+                planJson = record.planJson ?: "",
+                plan = null, // sera reconstruit par buildContext si nécessaire
+                classification = record.classification,
+                finished = record.finished,
+                error = record.error
+            )
+        }
+    }
 
     // === Méthodes privées — partagées entre le graphe koog et execute() ===
 

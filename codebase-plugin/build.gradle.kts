@@ -90,6 +90,35 @@ val cucumberTest = tasks.register<Test>("cucumberTest") {
     outputs.upToDateWhen { false }
 }
 
+val cucumberTestEpicV7 = tasks.register<Test>("cucumberTestEpicV7") {
+    description = "Runs Cucumber BDD tests — EPIC V-7 (Resume Session) only"
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = configurations.testRuntimeClasspath.get() +
+        sourceSets.test.get().output +
+        sourceSets.main.get().output +
+        files(tasks.jar.get().archiveFile)
+
+    dependsOn(tasks.classes)
+    useJUnitPlatform { excludeEngines("junit-jupiter") }
+    systemProperty("cucumber.junit-platform.naming-strategy", "long")
+    maxHeapSize = "1g"
+    maxParallelForks = 1
+    forkEvery = 1
+    jvmArgs("-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=256m", "-XX:TieredStopAtLevel=1")
+    timeout.set(Duration.ofMinutes(5))
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+        exceptionFormat = FULL
+    }
+    outputs.upToDateWhen { false }
+
+    // Découverte par suite — le runner EpicV7CucumberRunner filtre @epic_v_7
+    filter { includeTestsMatching("codebase.scenarios.EpicV7CucumberRunner") }
+}
+
 val cucumberTestEpicL3 = tasks.register<Test>("cucumberTestEpicL3") {
     description = "Runs Cucumber BDD tests — EPIC L-3 (KoogAugmentedContextGraph) only"
     group = "verification"
@@ -117,6 +146,34 @@ val cucumberTestEpicL3 = tasks.register<Test>("cucumberTestEpicL3") {
 
     // Découverte par suite — le runner EpicL3CucumberRunner filtre @epic_l_3
     filter { includeTestsMatching("codebase.scenarios.EpicL3CucumberRunner") }
+}
+
+val cucumberTestEpicV8 = tasks.register<Test>("cucumberTestEpicV8") {
+    description = "Runs Cucumber BDD tests — EPIC V-8 (DashboardTask) only"
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = configurations.testRuntimeClasspath.get() +
+        sourceSets.test.get().output +
+        sourceSets.main.get().output +
+        files(tasks.jar.get().archiveFile)
+
+    dependsOn(tasks.classes)
+    useJUnitPlatform { excludeEngines("junit-jupiter") }
+    systemProperty("cucumber.junit-platform.naming-strategy", "long")
+    maxHeapSize = "1g"
+    maxParallelForks = 1
+    forkEvery = 1
+    jvmArgs("-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=256m", "-XX:TieredStopAtLevel=1")
+    timeout.set(Duration.ofMinutes(5))
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+        exceptionFormat = FULL
+    }
+    outputs.upToDateWhen { false }
+
+    filter { includeTestsMatching("codebase.scenarios.EpicV8CucumberRunner") }
 }
 
 tasks.withType<Test>().configureEach {

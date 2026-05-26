@@ -4,6 +4,7 @@ import codebase.koog.llm.FakeLlmProvider
 import codebase.koog.llm.LlmProvider
 import codebase.koog.llm.pool.OllamaLlmProvider
 import codebase.koog.llm.pool.OllamaPool
+import codebase.koog.session.SessionRecord
 import codebase.koog.tracking.TokenTracker
 import contracts.llmpool.LlmInstance
 import contracts.llmpool.LlmInstancePool
@@ -14,6 +15,7 @@ import contracts.vibecoding.registry.ToolRegistry
 import vibecoding.contracts.state.VibecodingState
 import codebase.koog.VibecodingGraph
 import kotlin.test.assertTrue
+import java.time.Instant
 
 /**
  * World Object injecté par PicoContainer dans toutes les Steps Cucumber
@@ -57,6 +59,25 @@ class VibecodingWorld {
 
     /** Instances du pool (pour assertions) */
     var poolInstances: List<LlmInstance> = emptyList()
+
+    // ── @epic_v_7 : Resume session ──
+
+    /** SessionRecord construit par le scénario Cucumber */
+    var sessionRecord: SessionRecord? = null
+
+    /** VibecodingState résultant de resumeSession() */
+    var resumedState: VibecodingState? = null
+
+    // ── @epic_v_8 : DashboardTask ──
+
+    /** Projet Gradle construit par le Background */
+    var gradleProject: org.gradle.api.Project? = null
+
+    /** Tâche Gradle récupérée par lookup */
+    var foundTask: org.gradle.api.Task? = null
+
+    /** Exception levée par executeDashboard() */
+    var dashboardException: Exception? = null
 
     /**
      * Configure un pool Ollama avec N instances et un seuil de quota.
