@@ -4,9 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-27 (Session 070)
-_Session en cours_ : 071 — Cucumber verification + publishToMavenLocal
-_Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/` (N=70, multiple de 10)
+_Derniere mise a jour_ : 2026-05-26 (Session 069)
+_Session en cours_ : 070 — E2E Integration Test + OllamaLlmProvider Cache Dedup. E2E: VibecodingTask avec Testcontainers ConnectionFactory reel → verifier session persistee dans PostgreSQL. Provider: cache OllamaChatModel par (baseUrl, model) pour eviter recreation a chaque call(). Base: session 069 (resume + dashboard + ConnectionFactory fix. 17 JUnit5 + 4 Cucumber PASS).
 
 '''
 == REGLES ABSOLUES (resume)

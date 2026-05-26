@@ -1,0 +1,91 @@
+= Session 069 — Resume Session + Dashboard CLI + Bugfix ConnectionFactory
+:session: 069
+:date: 2026-05-26
+:contexte: Session 068 — LlmProviderResolver + --model option + completion tracking
+:resultat: SUCCESS — 17 JUnit5 + 4 Cucumber PASS, 0 regression
+:score: 10/10
+
+== What was delivered
+
+=== P1 — Resume Session (--resume <sessionId>)
+- ✅ Option `--resume` sur `VibecodingTask` (propriété Property<String>, convention "")
+- ✅ `VibecodingGraph.resumeSession(SessionRecord)` — reconstruction `VibecodingState`
+  depuis `SessionRecord` (intention préfixée `[Resume <id>]`, iteration=0, plan/classification conservés)
+  → Companion object, ~20 lignes
+- ✅ Intégration dans `executeVibecoding()` — charge la session depuis `SessionRepository(R2DBC)`,
+  crée un `VibecodingGraph` avec le state résumé
+- ✅ Cucumber `@epic_v_7` — 2 scénarios :
+  . Reconstruction normale (intention, workspaceRoot, maxActions, iteration=0)
+  . Session finie → state final
+
+=== P2 — Dashboard CLI (./gradlew vibecodingDashboard)
+- ✅ `DashboardTask` Gradle — expose `Dashboard.summary()` en console formatée
+  (sessions, coûts, tokens, confidentialité, sessions 7j/30j, plus chère session)
+  → ~80 lignes, group "tracking"
+- ✅ Enregistrement dans `CodebasePlugin` (tâche `vibecodingDashboard`)
+- ✅ Tests unitaires — 3/3 (métadonnées tâche, erreur sans ConnectionFactory, injection nullable)
+- ✅ Cucumber `@epic_v_8` — 2 scénarios :
+  . Tâche enregistrée avec group "tracking" et description
+  . IllegalStateException sans ConnectionFactory
+
+=== Bugfix — ConnectionFactory transmis dans le path normal
+- **Bug** : `connectionFactory` n'était passé à `VibecodingGraph` que dans le path `--resume`.
+  En mode normal, les sessions n'étaient jamais persistées.
+- **Fix** : extraction de `val cf = connectionFactory` avant le if/else → passé
+  aux deux chemins (normal et --resume)
+- ✅ Tests : 2 nouveaux tests unitaires (nullable injection, execute sans crash)
+
+== Fichiers modifiés
+
+[cols="3,2,2"]
+|===
+| Fichier | Action | Lignes
+| `VibecodingTask.kt` | + option --resume, + intégration resume, + ConnectionFactory fix | +35
+| `VibecodingGraph.kt` | + companion object resumeSession() | +25
+| `CodebasePlugin.kt` | + enregistrement vibecodingDashboard | +7
+| `build.gradle.kts` | + cucumberTestEpicV7, cucumberTestEpicV8 | +55
+| `VibecodingSteps.kt` | + step definitions @epic_v_7 | +80
+| `VibecodingWorld.kt` | + champs sessionRecord, resumedState, gradleProject, ... | +15
+| `VibecodingTaskTest.kt` | + 4 tests (resume option, ConnectionFactory) | +35
+| `VibecodingGraphTest.kt` | + 3 tests resumeSession | +80
+|===
+
+== Fichiers créés
+
+- `DashboardTask.kt` — tâche Gradle vibecodingDashboard (~80 lignes)
+- `DashboardTaskTest.kt` — 3 tests unitaires
+- `DashboardSteps.kt` — step definitions Cucumber @epic_v_8
+- `EpicV7CucumberRunner.kt` — runner @epic_v_7
+- `EpicV8CucumberRunner.kt` — runner @epic_v_8
+- `epic_v_dashboard.feature` — 2 scénarios BDD
+
+== Résultats tests
+
+[cols="3,2,2"]
+|===
+| Suite | Tests | Résultat
+| VibecodingGraphTest | 13 | ✅ PASS
+| VibecodingTaskTest | 12 | ✅ PASS
+| DashboardTaskTest | 3 | ✅ PASS
+| TokenTrackerTest | 9 | ✅ PASS (régression OK)
+| DashboardTest | préexistant | ✅ non régressé
+| Cucumber @epic_v_7 | 2 | ✅ PASS
+| Cucumber @epic_v_8 | 2 | ✅ PASS
+|===
+
+Total : 17 JUnit5 + 4 Cucumber nouveaux, 0 régression.
+
+== Prochaine session — Pistes
+
+. Refactoring pool — `LlmProviderResolver.gemma4Pool` déjà OK (session 068), mais le
+  `OllamaLlmProvider` pourrait bénéficier d'un `LlmProvider` dédié avec `cache` explicite
+  (actuellement `OllamaChatModel` recreé à chaque `call()` via `pool.nextInstance()`).
+
+. Couverture `VibecodingTask` avec `ConnectionFactory` réel (Testcontainers) — scénario
+  end-to-end : injecter CF → exécuter vibecoding → vérifier session persistée en base.
+  Aujourd'hui testé sans DB (mode déterministe dryRun).
+
+. Backlog évoqué dans PROMPT_REPRISE : "OllamaPool with RotationStrategy already tested
+  (@epic_v_6). Backlog: integrate OllamaPool + OllamaLlmProvider properly."
+  → Déjà fait en pratique (session 068), mais le `OllamaPool` est `lazy` dans `LlmProviderResolver`.
+  Si on veut injecter dynamiquement le pool (via extension Gradle), ça reste à faire.
