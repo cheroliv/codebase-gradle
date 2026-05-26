@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-27 (Session 058 — Renommage Global Packages cccp/education. TERMINE. 0 residu.)
-_Session en cours_ : 059 — (a definir). Backlog : EPIC 5, EPIC 12.
+_Derniere mise a jour_ : 2026-05-27 (Session 059)
+_Session en cours_ : 060 — Consolidation craftman BDD→TDD (SessionRepository + Cucumber). 3 correctifs prioritaires : @Before Cucumber, constructeur secondaire, couverture BDD→TDD. Base : 32/32 JUnit5 PASS, 10 scenarios Cucumber a valider. Backlog : EPIC 5, EPIC 12, EPIC-V-FLYWAY.
 
 '''
 == REGLES ABSOLUES (resume)

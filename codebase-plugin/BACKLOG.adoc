@@ -156,6 +156,28 @@ _US backlog_ : Migrer VibecodingTask + VibecodingGraph → planner-gradle (N2).
 Codebase conserve ToolRegistry + tools + KoogAugmentedContextGraph (N1).
 Retardée après consolidation EPIC V.
 
+=== EPIC-V-SESSION-REPO — Session 059 (en cours, 2026-05-27)
+
+3 connecteurs critiques pour boucle continue :
+* [ ] SessionRepository — persistance cross-session dans pgvector via R2DBC
+* [ ] TokenTracker — mesure réelle consommation tokens LLM
+* [ ] Dashboard — visibilité historique sessions + coût
+
+=== EPIC-V-FLYWAY — Migration Flyway (déclencheur futur)
+
+**Statut** : BACKLOG
+**Priorite** : P2
+**Seuil declencheur** : 5+ fichiers de migration de schema
+
+_Note Session 059_ : Le schema SQL est deja versionne avec la convention Flyway
+(`src/main/resources/db/migration/V1__init_vibecoding.sql`) mais sans la dependance
+Flyway. Le `initSchema()` de SessionRepository gere les `CREATE TABLE IF NOT EXISTS`
+directement en R2DBC. Quand le nombre de migrations depassera 5, importer
+`org.flywaydb:flyway-database-postgresql` et basculer sur `Flyway.migrate()`.
+
+_Contenu de V1_ : sessions, steps, indexes, colonne confidentiality_level
+(aligne sur les 4 cercles du Jardin Secret).
+
 == EPIC G : Publication Maven Central + Gradle Portal
 **Statut** : AUDITE (session 046) — Pret, aucune action supplementaire necessaire
 **Priorite** : P0

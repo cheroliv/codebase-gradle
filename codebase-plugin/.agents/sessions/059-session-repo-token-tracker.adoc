@@ -1,0 +1,75 @@
+= Session 059 — SessionRepository + TokenTracker + Dashboard (Jardin Secret)
+:session: 059
+:date: 2026-05-27
+:score: 7/10
+:status: PAUSEE — Baseline instable, reprise methodique Session 060
+
+== Contexte
+
+EPIC-V : 3 connecteurs critiques pour la boucle vibecoding continue.
+Schema OpenCode reverse-engineere depuis le code source public (SQLite 3 tables).
+Convention Flyway sans dependance adoptee (V1__init_vibecoding.sql).
+Jardin Secret integre au modele de donnees (confidentiality_level).
+
+== Actions realisees
+
+1. Reverse-engineering schema OpenCode → 3 tables SQLite (sessions, messages, files)
+2. Adaptation PostgreSQL + R2DBC : vibecoding_sessions + vibecoding_steps
+3. Integration Jardin Secret : colonne confidentiality_level (PUBLIC/INTERNAL/CONFIDENTIAL/SECRET)
+4. V1__init_vibecoding.sql cree dans src/main/resources/db/migration/ (convention Flyway)
+5. EPIC-V-FLYWAY ajoute au BACKLOG.adoc (seuil declencheur 5+ migrations)
+6. SessionRepository (R2DBC) : interface + implementation 304 lignes, 15 tests JUnit5 PASS
+7. TokenTracker (in-memory) : 58 lignes, 8 tests JUnit5 PASS
+8. Dashboard (aggregation) : 95 lignes, 9 tests JUnit5 PASS (1 corrige post-agent)
+9. SessionRepositoryWorld + SessionRepositorySteps : 338 lignes de steps Cucumber
+10. Feature epic_v_session_repository.feature : 10 scenarios BDD (Jardin Secret, cascade, dashboard)
+11. Compilation OK (zéro warning blocant)
+
+== Etat des lieux
+
+| Artifact | Lignes | Tests PASS | Tests FAIL |
+| SessionRepository | 304 | 15/15 | 0 |
+| TokenTracker | 58 | 8/8 | 0 |
+| Dashboard | 95 | 9/9 | 0 |
+| SessionRepositorySteps | 355 | compilation OK | Cucumber NON VERIFIE |
+| epic_v_session_repository.feature | 86 | — | NON VERIFIE |
+
+=== Points bloquants
+
+. **@Before Cucumber non teste** : tag `@Before("@epic_v_session_repo")` ajoute en fin de session,
+  non valide par execution. Impact potentiel sur la suite Cucumber globale.
+
+. **Ordre BDD→TDD inverse** : les tests unitaires ont precede les scenarios Cucumber.
+  A verifier en Session 060.
+
+. **Constructeur secondaire SessionRecord** : ambiguite avec le constructeur primaire.
+  A supprimer.
+
+== Lecons
+
+. **Pas de parallelisation d'agents** : les @xp ont produit du code fonctionnel mais la
+  correction post-agent (capitalisation confidentiality, type Java Integer→Kotlin Int,
+  Elvis operator redondant) a coute ~15 minutes. La perte de temps est dans la reconciliation.
+
+. **BDD d'abord, toujours** : ecrire la feature Cucumber AVANT les tests unitaires.
+  C'est le contrat, pas la verification.
+
+. **Baby steps reels** : 1 fichier, 1 compile, 1 test. Pas de batch.
+
+== Fichiers crees/modifies
+
+| Fichier | Action |
+| src/main/resources/db/migration/V1__init_vibecoding.sql | CREE |
+| src/main/kotlin/codebase/koog/session/SessionRecord.kt | CREE |
+| src/main/kotlin/codebase/koog/session/SessionRepository.kt | CREE |
+| src/main/kotlin/codebase/koog/tracking/TokenTracker.kt | CREE |
+| src/main/kotlin/codebase/koog/tracking/Dashboard.kt | CREE |
+| src/test/kotlin/codebase/koog/session/SessionRepositoryTest.kt | CREE |
+| src/test/kotlin/codebase/koog/tracking/TokenTrackerTest.kt | CREE |
+| src/test/kotlin/codebase/koog/tracking/DashboardTest.kt | CREE |
+| src/test/features/epic_v_session_repository.feature | CREE |
+| src/test/kotlin/codebase/scenarios/SessionRepositoryWorld.kt | CREE |
+| src/test/kotlin/codebase/scenarios/SessionRepositorySteps.kt | CREE |
+| BACKLOG.adoc | MODIFIE (EPIC-V-FLYWAY) |
+| .agents/INDEX.adoc | MODIFIE (session 059) |
+| PROMPT_REPRISE.adoc | MODIFIE (session 060) |

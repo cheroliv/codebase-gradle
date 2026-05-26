@@ -1,16 +1,65 @@
-= PROMPT_REPRISE — Session 059 — (à définir)
-:session: 059
-:date: (à définir)
-:status: EN_ATTENTE
+= PROMPT_REPRISE — Session 060 — Consolidation Craftman SessionRepository + Cucumber
+:session: 060
+:date: 2026-05-27
+:status: PRET
 :max-lines: 70
-:priorite: P1
+:priorite: P0
+:methodologie: BDD→TDD baby-step, 1 fichier a la fois, compiler apres chaque edition
 
 == Mission
 
-À définir.
+Consolider le travail de la Session 059 (SessionRepository + TokenTracker + Dashboard)
+dans l'ordre craftman canonique : BDD d'abord, TDD ensuite, code en dernier.
+ZERO agent parallele. ZERO subagent.
 
-== Contexte
+== Etat d'entree
 
-La session 058 a terminé le renommage global des packages cccp/education.
-Zéro résidu dans les packages/imports Kotlin. Prochaines priorités : EPIC 5
-(Pipeline fine-tuning experts CDA/FPA) ou EPIC 12 (Dilution Article de Blog).
+- SessionRepository (R2DBC) : 304 lignes, 15/15 JUnit5 PASS
+- TokenTracker (in-memory) : 58 lignes, 8/8 JUnit5 PASS
+- Dashboard (aggregation) : 95 lignes, 9/9 JUnit5 PASS
+- Cucumber feature : epic_v_session_repository.feature (10 scenarios) — NON VERIFIE
+- Cucumber steps : SessionRepositorySteps.kt (355 lignes) — compilation OK, NON EXECUTE
+- Schema : V1__init_vibecoding.sql (Flyway convention sans dependance)
+
+== Points bloquants (3 correctifs prioritaires)
+
+. **@Before Cucumber** : le tag `@Before("@epic_v_session_repo")` a ete ajoute en fin de
+  Session 059 mais jamais teste. Il faut verifier que le `TRUNCATE` fonctionne
+  et que les autres scenarios Cucumber ne sont pas impactes.
+
+. **Constructeur secondaire SessionRecord** : ambigu (2 facons de construire le meme objet).
+  Supprimer et adapter FakeSessionRepository pour utiliser le constructeur primaire.
+
+. **Ordre BDD→TDD** : verifier que chaque scenario Cucumber a un test unitaire correspondant.
+  Completude de couverture.
+
+== Plan d'execution (baby-step sequentiel)
+
+=== Etape 1 — Reparer le @Before Cucumber
+. `./gradlew compileTestKotlin` → confirmer compilation
+. `./gradlew cucumberTest -D"cucumber.filter.tags=@epic_v_session_repo"` → les 10 scenarios passent
+. `./gradlew cucumberTest` → les autres scenarios ne sont PAS impactes
+
+=== Etape 2 — Nettoyer le constructeur secondaire
+. Supprimer le constructeur secondaire de SessionRecord.kt
+. Adapter FakeSessionRepository (DashboardTest.kt) → constructeur primaire
+. `./gradlew compileKotlin` → confirmer
+. `./gradlew test --tests "codebase.koog.tracking.DashboardTest"` → 9/9 PASS
+
+=== Etape 3 — Verifier couverture BDD→TDD
+. Pour chaque scenario Cucumber, identifier le test JUnit5 correspondant
+. Ajouter les tests manquants si necessaire
+. `./gradlew test cucumberTest` → full suite verte
+
+=== Etape 4 — Commit sans push
+. `git add` les fichiers concernes
+. `git commit -m "EPIC-V Session 060 — Consolidation craftman SessionRepository + Cucumber BDD"`
+. ZERO push — lecture seule du remote
+
+== Regles absolues
+
+- **BDD d'abord** : le scenario Cucumber est la spec, pas la verification
+- **1 fichier a la fois** : modifier → compiler → tester → passer au suivant
+- **ZERO agent @xp ou subagent** : tout le code est ecrit par l'orchestrateur
+- **ZERO parallelisation** : sequentiel, baby-step par baby-step
+- **ZERO push** : commit local uniquement
