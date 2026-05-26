@@ -35,6 +35,7 @@ _Session en cours_ : 070 — E2E Integration Test + OllamaLlmProvider Cache Dedu
 
 |===
 | # | Date | Type | Sujet | Score
+| 070 | 2026-05-27 | feat+refactor+contract | Cache dedup OllamaLlmProvider (ConcurrentHashMap) + E2E VibecodingTaskTest Testcontainers (14/14 PASS) + Nettoyage 11434-11436 (24 fichiers) + Rotation 29 ports x5 modeles + MigrationTest fix (V1+V2) + Contrat Craftsmanship EAGER | 10/10
 | 069 | 2026-05-26 | feat+bugfix | Resume session --resume + Dashboard CLI + ConnectionFactory fix — 17 JUnit5 + 4 Cucumber PASS (2 @epic_v_7, 2 @epic_v_8) | 10/10
 | 068 | 2026-05-26 | feat | LlmProviderResolver model→provider mapping + --model option + completion tracking — 34 tests PASS | 10/10
 | 065 | 2026-05-27 | feat | EPIC V-6 Cablage Ollama Cloud Docker + ConnectionFactory R2DBC — Contrat N0 llm-pool-contracts (LlmInstance/QuotaConfig/LlmInstancePool) publie Maven Local. OllamaPool (rotation ROUND_ROBIN/LEAST_USED, skip quota exceeded). OllamaLlmProvider (LlmProvider, cache OllamaChatModel, timeout 60s, zero API key). ConnectionFactory injecte dans VibecodingGraph. SessionRepository.updateSession persiste TokenTracker (prompt/completion/cost/model). V2__add_session_model migration. 12/12 JUnit5 + 1/1 Cucumber @epic_v_6 PASS. 0 regression. | 10/10
