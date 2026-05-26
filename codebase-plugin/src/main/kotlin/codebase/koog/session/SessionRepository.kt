@@ -1,5 +1,6 @@
 package codebase.koog.session
 
+import codebase.koog.tracking.TokenTracker
 import io.r2dbc.spi.Connection
 import io.r2dbc.spi.ConnectionFactory
 import kotlinx.coroutines.reactive.awaitSingle
@@ -20,7 +21,8 @@ interface SessionRepository {
     suspend fun updateSession(
         id: String,
         state: VibecodingState,
-        model: String = "unknown"
+        model: String = "unknown",
+        tokenTracker: codebase.koog.tracking.TokenTracker = codebase.koog.tracking.TokenTracker()
     ): Boolean = error("Not supported")
 
     suspend fun addStep(
@@ -116,13 +118,16 @@ private class R2dbcSessionRepository(
     override suspend fun updateSession(
         id: String,
         state: VibecodingState,
-        model: String
+        model: String,
+        tokenTracker: TokenTracker
     ): Boolean {
+        val cost = tokenTracker.estimatedCost(model)
         return withConnection { conn ->
             val s = conn.createStatement(
                 "UPDATE vibecoding_sessions" +
                 " SET error = $2, finished = $3, iteration_count = $4," +
-                "     classification = $5, updated_at = NOW()" +
+                "     classification = $5, prompt_tokens = $6, completion_tokens = $7," +
+                "     cost = $8, model = $9, updated_at = NOW()" +
                 " WHERE id = $1"
             )
             s.bind("$1", id)
@@ -130,6 +135,10 @@ private class R2dbcSessionRepository(
             s.bind("$3", state.finished)
             s.bind("$4", state.iteration)
             s.bind("$5", state.classification.ifEmpty { "" })
+            s.bind("$6", tokenTracker.promptTokens)
+            s.bind("$7", tokenTracker.completionTokens)
+            s.bind("$8", cost)
+            s.bind("$9", model)
 
             val updated = Mono.from(s.execute())
                 .flatMap { Mono.from(it.rowsUpdated) }.defaultIfEmpty(0L)

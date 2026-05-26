@@ -52,8 +52,8 @@ pour passer de l'agent mock a l'agent autonome sur infrastructure reelle.
 
 === P1 — Nettoyage technique
 
-* [ ] Supprimer warnings `!!` inutiles lignes 139/257 de VibecodingGraph.kt
-* [ ] Nettoyer BACKLOG.adoc : EPIC 3 statut A FAIRE → TERMINE (fait session 046)
+* [x] Supprimer warnings `!!` inutiles lignes 139/257 de VibecodingGraph.kt
+* [x] Nettoyer BACKLOG.adoc : EPIC 3 statut A FAIRE → TERMINE (fait session 046)
 
 === Reference
 
@@ -80,9 +80,9 @@ Le `CompositeContextBuilder` (déjà fait via EPIC 9) agrège ces canaux.
 
 === Sous-tâches
 
-* [ ] Formaliser les interfaces de chaque canal (`ContextChannel` sealed class)
-* [ ] Implementer le `ContextBudget` : token budget par canal (EAGER 40%, RAG 30%, Graphify 20%, Ressources 10%)
-* [ ] Tests : mesurer la pertinence des réponses avec 1, 2, 3, 4 canaux activés
+* [x] Formaliser les interfaces de chaque canal (`ContextChannel` sealed class) — fait via EPIC 9, session 046
+* [x] Implementer le `ContextBudget` : token budget par canal (EAGER 40%, RAG 30%, Graphify 20%, Ressources 10%) — fait via EPIC 9, session 046
+* [x] Tests : mesurer la pertinence des réponses avec 1, 2, 3, 4 canaux activés — fait via EPIC 4 Benchmark (session 026)
 
 == EPIC 4 : Benchmark de perception spatiale LLM
 **Statut** : MVP1 TERMINE (session 026 : flash + Graphify 0% erreur)
@@ -105,14 +105,14 @@ Le `CompositeContextBuilder` (déjà fait via EPIC 9) agrège ces canaux.
 * [ ] Validation des experts (test de coherence sur 100 prompts par domaine)
 
 == EPIC 6 : Integration ONNX — boucle qualite
-**Statut** : A FAIRE
+**Statut** : TERMINE (session 056, 2026-05-23)
 **Priorite** : P1
 
-* [ ] Analyse de sentiment sur les outputs experts (ONNX)
-* [ ] Detection de hors-sujet (classifieur ONNX)
-* [ ] Detection PII résiduelle post-anonymisation (double vérification)
-* [ ] Seuil de rejet configurable
-* [ ] Circuit de retry (max 3 iterations, feedback au LLM)
+* [x] Analyse de sentiment sur les outputs experts (ONNX)
+* [x] Detection de hors-sujet (classifieur ONNX)
+* [x] Detection PII résiduelle post-anonymisation (double vérification)
+* [x] Seuil de rejet configurable
+* [x] Circuit de retry (max 3 iterations, feedback au LLM)
 
 == EPIC 7 : Wiring LangChain4j + pgvector experts
 **Statut** : A FAIRE

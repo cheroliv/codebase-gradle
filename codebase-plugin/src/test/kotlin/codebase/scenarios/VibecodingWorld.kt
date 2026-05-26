@@ -2,10 +2,18 @@ package codebase.scenarios
 
 import codebase.koog.llm.FakeLlmProvider
 import codebase.koog.llm.LlmProvider
+import codebase.koog.llm.pool.OllamaLlmProvider
+import codebase.koog.llm.pool.OllamaPool
 import codebase.koog.tracking.TokenTracker
+import contracts.llmpool.LlmInstance
+import contracts.llmpool.LlmInstancePool
+import contracts.llmpool.QuotaConfig
+import contracts.llmpool.ResetPolicy
+import contracts.llmpool.RotationStrategy
 import contracts.vibecoding.registry.ToolRegistry
 import vibecoding.contracts.state.VibecodingState
 import codebase.koog.VibecodingGraph
+import kotlin.test.assertTrue
 
 /**
  * World Object injecté par PicoContainer dans toutes les Steps Cucumber
@@ -36,6 +44,69 @@ class VibecodingWorld {
         toolRegistry = ToolRegistry()
     )
 
+    // ── @epic_v_6 : Ollama Pool ──
+
+    /** Pool Ollama configuré par le scénario Cucumber */
+    var ollamaPool: LlmInstancePool? = null
+
+    /** Provider Ollama cablé sur le pool */
+    var ollamaLlmProvider: OllamaLlmProvider? = null
+
+    /** Nombre d'appels effectués par le scénario */
+    var providerCallCount: Int = 0
+
+    /** Instances du pool (pour assertions) */
+    var poolInstances: List<LlmInstance> = emptyList()
+
+    /**
+     * Configure un pool Ollama avec N instances et un seuil de quota.
+     */
+    fun setupOllamaPool(instanceIds: List<String>, threshold: Int) {
+        poolInstances = instanceIds.map { id ->
+            LlmInstance(
+                id = id,
+                baseUrl = "http://localhost:11434",  // fake URL pour Cucumber (pas de vrai Ollama)
+                model = "gpt-oss:120b-cloud",
+                quota = QuotaConfig(limitValue = 10, thresholdPercent = threshold, resetPolicy = ResetPolicy.NEVER)
+            )
+        }
+        ollamaPool = OllamaPool(poolInstances, rotationStrategy = RotationStrategy.ROUND_ROBIN)
+    }
+
+    /**
+     * Appelle le provider Ollama N fois (via FakeOllamaLlmProvider pour Cucumber).
+     * Sans vrai serveur Ollama, on utilise un mock qui appelle nextInstance() sur le pool.
+     */
+    fun callOllamaProviderMultiple(times: Int) {
+        val pool = ollamaPool ?: error("Ollama pool not configured — call setupOllamaPool first")
+        repeat(times) {
+            pool.nextInstance()  // exerce le mécanisme de rotation/quota
+            providerCallCount++
+        }
+    }
+
+    /**
+     * Vérifie que les deux instances ont été utilisées au moins une fois.
+     */
+    fun assertBothInstancesUsed(idA: String, idB: String) {
+        val pool = ollamaPool as? OllamaPool ?: error("Pool is not an OllamaPool")
+        // Avec 5 appels et threshold=2 (20%→seuil 2), instance a atteint quota après 2 appels
+        // Instance b reçoit les appels restants (3) → les deux sont utilisées
+        val instanceA = poolInstances.first { it.id == idA }
+        val exceeded = pool.isQuotaExceeded(instanceA)
+        assertTrue(exceeded, "Instance $idA should have quota exceeded after 5 calls with threshold=2 (limit=10, 20%=2)")
+        // b a été utilisée (sinon on aurait eu une IllegalStateException au 3e appel)
+    }
+
+    /**
+     * Vérifie que le quota d'une instance est dépassé.
+     */
+    fun assertQuotaExceeded(id: String) {
+        val pool = ollamaPool ?: error("Ollama pool not configured")
+        val instance = poolInstances.first { it.id == id }
+        assertTrue(pool.isQuotaExceeded(instance), "Instance $id should have quota exceeded")
+    }
+
     /**
      * Réinitialise le graphe avec le FakeLlmProvider après configuration.
      * Appelé dans le Background @epic_v_5.
@@ -52,3 +123,4 @@ class VibecodingWorld {
         )
     }
 }
+

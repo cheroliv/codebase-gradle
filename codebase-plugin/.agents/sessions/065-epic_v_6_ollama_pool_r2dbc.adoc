@@ -1,0 +1,81 @@
+= Session 065 — EPIC V-6 Cablage Ollama Cloud Docker + ConnectionFactory R2DBC
+:date: 2026-05-27
+:type: feat
+:score: 10/10
+:status: TERMINE
+
+== Contexte
+
+Machine a 95% apres V-5 (LlmProvider + Gemini + Fake + callLLM + persistState + TokenTracker).
+Objectif : cabler le vrai tuyau Ollama cloud dockerise et la persistance R2DBC reelle.
+
+== Actions
+
+=== P0-2 — Ollama Cloud Docker + Pool Rotation (contrat N0)
+
+*Creation contrat N0* `llm-pool-contracts` dans `workspace-bom/` :
+- `LlmInstance` — instance avec baseUrl, model, quota (pas de cle API, auth SSH via Docker)
+- `QuotaConfig` — limitValue, thresholdPercent, isExceeded()
+- `ResetPolicy` — DAILY/WEEKLY/MONTHLY/NEVER/MANUAL
+- `RotationStrategy` — ROUND_ROBIN/LEAST_USED
+- `LlmInstancePool` — interface N0 (size, instances, nextInstance, isQuotaExceeded, resetUsage)
+
+*Implementation N1* `OllamaPool` dans `codebase.koog.llm.pool` :
+- Adapte le pattern ApiKeyPool de graphify-gradle → instances Docker Ollama
+- Rotation automatique sur quota exceeded
+- Fallback best-effort quand toutes les instances saturees
+
+*Provider* `OllamaLlmProvider` :
+- Implemente `LlmProvider` (Clean Architecture)
+- Cache `OllamaChatModel` par instance
+- Timeout 60s, log quota exceeded sans cle API
+- ZERO cle API — auth Docker par cle SSH montee en volume
+
+*Cucumber* `@epic_v_6` :
+- Scenario : "Ollama pool rotates instances when quota exceeded"
+- 2 instances ollama-a/ollama-b, threshold 2, 5 appels → rotation verifiee
+
+=== P0-1 — ConnectionFactory + Persistance R2DBC
+
+*SessionRepository* : `updateSession()` enrichi avec TokenTracker
+- Persiste `prompt_tokens`, `completion_tokens`, `cost`, `model`
+- Interface + value par defaut → retrocompatibilite preservee
+
+*VibecodingGraph* : injection `ConnectionFactory` optionnelle
+- `effectiveSessionRepository` lazy : priorite injection explicite, sinon creation depuis `ConnectionFactory`
+- `persistStateNode` passe `TokenTracker` a `updateSession`
+
+*Migration* : `V2__add_session_model.sql` — ajout colonne `model` dans `vibecoding_sessions`
+
+=== P1 — Nettoyage
+
+- Suppression 2 `!!` inutiles dans VibecodingGraph.kt (lignes 147, 265)
+- BACKLOG.adoc : EPIC 3 sous-taches marquees TERMINE, EPIC 6 statut aligne INDEX.adoc
+
+== Fichiers modifies
+
+*codebase-plugin* (7 modifies, 4 nouveaux) :
+- `build.gradle.kts` — dependance `llm-pool-contracts:0.1.0`
+- `VibecodingGraph.kt` — `ConnectionFactory` + `effectiveSessionRepository` + fix `!!`
+- `SessionRepository.kt` — `updateSession()` + `TokenTracker` + `V2__add_session_model.sql`
+- `BACKLOG.adoc` — EPIC 3 + EPIC 6 alignement
+- `epic_v_vibecoding.feature` — scenario @epic_v_6
+- `VibecodingSteps.kt` — steps @epic_v_6
+- `VibecodingWorld.kt` — setupOllamaPool/callOllamaProviderMultiple/assertBothInstancesUsed/assertQuotaExceeded
+- `src/main/kotlin/codebase/koog/llm/pool/` — nouveau package (OllamaPool, OllamaLlmProvider)
+- `src/test/kotlin/codebase/koog/llm/pool/` — tests (OllamaPoolTest 8/8, OllamaLlmProviderTest 4/4)
+- `EpicV6CucumberRunner.kt` — runner dedie @epic_v_6
+
+*workspace-bom* (4 nouveaux) :
+- `llm-pool-contracts/` — build.gradle.kts + 5 fichiers contrat N0
+- `settings.gradle.kts` — `include("llm-pool-contracts")`
+
+== Resultats
+
+- 12 nouveaux tests JUnit5 PASS
+- 1 nouveau scenario Cucumber @epic_v_6 PASS
+- Contrat N0 `llm-pool-contracts:0.1.0` publie Maven Local
+- SessionRepository enrichi TokenTracker (prompt_tokens, completion_tokens, cost, model)
+- Migration V2 ajoute colonne model
+- 0 regression sur l'existant
+- 0 secret, 0 token dans le code

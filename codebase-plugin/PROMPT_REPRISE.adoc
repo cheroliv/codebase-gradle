@@ -1,77 +1,44 @@
-= PROMPT_REPRISE — Session 065 — EPIC V-6 Cablage Ollama Cloud Docker + ConnectionFactory R2DBC
-:session: 065
+= PROMPT_REPRISE — Session 066 — EPIC V-6 Test Integration R2DBC + VibecodingGraph End-to-End
+:session: 066
 :date: 2026-05-27
 :status: PRET
-:max-lines: 70
+:max-lines: 50
 :priorite: P0
 :methodologie: BDD→TDD baby-step, 1 fichier a la fois, compiler apres chaque edition
 
 == Mission
 
-Cabler ConnectionFactory R2DBC dans VibecodingGraph pour la vraie persistance,
-puis ajouter OllamaLlmProvider pour connecter le graphe aux instances Ollama
-cloud dockerisees (ports 11434-11465) avec pool key adapter contre le quota.
-
-La base Gemini est posee en session 064. On passe au vrai tuyau : Ollama cloud
-dockerise, pool de cles SSH, et persistance R2DBC reelle.
+Terminer EPIC V-6 : test d'integration R2DBC Testcontainers dans VibecodingGraph,
+verifier createSession + updateSession end-to-end avec vrai ConnectionFactory.
 
 == Objectifs
 
-=== P0 — ConnectionFactory + Persistance reelle
-- Injecter `ConnectionFactory` (R2DBC) dans le constructeur de VibecodingGraph
-- Test d'integration avec vrai SessionRepository R2DBC via Testcontainers
-- `updateSession()` avec `TokenTracker.cost`/`estimatedCost` dans la boucle
-- Verifier que createSession + updateSession fonctionnent en end-to-end
+=== P0 — Test Integration R2DBC + VibecodingGraph
 
-=== P0 — OllamaLlmProvider (cloud dockerise)
-- Scanner les ports 11434→11465 sur l'hote (`curl http://localhost:{port}/api/tags`)
-- Implémenter `OllamaLlmProvider` via `OllamaChatModel.builder().baseUrl()`
-- Utiliser `gpt-oss:120b-cloud` comme modele principal (cloud gratuit/Pro)
-- OllamaPoolKeyAdapter : wrapper resilient pour le quota
-  * Si Ollama renvoie quota depasse → rotation vers instance suivante
-  * Pattern montage docker avec SSH key : utiliser `ollama signin` + device key
-  * Reference : article 0120 /home/cheroliv/workspace/office/sites/cheroliv.com/jbake/content/blog/2026/0120_cumuler_deux_abonnements_ollama_pro_docker_post.adoc
+- Test d'integration : VibecodingGraph avec ConnectionFactory Testcontainers
+- Verifier createSession + updateSession + TokenTracker en end-to-end
+- Verifier que les colonnes prompt_tokens, completion_tokens, cost, model sont persistees
+- 1 scenario Cucumber minimum (ou extension @epic_v_6 existant)
 
-=== P1 — Nettoyage
-- Supprimer warnings `!!` inutiles lignes 139/257 de VibecodingGraph.kt
-- Nettoyer BACKLOG.adoc : EPIC 3 statut A FAIRE → TERMINE (fait session 046)
+=== P1 — OllamaPoolKeyAdapter (differé)
 
-=== P1 — Test Cucumber
-- 1 scenario minimum : "LLM calls Ollama cloud and handles quota exceeded"
+- Wrapper resilient pour OllamaProKey — pattern a definir apres test integration R2DBC
+- Pattern : si Ollama renvoie quota exceeded → rotation automatique (deja dans OllamaPool)
+- Article 0120 : montage docker SSH key, pas de token API
 
 == Etat d'entree
 
-- VibecodingGraph — 5 noeuds koog (buildContext, callLLM, executeTools, persistState, checkProgress)
-- LlmProvider fun interface + GeminiLlmProvider + FakeLlmProvider deja crees
-- SessionRepository (R2DBC) — createSession, updateSession, addStep
-- TokenTracker — trackPrompt, estimatedCost
-- Langchain4j 1.14.1 — OllamaChatModel deja utilise
-- Instances Ollama Docker existantes sur ports 11434 (native) + 11435 (docker-b)
-  + potentiellement 11436-11465 selon les nouveaux conteneurs
-- Article 0120 documente le montage docker avec SSH key + dual abonnement
-- 35/35 JUnit5 + 101/101 Cucumber vibecoding PASS (session 064)
-
-== Architecture cible
-
-```
-OllamaPoolKeyAdapter
-  ├── OllamaInstance(port=11434, model=gpt-oss:120b-cloud)
-  ├── OllamaInstance(port=11435, model=gpt-oss:120b-cloud)
-  ├── OllamaInstance(port=11436+, model=gpt-oss:120b-cloud)
-  └── Fallback : quota exceeded → rotate
-
-VibecodingGraph (koog) ← Injection
-  R2dbcConfig → ConnectionFactory → SessionRepository
-  OllamaPoolKeyAdapter → LlmProvider
-  TokenTracker
-```
+- OllamaPool + OllamaLlmProvider fonctionnels (12 tests PASS)
+- llm-pool-contracts N0 publie
+- VibecodingGraph avec ConnectionFactory injectable
+- SessionRepository.updateSession() persiste TokenTracker (prompt/completion/cost/model)
+- V2__add_session_model.sql migration creee
+- 0 regression existant
 
 == Regles absolues
 
-- **ZERO agent @xp ou subagent** — l'orchestrateur fait le cablage
+- **ZERO agent @xp ou subagent**
 - **1 fichier a la fois, compile apres chaque edition**
-- **Pas de cles API dans les logs** — niveau logger a INFO max
-- **Pas de modification du contrat N0** (VibecodingState, ToolRegistry)
-- **Injection par constructeur** — VibecodingGraph recoit ConnectionFactory, OllamaPoolKeyAdapter
-- **Timeout par appel LLM** — 60s max, pas de blocage indefini
-- **Pattern docker SSH Key** — authentification par device key, jamais de token en clair
+- **Pas de cles API dans les logs**
+- **Timeout 60s par appel LLM**
+- **Injection par constructeur**

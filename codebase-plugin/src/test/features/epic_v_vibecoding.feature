@@ -72,3 +72,10 @@ Feature: Pipeline Vibecoding — koog autonomous loop
     When the LLM receives a prompt containing "Add dark mode toggle"
     Then the LLM decides autonomously
     And the vibecoding tracking records at least 1 prompt token
+
+  @epic_v_6 @wip
+  Scenario: Ollama pool rotates instances when quota exceeded
+    Given an Ollama pool with 2 instances "ollama-a" and "ollama-b" and threshold 2
+    When the LLM provider is called 5 times
+    Then both pool instances "ollama-a" and "ollama-b" are used
+    And the quota exceeded flag is raised for instance "ollama-a"

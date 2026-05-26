@@ -38,6 +38,8 @@ dependencies {
     implementation("education.cccp:agent-contracts:0.1.0")
     // N0 vibecoding contracts — ToolRegistry, ExecShellTool, ExecGradleTool, ToolkitIsMissingException
     implementation("education.cccp:vibecoding-contracts:0.1.0")
+    // N0 llm-pool contracts — LlmInstancePool, LlmInstance, QuotaConfig, RotationStrategy (shared N1→N2)
+    implementation("education.cccp:llm-pool-contracts:0.1.0")
     implementation(libs.bundles.arrow)
     implementation(libs.koog.agents) {
         // Exclusion nécessaire : koog 26.0.2-1 conflict with Kotlin embedded 13.0

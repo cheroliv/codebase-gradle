@@ -283,4 +283,26 @@ class VibecodingSteps(private val world: VibecodingWorld) {
             "TokenTracker should have recorded >0 calls, got ${world.tokenTracker.totalCalls}"
         )
     }
+
+    // ── @epic_v_6 : Ollama Pool + Quota Rotation ──
+
+    @Given("an Ollama pool with {int} instances {string} and {string} and threshold {int}")
+    fun `ollama pool with instances and threshold`(count: Int, idA: String, idB: String, threshold: Int) {
+        world.setupOllamaPool(listOf(idA, idB), threshold)
+    }
+
+    @When("the LLM provider is called {int} times")
+    fun `provider called multiple times`(times: Int) {
+        world.callOllamaProviderMultiple(times)
+    }
+
+    @Then("both pool instances {string} and {string} are used")
+    fun `both pool instances are used`(idA: String, idB: String) {
+        world.assertBothInstancesUsed(idA, idB)
+    }
+
+    @Then("the quota exceeded flag is raised for instance {string}")
+    fun `quota exceeded flag raised`(id: String) {
+        world.assertQuotaExceeded(id)
+    }
 }

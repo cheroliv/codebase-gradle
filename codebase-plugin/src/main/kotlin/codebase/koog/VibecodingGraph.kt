@@ -4,6 +4,7 @@ import codebase.koog.llm.LlmProvider
 import codebase.koog.session.SessionRepository
 import codebase.koog.tracking.TokenTracker
 import contracts.vibecoding.registry.ToolRegistry
+import io.r2dbc.spi.ConnectionFactory
 import vibecoding.contracts.state.AugmentedState
 import vibecoding.contracts.state.VibecodingState
 import ai.koog.agents.core.agent.asMermaidDiagram
@@ -33,17 +34,24 @@ import org.slf4j.LoggerFactory
  * koog orchestre, langchain4j exécute (RAG/LLM). ToolRegistry pour les actions filesystem/shell.
  *
  * Rétrocompatibilité : si llmProvider est null → pas de callLLM (mode déterministe comme avant V-4).
- * Si sessionRepository est null → pas de persistance.
+ * Si sessionRepository ET connectionFactory sont null → pas de persistance.
+ * Si connectionFactory est fourni → création automatique d'un SessionRepository interne.
  */
 class VibecodingGraph(
     val augmentedGraph: KoogAugmentedContextGraph? = null,
     val toolRegistry: ToolRegistry = ToolRegistry(),
     val llmProvider: LlmProvider? = null,
     val sessionRepository: SessionRepository? = null,
+    val connectionFactory: ConnectionFactory? = null,
     val tokenTracker: TokenTracker = TokenTracker()
 ) {
 
     private val log = LoggerFactory.getLogger(VibecodingGraph::class.java)
+
+    /** SessionRepository effectif : priorité injection explicite, sinon création depuis ConnectionFactory */
+    private val effectiveSessionRepository: SessionRepository? by lazy {
+        sessionRepository ?: connectionFactory?.let { SessionRepository(it) }
+    }
 
     private var sessionId: String? = null
 
@@ -108,7 +116,7 @@ class VibecodingGraph(
         // Persistance initiale — crée la session avant la boucle
         var state = initialState
         sessionId = try {
-            runBlocking { sessionRepository?.createSession(state) }?.also {
+            runBlocking { effectiveSessionRepository?.createSession(state) }?.also {
                 log.info("[VibecodingGraph] Session created: id={}", it)
             }
         } catch (e: Exception) {
@@ -136,7 +144,8 @@ class VibecodingGraph(
             }
 
             // S'il n'y a pas de plan, le LLM décide (ou on itère)
-            if (state.plan == null || state.plan!!.epics.isEmpty()) {
+            val plan = state.plan
+            if (plan == null || plan.epics.isEmpty()) {
                 // Mode LLM : décision autonome
                 if (llmProvider != null) {
                     state = try {
@@ -253,8 +262,8 @@ class VibecodingGraph(
             if (state.executedTasks.isNotEmpty()) {
                 appendLine("Tasks done: ${state.executedTasks.joinToString(", ")}")
             }
-            if (state.plan != null) {
-                appendLine("Plan remaining tasks: ${state.plan!!.epics.sumOf { it.userStories.sumOf { s -> s.tasks.size } } - state.executedTasks.size}")
+            state.plan?.let { plan ->
+                appendLine("Plan remaining tasks: ${plan.epics.sumOf { it.userStories.sumOf { s -> s.tasks.size } } - state.executedTasks.size}")
             }
             appendLine()
             appendLine("What should be the next action? Respond with a single tool name and parameters, or 'DONE' if finished.")
@@ -282,12 +291,14 @@ class VibecodingGraph(
      * on passe simplement (mode sans persistance).
      */
     private fun persistStateNode(state: VibecodingState): VibecodingState {
-        if (sessionRepository == null || sessionId == null) return state
+        val repo = effectiveSessionRepository ?: return state
+        val sid = sessionId ?: return state
         return try {
+            val tracker = tokenTracker
             runBlocking {
-                sessionRepository.updateSession(sessionId!!, state)
+                repo.updateSession(sid, state, "unknown", tracker)
             }
-            log.debug("[VibecodingGraph] Session {} updated: iteration={}", sessionId, state.iteration)
+            log.debug("[VibecodingGraph] Session {} updated: iteration={}, promptTokens={}, cost={}", sessionId, state.iteration, tracker.promptTokens, tracker.estimatedCost("deepseek-v4-pro"))
             state
         } catch (e: Exception) {
             log.warn("[VibecodingGraph] persistState failed: {}", e.message)
