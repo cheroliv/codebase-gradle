@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-27 (Session 061)
-_Session en cours_ : 062 — Code review boucle vibecoding (audit complet, gaps, roadmap restante). Lecture seule, rapport AsciiDoc. Base : 35/35 JUnit5 PASS, 100/100 Cucumber PASS.
+_Derniere mise a jour_ : 2026-05-27 (Session 063)
+_Session en cours_ : 064 — EPIC V-5 Cablage Gemini + Persistance VibecodingGraph. Ajouter callLLM + persistState dans le graphe koog. Cabler LlmConfig+SessionRepository+TokenTracker. Base : 39/39 JUnit5 PASS, 100/100 Cucumber PASS.
 
 '''
 == REGLES ABSOLUES (resume)
@@ -35,6 +35,7 @@ _Session en cours_ : 062 — Code review boucle vibecoding (audit complet, gaps,
 
 |===
 | # | Date | Type | Sujet | Score
+| 062 | 2026-05-27 | review | Code review boucle vibecoding — GLOBAL_CODE_REVIEW v12→v13. Audit 10 fichiers sources + 10 tests + schema SQL + contracts N0. 5 gaps identifies (V-5→V-9). Machine a 70%. | 9/10
 | 061 | 2026-05-27 | feat+infra | EPIC-V-FLYWAY — MigrationRunner artisanal (125 lignes, scan classpath V{n}__*.sql, table schema_version, SHA-256, idempotent). 3/3 MigrationTest PASS (Testcontainers). SessionRepository.initSchema() delegue (19→3 lignes). 35/35 JUnit5, 100/100 Cucumber, 0 regression. | 10/10
 | 060 | 2026-05-27 | consolidation | Consolidation craftman SessionRepository + Cucumber BDD — 3 correctifs : @Before Cucumber (9/9 PASS), constructeur secondaire SessionRecord (supprime, factory session()), couverture BDD→TDD (32/32 JUnit5, 150/150 Cucumber). Commit 3b95ff4. | 10/10
 | 058 | 2026-05-27 | refactor | Renommage global packages cccp/education — workspace-bom (21 fichiers), codebase (4+~25), planner (2), codex (31+2), training-private (1). 0 residu. | 10/10

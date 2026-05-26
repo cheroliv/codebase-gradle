@@ -1,5 +1,5 @@
-= PROMPT_REPRISE — Session 062 — Code Review Boucle Vibecoding
-:session: 062
+= PROMPT_REPRISE — Session 064 — EPIC V-5 Cablage Gemini + Persistance VibecodingGraph
+:session: 064
 :date: 2026-05-27
 :status: PRET
 :max-lines: 70
@@ -8,43 +8,52 @@
 
 == Mission
 
-Code review globale de la boucle vibecoding pour mesurer la distance
-restante avant une boucle autonome fonctionnelle de bout en bout.
+Cabler le LLM (Gemini via LlmConfig) et la persistance (SessionRepository)
+dans le graphe koog `VibecodingGraph` pour passer d'un executeur deterministe
+de plan a un veritable agent autonome.
+
+C'est le gap critique identifie par GLOBAL_CODE_REVIEW v13 : les composants
+existent (SessionRepository 304l, TokenTracker 58l, LlmConfig 66l) mais aucun
+n'est cable dans la boucle d'execution. La machine est a 70%.
 
 Objectifs :
-- Auditer TOUS les composants vibecoding existants (VibecodingGraph,
-  VibecodingTask, ToolRegistry, SessionRepository, MigrationRunner)
-- Identifier les gaps entre l'etat actuel et une boucle complete :
-  LLM → plan → execute tools → persist state → feedback loop
-- Produire un rapport AsciiDoc avec roadmap priorisee des etapes restantes
-- ZERO code nouveau — lecture, analyse et rapport uniquement
-
-ZERO agent parallele. Lecture seule sauf rapport.
+- Ajouter un noeud `callLLM` dans VibecodingGraph — le LLM decide quelle
+  tache executer (pas de plan deterministe)
+- Cabler `LlmConfig` → `GeminiConfig.resolveApiKey()` pour l'appel Gemini
+- Cabler `SessionRepository.createSession()` + `updateSession()` dans le graphe
+- Cabler `TokenTracker.trackPrompt()` pour mesurer la consommation reelle
+- Injecter `ConnectionFactory` (R2DBC) dans VibecodingGraph constructeur
+- 1 test Cucumber minimum : "LLM decides the next task autonomously"
+- ZERO regression sur les 199 tests vibecoding existants
+- ZERO token/secret dans le code ou les logs
 
 == Etat d'entree
 
-- VibecodingGraph.kt : graphe koog buildContext→classify→plan→executeTools→sendToolResult
-- VibecodingTask.kt : tache Gradle vibecode (dryRun, maxActions, audit trail JSONL)
-- ToolRegistry : 7 tools (read_file, write_file, edit_file, list_directory, exit, exec_shell, exec_gradle)
-- VibecodingState : data class (iterations, maxActions, dryRun, planJson, error, finished)
-- SessionRepository : persistance R2DBC (Jardin Secret confidentiality_level)
-- TokenTracker : comptage tokens in-memory
-- Dashboard : aggregation sessions
-- MigrationRunner : pipeline V{n}__*.sql idempotent
-- 35/35 JUnit5 PASS, 100/100 Cucumber PASS
+- LlmConfig + llm-config.yml livres — Gemini pret a etre utilise
+- SessionRepository (R2DBC) — createSession, updateSession, addStep
+- TokenTracker — trackPrompt, estimatedCost
+- VibecodingGraph — 3 noeuds actuels (buildContext, executeAction, checkProgress)
+- 35/35 JUnit5 + 100/100 Cucumber vibecoding PASS
+- Gemini API key disponible dans configuration/settings/gaccount.yml
+  (cheroliv.developer@gmail.com → GEMINI_API_KEY)
+- Langchain4j 1.14.1 — OllamaChatModel deja utilise, GeminiGoogleAiChatModel dispo
 
-== Questions de la review
+== Architecture cible
 
-. La boucle peut-elle tourner sans intervention humaine ?
-. Quels sont les nœuds manquants dans le graphe koog ?
-. Le feedback loop (error → replan → retry) est-il implemente ?
-. La persistance est-elle complete (state + steps + tokens + audit trail) ?
-. Le contract VibecodingState couvre-t-il tous les etats de la machine ?
-. Quels sont les 3 prochains EPICs critiques pour fermer la boucle ?
+```
+VibecodingGraph (koog)
+  buildContext → callLLM → executeTools → persistState → checkProgress
+      ↑              │                                       │
+      │              └── TokenTracker.trackPrompt()          │
+      │                                                      │
+      └── SessionRepository (create + update) ───────────────┘
+```
 
 == Regles absolues
 
-- **ZERO code** : lecture et analyse uniquement
-- **ZERO agent @xp ou subagent** : l'orchestrateur fait la review
-- **ZERO push sans permission**
-- **Rapport en AsciiDoc** : structure claire, gaps listes, roadmap priorisee
+- **ZERO agent @xp ou subagent** — l'orchestrateur fait le cablage
+- **1 fichier a la fois, compile apres chaque edition**
+- **Pas de cles API dans les logs** — niveau logger a INFO max
+- **Pas de modification du contrat N0** (VibecodingState, ToolRegistry)
+- **Injection par constructeur** — VibecodingGraph recoit SessionRepository + TokenTracker + LlmConfig
+- **Timeout par appel LLM** — 60s max, pas de blocage indefini

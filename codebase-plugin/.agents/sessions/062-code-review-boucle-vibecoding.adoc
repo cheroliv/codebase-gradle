@@ -1,0 +1,33 @@
+= Session 062 — Code Review Boucle Vibecoding
+:date: 2026-05-27
+:score: 9/10
+:status: DONE
+
+== Contexte
+
+Code review globale de la boucle vibecoding — mesure de la distance restante
+avant une boucle autonome fonctionnelle de bout en bout.
+
+== Actions réalisées
+
+1. Audit complet des 10 fichiers sources vibecoding (main) + 10 fichiers test + feature Cucumber + schema SQL + contracts N0 (workspace-bom)
+2. Archivage v12 → `configuration/.agents/code_review/GLOBAL_CODE_REVIEW_v12.adoc`
+3. Rédaction v13 dans `configuration/GLOBAL_CODE_REVIEW.adoc` (174 lignes)
+
+== Constats principaux
+
+- Les 3 trous noirs de la v12 (SessionRepository, TokenTracker, Dashboard) sont comblés **en code** (457 lignes, 199 tests livrés en sessions 059-061)
+- **Aucun n'est câblé** dans le graphe d'exécution — gap d'intégration, pas d'implémentation
+- Machine passée de 60% à 70%
+- 5 gaps restants : V-5 (câblage LLM+persistance), V-6 (feedback loop), V-7 (boucle continue cross-run), V-8 (state machine), V-9 (unification audit)
+- Projection : 3 jours (5-6 sessions) pour une boucle autonome
+
+== Fichiers modifiés
+
+- `configuration/GLOBAL_CODE_REVIEW.adoc` : version 13 ✅
+- `configuration/.agents/code_review/GLOBAL_CODE_REVIEW_v12.adoc` : archivage ✅
+
+== Leçon
+
+La gouvernance impose d'historiser les code reviews dans `configuration/GLOBAL_CODE_REVIEW.adoc`
+avec archivage par ségrégation temporelle dans `.agents/code_review/`. À ne pas oublier.

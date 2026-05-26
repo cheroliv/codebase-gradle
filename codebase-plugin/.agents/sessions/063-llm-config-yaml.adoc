@@ -1,0 +1,39 @@
+= Session 063 — Configuration LLM YAML + Data Class Jackson
+:date: 2026-05-27
+:score: 10/10
+:status: DONE
+
+== Contexte
+
+Création de la configuration LLM pour codebase-gradle : fichier YAML
+(pattern envVar/keyRef) + data class Kotlin mappée par Jackson.
+
+== Actions réalisées
+
+1. Création `LlmConfig.kt` dans `codebase/rag/` (4 data classes, 66 lignes)
+   - `LlmConfig` → `AiConfig` → `OllamaConfig` + `GeminiConfig`
+   - Jackson YAML désérialisation (`ObjectMapper(YAMLFactory())`)
+   - Pattern `envVar` : `GeminiConfig.envVar = "GEMINI_API_KEY"`
+   - Méthodes `resolveApiKey()`, `resolveBaseUrl()`, `resolveModel()`
+2. Création `llm-config.yml` dans `src/test/resources/`
+   - ollama + gemini configurés avec envVar références
+   - Zéro clé API en dur
+3. `.gitignore` → ajout `codebase-plugin/src/test/resources/llm-config.yml`
+4. `LlmConfigTest.kt` — 4 tests unitaires
+   - Désérialisation YAML, résolution Ollama defaults,
+     chargement depuis ressource fichier, résolution Gemini env var
+5. Vérification sécurité : `grep -r "AIzaSy"` → zéro match
+6. Compilation main + test : OK, 4/4 PASS, 0 failure
+
+== Fichiers créés/modifiés
+
+| Fichier | Action |
+| src/main/kotlin/codebase/rag/LlmConfig.kt | CREE |
+| src/test/resources/llm-config.yml | CREE (.gitignore) |
+| src/test/kotlin/codebase/rag/LlmConfigTest.kt | CREE |
+| .gitignore | MODIFIE (+ llm-config.yml) |
+
+== Leçon
+
+Pattern envVar bien établi. La data class est prête pour le câblage EPIC V-5
+(Gemini dans le graphe koog VibecodingGraph pour un vrai agent autonome).

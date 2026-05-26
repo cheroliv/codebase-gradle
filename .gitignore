@@ -17,3 +17,6 @@ gradle/wrapper/gradle-wrapper.jar
 snapshot.adoc
 libs
 /.webui_secret_key
+
+# LLM config tests — contient envVar references, .gitignore pour securite
+codebase-plugin/src/test/resources/llm-config.yml

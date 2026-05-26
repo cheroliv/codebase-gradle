@@ -2,6 +2,8 @@
 
 |===
 | Session | EPIC | Livrable
+| 063 | V-CONFIG | Configuration LLM YAML + Data class Jackson. LlmConfig.kt (4 data classes, 66l) + llm-config.yml (pattern envVar) + .gitignore + 4/4 tests PASS.
+| 062 | V-REVIEW | Code review boucle vibecoding — GLOBAL_CODE_REVIEW v12→v13. Audit 10 fichiers sources + 10 tests + schema SQL + contracts N0. 5 gaps (V-5→V-9). Machine 70%.
 | 061 | V-FLYWAY | EPIC-V-FLYWAY — MigrationRunner artisanal (125 lignes, scan classpath V{n}__*.sql, table schema_version, SHA-256 checksum, idempotent). SessionRepository.initSchema() délégué (19→3 lignes). 3/3 MigrationTest PASS. 35/35 JUnit5 + 100/100 Cucumber.
 | 055 | Bugfix | Fix 4 Cucumber résiduels (OpencodeInjector content-on-header-line + prepare_context strings trop spécifiques) + Audit EPIC L (zéro langgraph4j confirmé) + Cross-borough vibecode couvert par Cucumber epic_v. 209/209 PASS (126 JUnit5+76 Cucumber+7 EpicL3), 0 failure.
 | 051 | Debug pgvector | Fix 3 echecs residuels : locale `Locale.US` + regex `-?` pour sim, `startsWith(header)` pour header `[RÈGLES_EAGER]`, YAML/JSON inclus dans tokenize. 7 fichiers modifies. `cucumberTest` → BUILD SUCCESSFUL (0 failure).
