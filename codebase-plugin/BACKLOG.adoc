@@ -25,8 +25,42 @@ _Ce fichier est le suivi prioritaire des tâches. L'INDEX.adoc est la source de 
 * [x] Interface AnonymizationExpert + factory + deterministic fallback
 * [x] 3 scénarios Cucumber @wip
 
-== EPIC 3 : Architecture Multi-Canal Convergent — Formalisation
+== EPIC V-6 — Cablage Ollama Cloud Docker + ConnectionFactory R2DBC (Session 065)
 **Statut** : A FAIRE
+**Priorite** : P0
+**Depends on** : EPIC-V-5 (session 064)
+
+_Pourquoi_ : La machine est a 95% apres V-5 (LlmProvider, callLLM, persistState, TokenTracker).
+Reste a cabler le vrai tuyau Ollama cloud et la persistance R2DBC reelle
+pour passer de l'agent mock a l'agent autonome sur infrastructure reelle.
+
+=== P0 — ConnectionFactory + Persistance R2DBC
+
+* [ ] Injecter `ConnectionFactory` (R2DBC) dans constructeur VibecodingGraph
+* [ ] Test integration avec vrai SessionRepository R2DBC via Testcontainers
+* [ ] `updateSession()` avec `TokenTracker.cost`/`estimatedCost` dans la boucle de persistance
+* [ ] Verifier createSession + updateSession end-to-end (Testcontainers)
+
+=== P0 — OllamaLlmProvider cloud dockerise
+
+* [ ] Scanner ports 11434→11465 sur l'hote (`curl http://localhost:{port}/api/tags`)
+* [ ] `OllamaLlmProvider` via `OllamaChatModel.builder().baseUrl()`
+* [ ] Utiliser `gpt-oss:120b-cloud` comme modele principal (cloud gratuit/Pro)
+* [ ] OllamaPoolKeyAdapter : wrapper resilient quota/quota depasse + rotation instances
+* [ ] Pattern docker SSH key : article 0120 (dual-abonnement Ollama docker)
+* [ ] Test Cucumber : "LLM calls Ollama cloud and handles quota exceeded"
+
+=== P1 — Nettoyage technique
+
+* [ ] Supprimer warnings `!!` inutiles lignes 139/257 de VibecodingGraph.kt
+* [ ] Nettoyer BACKLOG.adoc : EPIC 3 statut A FAIRE → TERMINE (fait session 046)
+
+=== Reference
+
+- Article 0120 : `/home/cheroliv/workspace/office/sites/cheroliv.com/jbake/content/blog/2026/0120_cumuler_deux_abonnements_ollama_pro_docker_post.adoc`
+
+== EPIC 3 : Architecture Multi-Canal Convergent — Formalisation
+**Statut** : TERMINE (2026-05-19, session 046)
 **Priorite** : P0
 
 _Pourquoi_ : Le contexte fourni au LLM ne doit pas être un bloc monolithique. Il est

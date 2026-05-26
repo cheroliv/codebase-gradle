@@ -1,5 +1,5 @@
-= PROMPT_REPRISE — Session 064 — EPIC V-5 Cablage Gemini + Persistance VibecodingGraph
-:session: 064
+= PROMPT_REPRISE — Session 065 — EPIC V-6 Cablage Ollama Cloud Docker + ConnectionFactory R2DBC
+:session: 065
 :date: 2026-05-27
 :status: PRET
 :max-lines: 70
@@ -8,45 +8,62 @@
 
 == Mission
 
-Cabler le LLM (Gemini via LlmConfig) et la persistance (SessionRepository)
-dans le graphe koog `VibecodingGraph` pour passer d'un executeur deterministe
-de plan a un veritable agent autonome.
+Cabler ConnectionFactory R2DBC dans VibecodingGraph pour la vraie persistance,
+puis ajouter OllamaLlmProvider pour connecter le graphe aux instances Ollama
+cloud dockerisees (ports 11434-11465) avec pool key adapter contre le quota.
 
-C'est le gap critique identifie par GLOBAL_CODE_REVIEW v13 : les composants
-existent (SessionRepository 304l, TokenTracker 58l, LlmConfig 66l) mais aucun
-n'est cable dans la boucle d'execution. La machine est a 70%.
+La base Gemini est posee en session 064. On passe au vrai tuyau : Ollama cloud
+dockerise, pool de cles SSH, et persistance R2DBC reelle.
 
-Objectifs :
-- Ajouter un noeud `callLLM` dans VibecodingGraph — le LLM decide quelle
-  tache executer (pas de plan deterministe)
-- Cabler `LlmConfig` → `GeminiConfig.resolveApiKey()` pour l'appel Gemini
-- Cabler `SessionRepository.createSession()` + `updateSession()` dans le graphe
-- Cabler `TokenTracker.trackPrompt()` pour mesurer la consommation reelle
-- Injecter `ConnectionFactory` (R2DBC) dans VibecodingGraph constructeur
-- 1 test Cucumber minimum : "LLM decides the next task autonomously"
-- ZERO regression sur les 199 tests vibecoding existants
-- ZERO token/secret dans le code ou les logs
+== Objectifs
+
+=== P0 — ConnectionFactory + Persistance reelle
+- Injecter `ConnectionFactory` (R2DBC) dans le constructeur de VibecodingGraph
+- Test d'integration avec vrai SessionRepository R2DBC via Testcontainers
+- `updateSession()` avec `TokenTracker.cost`/`estimatedCost` dans la boucle
+- Verifier que createSession + updateSession fonctionnent en end-to-end
+
+=== P0 — OllamaLlmProvider (cloud dockerise)
+- Scanner les ports 11434→11465 sur l'hote (`curl http://localhost:{port}/api/tags`)
+- Implémenter `OllamaLlmProvider` via `OllamaChatModel.builder().baseUrl()`
+- Utiliser `gpt-oss:120b-cloud` comme modele principal (cloud gratuit/Pro)
+- OllamaPoolKeyAdapter : wrapper resilient pour le quota
+  * Si Ollama renvoie quota depasse → rotation vers instance suivante
+  * Pattern montage docker avec SSH key : utiliser `ollama signin` + device key
+  * Reference : article 0120 /home/cheroliv/workspace/office/sites/cheroliv.com/jbake/content/blog/2026/0120_cumuler_deux_abonnements_ollama_pro_docker_post.adoc
+
+=== P1 — Nettoyage
+- Supprimer warnings `!!` inutiles lignes 139/257 de VibecodingGraph.kt
+- Nettoyer BACKLOG.adoc : EPIC 3 statut A FAIRE → TERMINE (fait session 046)
+
+=== P1 — Test Cucumber
+- 1 scenario minimum : "LLM calls Ollama cloud and handles quota exceeded"
 
 == Etat d'entree
 
-- LlmConfig + llm-config.yml livres — Gemini pret a etre utilise
+- VibecodingGraph — 5 noeuds koog (buildContext, callLLM, executeTools, persistState, checkProgress)
+- LlmProvider fun interface + GeminiLlmProvider + FakeLlmProvider deja crees
 - SessionRepository (R2DBC) — createSession, updateSession, addStep
 - TokenTracker — trackPrompt, estimatedCost
-- VibecodingGraph — 3 noeuds actuels (buildContext, executeAction, checkProgress)
-- 35/35 JUnit5 + 100/100 Cucumber vibecoding PASS
-- Gemini API key disponible dans configuration/settings/gaccount.yml
-  (cheroliv.developer@gmail.com → GEMINI_API_KEY)
-- Langchain4j 1.14.1 — OllamaChatModel deja utilise, GeminiGoogleAiChatModel dispo
+- Langchain4j 1.14.1 — OllamaChatModel deja utilise
+- Instances Ollama Docker existantes sur ports 11434 (native) + 11435 (docker-b)
+  + potentiellement 11436-11465 selon les nouveaux conteneurs
+- Article 0120 documente le montage docker avec SSH key + dual abonnement
+- 35/35 JUnit5 + 101/101 Cucumber vibecoding PASS (session 064)
 
 == Architecture cible
 
 ```
-VibecodingGraph (koog)
-  buildContext → callLLM → executeTools → persistState → checkProgress
-      ↑              │                                       │
-      │              └── TokenTracker.trackPrompt()          │
-      │                                                      │
-      └── SessionRepository (create + update) ───────────────┘
+OllamaPoolKeyAdapter
+  ├── OllamaInstance(port=11434, model=gpt-oss:120b-cloud)
+  ├── OllamaInstance(port=11435, model=gpt-oss:120b-cloud)
+  ├── OllamaInstance(port=11436+, model=gpt-oss:120b-cloud)
+  └── Fallback : quota exceeded → rotate
+
+VibecodingGraph (koog) ← Injection
+  R2dbcConfig → ConnectionFactory → SessionRepository
+  OllamaPoolKeyAdapter → LlmProvider
+  TokenTracker
 ```
 
 == Regles absolues
@@ -55,5 +72,6 @@ VibecodingGraph (koog)
 - **1 fichier a la fois, compile apres chaque edition**
 - **Pas de cles API dans les logs** — niveau logger a INFO max
 - **Pas de modification du contrat N0** (VibecodingState, ToolRegistry)
-- **Injection par constructeur** — VibecodingGraph recoit SessionRepository + TokenTracker + LlmConfig
+- **Injection par constructeur** — VibecodingGraph recoit ConnectionFactory, OllamaPoolKeyAdapter
 - **Timeout par appel LLM** — 60s max, pas de blocage indefini
+- **Pattern docker SSH Key** — authentification par device key, jamais de token en clair

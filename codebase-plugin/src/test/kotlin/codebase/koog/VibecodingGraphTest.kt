@@ -39,7 +39,7 @@ class VibecodingGraphTest {
         val diagram = vibecodingGraph.asMermaidDiagram()
         // Le diagramme Mermaid koog contient les noms des nœuds (variables Kotlin)
         assertTrue(diagram.contains("buildContext"), "Mermaid missing buildContext node")
-        assertTrue(diagram.contains("executeAction"), "Mermaid missing executeAction node")
+        assertTrue(diagram.contains("executeTools"), "Mermaid missing executeTools node")
         assertTrue(diagram.contains("checkProgress"), "Mermaid missing checkProgress node")
     }
 

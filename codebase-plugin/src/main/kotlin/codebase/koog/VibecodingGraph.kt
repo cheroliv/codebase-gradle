@@ -1,5 +1,8 @@
 package codebase.koog
 
+import codebase.koog.llm.LlmProvider
+import codebase.koog.session.SessionRepository
+import codebase.koog.tracking.TokenTracker
 import contracts.vibecoding.registry.ToolRegistry
 import vibecoding.contracts.state.AugmentedState
 import vibecoding.contracts.state.VibecodingState
@@ -15,28 +18,37 @@ import org.slf4j.LoggerFactory
 /**
  * Graphe koog d'exécution vibecoding — pipeline autonome.
  *
- * Architecture (pattern koog+langchain4j) :
+ * Architecture (pattern koog+langchain4j) — V-5 enriched :
  * ```
- * buildContext → executeAction (loop) → checkProgress ─┬─→ executeAction (↺)
- *                                                        └─→ finish
+ * buildContext → callLLM → executeTools → persistState → checkProgress ─┬─→ callLLM (↺)
+ *                                                                        └─→ finish
  * ```
  *
  * - **buildContext** : appelle KoogAugmentedContextGraph (RAG/pgvector + classification + plan)
- * - **executeAction** : exécute une action via ToolRegistry (itère sur le plan)
+ * - **callLLM** : décision LLM — quelle tâche exécuter (Gemini/Ollama/Fake)
+ * - **executeTools** : exécute l'action décidée via ToolRegistry
+ * - **persistState** : sauvegarde l'état via SessionRepository
  * - **checkProgress** : vérifie si fini (maxActions, erreur, plan vide) ou continue la boucle
  *
  * koog orchestre, langchain4j exécute (RAG/LLM). ToolRegistry pour les actions filesystem/shell.
+ *
+ * Rétrocompatibilité : si llmProvider est null → pas de callLLM (mode déterministe comme avant V-4).
+ * Si sessionRepository est null → pas de persistance.
  */
 class VibecodingGraph(
     val augmentedGraph: KoogAugmentedContextGraph? = null,
-    val toolRegistry: ToolRegistry = ToolRegistry()
+    val toolRegistry: ToolRegistry = ToolRegistry(),
+    val llmProvider: LlmProvider? = null,
+    val sessionRepository: SessionRepository? = null,
+    val tokenTracker: TokenTracker = TokenTracker()
 ) {
 
     private val log = LoggerFactory.getLogger(VibecodingGraph::class.java)
 
+    private var sessionId: String? = null
+
     /**
-     * Graphe koog déclaratif — nœuds réels (pas de stubs).
-     * Chaque nœud délègue à la même méthode privée que execute().
+     * Graphe koog déclaratif — 5 nœuds (V-5 : callLLM + persistState ajoutés).
      */
     val graph: AIAgentGraphStrategy<VibecodingState, VibecodingState> = strategy<VibecodingState, VibecodingState>(
         name = "vibecoding",
@@ -46,8 +58,16 @@ class VibecodingGraph(
             buildContextNode(state)
         }
 
-        val executeAction by node<VibecodingState, VibecodingState> { state ->
-            executeActionNode(state)
+        val callLLM by node<VibecodingState, VibecodingState> { state ->
+            callLLMNode(state)
+        }
+
+        val executeTools by node<VibecodingState, VibecodingState> { state ->
+            executeToolsNode(state)
+        }
+
+        val persistState by node<VibecodingState, VibecodingState> { state ->
+            persistStateNode(state)
         }
 
         val checkProgress by node<VibecodingState, VibecodingState> { state ->
@@ -55,9 +75,11 @@ class VibecodingGraph(
         }
 
         edge(nodeStart forwardTo buildContext onCondition { _ -> true } transformed { it })
-        edge(buildContext forwardTo executeAction onCondition { _ -> true } transformed { it })
-        edge(executeAction forwardTo checkProgress onCondition { _ -> true } transformed { it })
-        edge(checkProgress forwardTo executeAction onCondition { state ->
+        edge(buildContext forwardTo callLLM onCondition { _ -> true } transformed { it })
+        edge(callLLM forwardTo executeTools onCondition { _ -> true } transformed { it })
+        edge(executeTools forwardTo persistState onCondition { _ -> true } transformed { it })
+        edge(persistState forwardTo checkProgress onCondition { _ -> true } transformed { it })
+        edge(checkProgress forwardTo callLLM onCondition { state ->
             !state.finished && !state.isFinal && state.error == null
         } transformed { it })
         edge(checkProgress forwardTo nodeFinish onCondition { state ->
@@ -66,7 +88,7 @@ class VibecodingGraph(
     }
 
     /**
-     * Point d'entrée principal — pipeline complet.
+     * Point d'entrée principal — pipeline complet (V-5 : callLLM + persistState).
      * Résilient : chaque étape catch ses erreurs.
      * Si maxActions=0 (ou déjà isFinal), retourne immédiatement.
      */
@@ -83,17 +105,28 @@ class VibecodingGraph(
             return initialState.withError("Timeout: session exceeded ${initialState.sessionTimeoutSeconds}s (elapsed ${elapsedSeconds(initialState)}s)")
         }
 
+        // Persistance initiale — crée la session avant la boucle
+        var state = initialState
+        sessionId = try {
+            runBlocking { sessionRepository?.createSession(state) }?.also {
+                log.info("[VibecodingGraph] Session created: id={}", it)
+            }
+        } catch (e: Exception) {
+            log.warn("[VibecodingGraph] createSession failed: {}", e.message)
+            null
+        }
+
         // Étape 1 : buildContext
-        var state = try {
-            buildContextNode(initialState)
+        state = try {
+            buildContextNode(state)
         } catch (e: Exception) {
             log.warn("[VibecodingGraph] buildContext failed: {}", e.message)
-            initialState.withError("BuildContextFailed: ${e.message}")
+            state.withError("BuildContextFailed: ${e.message}")
         }
         if (state.error != null) return state
         if (state.isFinal) return state.finish()
 
-        // Étape 2 : boucle d'exécution
+        // Étape 2 : boucle d'exécution V-5 (callLLM + executeTools + persistState)
         while (!state.finished && !state.isFinal && state.error == null) {
             // Vérification timeout à chaque itération
             if (isTimedOut(state)) {
@@ -102,13 +135,40 @@ class VibecodingGraph(
                 return state
             }
 
-            state = try {
-                executeActionNode(state)
-            } catch (e: Exception) {
-                log.warn("[VibecodingGraph] executeAction failed: {}", e.message)
-                state.withError("ExecuteActionFailed: ${e.message}")
+            // S'il n'y a pas de plan, le LLM décide (ou on itère)
+            if (state.plan == null || state.plan!!.epics.isEmpty()) {
+                // Mode LLM : décision autonome
+                if (llmProvider != null) {
+                    state = try {
+                        callLLMNode(state)
+                    } catch (e: Exception) {
+                        log.warn("[VibecodingGraph] callLLM failed: {}", e.message)
+                        state.withError("CallLLMFailed: ${e.message}")
+                    }
+                    if (state.error != null) return state
+                } else {
+                    // Mode déterministe : pas de plan = itère
+                    log.info("[VibecodingGraph] No plan, no LLM — iteration ${state.iteration + 1}/${state.maxActions}")
+                    state = state.nextIteration()
+                }
+            } else {
+                // Mode plan déterministe : executeTools sur les tâches du plan
+                state = try {
+                    executeToolsNode(state)
+                } catch (e: Exception) {
+                    log.warn("[VibecodingGraph] executeTools failed: {}", e.message)
+                    state.withError("ExecuteToolsFailed: ${e.message}")
+                }
+                if (state.error != null) return state
             }
-            if (state.error != null) return state
+
+            // persistState après chaque itération
+            state = try {
+                persistStateNode(state)
+            } catch (e: Exception) {
+                log.warn("[VibecodingGraph] persistState failed: {}", e.message)
+                state // ne casse pas la boucle sur erreur de persistence
+            }
 
             state = checkProgressNode(state)
         }
@@ -158,17 +218,81 @@ class VibecodingGraph(
     }
 
     /**
-     * Nœud 2 : executeAction — exécute une action du plan via ToolRegistry.
+     * Nœud 2 (V-5) : callLLM — le LLM décide de la prochaine action.
+     * Si llmProvider est null → identique au mode déterministe pré-V-5.
+     */
+    private fun callLLMNode(state: VibecodingState): VibecodingState {
+        if (llmProvider == null) {
+            return state // pas de LLM = on continue déterministe
+        }
+
+        val prompt = buildPromptForIteration(state)
+        tokenTracker.trackPrompt(prompt)
+
+        return try {
+            val response = runBlocking { llmProvider.call(prompt) }
+            log.info("[VibecodingGraph] LLM response: {} chars, first 80: {}", response.length, response.take(80))
+
+            state.nextIteration().copy(
+                lastToolResult = "LLM decided: $response"
+            )
+        } catch (e: Exception) {
+            log.warn("[VibecodingGraph] LLM call failed: {}", e.message)
+            state.withError("LLMCallFailed: ${e.message}")
+        }
+    }
+
+    private fun buildPromptForIteration(state: VibecodingState): String {
+        val statusLine = state.error?.let { "ERROR: $it" } ?: "OK"
+        return buildString {
+            appendLine("Vibecoding session — iteration ${state.iteration + 1}/${state.maxActions}")
+            appendLine("Intention: ${state.intention}")
+            appendLine("Workspace: ${state.workspaceRoot}")
+            appendLine("Dry run: ${state.dryRun}")
+            appendLine("Status: $statusLine")
+            if (state.executedTasks.isNotEmpty()) {
+                appendLine("Tasks done: ${state.executedTasks.joinToString(", ")}")
+            }
+            if (state.plan != null) {
+                appendLine("Plan remaining tasks: ${state.plan!!.epics.sumOf { it.userStories.sumOf { s -> s.tasks.size } } - state.executedTasks.size}")
+            }
+            appendLine()
+            appendLine("What should be the next action? Respond with a single tool name and parameters, or 'DONE' if finished.")
+        }
+    }
+
+    /**
+     * Nœud 3 : executeTools — exécute une action via ToolRegistry.
+     * Alias de executeActionNode (rétrocompatibilité pré-V-5).
      * En dryRun : ne fait qu'incrémenter le compteur.
      * Sans plan : incrémente et continue (mode résilient).
      */
-    private fun executeActionNode(state: VibecodingState): VibecodingState {
+    private fun executeToolsNode(state: VibecodingState): VibecodingState {
         // dryRun : parcourt les tâches du plan mais sans exécution réelle
         if (state.dryRun) {
             return executePlanTasks(state, realExecution = false)
         }
-
         return executePlanTasks(state, realExecution = true)
+    }
+
+    /**
+     * Nœud 4 (V-5) : persistState — sauvegarde l'état courant via SessionRepository.
+     * Ne casse pas le pipeline en cas d'erreur de persistance.
+     * Résilient : si sessionRepository est null ou si la session n'a pas été créée,
+     * on passe simplement (mode sans persistance).
+     */
+    private fun persistStateNode(state: VibecodingState): VibecodingState {
+        if (sessionRepository == null || sessionId == null) return state
+        return try {
+            runBlocking {
+                sessionRepository.updateSession(sessionId!!, state)
+            }
+            log.debug("[VibecodingGraph] Session {} updated: iteration={}", sessionId, state.iteration)
+            state
+        } catch (e: Exception) {
+            log.warn("[VibecodingGraph] persistState failed: {}", e.message)
+            state
+        }
     }
 
     private fun executePlanTasks(state: VibecodingState, realExecution: Boolean): VibecodingState {

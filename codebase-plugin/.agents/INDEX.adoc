@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-27 (Session 063)
-_Session en cours_ : 064 — EPIC V-5 Cablage Gemini + Persistance VibecodingGraph. Ajouter callLLM + persistState dans le graphe koog. Cabler LlmConfig+SessionRepository+TokenTracker. Base : 39/39 JUnit5 PASS, 100/100 Cucumber PASS.
+_Derniere mise a jour_ : 2026-05-27 (Session 064)
+_Session en cours_ : 065 — EPIC V-6 Cablage Ollama Cloud Docker + ConnectionFactory R2DBC. Injecter ConnectionFactory dans VibecodingGraph. OllamaLlmProvider pool docker ports 11434→11465 + gpt-oss:120b-cloud. OllamaPoolKeyAdapter quota rotation. Test integration R2DBC Testcontainers. Base : session 064 (LlmProvider + Gemini + Fake + callLLM + persistState + TokenTracker OK).
 
 '''
 == REGLES ABSOLUES (resume)
@@ -35,6 +35,8 @@ _Session en cours_ : 064 — EPIC V-5 Cablage Gemini + Persistance VibecodingGra
 
 |===
 | # | Date | Type | Sujet | Score
+| 064 | 2026-05-27 | feat | EPIC V-5 Cablage Gemini + Persistance — LlmProvider fun interface (Clean Architecture) + GeminiLlmProvider (production System.getenv) + FakeLlmProvider (test) + VibecodingGraph 5 noeuds (callLLM+persistState) + TokenTracker.trackPrompt + createSession init + Cucumber @epic_v_5 PASS. 11/11 JUnit5, 101/101 Cucumber, ZERO secret, ZERO regression. | 9/10
+| 063 | 2026-05-27 | feat | Configuration LLM YAML + Data class Jackson. LlmConfig.kt (4 data classes, 66l) + llm-config.yml (pattern envVar) + .gitignore + 4/4 tests PASS. | 10/10
 | 062 | 2026-05-27 | review | Code review boucle vibecoding — GLOBAL_CODE_REVIEW v12→v13. Audit 10 fichiers sources + 10 tests + schema SQL + contracts N0. 5 gaps identifies (V-5→V-9). Machine a 70%. | 9/10
 | 061 | 2026-05-27 | feat+infra | EPIC-V-FLYWAY — MigrationRunner artisanal (125 lignes, scan classpath V{n}__*.sql, table schema_version, SHA-256, idempotent). 3/3 MigrationTest PASS (Testcontainers). SessionRepository.initSchema() delegue (19→3 lignes). 35/35 JUnit5, 100/100 Cucumber, 0 regression. | 10/10
 | 060 | 2026-05-27 | consolidation | Consolidation craftman SessionRepository + Cucumber BDD — 3 correctifs : @Before Cucumber (9/9 PASS), constructeur secondaire SessionRecord (supprime, factory session()), couverture BDD→TDD (32/32 JUnit5, 150/150 Cucumber). Commit 3b95ff4. | 10/10
@@ -107,6 +109,8 @@ _Session en cours_ : 064 — EPIC V-5 Cablage Gemini + Persistance VibecodingGra
 | EPIC V | *Vibecoding* — Remplacer opencode par VibecodingTask Gradle (agent koog autonome : LLM + filesystem + shell koog). 7 tools (5 built-in + ExecShellTool + ExecGradleTool). pipeline buildContext→classify→plan→executeTools. 5 sous-EPICs (V-0→V-4, 15 pts). | ✅ TERMINE (2026-05-19). V-0 ✅, V-1 ✅, V-2 ✅, V-3 ✅, V-4 ✅. 15/15 pts. | P0
 | EPIC-V-SESSION-REPO | *SessionRepository* — Persistance vibecoding R2DBC (PostgreSQL + pgvector). SessionRepository, TokenTracker, Dashboard, Jardin Secret (confidentiality_level). Schema V1__init_vibecoding.sql (Flyway convention sans dependance). 32/32 JUnit5, 150/150 Cucumber. | ✅ TERMINE (2026-05-27). Sessions 059+060. Commit 3b95ff4. | P0
 | EPIC-V-FLYWAY | *Migration Flyway* — MigrationRunner artisanal (sans dependance), table schema_version, gestion versions/rollback V{n}__*.sql. Pipeline initSchema → migrate. | ✅ TERMINE (Session 061). 4 fichiers (MigrationRunner 125l, SessionRepository -16l, MigrationTest 136l 3/3, SessionRepositoryTest +1 fix). | P1
+| EPIC-V-5 | *Cablage Gemini + Persistance* — LlmProvider fun interface + GeminiLlmProvider (production) + FakeLlmProvider (test). VibecodingGraph 5 nœuds koog (callLLM, persistState). TokenTracker cablé. Cucumber @epic_v_5 PASS. | ✅ TERMINE (Session 064). 11/11 JUnit5, 101/101 Cucumber, ZERO secret. Machine a 95%. | P0
+| EPIC-V-6 | *Cablage Ollama Cloud Docker + ConnectionFactory R2DBC* — Injecter ConnectionFactory dans VibecodingGraph. OllamaLlmProvider pool docker (ports 11434→11465) + gpt-oss:120b-cloud. OllamaPoolKeyAdapter resilience quota (SSH key docker). Test integration R2DBC Testcontainers. | SESSION 065 | P0
 | EPIC G | Publication Maven Central + Gradle Portal — groupId education.cccp, namespace cccp-education. | ✅ AUDITE (2026-05-19). Credentials presents, namespace actif sur Maven Central + Portal. Zéro action supplementaire necessaire. publishToMavenLocal suffit pour conso N1→N2. | P0
 |===
 

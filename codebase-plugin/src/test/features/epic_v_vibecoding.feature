@@ -33,7 +33,7 @@ Feature: Pipeline Vibecoding — koog autonomous loop
 
   Scenario: Diagramme Mermaid valide
     When I request the Mermaid diagram from vibecoding
-    Then the vibecoding diagram contains "buildContext" and "executeAction" and "checkProgress"
+    Then the vibecoding diagram contains "buildContext" and "executeTools" and "checkProgress"
 
   Scenario: Pipeline complet ne crash pas sans pgvector
     When I execute vibecoding with intention "Test resilience" and dryRun true
@@ -65,3 +65,10 @@ Feature: Pipeline Vibecoding — koog autonomous loop
     Then vibecoding had no error
     And exactly 5 vibecoding tasks are marked as executed
     And the vibecoding iteration count is greater than or equal to 5
+
+  @epic_v_5
+  Scenario: LLM decides the next task autonomously
+    Given a VibecodingGraph is initialized with Gemini fake chat model
+    When the LLM receives a prompt containing "Add dark mode toggle"
+    Then the LLM decides autonomously
+    And the vibecoding tracking records at least 1 prompt token

@@ -1,0 +1,68 @@
+= Session 064 — EPIC V-5 Cablage Gemini + Persistance VibecodingGraph
+:date: 2026-05-26
+:auteur: Orchestrateur deep
+:score: 9/10
+
+== Contexte
+
+Mission : Cabler le LLM (Gemini via LlmConfig) et la persistance (SessionRepository)
+dans le graphe koog VibecodingGraph. Gap critique identifié par GLOBAL_CODE_REVIEW v13 :
+composants existent mais aucun n'est câblé dans la boucle d'exécution.
+
+== Architecture cible
+
+```
+VibecodingGraph (koog)
+  buildContext → callLLM → executeTools → persistState → checkProgress ─┬─→ callLLM (↺)
+                                                                          └─→ finish
+```
+
+== Livrables
+
+=== Ajouts
+
+* `LlmProvider.kt` — fun interface Clean Architecture (abstraction LLM)
+* `GeminiLlmProvider.kt` — production (System.getenv uniquement, zero token loggé)
+* `FakeLlmProvider.kt` — test (réponses déterministes sans API key)
+* `langchain4j-google-ai-gemini:1.14.1` — catalog + build.gradle.kts
+
+=== Modifications
+
+* `VibecodingGraph.kt` — constructeur enrichi (llmProvider, sessionRepository, tokenTracker)
+  + 2 nouveaux nœuds koog : callLLM + persistState
+  + executeActionNode → executeToolsNode (rétrocompatible)
+  + buildPromptForIteration() — prompt structuré itération
+  + createSession init avant boucle + updateSession après chaque itération
+  + TokenTracker.trackPrompt() dans callLLMNode
+* `VibecodingWorld.kt` — FakeLlmProvider + TokenTracker + initGraphWithLLM()
+* `VibecodingSteps.kt` — 3 nouvelles steps @epic_v_5
+* `epic_v_vibecoding.feature` — +1 scénario @epic_v_5
+* `VibecodingGraphTest.kt` — executeAction → executeTools (asserts diagramme)
+* `libs.versions.toml` — +langchain4j-google-ai-gemini
+* `build.gradle.kts` — +implémentation Gemini
+
+== Résultats
+
+* Compilation : ✅ main + tests OK
+* JUnit5 : ✅ 11/11 VibecodingGraph PASS
+* Cucumber @epic_v_5 : ✅ PASSED — "LLM decides the next task autonomously" + tracking
+* Régression : ✅ seul échec = pré-existant EpicL3 ("Erreur pgvector absente signalée")
+* Secrets : ✅ ZERO token/API key dans le code — System.getenv() uniquement
+* Contrat N0 : ✅ VibecodingState non modifié (lastToolResult utilisé pour stocker décision LLM)
+
+== Prochaine session (065)
+
+=== Reste à faire — EPIC V-6 Cablage Ollama Cloud Docker
+
+* Cabler ConnectionFactory R2DBC dans constructeur VibecodingGraph (vraie persistance PostgreSQL)
+* Test intégration avec vrai SessionRepository R2DBC via Testcontainers
+* updateSession() avec TokenTracker.cost dans la boucle de persistance
+* OllamaLlmProvider — provider Ollama cloud suivant la méthode docker ssh_key
+  - Scanner ports 11434→11465 sur l'hôte
+  - Utiliser gpt-oss:120b-cloud comme modèle principal
+  - API pool key adapter : si quota dépassé → rotation vers instance suivante
+  - Pattern montage docker ollama/ssh_key pour l'authentification
+  - Référence : article 0120 (docker-compose Ollama dual-abonnement)
+* OllamaPoolKeyAdapter — wrapper de résilience quota/quota dépassé
+* Nettoyer les warnings `!!` inutiles lignes 139/257 de VibecodingGraph.kt
+* Cleanup Backlog : EPIC 3 statut A FAIRE → TERMINE (déjà fait session 046)

@@ -27,6 +27,7 @@ dependencies {
     implementation(gradleApi())
     implementation(gradleKotlinDsl())
     implementation(libs.bundles.langchain4j.rag)
+    implementation(libs.langchain4j.google.ai.gemini)
     implementation(libs.bundles.r2dbc)
     implementation(libs.doc.pipeline)
     implementation(libs.planner.plugin)

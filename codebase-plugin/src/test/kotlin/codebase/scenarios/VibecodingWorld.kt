@@ -1,5 +1,8 @@
 package codebase.scenarios
 
+import codebase.koog.llm.FakeLlmProvider
+import codebase.koog.llm.LlmProvider
+import codebase.koog.tracking.TokenTracker
 import contracts.vibecoding.registry.ToolRegistry
 import vibecoding.contracts.state.VibecodingState
 import codebase.koog.VibecodingGraph
@@ -24,10 +27,28 @@ class VibecodingWorld {
     var mermaidDiagram: String = ""
     var securityException: SecurityException? = null
 
-    val graph: VibecodingGraph by lazy {
-        VibecodingGraph(
+    /** V-5 : fake LLM provider pour les tests (null = mode déterministe) */
+    var fakeLlmProvider: FakeLlmProvider? = null
+    var tokenTracker: TokenTracker = TokenTracker()
+
+    var graph: VibecodingGraph = VibecodingGraph(
+        augmentedGraph = null,
+        toolRegistry = ToolRegistry()
+    )
+
+    /**
+     * Réinitialise le graphe avec le FakeLlmProvider après configuration.
+     * Appelé dans le Background @epic_v_5.
+     */
+    fun initGraphWithLLM() {
+        val provider = fakeLlmProvider ?: FakeLlmProvider()
+        fakeLlmProvider = provider
+        tokenTracker = TokenTracker()
+        graph = VibecodingGraph(
             augmentedGraph = null,
-            toolRegistry = ToolRegistry()
+            toolRegistry = ToolRegistry(),
+            llmProvider = provider,
+            tokenTracker = tokenTracker
         )
     }
 }

@@ -1,5 +1,6 @@
 package codebase.scenarios
 
+import codebase.koog.llm.FakeLlmProvider
 import contracts.agent.Epic
 import vibecoding.contracts.plan.Plan
 import contracts.agent.GradleTask as PlanTask
@@ -26,7 +27,14 @@ class VibecodingSteps(private val world: VibecodingWorld) {
 
     @Given("a VibecodingGraph is instantiated without augmented graph")
     fun `vibecoding graph instantiated`() {
-        assertNotNull(world.graph, "Graph should be lazily instantiated via PicoContainer world")
+        assertNotNull(world.graph, "Graph should be instantiated via PicoContainer world")
+    }
+
+    @Given("a VibecodingGraph is initialized with Gemini fake chat model")
+    fun `vibecoding graph initialized with fake LLM`() {
+        world.fakeLlmProvider = FakeLlmProvider()
+        world.initGraphWithLLM()
+        assertNotNull(world.graph.llmProvider, "LLM provider should be set")
     }
 
     // ── When ──
@@ -235,5 +243,44 @@ class VibecodingSteps(private val world: VibecodingWorld) {
         assertNotNull(state, "Result state must not be null")
         assertEquals(expected, state.executedTasks.size,
             "Expected $expected executed tasks, got ${state.executedTasks.size}: ${state.executedTasks}")
+    }
+
+    // ── @epic_v_5 : Cablage LLM (Gemini fake) + TokenTracker ──
+
+    @When("the LLM receives a prompt containing {string}")
+    fun `llm receives prompt`(promptContent: String) {
+        // Exécution avec intention, sans plan → le LLM décide
+        val state = VibecodingState(
+            intention = promptContent,
+            workspaceRoot = "/tmp",
+            maxActions = 3
+        )
+        world.resultState = world.graph.execute(state)
+    }
+
+    @Then("the LLM decides autonomously")
+    fun `llm decides next task autonomously`() {
+        val state = world.resultState
+        assertNotNull(state, "Result state must not be null")
+        assertTrue(
+            state.lastToolResult.contains("LLM decided"),
+            "LLM should have decided: lastToolResult='${state.lastToolResult}'"
+        )
+        assertTrue(
+            world.fakeLlmProvider?.promptsReceived?.isNotEmpty() == true,
+            "LLM should have received at least 1 prompt"
+        )
+    }
+
+    @Then("the vibecoding tracking records at least 1 prompt token")
+    fun `tracking records prompt tokens`() {
+        assertTrue(
+            world.tokenTracker.promptTokens > 0,
+            "TokenTracker should have recorded >0 prompt tokens, got ${world.tokenTracker.promptTokens}"
+        )
+        assertTrue(
+            world.tokenTracker.totalCalls > 0,
+            "TokenTracker should have recorded >0 calls, got ${world.tokenTracker.totalCalls}"
+        )
     }
 }
