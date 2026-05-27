@@ -171,10 +171,15 @@ class VibecodingSteps(private val world: VibecodingWorld) {
     }
 
     @Then("the vibecoding error contains {string}")
-    fun `vibecoding error contains`(expected: String) {
-        val msg = world.securityException?.message
-        assertTrue(msg != null && msg.contains(expected, ignoreCase = true),
-            "Error should contain '$expected', got: $msg")
+    fun `vibecoding error contains text`(expected: String) {
+        val errorFromSecurity = world.securityException?.message
+        val errorFromState = world.resultState?.error
+        val anyError = errorFromSecurity ?: errorFromState
+        assertNotNull(anyError, "No error found in securityException nor resultState")
+        assertTrue(
+            anyError.contains(expected, ignoreCase = true),
+            "Error should contain '$expected', got: $anyError"
+        )
     }
 
     @When("I attempt vibecoding read of a file larger than 10 MB in workspace {string}")
@@ -287,26 +292,105 @@ class VibecodingSteps(private val world: VibecodingWorld) {
         )
     }
 
-    // ── @epic_v_6 : Ollama Pool + Quota Rotation ──
+    // ── @epic_v_6 : Feedback Loop — error→replan→retry ──
 
-    @Given("an Ollama pool with {int} instances {string} and {string} and threshold {int}")
-    fun `ollama pool with instances and threshold`(count: Int, idA: String, idB: String, threshold: Int) {
-        world.setupOllamaPool(listOf(idA, idB), threshold)
+    @Given("a VibecodingGraph is initialized with fake LLM for error recovery")
+    fun `vibecoding graph initialized with fake LLM for error recovery`() {
+        world.fakeLlmProvider = FakeLlmProvider()
+        world.initGraphWithLLM()
+        assertNotNull(world.graph.llmProvider, "LLM provider should be set for error recovery")
     }
 
-    @When("the LLM provider is called {int} times")
-    fun `provider called multiple times`(times: Int) {
-        world.callOllamaProviderMultiple(times)
+    @Given("the fake LLM suggests the next response {string}")
+    fun `fake LLM suggests response`(response: String) {
+        world.fakeLlmProvider?.let { it.nextResponse = response }
+            ?: throw IllegalStateException("Fake LLM not initialized, call Given step first")
     }
 
-    @Then("both pool instances {string} and {string} are used")
-    fun `both pool instances are used`(idA: String, idB: String) {
-        world.assertBothInstancesUsed(idA, idB)
+    @When("I execute vibecoding with a {int}-task failing plan and maxRetries {int}")
+    fun `execute vibecoding with failing plan and maxRetries`(taskCount: Int, maxRetries: Int) {
+        val tasks = (1..taskCount).map { i ->
+            PlanTask(
+                description = "Task $i: will fail",
+                gradleTask = "nonexistentTask${i}"  // tâche Gradle qui n'existe pas → échec
+            )
+        }
+        val fakePlan = Plan(
+            title = "failing-plan",
+            epics = listOf(
+                Epic(name = "FAIL", description = "Failing epic", points = 1, userStories = listOf(
+                    UserStory(description = "US-fail", tasks = tasks)
+                ))
+            ),
+            totalPoints = 1,
+            estimatedSessions = "1"
+        )
+        val state = VibecodingState(
+            intention = "Execute failing plan with retries",
+            workspaceRoot = "/tmp",
+            maxActions = 10,
+            maxRetries = maxRetries,
+            plan = fakePlan,
+            planJson = "{}"
+        )
+        world.resultState = world.graph.execute(state)
     }
 
-    @Then("the quota exceeded flag is raised for instance {string}")
-    fun `quota exceeded flag raised`(id: String) {
-        world.assertQuotaExceeded(id)
+    @When("I execute vibecoding with a {int}-task plan already timed out and maxRetries {int}")
+    fun `execute vibecoding with timed out plan`(taskCount: Int, maxRetries: Int) {
+        val nowMs = System.currentTimeMillis()
+        val tasks = (1..taskCount).map { i ->
+            PlanTask(description = "Task $i", gradleTask = "tasks")
+        }
+        val fakePlan = Plan(
+            title = "timeout-plan",
+            epics = listOf(
+                Epic(name = "E1", description = "test", points = 1, userStories = listOf(
+                    UserStory(description = "US1", tasks = tasks)
+                ))
+            ),
+            totalPoints = 1,
+            estimatedSessions = "1"
+        )
+        val state = VibecodingState(
+            intention = "Already timed out",
+            workspaceRoot = "/tmp",
+            sessionTimeoutSeconds = 1,
+            sessionStartTimeMs = nowMs - 2000,  // 2s en retard
+            maxActions = 100,
+            maxRetries = maxRetries,
+            plan = fakePlan,
+            planJson = "{}"
+        )
+        world.resultState = world.graph.execute(state)
+    }
+
+    @Then("the vibecoding result has at least {int} iterations")
+    fun `vibecoding result has at least N iterations`(min: Int) {
+        val state = world.resultState
+        assertNotNull(state, "Result state must not be null")
+        assertTrue(state.iteration >= min, "Expected >= $min iterations, got ${state.iteration}")
+    }
+
+    @Then("the vibecoding retry count is at least {int}")
+    fun `vibecoding retry count is at least N`(min: Int) {
+        val state = world.resultState
+        assertNotNull(state, "Result state must not be null")
+        assertTrue(state.retryCount >= min, "Expected retryCount >= $min, got ${state.retryCount}")
+    }
+
+    @Then("the vibecoding retry count is {int}")
+    fun `vibecoding retry count is exactly N`(expected: Int) {
+        val state = world.resultState
+        assertNotNull(state, "Result state must not be null")
+        assertEquals(expected, state.retryCount, "Expected retryCount=$expected, got ${state.retryCount}")
+    }
+
+    @Then("the vibecoding result has an error")
+    fun `vibecoding result has an error`() {
+        val state = world.resultState
+        assertNotNull(state, "Result state must not be null")
+        assertTrue(state.error != null, "Expected error to be present, got null")
     }
 
     // ── @epic_v_7 : Resume Session ──

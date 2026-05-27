@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 074 | 2026-05-27 | feat+tdd | EPIC V-6 Feedback Loop — error→replan→retry (maxRetries=3), buildReplanPrompt, checkProgress revisité. Boucle vibecoding autonome 100%. 4 JUnit5 + 3 Cucumber @epic_v_6 = 24/24 PASS. Fix compilation libs.versions.toml (google-ai-gemini). | 10/10
 | 071 | 2026-05-27 | refactor | Renommage doc-pipeline → codex-plugin (consommateur) + Reintegration session 066 orpheline. MAJ 2 catalogues + build.gradle.kts. Fix .agents/ orphelin racine + EPIC-V-6 TERMINE. | 10/10
 | 070
 | 069 | 2026-05-26 | feat+bugfix | Resume session --resume + Dashboard CLI + ConnectionFactory fix. P1: VibecodingGraph.resumeSession(SessionRecord) + integration dans executeVibecoding(). P2: DashboardTask Gradle (vibecodingDashboard) + enregistrement CodebasePlugin. Bugfix: ConnectionFactory now passed to VibecodingGraph in normal path (was only --resume). 17 JUnit5 + 4 Cucumber PASS (2 @epic_v_7, 2 @epic_v_8). | 10/10

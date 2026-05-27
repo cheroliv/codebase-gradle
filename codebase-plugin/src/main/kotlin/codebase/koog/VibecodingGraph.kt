@@ -135,9 +135,9 @@ class VibecodingGraph(
         if (state.error != null) return state
         if (state.isFinal) return state.finish()
 
-        // Étape 2 : boucle d'exécution V-5 (callLLM + executeTools + persistState)
-        while (!state.finished && !state.isFinal && state.error == null) {
-            // Vérification timeout à chaque itération
+        // Étape 2 : boucle d'exécution V-6 (callLLM + executeTools + persistState + feedback loop)
+        while (!state.finished && !state.isFinal) {
+            // Vérification timeout à chaque itération (erreur fatale)
             if (isTimedOut(state)) {
                 log.warn("[VibecodingGraph] Session timed out during loop (elapsed=${elapsedSeconds(state)}s > timeout=${state.sessionTimeoutSeconds}s, iteration=${state.iteration})")
                 state = state.withError("Timeout: session exceeded ${state.sessionTimeoutSeconds}s at iteration ${state.iteration}")
@@ -169,7 +169,42 @@ class VibecodingGraph(
                     log.warn("[VibecodingGraph] executeTools failed: {}", e.message)
                     state.withError("ExecuteToolsFailed: ${e.message}")
                 }
-                if (state.error != null) return state
+
+                // V-6 Feedback Loop : erreur récupérable → retry si maxRetries pas dépassé
+                if (state.error != null) {
+                    if (state.retryCount < state.maxRetries) {
+                        log.info("[VibecodingGraph] V-6 retry ${state.retryCount}/${state.maxRetries}: replanning after error '{}'", state.error)
+                        // Appeler le LLM pour replanifier
+                        if (llmProvider != null) {
+                            val replanPrompt = buildReplanPrompt(state)
+                            tokenTracker.trackPrompt(replanPrompt)
+                            try {
+                                val replanResponse = runBlocking { llmProvider.call(replanPrompt) }
+                                tokenTracker.trackCompletion(replanResponse)
+                                log.info("[VibecodingGraph] V-6 replan response: {} chars", replanResponse.length)
+                                state = state.clearError().incrementRetry().nextIteration().copy(
+                                    lastToolResult = "Replan: $replanResponse"
+                                )
+                            } catch (e: Exception) {
+                                log.warn("[VibecodingGraph] V-6 replan LLM call failed: {}", e.message)
+                                state = state.incrementRetry()
+                                // continue → next loop iteration will check retryCount again
+                            }
+                        } else {
+                            // Sans LLM : incrémente le retry et continue (mode résilient)
+                            log.info("[VibecodingGraph] V-6 no LLM available — retry ${state.retryCount}/${state.maxRetries}, continuing")
+                            state = state.clearError().incrementRetry().nextIteration()
+                        }
+                        // Si toujours en erreur après replan → abandon
+                        if (state.error != null && state.retryCount >= state.maxRetries) {
+                            log.warn("[VibecodingGraph] V-6 maxRetries (${state.maxRetries}) exhausted, giving up")
+                            return state.withError("MaxRetriesExhausted: ${state.error}")
+                        }
+                    } else {
+                        log.warn("[VibecodingGraph] V-6 maxRetries (${state.maxRetries}) already exhausted, returning error")
+                        return state.withError("MaxRetriesExhausted: ${state.error}")
+                    }
+                }
             }
 
             // persistState après chaque itération
@@ -301,6 +336,26 @@ class VibecodingGraph(
     }
 
     /**
+     * V-6 Feedback Loop : prompt de replanification après erreur.
+     * Le LLM reçoit le contexte de l'erreur et doit proposer une approche alternative.
+     */
+    private fun buildReplanPrompt(state: VibecodingState): String {
+        return buildString {
+            appendLine("Vibecoding error recovery — retry ${state.retryCount}/${state.maxRetries}")
+            appendLine("Intention: ${state.intention}")
+            appendLine("Current task: ${state.currentTaskDescription}")
+            appendLine("Last tool result: ${state.lastToolResult}")
+            appendLine("Error: ${state.error}")
+            if (state.executedTasks.isNotEmpty()) {
+                appendLine("Already executed: ${state.executedTasks.joinToString(", ")}")
+            }
+            appendLine()
+            appendLine("The previous action failed. Propose an alternative approach to recover.")
+            appendLine("Suggest a different Gradle task, file edit, or approach. Keep it short.")
+        }
+    }
+
+    /**
      * Nœud 3 : executeTools — exécute une action via ToolRegistry.
      * Alias de executeActionNode (rétrocompatibilité pré-V-5).
      * En dryRun : ne fait qu'incrémenter le compteur.
@@ -381,16 +436,22 @@ class VibecodingGraph(
                 executedTasks = state.executedTasks + task.description,
                 lastToolResult = "Failed: ${e.message}",
                 currentTaskDescription = task.description,
-                error = "TaskFailed: ${e.message}"
+                // V-6: erreur récupérable — ne termine pas la session
+                error = "TaskFailed: ${e.message}",
+                retryCount = state.retryCount + 1,
+                finished = false
             )
         }
     }
 
     /**
      * Nœud 3 : checkProgress — vérifie si le travail est terminé.
+     * V-6 : une erreur récupérable (retryCount < maxRetries) ne termine pas la session.
      */
     private fun checkProgressNode(state: VibecodingState): VibecodingState {
-        if (state.error != null) return state.finish()
+        // V-6 : erreur avec retries restants → ne pas finir, laisser la boucle retry
+        if (state.error != null && state.retryCount >= state.maxRetries) return state.finish()
+        if (state.error != null && state.retryCount < state.maxRetries) return state
         if (state.iteration >= state.maxActions) return state.finish()
         if (state.finished) return state
 

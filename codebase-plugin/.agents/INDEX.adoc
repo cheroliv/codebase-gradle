@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-27 (Session 071 — Cross-borough codex-plugin rename)
-_Session precedente_ : 070 — E2E Cache dedup + Testcontainers + Nettoyage ports
-_Session en cours_ : 072 — Disponible (prochaine : EPIC-O ou continuation EPIC-V)
+_Derniere mise a jour_ : 2026-05-27 (Session 074 — EPIC V-6 Feedback Loop TERMINE)
+_Session precedente_ : 074 — V-6 Feedback Loop (error→replan→retry). 4 JUnit5 + 3 Cucumber @epic_v_6 = 24/24 PASS.
+_Session en cours_ : 075 — Fix Newark + TokenTracker bug
 _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/` (N=70, multiple de 10)
 
 '''
@@ -37,6 +37,7 @@ _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/
 
 |===
 | # | Date | Type | Sujet | Score
+| 074 | 2026-05-27 | feat+tdd | EPIC V-6 Feedback Loop — error→replan→retry. Boucle vibecoding autonome 100%. 4/4 JUnit5 + 3/3 Cucumber @epic_v_6 PASS. Fix compilation libs.versions.toml. 24/24 PASS, zero régression. | 10/10
 | 070 | 2026-05-27 | feat+refactor+contract | Cache dedup OllamaLlmProvider (ConcurrentHashMap) + E2E VibecodingTaskTest Testcontainers (14/14 PASS) + Nettoyage 11434-11436 (24 fichiers) + Rotation 29 ports x5 modeles + MigrationTest fix (V1+V2) + Contrat Craftsmanship EAGER | 10/10
 | 069 | 2026-05-26 | feat+bugfix | Resume session --resume + Dashboard CLI + ConnectionFactory fix — 17 JUnit5 + 4 Cucumber PASS (2 @epic_v_7, 2 @epic_v_8) | 10/10
 | 068 | 2026-05-26 | feat | LlmProviderResolver model→provider mapping + --model option + completion tracking — 34 tests PASS | 10/10
@@ -119,6 +120,7 @@ _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/
 | EPIC-V-6 | *Cablage Ollama Cloud Docker + ConnectionFactory R2DBC* — Contrat N0 llm-pool-contracts publie. OllamaPool rotation instances. OllamaLlmProvider zero API key. ConnectionFactory injecte dans VibecodingGraph. SessionRepository.updateSession persiste TokenTracker. V2 migration. 12/12 JUnit5 + 1/1 Cucumber @epic_v_6 PASS. | ✅ TERMINE (2026-05-25, Session 066 vibecoding ameliorations) | P0
 | EPIC-V-7 | *Resume Session* — Option --resume sur VibecodingTask + VibecodingGraph.resumeSession(SessionRecord). 4/4 JUnit5 + 2/2 Cucumber @epic_v_7 PASS. | ✅ TERMINE (Session 069) | P0
 | EPIC-V-8 | *Dashboard CLI* — DashboardTask Gradle (vibecodingDashboard) + enregistrement CodebasePlugin. 3/3 JUnit5 + 2/2 Cucumber @epic_v_8 PASS. | ✅ TERMINE (Session 069) | P0
+| EPIC-V-6-FEEDBACK | *Feedback Loop error→replan→retry* — Boucle de retry autonome (maxRetries=3), buildReplanPrompt, checkProgress revisité. Dernier gap avant agent 100%. 4/4 JUnit5 + 3/3 Cucumber @epic_v_6 PASS. Machine vibecoding = 100%. | ✅ TERMINE (Session 074) | P0
 | EPIC G | Publication Maven Central + Gradle Portal — groupId education.cccp, namespace cccp-education. | ✅ AUDITE (2026-05-19). Credentials presents, namespace actif sur Maven Central + Portal. Zéro action supplementaire necessaire. publishToMavenLocal suffit pour conso N1→N2. | P0
 | EPIC W | *Auto-discovery Gradle Tasks* — ToolRegistry + OpenAPI Spec. | 🔲 BACKLOG (cadré V16). 7 sous-EPICs, ~18 pts. | P1
 | EPIC X | *Décision Multi-Step verify→adapt* — Plan structuré, TaskResultVerifier, RollbackStrategy. | 🔲 BACKLOG (cadré V16). 7 sous-EPICs, ~20 pts. | P1

@@ -73,12 +73,29 @@ Feature: Pipeline Vibecoding — koog autonomous loop
     Then the LLM decides autonomously
     And the vibecoding tracking records at least 1 prompt token
 
-  @epic_v_6 @wip
-  Scenario: Ollama pool rotates instances when quota exceeded
-    Given an Ollama pool with 2 instances "ollama-a" and "ollama-b" and threshold 2
-    When the LLM provider is called 5 times
-    Then both pool instances "ollama-a" and "ollama-b" are used
-    And the quota exceeded flag is raised for instance "ollama-a"
+  @epic_v_6
+  Scenario: Erreur récupérable déclenche un retry avec LLM
+    Given a VibecodingGraph is initialized with fake LLM for error recovery
+    And the fake LLM suggests the next response "retry with different approach"
+    When I execute vibecoding with a 1-task failing plan and maxRetries 3
+    Then the vibecoding result has at least 2 iterations
+    And the vibecoding retry count is at least 1
+    And vibecoding had no error
+
+  @epic_v_6
+  Scenario: MaxRetries épuisé — abandon avec erreur fatale
+    Given a VibecodingGraph is initialized with fake LLM for error recovery
+    And the fake LLM suggests the next response "try again"
+    When I execute vibecoding with a 1-task failing plan and maxRetries 1
+    Then the vibecoding result has an error
+    And the vibecoding error contains "MaxRetriesExhausted"
+
+  @epic_v_6
+  Scenario: Timeout est une erreur fatale — pas de retry
+    Given a VibecodingGraph is instantiated without augmented graph
+    When I execute vibecoding with a 5-task plan already timed out and maxRetries 3
+    Then the vibecoding result has an error
+    And the vibecoding retry count is 0
 
   @epic_v_7
   Scenario: Resume session reconstructs VibecodingState from SessionRecord

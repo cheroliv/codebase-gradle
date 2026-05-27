@@ -27,7 +27,7 @@ dependencies {
     implementation(gradleApi())
     implementation(gradleKotlinDsl())
     implementation(libs.bundles.langchain4j.rag)
-    implementation(libs.langchain4j.google.ai.gemini)
+    implementation(libs.google.ai.gemini)
     implementation(libs.bundles.r2dbc)
     implementation(libs.codex.plugin)
     implementation(libs.planner.plugin)
@@ -88,6 +88,34 @@ val cucumberTest = tasks.register<Test>("cucumberTest") {
         exceptionFormat = FULL
     }
     outputs.upToDateWhen { false }
+}
+
+val cucumberTestEpicV6 = tasks.register<Test>("cucumberTestEpicV6") {
+    description = "Runs Cucumber BDD tests — EPIC V-6 (Feedback Loop — error→replan→retry) only"
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = configurations.testRuntimeClasspath.get() +
+        sourceSets.test.get().output +
+        sourceSets.main.get().output +
+        files(tasks.jar.get().archiveFile)
+
+    dependsOn(tasks.classes)
+    useJUnitPlatform { excludeEngines("junit-jupiter") }
+    systemProperty("cucumber.junit-platform.naming-strategy", "long")
+    maxHeapSize = "1g"
+    maxParallelForks = 1
+    forkEvery = 1
+    jvmArgs("-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=256m", "-XX:TieredStopAtLevel=1")
+    timeout.set(Duration.ofMinutes(5))
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+        exceptionFormat = FULL
+    }
+    outputs.upToDateWhen { false }
+
+    filter { includeTestsMatching("codebase.scenarios.EpicV6CucumberRunner") }
 }
 
 val cucumberTestEpicV7 = tasks.register<Test>("cucumberTestEpicV7") {

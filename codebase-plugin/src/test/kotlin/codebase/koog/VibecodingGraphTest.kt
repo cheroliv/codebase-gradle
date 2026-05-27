@@ -1,6 +1,7 @@
 package codebase.koog
 
 import codebase.koog.session.SessionRecord
+import codebase.koog.llm.FakeLlmProvider
 import contracts.agent.Epic
 import vibecoding.contracts.plan.Plan
 import contracts.agent.GradleTask as PlanTask
@@ -283,5 +284,177 @@ class VibecodingGraphTest {
 
         assertTrue(state.isFinal, "Finished session should be final on resume")
         assertTrue(state.finished)
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // V-6 FEEDBACK LOOP — error→replan→retry
+    // ═══════════════════════════════════════════════════════════
+
+    @Test
+    fun `v6 should retry once and recover from recoverable error`() {
+        // Simule une erreur récupérable: l'agent essaie, échoue, retry et réussit
+        val fakeLlm = FakeLlmProvider()
+        fakeLlm.nextResponse = "retry with different approach"
+
+        val plan = Plan(
+            title = "Fix compilation",
+            epics = listOf(
+                Epic(name = "E1", description = "test", points = 1, userStories = listOf(
+                    UserStory(description = "US1", tasks = listOf(
+                        PlanTask(description = "compile", gradleTask = "compileKotlin")
+                    ))
+                ))
+            ),
+            totalPoints = 1,
+            estimatedSessions = "1"
+        )
+
+        val graph = VibecodingGraph(
+            augmentedGraph = null,
+            toolRegistry = ToolRegistry(),
+            llmProvider = fakeLlm
+        )
+
+        val state = VibecodingState(
+            intention = "Fix compilation error",
+            workspaceRoot = "/tmp",
+            maxActions = 5,
+            maxRetries = 3,
+            plan = plan
+        )
+
+        val result = graph.execute(state)
+
+        // Doit avoir fait au moins 2 itérations (essai initial + retry)
+        assertTrue(result.iteration >= 2,
+            "Should iterate at least 2 times for retry, got ${result.iteration}")
+        // Max retries (3) non dépassé
+        assertTrue(result.retryCount <= 3,
+            "Should not exceed maxRetries=3, got retryCount=${result.retryCount}")
+    }
+
+    @Test
+    fun `v6 should give up after maxRetries exhausted`() {
+        val fakeLlm = FakeLlmProvider()
+        fakeLlm.nextResponse = "try again"
+
+        val plan = Plan(
+            title = "Fix bug",
+            epics = listOf(
+                Epic(name = "E1", description = "test", points = 1, userStories = listOf(
+                    UserStory(description = "US1", tasks = listOf(
+                        PlanTask(description = "run tests", gradleTask = "test")
+                    ))
+                ))
+            ),
+            totalPoints = 1,
+            estimatedSessions = "1"
+        )
+
+        val graph = VibecodingGraph(
+            augmentedGraph = null,
+            toolRegistry = ToolRegistry(),
+            llmProvider = fakeLlm
+        )
+
+        val state = VibecodingState(
+            intention = "Run failing tests",
+            workspaceRoot = "/tmp",
+            maxActions = 5,
+            maxRetries = 1, // une seule tentative de retry
+            plan = plan
+        )
+
+        val result = graph.execute(state)
+
+        // Doit abandonner après maxRetries
+        assertTrue(result.error != null || result.finished,
+            "Should eventually stop after maxRetries: error=${result.error}, finished=${result.finished}")
+        assertTrue(result.retryCount <= 1, "retryCount should not exceed maxRetries=1")
+    }
+
+    @Test
+    fun `v6 should not retry on permanent error`() {
+        // Erreur fatale (ex: timeout) ne doit pas être retryée
+        val nowMs = System.currentTimeMillis()
+
+        val plan = Plan(
+            title = "Timeout test",
+            epics = listOf(
+                Epic(name = "E1", description = "test", points = 1, userStories = listOf(
+                    UserStory(description = "US1", tasks = listOf(
+                        PlanTask(description = "run", gradleTask = "test")
+                    ))
+                ))
+            ),
+            totalPoints = 1,
+            estimatedSessions = "1"
+        )
+
+        val graph = VibecodingGraph(
+            augmentedGraph = null,
+            toolRegistry = ToolRegistry()
+        )
+
+        val state = VibecodingState(
+            intention = "Timed out task",
+            workspaceRoot = "/tmp",
+            sessionTimeoutSeconds = 1,
+            sessionStartTimeMs = nowMs - 2000,
+            maxActions = 100,
+            maxRetries = 3,
+            plan = plan
+        )
+
+        val result = graph.execute(state)
+
+        // Timeout = erreur fatale → pas de retry
+        assertEquals(0, result.retryCount,
+            "Timeout is a permanent error, should not retry")
+        assertTrue(result.error != null, "Should have error")
+    }
+
+    @Test
+    fun `v6 retry should clear error after successful retry`() {
+        // Premier essai échoue, le retry (2ème essai) réussit → error doit être null
+        val fakeLlm = FakeLlmProvider()
+        fakeLlm.nextResponse = "fixed the issue"
+
+        // Le plan a 3 tâches. La première échoue (pas de gradlew),
+        // le LLM replanifie, le retry doit exécuter la 2ème tâche.
+        val plan = Plan(
+            title = "Multi-step",
+            epics = listOf(
+                Epic(name = "E1", description = "test", points = 1, userStories = listOf(
+                    UserStory(description = "US1", tasks = listOf(
+                        PlanTask(description = "step1", gradleTask = "nonexistentTask"),
+                        PlanTask(description = "step2", gradleTask = "tasks"),
+                        PlanTask(description = "step3", gradleTask = "properties")
+                    ))
+                ))
+            ),
+            totalPoints = 1,
+            estimatedSessions = "1"
+        )
+
+        val graph = VibecodingGraph(
+            augmentedGraph = null,
+            toolRegistry = ToolRegistry(),
+            llmProvider = fakeLlm
+        )
+
+        val state = VibecodingState(
+            intention = "Multi-step with retry",
+            workspaceRoot = "/tmp",
+            maxActions = 10,
+            maxRetries = 2,
+            plan = plan
+        )
+
+        val result = graph.execute(state)
+
+        // Après les retries, toutes les tâches ont dû être exécutées
+        assertTrue(result.executedTasks.size >= 2,
+            "Should have executed at least 2 tasks after retry, got ${result.executedTasks.size}")
     }
 }

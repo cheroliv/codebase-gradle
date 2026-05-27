@@ -1,29 +1,30 @@
-= PROMPT_REPRISE — Session 071 : Cucumber verification + publishToMavenLocal
-:session: 071
+= PROMPT_REPRISE — Session 075 : Fix Newark + TokenTracker bug
+:sessions: 075
 :date: 2026-05-27
-:contexte: Session 070 TERMINEE — Cache dedup + E2E VibecodingTask + Nettoyage ports 11434-11436 + Rotation 29 ports
-:prerequis: Session 070 (14/14 VibecodingTaskTest, pool tests PASS, MigrationTest fix)
+:contexte: Session 074 TERMINÉE — EPIC V-6 Feedback Loop (error→replan→retry). Machine vibecoding 100%.
+:prerequis: Session 074 (3/3 Cucumber @epic_v_6, 17/17 JUnit5, zero régression)
 
-== What was delivered (Session 070)
+== Ce qui a été livré (Session 074 — V-6 Feedback Loop)
 
-- P1 — OllamaLlmProvider cache dedup par (baseUrl, model) en ConcurrentHashMap. 2 tests
-- P2 — E2E VibecodingTaskTest avec Testcontainers PostgreSQL. 14/14 PASS
-- Nettoyage 24 fichiers : 11434-11436 → 11437+ (ports proteges)
-- Rotation 29 ports × 5 modeles autorises (OllamaPoolTest.fullPool)
-- MigrationTest fix : 2 migrations V1+V2
-- AGENT.adoc : Contrat Software Craftsmanship EAGER ajoute
+- ✅ VibecodingState enrichi : retryCount, maxRetries, withRecoverableError, clearError, incrementRetry
+- ✅ VibecodingGraph : feedback loop (error→replan LLM→retry), buildReplanPrompt, checkProgress revisité
+- ✅ 4 tests JUnit5 V-6 + 3 scénarios Cucumber @epic_v_6 = 24/24 PASS
+- ✅ Fix compilation : libs.versions.toml (google-ai-gemini), publication codex-plugin dans mavenLocal
+- ✅ Machine vibecoding : 100% autonome — boucle de feedback fermée
 
-== Objective Session 071
+== Objectif Session 075
 
-=== Cucumber verification
-- Lancer cucumberTest pour verifier que les 101+ scenarios Cucumber passent toujours
-- En particulier : @epic_v_7, @epic_v_8, @epic_v_6, @epic_v_5, sessions vibecoding
+=== P0 — Fix TokenTracker bug (5 min)
+- Ajouter "deepseek-v4-pro:cloud" dans COST_PER_MILLION
+- Ou normaliser les noms dans LlmProviderResolver
 
-=== publishToMavenLocal
-- ./gradlew publishToMavenLocal pour les consommateurs N2
+=== P0 — Réparer Newark (training-gradle) (1 session)
+- Supprimer code orphelin `TrainingGradlePlugin.kt:206-212`
+- Résoudre conflit `org.jetbrains:annotations` via version catalog `strictly`
+- Compiler et faire passer les tests
 
-=== Cleanup final
-- Verifier que llm-config.yml est bien dans le repo (force-add fait en 070)
-- git status clean
+=== P1 — Dogfood vibecoding sur Newark
+- `./gradlew vibecode --intention="Generate SPD for session 1" --model=deepseek`
+- Tester la boucle V-6 en conditions réelles sur le pipeline SPG→SPD
 
 Code in: foundry/public/codebase-gradle/codebase-plugin/
