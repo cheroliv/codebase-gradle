@@ -1,0 +1,97 @@
+= BACKLOG — Codebase Gradle
+:toc:
+:last_update: 2026-05-27 (Session 073 — cadrage EPIC Z)
+
+== EPIC W — Auto-discovery Gradle Tasks → ToolRegistry + OpenAPI Spec
+
+Cadré dans GLOBAL_CODE_REVIEW V16 §23.8.1. 7 sous-EPICs W-0→W-6.
+Scanner les plugin descriptors Gradle, extraire annotations @Input/@Option/@TaskAction,
+générer schéma OpenAPI, auto-enregistrer dans ToolRegistry.
+
+[cols="1,3,2", options="header"]
+|===
+| # | Description | Pts
+| W-0 | Spécification : GLOBAL_CODE_REVIEW.adoc §23.8.1 | 1
+| W-1 | PluginDescriptorScanner — parse META-INF/gradle-plugins/*.properties | 3
+| W-2 | TaskMetadataExtractor — @Input, @Option, @TaskAction | 3
+| W-3 | OpenApiSpecGenerator — JSON/YAML schema par tâche | 3
+| W-4 | AutoRegister dans ToolRegistry | 3
+| W-5 | Tests unitaires + intégration Testcontainers | 3
+| W-6 | Validation cross-borough (planner, codex, training) | 2
+|===
+
+*Total : ~18 pts.* Priorité P1.
+
+== EPIC X — Décision Multi-Step : Plan → Execute → Verify → Adapt
+
+Cadré dans GLOBAL_CODE_REVIEW V16 §23.8.2. 7 sous-EPICs X-0→X-6.
+VibecodingPlan structuré avec dépendances entre étapes, TaskResultVerifier,
+boucle verify→adapt, RollbackStrategy.
+
+[cols="1,3,2", options="header"]
+|===
+| # | Description | Pts
+| X-0 | Spécification : GLOBAL_CODE_REVIEW.adoc §23.8.2 | 1
+| X-1 | VibecodingPlan — data class avec dépendances entre étapes | 3
+| X-2 | TaskResultVerifier — parse stdout/stderr (SUCCESS/FAILED/BLOCKED) | 3
+| X-3 | VerifyAdaptLoop — verify→adapt avec maxRetries, backoff exponentiel | 5
+| X-4 | RollbackStrategy — STOP, REVERT, SKIP, FALLBACK_HUMAN | 3
+| X-5 | Tests unitaires + Cucumber BDD | 3
+| X-6 | Validation end-to-end cross-borough | 2
+|===
+
+*Total : ~20 pts.* Priorité P1.
+
+== EPIC Y — Agentic Literature Compiler
+
+Cadré dans GLOBAL_CODE_REVIEW V16 §23.8.3. 8 sous-EPICs Y-0→Y-7.
+Compiler la littérature agentique textuelle en artefacts exécutables sur
+le système de contexte augmenté (koog+langchain4j+RAG).
+
+[cols="1,3,2", options="header"]
+|===
+| # | Description | Pts
+| Y-0 | Spécification : GLOBAL_CODE_REVIEW.adoc §23.8.3 | 1
+| Y-1 | AgenticChunker — segmentation sémantique en unités atomiques | 3
+| Y-2 | AgenticOntologizer — mapping sur TAXONOMIE_WORKSPACE | 3
+| Y-3 | Schema SQL generation — stockage relationnel + embeddings pgvector | 3
+| Y-4 | Transformation — chunk → ToolRegistry pre/post hook | 5
+| Y-5 | AgenticIngestor — la machine s'ingère elle-même | 5
+| Y-6 | Validation plan multi-step + contraintes | 3
+| Y-7 | Tests unitaires + Cucumber BDD + validation cross-borough | 3
+|===
+
+*Total : ~26 pts.* Priorité P1.
+
+== EPIC Z — Autofocus : Accommodation Contextuelle Programmatique
+
+Découvert en direct pendant la session 073 (27 mai 2026) — la capacité
+manquante de zoom x1↔x1000, le second pilier de la cognition humaine après
+l'association d'idées.
+
+*Document de référence* : link:../../../../../../../configuration/AUTOFOCUS_CAPABILITY.adoc[AUTOFOCUS_CAPABILITY.adoc]
+(11ème document du Jardin Secret, symlink à la racine workspace).
+
+[cols="1,3,2", options="header"]
+|===
+| # | Description | Pts
+| Z-0 | Spécification — AUTOFOCUS_CAPABILITY.adoc (12 sections, état de l'art, structure de code) | 1
+| Z-1 | FocusLevel + AutofocusClassifier — énumération 4 niveaux + classifieur heuristique 2 passes (regex + fallback LLM) | 3
+| Z-2 | ContextZoomer — zoom(target, augmentedContext) → filtré. Consomme graph.json (graphify-gradle N0), ranking Aider-like | 3
+| Z-3 | AutofocusStack (LIFO) — push/pop/trace entre niveaux. Max depth 5, logging JSON/Mermaid | 2
+| Z-4 | AutofocusContextTree (RAPTOR-inspired) — arbre hiérarchique 4 niveaux pré-calculé, stocké pgvector | 3
+| Z-5 | Intégration VibecodingGraph — ajout 3 nœuds koog (autofocusClassify, autofocusZoom, verifyAndAdapt modifié) | 5
+| Z-6 | Intégration V-6 Feedback Loop — zoom-in automatique sur FAILED, pop sur SUCCESS | 3
+| Z-7 | Validation cross-borough — scénario E2E : ./gradlew vibecoding --intention="Fix Newark" | 3
+|===
+
+*Total : ~23 pts.*
+*Dépendances :* V-6 Feedback Loop (prérequis).
+*Priorité :* P1 — activé après la boucle autonome V-6.
+*Borough porteur :* codebase-gradle (Queens, N1) — package `autofocus/` dans `codebase/koog/`.
+*5ème verbe taxonomie :* ZOOMER (groupe Gradle `zoom`).
+
+== Prochain EPIC à démarrer
+
+. **V-6 Feedback Loop** — error→replan→retry (maxRetries=3, ~100 lignes). Session 073 🔴 P0.
+. **Z-1 AutofocusClassifier** — heuristique regex 2 passes. Après V-6 🟡 P1.

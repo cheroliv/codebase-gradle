@@ -4,8 +4,8 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-27 (Session 070)
-_Session en cours_ : 071 — V-6 Feedback Loop + Y-1 AgenticChunker via vibecoding
+_Derniere mise a jour_ : 2026-05-27 (Session 073 — cadrage Autofocus)
+_Session en cours_ : 073 — Cadrage AUTOFOCUS_CAPABILITY + EPIC Z + Gouvernance
 _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/` (N=70, multiple de 10)
 
 '''
@@ -115,10 +115,14 @@ _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/
 | EPIC-V-SESSION-REPO | *SessionRepository* — Persistance vibecoding R2DBC (PostgreSQL + pgvector). SessionRepository, TokenTracker, Dashboard, Jardin Secret (confidentiality_level). Schema V1__init_vibecoding.sql (Flyway convention sans dependance). 32/32 JUnit5, 150/150 Cucumber. | ✅ TERMINE (2026-05-27). Sessions 059+060. Commit 3b95ff4. | P0
 | EPIC-V-FLYWAY | *Migration Flyway* — MigrationRunner artisanal (sans dependance), table schema_version, gestion versions/rollback V{n}__*.sql. Pipeline initSchema → migrate. | ✅ TERMINE (Session 061). 4 fichiers (MigrationRunner 125l, SessionRepository -16l, MigrationTest 136l 3/3, SessionRepositoryTest +1 fix). | P1
 | EPIC-V-5 | *Cablage Gemini + Persistance* — LlmProvider fun interface + GeminiLlmProvider (production) + FakeLlmProvider (test). VibecodingGraph 5 nœuds koog (callLLM, persistState). TokenTracker cablé. Cucumber @epic_v_5 PASS. | ✅ TERMINE (Session 064). 11/11 JUnit5, 101/101 Cucumber, ZERO secret. Machine a 95%. | P0
-| EPIC-V-6 | *Cablage Ollama Cloud Docker + ConnectionFactory R2DBC* — Contrat N0 llm-pool-contracts publie. OllamaPool rotation instances. OllamaLlmProvider zero API key. ConnectionFactory injecte dans VibecodingGraph. SessionRepository.updateSession persiste TokenTracker. V2 migration. 12/12 JUnit5 + 1/1 Cucumber @epic_v_6 PASS. | EN COURS (Session 066 pour test integration) | P0
+| EPIC-V-6 | *Cablage Ollama Cloud Docker + ConnectionFactory R2DBC* — Contrat N0 llm-pool-contracts publie. OllamaPool rotation instances. OllamaLlmProvider zero API key. ConnectionFactory injecte dans VibecodingGraph. SessionRepository.updateSession persiste TokenTracker. V2 migration. 12/12 JUnit5 + 1/1 Cucumber @epic_v_6 PASS. | ✅ TERMINE (2026-05-25, Session 066 vibecoding ameliorations) | P0
 | EPIC-V-7 | *Resume Session* — Option --resume sur VibecodingTask + VibecodingGraph.resumeSession(SessionRecord). 4/4 JUnit5 + 2/2 Cucumber @epic_v_7 PASS. | ✅ TERMINE (Session 069) | P0
 | EPIC-V-8 | *Dashboard CLI* — DashboardTask Gradle (vibecodingDashboard) + enregistrement CodebasePlugin. 3/3 JUnit5 + 2/2 Cucumber @epic_v_8 PASS. | ✅ TERMINE (Session 069) | P0
 | EPIC G | Publication Maven Central + Gradle Portal — groupId education.cccp, namespace cccp-education. | ✅ AUDITE (2026-05-19). Credentials presents, namespace actif sur Maven Central + Portal. Zéro action supplementaire necessaire. publishToMavenLocal suffit pour conso N1→N2. | P0
+| EPIC W | *Auto-discovery Gradle Tasks* — ToolRegistry + OpenAPI Spec. | 🔲 BACKLOG (cadré V16). 7 sous-EPICs, ~18 pts. | P1
+| EPIC X | *Décision Multi-Step verify→adapt* — Plan structuré, TaskResultVerifier, RollbackStrategy. | 🔲 BACKLOG (cadré V16). 7 sous-EPICs, ~20 pts. | P1
+| EPIC Y | *Agentic Literature Compiler* — Compiler littérature agentique → artefacts exécutables. | 🔲 BACKLOG (cadré V16). 8 sous-EPICs, ~26 pts. | P1
+| EPIC Z | *Autofocus* — Accommodation contextuelle programmatique (zoom x1↔x1000). 11ème doc Jardin Secret. Package `autofocus/` dans `codebase/koog/`. 5ème verbe ZOOMER. | 🔲 BACKLOG (cadré Session 073). 7 sous-EPICs, ~23 pts. Voir `AUTOFOCUS_CAPABILITY.adoc`. | P1
 |===
 
 '''
@@ -130,7 +134,8 @@ _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/
 | `LAZY_EAGER_ESSENTIALS.adoc` | Principes LAZY/EAGER compacts | EAGER
 | `PROMPT_REPRISE.adoc` | Mission session en cours | EAGER
 | `VISION_ORCHESTRATION_LLM.adoc` | Vision dispatcher + experts (275 lignes) | LAZY
-| `BACKLOG.adoc` | Suivi prioritaire des taches codebase | LAZY
+| `BACKLOG.adoc` | Suivi prioritaire des taches codebase (EPICs W/X/Y/Z) | LAZY
+| `AUTOFOCUS_CAPABILITY.adoc` (racine workspace) | Spécification complete Autofocus (11ème doc Jardin Secret) | LAZY
 | `AGENT_GOVERNANCE.adoc` (dans configuration/) | Gouvernance transverse globale | LAZY
 | `.agents/SESSIONS_HISTORY.adoc` | Historique des sessions | EAGER
 | `.agents/TEST_COVERAGE_ANALYSIS.adoc` | Analyse couverture tests | LAZY
