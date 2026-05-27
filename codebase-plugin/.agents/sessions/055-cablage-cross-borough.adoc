@@ -15,7 +15,7 @@ pour fermer la boucle agentique : codex retrieval → composite context → plan
 === Step 1 — Inject codex-plugin comme dependance N1
 
 - Ajout `implementation(libs.doc.pipeline)` dans `codebase-plugin/build.gradle.kts`
-- Ajout `education.cccp:doc-pipeline:0.1.0-SNAPSHOT` dans le version catalog
+- Ajout `education.cccp:codex-plugin:0.1.0-SNAPSHOT` dans le version catalog
 - `CodexVectorStore` accessible dans `CompositeContextBuilder` via constructeur optionnel
 
 === Step 2 — Canal DOCS (5eme canal, 10% budget)
@@ -39,7 +39,7 @@ pour fermer la boucle agentique : codex retrieval → composite context → plan
 
 - 209 tests, 205 PASS, 4 preexistants (Cucumber infrastructure)
 - Tous les tests unitaires VibecodingContracts, ChannelBudget, ContextChannel, MultiChannelContextGraph PASS
-- Cross-borough compile verification : doc-pipeline + planner-plugin dans le classpath de codebase-plugin
+- Cross-borough compile verification : codex-plugin + planner-plugin dans le classpath de codebase-plugin
 
 == Dependences resolves
 
@@ -47,7 +47,7 @@ pour fermer la boucle agentique : codex retrieval → composite context → plan
 |===
 | Borough | GAV
 | codex (Brooklyn)
-| `education.cccp:doc-pipeline:0.1.0-SNAPSHOT`
+| `education.cccp:codex-plugin:0.1.0-SNAPSHOT`
 | planner (Manhattan)
 | `education.cccp:planner-plugin:0.0.1`
 |===

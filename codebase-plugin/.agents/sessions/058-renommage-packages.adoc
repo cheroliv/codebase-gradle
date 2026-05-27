@@ -17,7 +17,7 @@ ni aux plugin IDs Gradle Portal.
 | workspace-bom (3 modules) | `education.cccp.contracts.*` → `contracts.*` | 21 .kt (déplacés + packages)
 | codebase-plugin (Queens) | `cccp.vibecoding.contracts.*` → `vibecoding.contracts.*` + 83 imports | 4 déplacés + ~25 modifiés
 | planner-plugin (Manhattan) | 6 imports `education.cccp.contracts.context.*` → `contracts.context.*` | 2 modifiés
-| codex/doc-pipeline (Brooklyn) | 31 fichiers déplacés `cccp/education/codex/` → `codex/` + 2 imports | 31 déplacés + 2 modifiés
+| codex/codex-plugin (Brooklyn) | 31 fichiers déplacés `cccp/education/codex/` → `codex/` + 2 imports | 31 déplacés + 2 modifiés
 | training-gradle (private) | 4 imports `education.cccp.contracts.context.*` → `contracts.context.*` | 1 modifié
 |===
 

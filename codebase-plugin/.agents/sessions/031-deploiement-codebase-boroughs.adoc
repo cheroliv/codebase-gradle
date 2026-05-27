@@ -19,7 +19,7 @@ Déploiement pipeline de contexte augmenté sur les 12 boroughs N2 cibles.
 Pour chaque borough : + `codebase = "0.0.1"` dans `[versions]`, + `codebase = { id = "cccp.education.codebase", version.ref = "codebase" }` dans `[plugins]`, + `mavenLocal()` dans `pluginManagement` si absent, + `alias(libs.plugins.codebase)` dans plugins block :
 
 | Borough | Chemin | mavenLocal ajouté | Compilation |
-| codex-gradle | doc-pipeline/ | déjà présent | FAIL (pré-existant: readme pas dans mavenLocal) |
+| codex-gradle | codex-plugin/ | déjà présent | FAIL (pré-existant: readme pas dans mavenLocal) |
 | planner-gradle | planner-plugin/ | OUI (ajouté) | FAIL (pré-existant: planner pas dans mavenLocal) |
 | training-gradle | training-plugin/ | OUI (ajouté) | ✅ SUCCESS |
 | capsule-gradle | capsule-plugin/ | déjà présent | FAIL (pré-existant: slider pas dans mavenLocal) |

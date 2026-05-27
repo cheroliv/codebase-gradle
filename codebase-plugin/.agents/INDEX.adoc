@@ -4,8 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-27 (Session 073 — cadrage Autofocus)
-_Session en cours_ : 073 — Cadrage AUTOFOCUS_CAPABILITY + EPIC Z + Gouvernance
+_Derniere mise a jour_ : 2026-05-27 (Session 071 — Cross-borough codex-plugin rename)
+_Session precedente_ : 070 — E2E Cache dedup + Testcontainers + Nettoyage ports
+_Session en cours_ : 072 — Disponible (prochaine : EPIC-O ou continuation EPIC-V)
 _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/` (N=70, multiple de 10)
 
 '''

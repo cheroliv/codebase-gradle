@@ -29,7 +29,7 @@ dependencies {
     implementation(libs.bundles.langchain4j.rag)
     implementation(libs.langchain4j.google.ai.gemini)
     implementation(libs.bundles.r2dbc)
-    implementation(libs.doc.pipeline)
+    implementation(libs.codex.plugin)
     implementation(libs.planner.plugin)
 
     // N0 codebase contracts — source unique de vérité (ContextChannel, ChannelBudget, CompositeContext, CompositeContextConfig)

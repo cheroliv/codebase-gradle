@@ -16,7 +16,7 @@ r2dbc-spi = "1.0.0.RELEASE"
 mapstruct = "1.6.3"
 arrow = "2.2.2"
 plugin-publish = "2.1.0"
-doc-pipeline = "0.1.0-SNAPSHOT"
+codex-plugin = "0.1.0-SNAPSHOT"
 planner-plugin = "0.0.1"
 koog = "0.8.0"
 
@@ -45,7 +45,7 @@ mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.re
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serial" }
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
-doc-pipeline = { module = "education.cccp:doc-pipeline", version.ref = "doc-pipeline" }
+codex-plugin = { module = "education.cccp:codex-plugin", version.ref = "codex-plugin" }
 planner-plugin = { module = "education.cccp:planner-plugin", version.ref = "planner-plugin" }
 koog-agents = { module = "ai.koog:koog-agents", version.ref = "koog" }
 
