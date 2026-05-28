@@ -1,0 +1,19 @@
+= Session 078 — Code Review Globale + Fix MapStruct mort
+:date: 2026-05-28
+:type: review+cleanup
+:score: 10/10
+
+== Contexte
+Code review en profondeur du codebase-gradle (Queens) — audit complet de 64 fichiers source (6,744 lignes) + 68 fichiers test (9,296 lignes) + 23 features Cucumber.
+
+== Actions
+- GLOBAL_CODE_REVIEW v14 : score global 4.0/5.0
+- P1 identifiés : mapstruct mort, OffTopicDetector contract break
+- P2 identifiés : ONNX phantom, layer violation GeminiConfig, ignoreFailures CI
+- P3 identifiés : duplication EagerFiles/Graphify, path dur training privé, dossier tools/ vide
+- Suppression mapstruct des 2 catalogues TOML + build.gradle.kts (3 fichiers)
+- Vérification compileKotlin OK
+
+== Commandes
+./gradlew compileKotlin → BUILD SUCCESSFUL
+git diff --stat → 3 files, 2 insertions(+), 10 deletions(-)

@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-27 (Session 074 — EPIC V-6 Feedback Loop TERMINE)
-_Session precedente_ : 074 — V-6 Feedback Loop (error→replan→retry). 4 JUnit5 + 3 Cucumber @epic_v_6 = 24/24 PASS.
-_Session en cours_ : 075 — Fix Newark + TokenTracker bug
+_Derniere mise a jour_ : 2026-05-28 (Session 078 — Code Review v14)
+_Session precedente_ : 078 — GLOBAL_CODE_REVIEW v14. Audit 64 fichiers source + 68 tests + 23 features Cucumber. Score 4.0/5.0. MapStruct supprimé.
+_Session en cours_ : 079 — Fix P2 gaps code review
 _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/` (N=70, multiple de 10)
 
 '''
@@ -37,6 +37,7 @@ _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/
 
 |===
 | # | Date | Type | Sujet | Score
+| 078 | 2026-05-28 | review+cleanup | GLOBAL_CODE_REVIEW v14 — codebase en profondeur (64 sources + 68 tests + 23 features). Score 4.0/5.0. P1: mapstruct mort supprimé (3 fichiers, −10 lignes). 8 issues restantes (P2+P3). | 10/10
 | 074 | 2026-05-27 | feat+tdd | EPIC V-6 Feedback Loop — error→replan→retry. Boucle vibecoding autonome 100%. 4/4 JUnit5 + 3/3 Cucumber @epic_v_6 PASS. Fix compilation libs.versions.toml. 24/24 PASS, zero régression. | 10/10
 | 070 | 2026-05-27 | feat+refactor+contract | Cache dedup OllamaLlmProvider (ConcurrentHashMap) + E2E VibecodingTaskTest Testcontainers (14/14 PASS) + Nettoyage 11434-11436 (24 fichiers) + Rotation 29 ports x5 modeles + MigrationTest fix (V1+V2) + Contrat Craftsmanship EAGER | 10/10
 | 069 | 2026-05-26 | feat+bugfix | Resume session --resume + Dashboard CLI + ConnectionFactory fix — 17 JUnit5 + 4 Cucumber PASS (2 @epic_v_7, 2 @epic_v_8) | 10/10

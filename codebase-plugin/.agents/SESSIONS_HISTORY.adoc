@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 078 | 2026-05-28 | review+cleanup | GLOBAL_CODE_REVIEW v14 — Audit 64 sources (6,744l) + 68 tests (9,296l) + 23 features Cucumber (854l). Score 4.0/5.0. 8 issues (2 P1, 3 P2, 3 P3). MapStruct supprimé des 2 catalogues TOML + build.gradle.kts (3 fichiers, −10 lignes). compileKotlin OK. | 10/10
 | 074 | 2026-05-27 | feat+tdd | EPIC V-6 Feedback Loop — error→replan→retry (maxRetries=3), buildReplanPrompt, checkProgress revisité. Boucle vibecoding autonome 100%. 4 JUnit5 + 3 Cucumber @epic_v_6 = 24/24 PASS. Fix compilation libs.versions.toml (google-ai-gemini). | 10/10
 | 071 | 2026-05-27 | refactor | Renommage doc-pipeline → codex-plugin (consommateur) + Reintegration session 066 orpheline. MAJ 2 catalogues + build.gradle.kts. Fix .agents/ orphelin racine + EPIC-V-6 TERMINE. | 10/10
 | 070

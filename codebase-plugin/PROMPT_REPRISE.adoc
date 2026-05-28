@@ -1,30 +1,22 @@
-= PROMPT_REPRISE — Session 075 : Fix Newark + TokenTracker bug
-:sessions: 075
-:date: 2026-05-27
-:contexte: Session 074 TERMINÉE — EPIC V-6 Feedback Loop (error→replan→retry). Machine vibecoding 100%.
-:prerequis: Session 074 (3/3 Cucumber @epic_v_6, 17/17 JUnit5, zero régression)
+= PROMPT_REPRISE — Session 079 : Fix P2 gaps code review
+:sessions: 079
+:date: 2026-05-28
+:contexte: Session 078 TERMINÉE — GLOBAL_CODE_REVIEW v14. MapStruct supprimé (P1 fixé). 8 issues restantes.
+:prerequis: Session 078 (code review, 3 fichiers, compile OK)
 
-== Ce qui a été livré (Session 074 — V-6 Feedback Loop)
+== Ce qui a été livré (Session 078 — Code Review)
+- ✅ GLOBAL_CODE_REVIEW v14 — score 4.0/5.0
+- ✅ P1 : mapstruct mort supprimé (3 fichiers, −10 lignes)
+- 🔲 P2 restants : ONNX phantom, layer violation GeminiConfig, ignoreFailures CI
+- 🔲 P3 restants : duplication EagerFiles/Graphify, path dur training, dossier tools/ vide
 
-- ✅ VibecodingState enrichi : retryCount, maxRetries, withRecoverableError, clearError, incrementRetry
-- ✅ VibecodingGraph : feedback loop (error→replan LLM→retry), buildReplanPrompt, checkProgress revisité
-- ✅ 4 tests JUnit5 V-6 + 3 scénarios Cucumber @epic_v_6 = 24/24 PASS
-- ✅ Fix compilation : libs.versions.toml (google-ai-gemini), publication codex-plugin dans mavenLocal
-- ✅ Machine vibecoding : 100% autonome — boucle de feedback fermée
+== Objectif Session 079
+=== P0 — Appliquer les P2 restants
+- Déplacer GeminiConfig dans koog.llm (layer violation)
+- Retirer ignoreFailures du build.gradle.kts
+- Nettoyer doc ONNX si non utilisé
 
-== Objectif Session 075
-
-=== P0 — Fix TokenTracker bug (5 min)
-- Ajouter "deepseek-v4-pro:cloud" dans COST_PER_MILLION
-- Ou normaliser les noms dans LlmProviderResolver
-
-=== P0 — Réparer Newark (training-gradle) (1 session)
-- Supprimer code orphelin `TrainingGradlePlugin.kt:206-212`
-- Résoudre conflit `org.jetbrains:annotations` via version catalog `strictly`
-- Compiler et faire passer les tests
-
-=== P1 — Dogfood vibecoding sur Newark
-- `./gradlew vibecode --intention="Generate SPD for session 1" --model=deepseek`
-- Tester la boucle V-6 en conditions réelles sur le pipeline SPG→SPD
-
-Code in: foundry/public/codebase-gradle/codebase-plugin/
+=== P1 — Appliquer les P3
+- Factoriser collectEagerFiles/loadGraphifyStats dans un service partagé
+- Rendre path training configurable
+- Supprimer dossier tools/ vide

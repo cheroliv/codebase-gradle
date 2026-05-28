@@ -9,6 +9,7 @@ plugins {
     // Gradle 9.5.1 : alias(libs.plugins.kotlin.jvm) et publish hors scope dans plugins {} d'un sous-projet
     // Workaround : versions explicites
     id("org.jetbrains.kotlin.jvm") version "2.3.20"
+    kotlin("plugin.serialization") version "2.3.20"
     id("org.jetbrains.kotlinx.kover") version "0.9.8"
     id("com.gradle.plugin-publish") version "2.1.0"
 }
@@ -66,8 +67,7 @@ dependencies {
     implementation(libs.jackson.dataformat.yaml)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.testcontainers.postgresql)
-    implementation(libs.mapstruct)
-    annotationProcessor(libs.mapstruct.processor)
+
 
     testImplementation(kotlin("test-junit5"))
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -220,8 +220,6 @@ val cucumberTestEpicV8 = tasks.register<Test>("cucumberTestEpicV8") {
 }
 
 tasks.withType<Test>().configureEach {
-    // Kover nécessite que les tests tournent, même avec des échecs préexistants
-    // (pgvector offline, Gradle TestKit). ignoreFailures = true permet la collecte.
     ignoreFailures = true
     useJUnitPlatform()
     jvmArgs("-XX:+EnableDynamicAgentLoading")

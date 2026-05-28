@@ -13,7 +13,6 @@ coroutines = "1.10.2"
 r2dbc-postgresql = "1.0.7.RELEASE"
 r2dbc-pool = "1.0.2.RELEASE"
 r2dbc-spi = "1.0.0.RELEASE"
-mapstruct = "1.6.3"
 arrow = "2.2.2"
 plugin-publish = "2.1.0"
 kover = "0.9.8"
@@ -41,8 +40,6 @@ kotlinx-coroutines-reactive = { module = "org.jetbrains.kotlinx:kotlinx-coroutin
 r2dbc-postgresql = { module = "org.postgresql:r2dbc-postgresql", version.ref = "r2dbc-postgresql" }
 r2dbc-pool = { module = "io.r2dbc:r2dbc-pool", version.ref = "r2dbc-pool" }
 r2dbc-spi = { module = "io.r2dbc:r2dbc-spi", version.ref = "r2dbc-spi" }
-mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
-mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serial" }
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
