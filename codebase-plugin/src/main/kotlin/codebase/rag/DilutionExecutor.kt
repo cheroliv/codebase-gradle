@@ -117,7 +117,7 @@ class DilutionExecutor(
         return backupFile.absolutePath
     }
 
-    private fun findSectionStart(content: String, sectionTitle: String): Int? {
+    internal fun findSectionStart(content: String, sectionTitle: String): Int? {
         val cleanTitle = sectionTitle.trim().removePrefix("==").trim()
         val patterns = listOf(
             Regex("""^== \Q$cleanTitle\E\s*$""", RegexOption.MULTILINE),
@@ -132,7 +132,7 @@ class DilutionExecutor(
         return null
     }
 
-    private fun formatDilutedSection(record: DilutionRecord): String {
+    internal fun formatDilutedSection(record: DilutionRecord): String {
         val date = record.timestamp.toLocalDate().format(dateFmt)
         val lines = listOf(
             "",
@@ -155,7 +155,7 @@ class DilutionExecutor(
         return lines.joinToString("\n")
     }
 
-    private fun injectSection(
+    internal fun injectSection(
         content: String,
         formattedSection: String,
         suggestedSection: String
@@ -222,7 +222,7 @@ class DilutionExecutor(
         return before.trimEnd() + "\n\n" + table + after
     }
 
-    private fun findLastSectionEnd(content: String): Int {
+    internal fun findLastSectionEnd(content: String): Int {
         val sectionRegex = Regex("""^== .+$""", RegexOption.MULTILINE)
         val matches = sectionRegex.findAll(content).toList()
         if (matches.isEmpty()) return 0
