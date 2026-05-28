@@ -196,7 +196,7 @@ Pour le contenu fourni, reponds UNIQUEMENT au format JSON (sans texte avant ni a
         return report
     }
 
-    private fun parseSections(text: String): List<ParsedSection> {
+    internal fun parseSections(text: String): List<ParsedSection> {
         val headingRegex = Regex("(?m)^== (.+)$")
         val matches = headingRegex.findAll(text).toList()
 
@@ -250,7 +250,7 @@ Contenu : ${section.content.take(2000)}
         }
     }
 
-    private fun parseRoutingResponse(section: ParsedSection, raw: String): DilutionTarget {
+    internal fun parseRoutingResponse(section: ParsedSection, raw: String): DilutionTarget {
         val json = raw.removePrefix("```json").removePrefix("```").removeSuffix("```").trim()
 
         val targetDoc = when {
@@ -274,7 +274,7 @@ Contenu : ${section.content.take(2000)}
         )
     }
 
-    private fun archiveReport(report: StimulusCascadeReport): String {
+    internal fun archiveReport(report: StimulusCascadeReport): String {
         val dirName = "${report.timestamp.format(tsFormat)}_stimulus-dilution"
         val archiveDir = File(workspaceDir, "$visionArchiveDir/$dirName")
         archiveDir.mkdirs()
@@ -427,7 +427,7 @@ Contenu : ${section.content.take(2000)}
 
     fun dilutionResults(): List<DilutionResult> = dilutionResults.toList()
 
-    private fun sha256(input: String): String {
+    internal fun sha256(input: String): String {
         val md = MessageDigest.getInstance("SHA-256")
         val digest = md.digest(input.toByteArray(UTF_8))
         return BigInteger(1, digest).toString(16).padStart(64, '0')
