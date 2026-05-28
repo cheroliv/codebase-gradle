@@ -16,6 +16,7 @@ r2dbc-spi = "1.0.0.RELEASE"
 mapstruct = "1.6.3"
 arrow = "2.2.2"
 plugin-publish = "2.1.0"
+kover = "0.9.8"
 codex-plugin = "0.1.0-SNAPSHOT"
 planner-plugin = "0.0.1"
 koog = "0.8.0"
@@ -78,3 +79,4 @@ arrow = [
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 publish = { id = "com.gradle.plugin-publish", version.ref = "plugin-publish" }
 codebase = { id = "education.cccp.codebase", version.ref = "codebase" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }

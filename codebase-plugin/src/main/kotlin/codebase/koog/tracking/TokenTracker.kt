@@ -53,7 +53,9 @@ class TokenTracker(
         )
 
         fun costFor(model: String, promptTokens: Long, completionTokens: Long): Double {
-            val (promptPrice, completionPrice) = COST_PER_MILLION[model] ?: return 0.0
+            // Normalise les suffixes Ollama (:cloud, :latest, etc.) vers le nom canonique
+            val normalizedModel = model.substringBefore(":")
+            val (promptPrice, completionPrice) = COST_PER_MILLION[normalizedModel] ?: return 0.0
             val promptCost = (promptTokens.toDouble() / 1_000_000.0) * promptPrice
             val completionCost = (completionTokens.toDouble() / 1_000_000.0) * completionPrice
             return promptCost + completionCost

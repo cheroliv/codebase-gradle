@@ -59,6 +59,16 @@ class TokenTrackerTest {
     }
 
     @Test
+    fun `estimatedCost normalizes model suffix to find canonical name`() {
+        val tracker = TokenTracker()
+        tracker.trackPrompt("Hello, world. ".repeat(50))
+        val cost = tracker.estimatedCost("deepseek-v4-pro:cloud")
+        assertTrue(cost > 0.0, "Cost should be positive for model with :cloud suffix (canonical lookup)")
+        val costFlash = tracker.estimatedCost("deepseek-v4-flash:latest")
+        assertTrue(costFlash > 0.0, "Cost should be positive for model with :latest suffix")
+    }
+
+    @Test
     fun `estimatedCost returns 0 for unknown model`() {
         val tracker = TokenTracker()
         tracker.trackPrompt("Hello")
