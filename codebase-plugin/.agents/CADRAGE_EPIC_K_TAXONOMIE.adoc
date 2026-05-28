@@ -250,7 +250,7 @@ transformToEpub (Brooklyn)     — Transforme en EPUB lisible
 
 $ ./gradlew tasks --group=deploy
 
-deployToGhPages (Staten)       — Déploie le site bakery sur GitHub Pages
+deployToGhPages (Staten)       — Déploie le site de documentation magic-stick sur GitHub Pages (via bakery-gradle)
 ----
 
 → N'importe qui comprend le cycle de vie en une commande.
