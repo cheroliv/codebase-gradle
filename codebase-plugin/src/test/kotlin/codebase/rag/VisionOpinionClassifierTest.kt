@@ -214,8 +214,8 @@ class VisionOpinionClassifierTest {
     // ══════ Data classes et enum tests ══════
 
     @Test
-    fun `TestSections has 9 predefined sections`() {
-        assertEquals(9, TestSections.all.size)
+    fun `TestSections has 10 predefined sections`() {
+        assertEquals(10, TestSections.all.size)
     }
 
     @Test
