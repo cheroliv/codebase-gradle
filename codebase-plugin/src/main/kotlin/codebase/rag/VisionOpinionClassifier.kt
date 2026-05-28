@@ -184,7 +184,7 @@ Pour le texte fourni, réponds UNIQUEMENT au format JSON suivant (sans texte ava
         )
     }
 
-    private fun parseResponse(section: ContentSection, raw: String): SectionClassification {
+    internal fun parseResponse(section: ContentSection, raw: String): SectionClassification {
         val json = raw
             .removePrefix("```json")
             .removePrefix("```")
