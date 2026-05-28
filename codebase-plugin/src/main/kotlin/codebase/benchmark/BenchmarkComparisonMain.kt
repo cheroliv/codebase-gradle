@@ -75,7 +75,7 @@ object BenchmarkComparisonMain {
         log.info("Gate evaluation: {}", gateFile.absolutePath)
     }
 
-    private fun parseThresholdResults(reportJson: String): List<ThresholdRecord> {
+    internal fun parseThresholdResults(reportJson: String): List<ThresholdRecord> {
         val report = BenchmarkReportExporter.parseObject(reportJson.trim())
         return report.results.map { thresholdData ->
             ThresholdRecord(
@@ -87,7 +87,7 @@ object BenchmarkComparisonMain {
         }
     }
 
-    private fun generateComparisonAsciiDoc(records: List<ScenarioRecord>, modelName: String): String {
+    internal fun generateComparisonAsciiDoc(records: List<ScenarioRecord>, modelName: String): String {
         val sb = StringBuilder()
 
         sb.appendLine("= EPIC 4 — Comparaison Multi-Canal Benchmark Perception Spatiale")
@@ -199,7 +199,7 @@ object BenchmarkComparisonMain {
         return sb.toString()
     }
 
-    private fun evaluateGate(records: List<ScenarioRecord>): String {
+    internal fun evaluateGate(records: List<ScenarioRecord>): String {
         val workspaceRecord = records.find { it.id == "RAG_GRAPHIFY_WORKSPACE" }
         val result128k = workspaceRecord?.results?.find { it.threshold == "128K" }
 
