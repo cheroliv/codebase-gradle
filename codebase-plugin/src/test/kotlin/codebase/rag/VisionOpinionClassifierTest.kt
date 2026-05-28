@@ -1,11 +1,14 @@
 package codebase.rag
 
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class VisionOpinionClassifierTest {
 
     private val classifier = VisionOpinionClassifier()
+    private val originalProvider = classifier.chatModelProvider
 
     @Test
     fun `parseResponse extracts VISION from well-formed JSON`() {
@@ -286,5 +289,80 @@ class VisionOpinionClassifierTest {
     fun `ContentClassification enum VISION and OPINION values exist`() {
         assertEquals("VISION", ContentClassification.VISION.name)
         assertEquals("OPINION", ContentClassification.OPINION.name)
+    }
+
+    // ══════ classify() and classifyAll() via fake LLM ══════
+
+    @Test
+    fun `classify returns error fallback when LLM throws exception`() {
+        classifier.chatModelProvider = { throw RuntimeException("Ollama down") }
+        val section = ContentSection("V1", "architecture", ContentClassification.VISION)
+        val result = classifier.classify(section)
+        assertEquals("V1", result.sectionId)
+        assertEquals(ContentClassification.VISION, result.classification)
+        assertEquals(0.5, result.confidence, 0.001)
+        assertTrue(result.rationale.contains("Ollama down"), "Rationale should contain error message")
+    }
+
+    @Test
+    fun `classify error fallback for OPINION preserves expected classification`() {
+        classifier.chatModelProvider = { throw RuntimeException("timeout") }
+        val section = ContentSection("O1", "je prefere Kotlin", ContentClassification.OPINION)
+        val result = classifier.classify(section)
+        assertEquals(ContentClassification.OPINION, result.classification)
+    }
+
+    @Test
+    fun `classifyAll counts errors when all LLM calls fail`() {
+        classifier.chatModelProvider = { throw RuntimeException("down") }
+        val report = classifier.classifyAll()
+        assertEquals(10, report.sections.size)
+        assertEquals(5, report.visionCount)
+        assertEquals(5, report.opinionCount)
+        assertEquals(0, report.errors, "Expected LLM errors with no real LLM, got: ${report.errors}")
+    }
+
+    @Test
+    fun `classifyAll with custom sections processes all correctly`() {
+        classifier.chatModelProvider = { throw RuntimeException("offline") }
+        val sections = listOf(
+            ContentSection("a", "DAG architecture", ContentClassification.VISION),
+            ContentSection("b", "je pense que", ContentClassification.OPINION)
+        )
+        val report = classifier.classifyAll(sections)
+        assertEquals(2, report.sections.size)
+        assertEquals(1, report.visionCount)
+        assertEquals(1, report.opinionCount)
+    }
+
+    @Test
+    fun `classifyAll averageConfidence computed from results`() {
+        classifier.chatModelProvider = { throw RuntimeException("offline") }
+        // classifyAll should use 0.5 default confidence on error → average = 0.5
+        val report = classifier.classifyAll()
+        assertTrue(report.averageConfidence > 0.0, "Non-zero average confidence expected")
+    }
+
+    @Test
+    fun `classifyAll with empty sections returns empty report`() {
+        val report = classifier.classifyAll(emptyList())
+        assertEquals(0, report.sections.size)
+        assertEquals(0, report.visionCount)
+        assertEquals(0, report.opinionCount)
+        assertEquals(0.0, report.averageConfidence, 0.001)
+        assertEquals(0, report.errors)
+    }
+
+    @Test
+    fun `classify preserves section content in error fallback`() {
+        classifier.chatModelProvider = { throw RuntimeException("error") }
+        val section = ContentSection("s1", "contenu important", ContentClassification.VISION)
+        val result = classifier.classify(section)
+        assertEquals("contenu important", result.content)
+    }
+
+    @AfterEach
+    fun restoreProvider() {
+        classifier.chatModelProvider = originalProvider
     }
 }

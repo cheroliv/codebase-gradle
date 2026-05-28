@@ -1,0 +1,33 @@
+= Session 071 — Renommage doc-pipeline → codex-plugin (Consommateur) + Reintegration Session 066
+:session: 071
+:date: 2026-05-27
+:status: TERMINE
+
+== Contexte
+
+Session cross-borough trigger : renommage du module codex-gradle
+de `doc-pipeline` en `codex-plugin`. Le consommateur codebase-gradle
+doit mettre a jour ses references de dependance.
+
+Correction simultanee : la session 066 (Vibecoding ameliorations)
+etait orpheline a la racine `codebase-gradle/.agents/` au lieu de
+`codebase-plugin/.agents/sessions/`. Reintegree avec coherence historique.
+
+== Actions
+
+1. ✅ MAJ `gradle/libs.versions.toml` (racine) : alias+version `codex-plugin`
+2. ✅ MAJ `codebase-plugin/gradle/libs.versions.toml` : alias+version `codex-plugin`
+3. ✅ MAJ `codebase-plugin/build.gradle.kts` : `libs.codex.plugin` au lieu de `libs.doc.pipeline`
+4. ✅ Deplacement session 066 → `codebase-plugin/.agents/sessions/066-vibecoding-ameliorations.adoc`
+5. ✅ Suppression `.agents/` orphelin a la racine codebase-gradle
+6. ✅ MAJ SESSIONS_HISTORY : insertion session 066 a sa place chronologique (25 mai)
+7. ✅ MAJ INDEX : EPIC-V-6 marque TERMINE (etait EN COURS)
+
+== Fichiers modifies
+
+- `gradle/libs.versions.toml`
+- `codebase-plugin/gradle/libs.versions.toml`
+- `codebase-plugin/build.gradle.kts`
+- `codebase-plugin/.agents/sessions/066-vibecoding-ameliorations.adoc` (deplace)
+- `codebase-plugin/.agents/SESSIONS_HISTORY.adoc` (insertion)
+- `codebase-plugin/.agents/INDEX.adoc` (statut EPIC-V-6)

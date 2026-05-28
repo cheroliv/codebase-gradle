@@ -1,6 +1,8 @@
 package codebase.rag
 
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import java.io.File
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -365,5 +367,220 @@ class StimulusCascadeTest {
         assertEquals("S2", section.id)
         assertEquals("Titre", section.title)
         assertEquals("Contenu texte", section.content)
+    }
+
+    // ══════ parseSections ══════
+
+    @Test
+    fun `parseSections extracts headings from AsciiDoc text`() {
+        val text = """
+            = Brain Dump
+            == Vision Architecture
+            Le DAG a 4 niveaux N0-N3.
+            Chaque plugin ne référence que des plugins inférieurs.
+            == Opinions libres
+            Je pense que Kotlin est mieux que Java pour les DSL.
+            Franchement, c'est plus lisible.
+            == Organisation des fichiers
+            Le workspace est structuré en cercles de confiance.
+        """.trimIndent()
+
+        val sections = cascade.parseSections(text)
+
+        assertEquals(3, sections.size)
+        assertEquals("S1", sections[0].id)
+        assertEquals("Vision Architecture", sections[0].title)
+        assertTrue(sections[0].content.contains("DAG a 4 niveaux"))
+        assertEquals("S2", sections[1].id)
+        assertEquals("Opinions libres", sections[1].title)
+        assertTrue(sections[1].content.contains("Kotlin"))
+        assertEquals("S3", sections[2].id)
+        assertEquals("Organisation des fichiers", sections[2].title)
+    }
+
+    @Test
+    fun `parseSections returns single section for text without headings`() {
+        val text = "Ceci est un texte simple sans headings AsciiDoc."
+
+        val sections = cascade.parseSections(text)
+        assertEquals(1, sections.size)
+        assertEquals("S1", sections[0].id)
+        assertEquals("Ceci est un texte simple sans headings AsciiDoc.", sections[0].title)
+        assertEquals(text, sections[0].content)
+    }
+
+    @Test
+    fun `parseSections handles text with only level-1 heading`() {
+        val text = "= Titre Principal\nContenu sans sous-sections."
+
+        val sections = cascade.parseSections(text)
+        assertEquals(1, sections.size)
+        assertEquals("S1", sections[0].id)
+        assertEquals("Titre Principal", sections[0].title) // removePrefix("= ") applied
+    }
+
+    @Test
+    fun `parseSections preserves section boundaries between headings`() {
+        val text = """
+            == Section A
+            Texte de la section A.
+            Plusieurs lignes dans A.
+            == Section B
+            Texte de B, une seule ligne.
+            == Section C
+            Texte de C.
+            Sur deux lignes.
+        """.trimIndent()
+
+        val sections = cascade.parseSections(text)
+        assertEquals(3, sections.size)
+        assertEquals("S1", sections[0].id)
+        assertTrue(sections[0].content.startsWith("Texte de la section A"))
+        assertEquals("S2", sections[1].id)
+        assertTrue(sections[1].content.contains("Texte de B"))
+        assertEquals("S3", sections[2].id)
+        assertTrue(sections[2].content.contains("Texte de C"))
+    }
+
+    // ══════ parseRoutingResponse ══════
+
+    @Test
+    fun `parseRoutingResponse routes to WORKSPACE_VISION from JSON`() {
+        val section = StimulusCascade.ParsedSection("S1", "Architecture", "contenu")
+        val raw = """{"targetDocument": "WORKSPACE_VISION", "suggestedSection": "== DAG N0-N3", "rationale": "Contenu architectural"}"""
+
+        val result = cascade.parseRoutingResponse(section, raw)
+
+        assertEquals(TargetDocument.WORKSPACE_VISION, result.targetDocument)
+        assertEquals("== DAG N0-N3", result.suggestedSection)
+        assertEquals("Contenu architectural", result.rationale)
+    }
+
+    @Test
+    fun `parseRoutingResponse routes to WORKSPACE_AS_PRODUCT`() {
+        val section = StimulusCascade.ParsedSection("S2", "Business", "contenu")
+        val raw = """{"targetDocument": "WORKSPACE_AS_PRODUCT", "suggestedSection": "== Pricing", "rationale": "Stratégie business"}"""
+
+        val result = cascade.parseRoutingResponse(section, raw)
+        assertEquals(TargetDocument.WORKSPACE_AS_PRODUCT, result.targetDocument)
+    }
+
+    @Test
+    fun `parseRoutingResponse routes to WHAT_THE_GAMES_BEEN_MISSING`() {
+        val section = StimulusCascade.ParsedSection("S3", "Idée", "contenu")
+        val raw = """{"targetDocument": "WHAT_THE_GAMES_BEEN_MISSING", "suggestedSection": "== Idées radicales", "rationale": "Brainstorming"}"""
+
+        val result = cascade.parseRoutingResponse(section, raw)
+        assertEquals(TargetDocument.WHAT_THE_GAMES_BEEN_MISSING, result.targetDocument)
+    }
+
+    @Test
+    fun `parseRoutingResponse routes to WORKSPACE_ORGANIZATION`() {
+        val section = StimulusCascade.ParsedSection("S4", "Structure", "contenu")
+        val raw = """{"targetDocument": "WORKSPACE_ORGANIZATION", "suggestedSection": "== Inventaire", "rationale": "Organisation"}"""
+
+        val result = cascade.parseRoutingResponse(section, raw)
+        assertEquals(TargetDocument.WORKSPACE_ORGANIZATION, result.targetDocument)
+    }
+
+    @Test
+    fun `parseRoutingResponse falls back to WORKSPACE_VISION for unknown target`() {
+        val section = StimulusCascade.ParsedSection("S5", "Inconnu", "contenu")
+        val raw = """{"targetDocument": "UNKNOWN_DOC", "suggestedSection": "== Test", "rationale": "?"}"""
+
+        val result = cascade.parseRoutingResponse(section, raw)
+        assertEquals(TargetDocument.WORKSPACE_VISION, result.targetDocument)
+    }
+
+    @Test
+    fun `parseRoutingResponse handles missing fields with defaults`() {
+        val section = StimulusCascade.ParsedSection("S6", "Minimal", "contenu")
+        val raw = """{"targetDocument": "WORKSPACE_VISION"}"""
+
+        val result = cascade.parseRoutingResponse(section, raw)
+        assertEquals(TargetDocument.WORKSPACE_VISION, result.targetDocument)
+        assertTrue(result.suggestedSection.contains("S6"), "Should contain section ID")
+        assertEquals("routage automatique", result.rationale)
+    }
+
+    @Test
+    fun `parseRoutingResponse strips markdown code fences`() {
+        val section = StimulusCascade.ParsedSection("S7", "Code", "contenu")
+        val raw = """
+            ```json
+            {"targetDocument": "WORKSPACE_VISION", "suggestedSection": "== Gov", "rationale": "Rules"}
+            ```
+        """.trimIndent()
+
+        val result = cascade.parseRoutingResponse(section, raw)
+        assertEquals(TargetDocument.WORKSPACE_VISION, result.targetDocument)
+        assertEquals("== Gov", result.suggestedSection)
+    }
+
+    // ══════ sha256 ══════
+
+    @Test
+    fun `sha256 produces 64-char hex string`() {
+        val hash = cascade.sha256("hello world")
+        assertEquals(64, hash.length)
+        assertTrue(hash.all { it in "0123456789abcdef" })
+    }
+
+    @Test
+    fun `sha256 is deterministic`() {
+        val h1 = cascade.sha256("test")
+        val h2 = cascade.sha256("test")
+        assertEquals(h1, h2)
+    }
+
+    @Test
+    fun `sha256 produces different hashes for different inputs`() {
+        val h1 = cascade.sha256("test")
+        val h2 = cascade.sha256("other")
+        assertTrue(h1 != h2)
+    }
+
+    // ══════ archiveReport ══════
+
+    @Test
+    fun `archiveReport creates directory with timestamp and saves files`(@TempDir tempDir: File) {
+        val cascadeWithRoot = StimulusCascade(workspaceRoot = tempDir.absolutePath, dryRun = true)
+        val report = StimulusCascadeReport(
+            source = "= Brain dump test\n== Section 1\ncontenu",
+            sourceHash = "abc123",
+            sections = listOf(
+                DilutionRecord("S1", "Section 1", "contenu", ContentClassification.VISION, 0.9,
+                    DilutionTarget(TargetDocument.WORKSPACE_VISION, "== Test", "ok"), "r",
+                    LocalDateTime.of(2026, 5, 28, 14, 0)),
+            ),
+            visionCount = 1, opinionCount = 0, dilutedCount = 1,
+            timestamp = LocalDateTime.of(2026, 5, 28, 14, 30, 0)
+        )
+
+        val archivePath = cascadeWithRoot.archiveReport(report)
+
+        val archiveDir = File(archivePath)
+        assertTrue(archiveDir.isDirectory, "Archive directory should exist")
+        assertTrue(archiveDir.name.contains("2026"), "Should contain year")
+
+        val brainDumpFile = File(archiveDir, "brain-dump-original.adoc")
+        assertTrue(brainDumpFile.isFile)
+        assertTrue(brainDumpFile.readText().contains("Brain dump test"))
+
+        val jsonFile = File(archiveDir, "cascade-report.json")
+        assertTrue(jsonFile.isFile)
+        assertTrue(jsonFile.readText().contains("abc123"))
+
+        val adocFile = File(archiveDir, "cascade-report.adoc")
+        assertTrue(adocFile.isFile)
+        assertTrue(adocFile.readText().contains("EPIC 10"))
+    }
+
+    // ══════ dilutionResults ══════
+
+    @Test
+    fun `dilutionResults initially empty`() {
+        val c = StimulusCascade(dryRun = true)
+        assertTrue(c.dilutionResults().isEmpty())
     }
 }

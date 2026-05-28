@@ -96,6 +96,15 @@ class VisionOpinionClassifier(
 ) {
     private val log = LoggerFactory.getLogger(VisionOpinionClassifier::class.java)
 
+    // Visible for testing — allows injecting a fake LLM without MockK
+    internal var chatModelProvider: () -> dev.langchain4j.model.ollama.OllamaChatModel = {
+        dev.langchain4j.model.ollama.OllamaChatModel.builder()
+            .baseUrl(baseUrl)
+            .modelName(modelName)
+            .timeout(Duration.ofSeconds(timeoutSeconds))
+            .build()
+    }
+
     private val systemPrompt = """
 Tu es un classifieur de contenu du workspace. Ta mission est de déterminer si un texte est de la VISION (document fondateur, architecture, règles de gouvernance, décisions techniques validées) ou de l'OPINION (préférence personnelle, avis subjectif, brainstorming non validé, spéculation).
 
@@ -124,18 +133,12 @@ Pour le texte fourni, réponds UNIQUEMENT au format JSON suivant (sans texte ava
 """.trimIndent()
 
     fun classify(section: ContentSection): SectionClassification {
-        val model = OllamaChatModel.builder()
-            .baseUrl(baseUrl)
-            .modelName(modelName)
-            .timeout(Duration.ofSeconds(timeoutSeconds))
-            .build()
-
-        val messages = listOf(
-            SystemMessage.from(systemPrompt),
-            UserMessage.from(section.content)
-        )
-
         val raw = try {
+            val model = chatModelProvider()
+            val messages = listOf(
+                SystemMessage.from(systemPrompt),
+                UserMessage.from(section.content)
+            )
             val request = ChatRequest.builder().messages(messages).build()
             val response = model.chat(request)
             response.aiMessage().text().trim()

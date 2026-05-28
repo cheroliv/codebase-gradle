@@ -1,0 +1,71 @@
+= Session 070 — E2E Integration Test + OllamaLlmProvider Cache Dedup
+:session: 070
+:date: 2026-05-27
+:type: feat + refactor + contract
+:score: 10/10
+
+== Contexte
+
+Session 069 terminee — Resume session --resume + Dashboard CLI + ConnectionFactory fix.
+17 JUnit5 + 4 Cucumber PASS.
+
+== Livrables
+
+=== P1 — OllamaLlmProvider cache dedup (~20 lignes)
+
+- `modelCache` : `mutableMapOf<String>` (cle = instance.id) → `ConcurrentHashMap<String, OllamaChatModel>` (cle = `baseUrl|model`)
+- Nouvelle methode `getCachedModel()` internal (pour tests)
+- Fonction privee `cacheKey(instance)` = `"${baseUrl}|${model}"`
+- 2 nouveaux tests : `assertSame` (memes baseUrl+model), `assertNotSame` (modeles differents)
+- Import `java.util.concurrent.ConcurrentHashMap`
+
+=== P2 — E2E VibecodingTask integration test (~40 lignes)
+
+- `VibecodingTaskTest` companion object avec `PostgreSQLContainer<Nothing>("pgvector/pgvector:pg17")`
+- Injection `connectionFactory` Testcontainers dans `VibecodingTask`
+- Execution dryRun → verification `SessionRepository.listSessions(1)` non-vide
+- Assertions : intention contient "E2E", workspaceRoot = tempDir, dryRun = true
+- 14/14 tests PASS (incluant les 13 existants)
+
+=== Contrat Software Craftsmanship (AGENT.adoc)
+
+- Section EAGER ajoutee : TDD/BDD/DDD baby steps, Clean Architecture, sequentiel pur, 1 fichier a la fois
+- Ports proteges 11434-11436, ports autorises 11437-11465
+- 5 modeles autorises : gpt-oss:120b-cloud, gpt-oss:20b-cloud, qwen3-coder-next:cloud, qwen3-next:80b-cloud, qwen3-coder:480b-cloud
+
+=== Nettoyage ports 11434-11436 (24 fichiers)
+
+- Tout le code source, tests, resources : `11434→11437`, `11435→11438`
+- Modeles interdits remplaces (deepseek-v4-pro:cloud → gpt-oss:*)
+- ZERO residu 11434-11436 dans tout le projet
+
+=== Rotation 29 ports × 5 modeles
+
+- `OllamaPoolTest` companion object : `AUTHORIZED_PORTS` (11437..11465), `AUTHORIZED_MODELS` (5 modeles), `fullPool()`
+- Nouveau test : cycling ROUND_ROBIN verifie sur 29 ports + wrap au 30eme appel
+- Verification que seuls les 5 modeles autorises sont presents
+
+=== MigrationTest fix
+
+- 2 migrations (V1 + V2) → assertions corrigees de 1 a 2
+
+== Commandes
+
+```
+./gradlew test --tests "codebase.koog.llm.pool.*" --tests "codebase.koog.VibecodingTaskTest" --tests "codebase.koog.session.MigrationTest"
+```
+
+== Fichiers modifies (24)
+
+- AGENT.adoc : +22 lignes (Contrat Craftsmanship)
+- OllamaLlmProvider.kt : ConcurrentHashMap + cacheKey
+- OllamaPool.kt : commentaire plage ports
+- 10 fichiers rag/ : 11434→11437 + modeles autorises
+- 3 fichiers benchmark/ : 11434→11437
+- VibecodingTaskTest.kt : +75 lignes (E2E Testcontainers)
+- OllamaLlmProviderTest.kt : +45 lignes (cache dedup tests)
+- OllamaPoolTest.kt : +81 lignes (rotation 29 ports)
+- MigrationTest.kt : assertions 1→2
+- LlmConfigTest.kt : 11434→11437
+- 3 fichiers Cucumber steps : 11434→11437
+- 2 fichiers YAML test resources : 11434→11437

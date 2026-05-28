@@ -1,0 +1,61 @@
+= Session 074 — EPIC V-6 Feedback Loop — TERMINÉE
+:sectnums:
+:toc:
+
+== Contexte
+
+- **Épic** : EPIC-V-6 — Feedback Loop (error→replan→retry)
+- **Prérequis** : Sessions 068-071 (V-5 Gemini+Persistance, V-7 Resume, V-8 Dashboard)
+- **Date** : 2026-05-27
+- **Score** : 10/10
+
+== Ce qui a été livré
+
+=== V-6 Feedback Loop — error→replan→retry
+
+- `VibecodingState.kt` : `retryCount`, `maxRetries=3`, `withRecoverableError()`, `clearError()`, `incrementRetry()`
+- `VibecodingGraph.kt` : Boucle de retry dans `execute()`, `buildReplanPrompt()`, logique retry<maxRetries
+- `executePlanTasks()` : erreur récupérable au lieu de fatale
+- `checkProgressNode()` : distingue erreur récupérable vs fatale
+
+=== Tests
+
+- **JUnit5** : 4 nouveaux tests V-6 + 0 régression = 17/17 PASS
+  - `v6 should retry once and recover from recoverable error`
+  - `v6 should give up after maxRetries exhausted`
+  - `v6 should not retry on permanent error`
+  - `v6 retry should clear error after successful retry`
+- **Cucumber @epic_v_6** : 3 scénarios, 3/3 PASS
+  - Erreur récupérable déclenche un retry avec LLM
+  - MaxRetries épuisé — abandon avec erreur fatale
+  - Timeout est une erreur fatale — pas de retry
+
+=== Fix compilation
+
+- Renommage `langchain4j-google-ai-gemini` → `google-ai-gemini` dans `gradle/libs.versions.toml`
+- Publication `codex-plugin` dans mavenLocal
+
+=== Fichiers modifiés
+
+| Fichier | Changement |
+|---|---|
+| `codebase-plugin/src/main/kotlin/vibecoding/contracts/state/VibecodingState.kt` | +12 lignes (retryCount, maxRetries, helpers) |
+| `codebase-plugin/src/main/kotlin/codebase/koog/VibecodingGraph.kt` | +73 lignes (feedback loop, buildReplanPrompt, checkProgress revisité) |
+| `codebase-plugin/src/test/kotlin/codebase/koog/VibecodingGraphTest.kt` | +173 lignes (4 tests JUnit5 V-6) |
+| `codebase-plugin/src/test/features/epic_v_vibecoding.feature` | 3 scénarios @epic_v_6 |
+| `codebase-plugin/src/test/kotlin/codebase/scenarios/VibecodingSteps.kt` | +118 lignes (8 steps Cucumber V-6, unifié doublons) |
+| `codebase-plugin/build.gradle.kts` | `cucumberTestEpicV6` task |
+| `codebase-plugin/gradle/libs.versions.toml` | Fix google-ai-gemini naming |
+| `gradle/libs.versions.toml` | Idem |
+
+=== Progression machine vibecoding
+
+- **Avant** : ~90% (V-6 manquant)
+- **Après** : **100%** — boucle vibecoding autonome complète
+- Le flow complet : error→replan LLM→retry (maxRetries=3)
+
+=== Dette restante
+
+- 🔲 Bug `TokenTracker` model name mismatch (`deepseek-v4-pro` vs `deepseek-v4-pro:cloud`)
+- 🔲 Newark (training-gradle) ne compile pas — bloquant MVP0
+- 🔲 EPICs W, X, Y, Z dans le backlog
