@@ -125,6 +125,7 @@ _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/
 | EPIC W | *Auto-discovery Gradle Tasks* — ToolRegistry + OpenAPI Spec. | 🔲 BACKLOG (cadré V16). 7 sous-EPICs, ~18 pts. | P1
 | EPIC X | *Décision Multi-Step verify→adapt* — Plan structuré, TaskResultVerifier, RollbackStrategy. | 🔲 BACKLOG (cadré V16). 7 sous-EPICs, ~20 pts. | P1
 | EPIC Y | *Agentic Literature Compiler* — Compiler littérature agentique → artefacts exécutables. | 🔲 BACKLOG (cadré V16). 8 sous-EPICs, ~26 pts. | P1
+| EPIC-V-6-POOL | *Adaptation Ollama Cloud Pool* — Le pool 11437-11465 ne contient que gemma4:31b-cloud (pas de modèles premium qwen3.5/deepseek-v4/glm-5.1/minimax-m2.7/kimi-k2.6). Adaptation OllamaLlmProvider pour utiliser gemma4:31b-cloud. Script scan-ollama-cloud.sh. 4 sous-EPICs (V-6-POOL-0→V-6-POOL-3, ~5 pts). | 🔴 EN ATTENTE (cadré Session 077). | P0
 | EPIC Z | *Autofocus* — Accommodation contextuelle programmatique (zoom x1↔x1000). 11ème doc Jardin Secret. Package `autofocus/` dans `codebase/koog/`. 5ème verbe ZOOMER. | 🔲 BACKLOG (cadré Session 073). 7 sous-EPICs, ~23 pts. Voir `AUTOFOCUS_CAPABILITY.adoc`. | P1
 |===
 

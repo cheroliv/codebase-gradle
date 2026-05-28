@@ -91,7 +91,30 @@ l'association d'idées.
 *Borough porteur :* codebase-gradle (Queens, N1) — package `autofocus/` dans `codebase/koog/`.
 *5ème verbe taxonomie :* ZOOMER (groupe Gradle `zoom`).
 
+== EPIC V-6-POOL — Adaptation Ollama Cloud Pool pour Vibecoding
+
+*Contexte Session 077 (28 mai 2026)* : Script `scan-ollama-cloud.sh` révèle
+que le pool 11437-11465 ne contient que `gemma4:31b-cloud`, aucun des modèles
+premium attendus (`qwen3.5`, `deepseek-v4`, `glm-5.1`, `minimax-m2.7`, `kimi-k2.6`).
+
+Le pool est fonctionnel (29 workers, tous répondent `/api/tags`, `/api/chat`),
+donc `OllamaPool` (EPIC V-6) est correctement câblé. La seule adaptation
+nécessaire est d'ajouter le modèle `gemma4:31b-cloud` à la liste des
+modèles disponibles dans le pool.
+
+[cols="1,3,2", options="header"]
+|===
+| # | Description | Pts
+| V-6-POOL-0 | Script scan-ollama-cloud.sh dans `/tmp/opencode/` pour discovery pool en direct | 1
+| V-6-POOL-1 | Ajout `gemma4:31b-cloud` à la liste des modèles OllamaCloud (OllamaLlmProvider / config llm-config.yml) | 1
+| V-6-POOL-2 | Mise à jour rotation pool (ROUND_ROBIN/LEAST_USED) avec la liste réelle des modèles découverts | 1
+| V-6-POOL-3 | Test vibecoding complet avec gemma4:31b-cloud (validation que le pool répond correctement) | 2
+|===
+
+*Total : ~5 pts.* Priorité P0 — déblocage immédiat de la boucle vibecoding.
+*Dépendance* : EPIC V-6 Feedback Loop (prérequis, ✅ TERMINE).
+
 == Prochain EPIC à démarrer
 
-. **V-6 Feedback Loop** — error→replan→retry (maxRetries=3, ~100 lignes). Session 073 🔴 P0.
+. **V-6-POOL-1** — Ajout gemma4:31b-cloud au pool. Session 077 🔴 P0.
 . **Z-1 AutofocusClassifier** — heuristique regex 2 passes. Après V-6 🟡 P1.
