@@ -1,0 +1,1115 @@
+= Codebase-Gradle: Strategic Roadmap & Architecture
+:author: cheroliv
+:revdate: {docdate}
+:doctype: book
+:icons: font
+:toc: left
+:toclevels: 4
+:sectnums:
+:source-highlighter: rouge
+:rouge-style: github
+:imagesdir: docs/images
+
+== Executive Summary
+
+Codebase-gradle is evolving from a **generic code-generation plugin** to a **production-grade Assistant Protocol** for autonomous code generation and pedagogy. This document consolidates the strategic vision, technical architecture, roadmap, and stabilization requirements.
+
+**Core Vision:** Build a stable, versionable assistant protocol (v1.0.0) that enables:
+- Reproducible code generation
+- Autonomous vibecoding loops (error → replan → retry)
+- Quality-gated outputs (sentiment, off-topic, PII detection)
+- Full audit trails for compliance
+- Dashboard visibility for all runs
+
+**Success Criteria:** By end of Q2 2026, `codebase-gradle` v1.0.0 protocol is published and stable.
+
+---
+
+== Part 1: Context & Vision
+
+=== The Problem Statement
+
+**Before (OpenCode CLI):**
+- Free-form input → non-deterministic execution
+- No reproducibility guarantee
+- No audit trail
+- No error recovery protocol
+- Users dependent on external CLI
+
+**After (Codebase-Gradle Protocol v1.0.0):**
+- Structured intent classification
+- Augmented context (RAG + Graphify)
+- Deterministic planning & execution
+- Reproducibility IDs for exact replay
+- Automatic error recovery & replanning
+- Full audit trail for compliance
+- Standalone (no external CLI dependency)
+
+---
+
+=== Your Ecosystem of Plugins
+
+[cols="2,3,2", options="header"]
+|===
+| Plugin | Purpose | Role
+| **codebase-gradle** | Core assistant protocol + vibecoding | Main orchestrator
+| **codebase-contracts** | Shared input/output contracts | Protocol definition
+| **codex-gradle** | Document indexing (PDF/EPUB → pgvector) | RAG infrastructure
+| **capsule-gradle** | Pedagogical video generation (reveal.js + Playwright + TTS) | Formation output
+| **api-key-pool-gradle** | LLM quota management & rotation | Infrastructure
+| **bakery-gradle** | Static site generation (JBake → GitHub Pages) | Publishing
+| **jhipster-gradle-plugins** | JHipster project regeneration with __codebase__/ sync | Sandbox for exercises
+|===
+
+**Key Insight:** This is not 6 random plugins. This is a **production pipeline** for autonomous code generation, pedagogical content, and training.
+
+[plantuml]
+----
+@startuml
+!define ACCENT #2E86C1
+!define LIGHT #EBF5FB
+!define SAFE #D5F5E3
+
+skinparam rectangle {
+  BackgroundColor LIGHT
+  BorderColor ACCENT
+}
+
+package "INPUT LAYER" {
+  rectangle "User Intent\n(description + domain)" as intent
+}
+
+package "AUGMENTATION LAYER" {
+  rectangle "codex-gradle\n(RAG Indexing)" as codex
+  rectangle "Graphify\n(Knowledge Graph)" as graph
+}
+
+package "CORE ASSISTANT" {
+  rectangle "codebase-gradle\n(Protocol v1.0.0)\n- Intent classification\n- Planning (EPIC/Story/Task)\n- Vibecoding loop\n- Quality gates" as core #SAFE
+}
+
+package "EXECUTION LAYER" {
+  rectangle "api-key-pool-gradle\n(LLM Management)" as pool
+  rectangle "koog-agents\n(Autonomous Loop)" as koog
+}
+
+package "AUDIT & VALIDATION" {
+  rectangle "Quality Gate\n(Sentiment, PII, Off-topic)" as qg
+  rectangle "Dashboard\n(Reproductibility tracking)" as dash
+}
+
+package "OUTPUT FORMATS" {
+  rectangle "capsule-gradle\n(Video generation)" as capsule
+  rectangle "bakery-gradle\n(Static site)" as bakery
+  rectangle "jhipster-gradle-plugins\n(Sandbox)" as jhipster
+}
+
+intent --> codex
+codex --> graph
+graph --> core
+core --> pool
+pool --> koog
+koog --> qg
+qg --> dash
+dash --> capsule
+dash --> bakery
+dash --> jhipster
+
+@enduml
+----
+
+---
+
+=== Why This Matters
+
+**For Users:**
+- Reliable, reproducible code generation
+- No vendor lock-in (standalone)
+- Audit trail for compliance
+- Can rebuild exact same output
+
+**For Developers:**
+- Clear protocol contracts
+- Backward-compatible versioning
+- Dashboard for debugging
+- Feedback loop for continuous improvement
+
+**For Enterprises:**
+- Production-ready assistant
+- Quality guarantees (sentiment, PII, off-topic)
+- Scalable (multi-provider LLM support)
+- Tradeable on platforms (Gradle Plugin Portal, Maven Central)
+
+---
+
+== Part 2: The Protocol v1.0.0
+
+=== What is "Protocol Established"?
+
+A **Protocol v1.0.0** means:
+
+[cols="2,3", options="header"]
+|===
+| Aspect | Definition
+| **Immutable Contracts** | Input/output schemas are FROZEN. No breaking changes.
+| **Versioned** | Semantic versioning (x.y.z) independent of plugin version.
+| **Reproducible** | Same intent + context → reproducibilityId → exact replay.
+| **Auditable** | Every execution logged with timestamp, user, inputs, outputs, errors.
+| **Error-Recoverable** | Automatic error classification + replanning protocol.
+| **Quality-Gated** | Deterministic quality checks (sentiment, PII, off-topic).
+|===
+
+---
+
+=== Input Contract: AssistantIntent v1.0.0
+
+```kotlin
+package codebase.protocol
+
+/**
+ * AssistantIntent v1.0.0
+ * 
+ * Immutable contract for user interaction with vibecoding assistant.
+ * Version locked until v2.0.0 (backward-incompatible changes only).
+ */
+data class AssistantIntent(
+    val protocolVersion: String = "1.0.0",
+    
+    // REQUIRED
+    val description: String,               // "Créer 5 tests de validation"
+    val domain: String,                    // "cda" | "vibecoding" | "rag"
+    
+    // AUGMENTATION
+    val compositeContext: CompositeContext, // RAG + Graphify + code index
+    
+    // CLASSIFICATION
+    val classification: IntentClassification, // PRO | FLASH
+    
+    // EXECUTION CONTROL
+    val maxActions: Int = 10,              // Max actions in vibecoding loop
+    val timeout: Duration = 5.minutes,     // Max execution time
+    val dryRun: Boolean = false,           // Simulate without LLM calls?
+    
+    // REPRODUCIBILITY
+    val sessionId: UUID = UUID.randomUUID(),
+    val seedLlm: Long? = null,             // Fixed seed for determinism
+    
+    // METADATA
+    val userId: String? = null,
+    val projectName: String,
+    val tags: List<String> = emptyList(),
+) {
+    init {
+        require(description.isNotBlank()) { "description cannot be blank" }
+        require(maxActions > 0) { "maxActions must be > 0" }
+        require(timeout.toSeconds() > 0) { "timeout must be > 0" }
+    }
+}
+
+enum class IntentClassification {
+    PRO,   // Professional: complex, multi-step, production code
+    FLASH  // Flash: simple, one-shot, quick generation
+}
+```
+
+---
+
+=== Output Contract: AssistantResponse v1.0.0
+
+```kotlin
+package codebase.protocol
+
+/**
+ * AssistantResponse v1.0.0
+ * 
+ * Immutable contract for vibecoding assistant output.
+ * Includes full audit trail, reproductibility ID, and quality metrics.
+ */
+data class AssistantResponse(
+    val protocolVersion: String = "1.0.0",
+    
+    // REPRODUCIBILITY
+    val reproductibilityId: UUID,          // Can replay: vibecode --replay=<id>
+    val sessionId: UUID,                   // Links to input intent
+    
+    // EXECUTION PLAN
+    val augmentedPlan: AugmentedPlan,      // EPIC + UserStories + Tasks
+    val planningMetrics: PlanningMetrics,  // Tokens, time, LLM provider
+    
+    // EXECUTION TRACE
+    val executionTrace: ExecutionTrace,    // Who did what, step-by-step
+    val executionMetrics: ExecutionMetrics,// Success rate, errors, retries
+    
+    // QUALITY GATES
+    val auditResults: AuditResults,        // Sentiment, PII, off-topic scores
+    val qualityScore: Double,              // 0.0 → 1.0
+    val passedAllGates: Boolean,           // qualityScore >= minAcceptable?
+    
+    // CONFIDENTIALITY
+    val confidentialityMask: PiiMaskingResult, // PII redactions applied
+    
+    // ERROR HANDLING
+    val errors: List<AssistantError> = emptyList(),
+    val errorRecoveries: List<ErrorRecovery> = emptyList(),
+    
+    // TIMESTAMPS
+    val startTime: Instant,
+    val endTime: Instant,
+    val duration: Duration,
+    
+    // CONTEXT FOR NEXT RUNS
+    val feedbackInputSlot: FeedbackSignal?,  // If user wants to refine
+) {
+    val isSuccessful: Boolean get() = passedAllGates && errors.isEmpty()
+}
+
+data class AugmentedPlan(
+    val epics: List<Epic>,
+    val userStories: List<UserStory>,
+    val tasks: List<Task>,
+    val estimatedEffort: Duration,
+)
+
+data class ExecutionTrace(
+    val steps: List<ExecutionStep>,
+    val replannedAt: List<Int> = emptyList(), // Step indices where replan occurred
+)
+
+data class ExecutionStep(
+    val index: Int,
+    val taskId: String,
+    val action: String,                    // "generate_code" | "run_test" | "audit"
+    val result: String,
+    val timestamp: Instant,
+    val llmProvider: String,               // "gemini" | "openai" | "claude"
+    val tokensUsed: Int,
+)
+
+data class AuditResults(
+    val sentimentScore: Double,            // 0.0 → 1.0 (motivation level)
+    val sentimentPass: Boolean,            // >= 0.60?
+    
+    val offTopicScore: Double,             // 0.0 → 1.0 (how off-topic)
+    val offTopicPass: Boolean,             // <= 0.20?
+    
+    val piiDetected: List<PiiInstance>,    // If any PII found
+    val piiPass: Boolean,                  // piiDetected.isEmpty()?
+    
+    val executionTimeSeconds: Double,
+    val executionTimePass: Boolean,        // <= timeout?
+)
+
+data class AssistantError(
+    val code: ErrorCode,
+    val message: String,
+    val category: ErrorCategory,
+    val timestamp: Instant,
+    val context: Map<String, Any>,
+)
+
+enum class ErrorCode {
+    INTENT_INVALID,
+    CONTEXT_MISSING,
+    LLM_TIMEOUT,
+    LLM_RATE_LIMIT,
+    PLAN_DIVERGENCE,
+    EXECUTION_FAILED,
+    QUALITY_GATE_FAILED,
+    PII_DETECTED,
+    REPRODUCIBILITY_FAILED,
+}
+
+enum class ErrorCategory {
+    SEMANTIC,     // Plan doesn't make sense
+    EXECUTION,    // LLM/network/infrastructure
+    QUALITY,      // Quality gate failed
+    REPRODUCIBILITY, // Can't reproduce
+}
+
+data class FeedbackSignal(
+    val reproductibilityId: UUID,
+    val userIntent: String,                // "C'est pas bon, refais ça..."
+    val errorCategory: ErrorCategory,
+    val manualCorrection: String? = null,  // If user provides override
+)
+```
+
+---
+
+=== Error Recovery Protocol
+
+When vibecoding encounters an error, it **automatically** follows this protocol:
+
+[plantuml]
+----
+@startuml
+skinparam backgroundColor #FEFEFE
+skinparam activity {
+  BackgroundColor #FDFEFE
+  BorderColor #2E86C1
+  FontSize 11
+  DiamondBackgroundColor #FEF9E7
+  DiamondBorderColor #F39C12
+}
+
+start
+
+:Step N fails\n(LLM error, plan divergence, etc);
+
+if (Error category?) then (SEMANTIC)
+  #FEF9E7 :Classify: Plan doesn't make sense;
+  :Extract failure context;
+  :Replan with corrected context;
+  :Retry from step N;
+else if (EXECUTION) then
+  #D6EAF8 :Classify: Infrastructure issue;
+  :Exponential backoff;
+  :Retry from step N;
+else if (QUALITY)
+  #FADBD8 :Classify: Quality gate failed;
+  :Log failure reason;
+  :Manual intervention required;
+  stop
+endif
+
+if (Retry successful?) then (yes)
+  #D5F5E3 :Step N passed;
+  :Continue to step N+1;
+else if (Max retries exceeded?)
+  #FADBD8 :Log final failure;
+  :Save for manual inspection;
+  stop
+endif
+
+@enduml
+----
+
+**Implementation:**
+
+```kotlin
+data class ErrorRecovery(
+    val errorCode: ErrorCode,
+    val recoveryStrategy: RecoveryStrategy,
+    val retryCount: Int,
+    val success: Boolean,
+)
+
+enum class RecoveryStrategy {
+    REPLAN,           // Change the plan, retry
+    BACKOFF_RETRY,    // Exponential backoff, same plan
+    FALLBACK,         // Use simpler approach
+    MANUAL,           // Requires user input
+}
+
+// In VibecodingTask
+fun executeWithErrorRecovery(step: ExecutionStep): Result<ExecutionStep> {
+    var attempt = 0
+    while (attempt < maxRetries) {
+        try {
+            return executeStep(step)
+        } catch (e: Exception) {
+            val category = classifyError(e)
+            val strategy = pickRecoveryStrategy(category, attempt)
+            
+            attempt++
+            errorRecoveries.add(ErrorRecovery(
+                errorCode = mapToErrorCode(e),
+                recoveryStrategy = strategy,
+                retryCount = attempt,
+                success = false
+            ))
+            
+            when (strategy) {
+                RecoveryStrategy.REPLAN -> {
+                    val correctedPlan = replanFromStep(step.index)
+                    // Update plan and continue
+                }
+                RecoveryStrategy.BACKOFF_RETRY -> {
+                    Thread.sleep(exponentialBackoff(attempt))
+                    // Continue loop
+                }
+                RecoveryStrategy.MANUAL -> {
+                    return Failure(e)
+                }
+            }
+        }
+    }
+    return Failure(MaxRetriesExceededException())
+}
+```
+
+---
+
+=== Reproducibility Guarantee
+
+**Reproducibility ID = Deterministic Replay**
+
+```kotlin
+// Generate an intent
+val intent = AssistantIntent(
+    description = "Créer 5 tests de validation",
+    domain = "vibecoding",
+    seedLlm = 42,  // Fixed seed
+)
+
+// Run vibecoding
+val response = vibecodeTask.execute(intent)
+val reproductibilityId = response.reproductibilityId
+
+// Later, replay exactly:
+val replayedResponse = vibecodeTask.replay(reproductibilityId)
+
+// Should be ≈ same (≤10% semantic diff acceptable)
+require(
+    semanticSimilarity(response.executionTrace, replayedResponse.executionTrace) >= 0.90
+)
+```
+
+**Acceptable Variance:** ±10%
+- LLM non-determinism (seeds help but not perfect)
+- Timestamp differences (expected)
+- Token usage may vary slightly
+- But semantic content should be identical
+
+**Dashboard tracks:**
+- ReproductibilityId → full execution log
+- Can replay at any time
+- Compare N runs → reproducibility rate
+
+---
+
+=== Quality Gate Protocol
+
+```kotlin
+data class QualityGateRules(
+    val protocolVersion: String = "1.0.0",
+    
+    // Sentiment check: Is the output motivating? (pedagogical)
+    val sentimentMinScore: Double = 0.60,
+    
+    // Off-topic check: Is the output relevant?
+    val offTopicMaxScore: Double = 0.20,
+    
+    // PII check: Any personally identifiable info?
+    val piiMaxInstances: Int = 0,
+    
+    // Execution time SLA
+    val executionTimeoutSeconds: Int = 300,
+    
+    // Effort estimation
+    val maxEstimatedEffortMinutes: Int = 480,
+) {
+    fun validate(response: AssistantResponse): ValidationResult {
+        val checks = listOf(
+            CheckResult("sentiment", response.auditResults.sentimentScore >= sentimentMinScore),
+            CheckResult("off_topic", response.auditResults.offTopicScore <= offTopicMaxScore),
+            CheckResult("pii", response.auditResults.piiDetected.isEmpty()),
+            CheckResult("execution_time", response.duration.toSeconds() <= executionTimeoutSeconds),
+        )
+        
+        return ValidationResult(
+            passed = checks.all { it.passed },
+            checks = checks,
+        )
+    }
+}
+```
+
+---
+
+== Part 3: Technical Roadmap
+
+=== Phase 1: Protocol Stabilization (Months 1-3)
+
+**Objectives:**
+- Lock v1.0.0 contracts (no breaking changes until v2.0.0)
+- Achieve reproducibility rate ≥90% on test suite
+- Publish formal specification
+- <5% flakiness on Cucumber tests
+
+**Deliverables:**
+
+[cols="2,2,2", options="header"]
+|===
+| Task | Owner | Status
+| Write `PROTOCOL_v1.0.0.adoc` with contracts | You | TODO
+| Implement contract validation tests | QA | TODO
+| Reproducibility test suite (10 runs per intent) | Dev | TODO
+| Dashboard upgrade: show reproductibilityId + audit trail | Dev | TODO
+| Fix timeout issues (Epic tests: 5min → 8min realistic) | Dev | TODO
+| Stabilize annotations conflict (13.0 pinning) | Gradle expert | TODO
+| Reduce PostgreSQL startup flakiness | Dev | TODO
+| Document error codes + recovery strategies | Tech writer | TODO
+|===
+
+**Success Criteria:**
+```
+✅ Protocol v1.0.0 published
+✅ All input/output contracts frozen
+✅ Reproducibility rate: 90%+
+✅ Cucumber test flakiness: <5%
+✅ Spec document: 30+ pages
+```
+
+---
+
+=== Phase 2: MVP Publication (Months 3-5)
+
+**Objectives:**
+- Publish `codebase-gradle` v0.1.0 on Maven Central
+- Publish Protocol Specification on GitHub
+- 2-3 real-world code generation examples working
+- Community feedback collected
+
+**Deliverables:**
+
+[cols="2,2", options="header"]
+|===
+| Task | Status
+| Package v0.1.0 for release | TODO
+| Sign with GPG key | TODO
+| Publish to Sonatype staging | TODO
+| Generate + release Protocol_v1.0.0.adoc | TODO
+| Create example: "Generate 5 Kotlin tests" | TODO
+| Create example: "Generate documentation" | TODO
+| Blog post: "Assistant Protocol v1.0.0" | TODO
+| GitHub Discussions: collect feedback | TODO
+|===
+
+**Success Criteria:**
+```
+✅ codebase-gradle v0.1.0 available on Maven Central
+✅ Protocol spec published + cited
+✅ 2+ real examples working end-to-end
+✅ 10+ GitHub stars / positive feedback
+```
+
+---
+
+=== Phase 3: Ecosystem & Integrations (Months 5-8)
+
+**Objectives:**
+- Integrate with `capsule-gradle` (video generation from assistant outputs)
+- Integrate with `codex-gradle` (document indexing improvements)
+- Multi-provider LLM support (Gemini, OpenAI, Claude)
+- Dashboard v2 with advanced analytics
+
+**Deliverables:**
+
+[cols="2,2", options="header"]
+|===
+| Task | Status
+| capsule-gradle integration tests | TODO
+| codex-gradle RAG quality improvements | TODO
+| Multi-provider LLM abstraction | TODO
+| Dashboard v2 (metrics, trends, alerts) | TODO
+| Helm chart for Kubernetes deployment | TODO
+| CI/CD template (GitHub Actions) | TODO
+|===
+
+---
+
+=== Phase 4: Enterprise-Ready (Months 8+)
+
+**Objectives:**
+- SLA guarantees (99.9% uptime, <10s response)
+- Multi-tenant support
+- Advanced audit + compliance
+- Training programs
+
+**Deliverables:**
+
+[cols="2,2", options="header"]
+|===
+| Task | Status
+| SLA monitoring + alerting | TODO
+| Multi-tenant architecture | TODO
+| GDPR/SOC2 compliance docs | TODO
+| Enterprise training materials | TODO
+| Commercial support offering | TODO
+|===
+
+---
+
+== Part 4: Current State Analysis
+
+=== What's Working Well ✅
+
+[cols="2,3", options="header"]
+|===
+| Aspect | Evidence
+| **Test Strategy** | bakery-gradle: 75% coverage, codebase-gradle: 40% coverage, Cucumber BDD + functional tests
+| **Architecture** | Clear separation: plugins → tasks → protocol
+| **Documentation** | README in EN + FR, PlantUML diagrams, extensive comments
+| **Publishing** | Sonatype setup, Maven Central ready, GPG signing configured
+| **Dependencies** | LangChain4j + Gemini, pgvector, koog-agents all present
+| **Monitoring** | Dashboard task exists, tokens tracked, PII masking implemented
+|===
+
+---
+
+=== What Needs Stabilization ⚠️
+
+[cols="2,3,2", options="header"]
+|===
+| Issue | Impact | Priority
+| **Reproducibility undefined** | Users can't replay generations | 🔴 HIGH
+| **Protocol contracts not frozen** | Breaking changes possible | 🔴 HIGH
+| **Test flakiness (5min timeouts)** | CI/CD fails unpredictably | 🔴 HIGH
+| **Annotations conflict** | 13.0 vs koog 26.0.2-1 | 🟡 MEDIUM
+| **PostgreSQL testcontainers slow** | 15min Cucumber tests | 🟡 MEDIUM
+| **Error recovery protocol not defined** | Failures not handled systematically | 🟡 MEDIUM
+| **No reproductibilityId in output** | Can't replay | 🔴 HIGH
+| **Dashboard incomplete** | Lacks audit trail visualization | 🟡 MEDIUM
+|===
+
+---
+
+=== Critical Wins Needed (Next 2 Weeks)
+
+```
+1. Add reproductibilityId to AssistantResponse
+   └─ Required for protocol v1.0.0
+
+2. Lock input/output contracts
+   └─ Create protocol validation tests
+   
+3. Write error recovery protocol
+   └─ Define ErrorCategory + RecoveryStrategy
+   
+4. Fix test timeouts
+   └─ V6/V7/L3/V8 runners: 5min → 8min
+   └─ Main cucumber: 15min is OK
+   
+5. Document reproducibility guarantee
+   └─ What is "acceptable variance"? (±10%)
+   └─ How to measure it?
+```
+
+---
+
+== Part 5: Success Metrics
+
+=== By End of Phase 1 (Month 3)
+
+[cols="2,2,1", options="header"]
+|===
+| Metric | Target | Status
+| Protocol version | v1.0.0 frozen | 🔴 Not done
+| Reproducibility rate | ≥90% | 🔴 Not measured
+| Test flakiness | <5% | 🟡 Unknown
+| Spec document pages | 30+ | 🟡 Partial (this doc)
+| Contract tests | 100% coverage | 🔴 Not done
+| Error recovery examples | 3+ scenarios | 🔴 Not done
+|===
+
+---
+
+=== By End of Phase 2 (Month 5)
+
+[cols="2,2,1", options="header"]
+|===
+| Metric | Target | Status
+| Maven Central published | v0.1.0 | 🔴 Not done
+| GitHub stars | 10+ | 🔴 0
+| Example projects working | 2+ | 🔴 Not done
+| Community feedback | 5+ issues | 🔴 No issues yet
+| Blog posts | 2+ | 🔴 Not written
+|===
+
+---
+
+=== By End of Phase 3 (Month 8)
+
+[cols="2,2,1", options="header"]
+|===
+| Metric | Target | Status
+| Multi-provider LLM | 3+ providers | 🔴 Not done
+| Dashboard v2 features | Metrics + trends | 🔴 Not done
+| Integration tests | capsule + codex | 🔴 Not done
+| SLA monitoring | Uptime tracked | 🔴 Not done
+|===
+
+---
+
+== Part 6: Risk Mitigation
+
+=== Major Risks & Mitigations
+
+[cols="2,2,3", options="header"]
+|===
+| Risk | Likelihood | Mitigation
+| **LLM non-determinism breaks reproducibility** | 🟡 Medium | Fixed seeds + epsilon tolerance (±10%)
+| **PostgreSQL testcontainers flake in CI** | 🟡 Medium | Testcontainers with longer timeouts + retry logic
+| **Koog agent loop diverges (no convergence)** | 🔴 High | Max iterations + fallback strategy
+| **Annotations conflict breaks builds** | 🟡 Medium | Strict pinning + constraint declaration
+| **Quality gate too strict (nothing passes)** | 🟡 Medium | Calibrate on real data, iterate scores
+| **Community doesn't adopt** | 🟡 Medium | Start with simple use case (bakery-gradle first)
+| **Multi-provider LLM integration complex** | 🟡 Medium | Abstract provider interface + factory pattern
+|===
+
+---
+
+== Part 7: Implementation Checklist
+
+=== Week 1: Protocol Contracts
+
+```
+[ ] Create: codebase-plugin/src/main/kotlin/codebase/protocol/AssistantIntent.kt
+    - Immutable, frozen for v1.0.0
+    - All required fields documented
+    - Validation in init block
+
+[ ] Create: codebase-plugin/src/main/kotlin/codebase/protocol/AssistantResponse.kt
+    - reproductibilityId: UUID (CRITICAL)
+    - auditResults: AuditResults
+    - executionTrace: ExecutionTrace with step-by-step logging
+    - errorRecoveries: List<ErrorRecovery>
+
+[ ] Create: codebase-plugin/src/main/kotlin/codebase/protocol/ErrorRecoveryProtocol.kt
+    - ErrorCode enum (INTENT_INVALID, LLM_TIMEOUT, etc)
+    - ErrorCategory enum (SEMANTIC, EXECUTION, QUALITY)
+    - RecoveryStrategy enum (REPLAN, BACKOFF_RETRY, FALLBACK, MANUAL)
+    - ErrorRecovery data class
+
+[ ] Create: codebase-plugin/src/main/kotlin/codebase/protocol/QualityGateRules.kt
+    - sentimentMinScore: Double = 0.60
+    - offTopicMaxScore: Double = 0.20
+    - piiMaxInstances: Int = 0
+    - executionTimeoutSeconds: Int = 300
+    - validate(response) → ValidationResult
+
+[ ] Create: codebase-plugin/src/test/kotlin/codebase/protocol/ContractTests.kt
+    - Input contract validation
+    - Output contract validation
+    - Error recovery protocol tests
+    - Quality gate rule tests
+```
+
+---
+
+=== Week 2: Reproducibility Infrastructure
+
+```
+[ ] Modify VibecodingTask to:
+    - Assign reproductibilityId = UUID.randomUUID()
+    - Store full executionTrace (all steps)
+    - Log all LLM calls with timestamps
+    - Save execution to ~/.codebase-gradle/runs/<id>.json
+
+[ ] Create: codebase-plugin/src/main/kotlin/codebase/reproducibility/ReproductibilityStore.kt
+    - Load execution by ID
+    - Replay execution with same inputs
+    - Compare semantic similarity
+
+[ ] Create: codebase-plugin/src/test/kotlin/codebase/reproducibility/ReproductibilityTests.kt
+    - Run same intent 10 times
+    - Measure semantic similarity >= 0.90
+    - Document variance sources
+
+[ ] Integrate reproductibilityId into Dashboard
+    - Link reproductibilityId → execution log
+    - Allow replaying from dashboard
+```
+
+---
+
+=== Week 3: Error Recovery Implementation
+
+```
+[ ] Implement ErrorRecoveryExecutor
+    - classifyError(exception) → ErrorCategory
+    - pickRecoveryStrategy(category, attemptCount) → RecoveryStrategy
+    - executeWithErrorRecovery(step) → Result<ExecutionStep>
+    - trackErrorRecoveries in AssistantResponse
+
+[ ] Add error recovery to VibecodingTask
+    - Wrap executeStep() in error recovery logic
+    - Max retries: 3 per step
+    - Log all recovery attempts
+
+[ ] Create: codebase-plugin/src/test/scenarios/ErrorRecoveryRunner.kt
+    - Cucumber tests for each ErrorCategory
+    - Verify recovery strategies work
+    - Verify max retries enforced
+```
+
+---
+
+=== Week 4: Documentation & Testing
+
+```
+[ ] Write: PROTOCOL_v1.0.0.adoc
+    - Input/output contracts
+    - Error codes + recovery strategies
+    - Reproducibility guarantee
+    - Quality gate rules
+    - Use cases + examples
+
+[ ] Create: docs/REPRODUCIBILITY.md
+    - How to replay a generation
+    - How reproducibility is measured
+    - Acceptable variance documentation
+
+[ ] Create: docs/ERROR_RECOVERY.md
+    - Error categories + handling
+    - Recovery strategies
+    - When to fail fast vs retry
+
+[ ] Update: bakery-gradle / codebase-gradle README
+    - Add "Protocol v1.0.0" section
+    - Link to PROTOCOL_v1.0.0.adoc
+
+[ ] Fix test timeouts
+    - cucumberTestEpicV6: 5min → 8min
+    - cucumberTestEpicV7: 5min → 8min
+    - cucumberTestEpicL3: 5min → 8min
+    - cucumberTestEpicV8: 5min → 8min
+    - Run locally to verify: ./gradlew check
+```
+
+---
+
+== Part 8: Dependencies & Contracts
+
+=== Internal Contracts (Must Be Stable)
+
+```kotlin
+// These should be published to Maven Central ASAP
+education.cccp:codebase-contracts:0.1.0
+education.cccp:agent-contracts:0.1.0
+education.cccp:vibecoding-contracts:0.1.0
+education.cccp:llm-pool-contracts:0.1.0
+```
+
+**Action Items:**
+- [ ] Verify each contract has v1.0.0 API (no breaking changes planned)
+- [ ] Publish to Maven Central (not mavenLocal)
+- [ ] Document backward-compatibility policy
+
+---
+
+=== External Dependencies (Known Issues)
+
+| Dependency | Version | Issue | Mitigation |
+|------------|---------|-------|-----------|
+| `org.jetbrains:annotations` | 13.0 vs 26.0.2-1 | Conflict with koog-agents | Strict pinning (13.0) |
+| `org.jetbrains.kotlin` | 2.3.20 | Baseline | Ensure Java 24/25 compatible |
+| `langchain4j` | 0.x | Pre-1.0, may change | Pin minor version strictly |
+| `koog-agents` | 0.8.0 | Transitive deps unstable | Test upgrades thoroughly |
+| `testcontainers` | Latest | PostgreSQL startup slow | Increase timeout, reuse container |
+
+---
+
+== Part 9: Governance
+
+=== Protocol Versioning Policy
+
+**v1.0.0 (CURRENT):**
+- Input schema: FROZEN
+- Output schema: FROZEN
+- Error codes: FROZEN
+- Quality gate rules: FROZEN
+- No breaking changes until v2.0.0
+
+**v1.1.0 (Future, ADDITIVE):**
+- Can add new optional fields to input
+- Can add new optional fields to output
+- Must support v1.0.0 clients
+- Clear migration guide
+
+**v2.0.0 (Future, BREAKING):**
+- Only for major incompatibilities
+- Only after v1.x is mature (12+ months)
+- 6 month deprecation period
+
+---
+
+=== Review & Approval Process
+
+Before any breaking change:
+
+1. **Issue:** Describe the breaking change + rationale
+2. **RFC:** Request for Comments in GitHub Discussions
+3. **Consultation:** 2 weeks feedback window
+4. **Decision:** Approve or defer to v2.0.0
+5. **Implementation:** Tag as v1.1.0 (additive) or plan v2.0.0
+
+---
+
+== Part 10: Quick Reference
+
+=== Key Definitions
+
+**Reproducibility ID:** UUID assigned to each execution, allows exact replay
+
+**Protocol Version:** Semantic version (1.0.0) independent of plugin version
+
+**Quality Gate:** Automated validation (sentiment, PII, off-topic, timeout)
+
+**Error Recovery:** Automatic replan + retry when execution fails
+
+**Audit Trail:** Complete log of who did what, when, why
+
+**Frozen Contract:** Input/output schema locked until v2.0.0
+
+---
+
+=== Command Reference
+
+```bash
+# Generate with fixed seed (for reproducibility testing)
+./gradlew vibecode \
+  -Pintention="Create 5 tests" \
+  -PseedLlm=42
+
+# Replay a previous generation
+./gradlew vibecode \
+  -Preplay=550e8400-e29b-41d4-a716-446655440000
+
+# View dashboard
+./gradlew vibecodingDashboard
+
+# Run all tests (no flakiness)
+./gradlew check -x cucumberTest
+
+# Run only reproducibility tests
+./gradlew check -Dtest.reproducibility=true
+```
+
+---
+
+=== Success Definition
+
+**codebase-gradle v1.0.0 is "production-ready" when:**
+
+```
+✅ Protocol v1.0.0 published and frozen
+✅ AssistantResponse includes reproductibilityId
+✅ Reproducibility rate: ≥90% on 20+ test runs
+✅ Test flakiness: <5%
+✅ Error recovery: all 4 categories handled
+✅ Quality gates: all 4 checks implemented
+✅ Audit trail: complete execution log captured
+✅ Dashboard: shows reproductibilityId + audit trail
+✅ Documentation: 30+ page spec published
+✅ Examples: 2+ real-world use cases working
+```
+
+---
+
+== Appendix A: Glossary
+
+[cols="2,3", options="header"]
+|===
+| Term | Definition
+| **Vibecoding** | Autonomous code generation loop driven by Koog agent
+| **RAG** | Retrieval-Augmented Generation (pgvector + knowledge index)
+| **Graphify** | Knowledge graph representation of codebase relationships
+| **Quality Gate** | Automated validation of outputs (sentiment, PII, etc)
+| **Reproducibility ID** | UUID enabling exact replay of a generation
+| **Audit Trail** | Complete log of execution steps, timestamps, decisions
+| **Error Recovery** | Automatic replan + retry when step fails
+| **Protocol v1.0.0** | Frozen input/output contracts for stable API
+| **Frozen Contract** | Schema locked until breaking change version
+| **EPIC** | Large feature requirement
+| **UserStory** | Medium-sized user request
+| **Task** | Atomic unit of work
+|===
+
+---
+
+== Appendix B: Architecture Diagram (Full)
+
+[plantuml]
+----
+@startuml
+!define ACCENT #2E86C1
+!define LIGHT #EBF5FB
+!define SAFE #D5F5E3
+!define WARN #FEF9E7
+!define ERROR #FADBD8
+
+skinparam rectangle {
+  BackgroundColor LIGHT
+  BorderColor ACCENT
+}
+
+package "PROTOCOL LAYER (v1.0.0 FROZEN)" #SAFE {
+  rectangle "AssistantIntent\n(input contract)" as intent
+  rectangle "AssistantResponse\n(output contract)" as response
+  rectangle "ErrorRecoveryProtocol\n(error handling)" as errors
+  rectangle "QualityGateRules\n(validation)" as qg_rules
+}
+
+package "USER INTENT" {
+  rectangle "description: String\ndomain: String\nclassification: PRO|FLASH" as user_intent #LIGHT
+}
+
+package "AUGMENTATION" {
+  rectangle "CompositeContext\n(RAG + Graphify + code index)" as context
+}
+
+package "EXECUTION ENGINE" {
+  rectangle "PlanIntentionTask\n(generates EPIC/Story/Task)" as planner
+  rectangle "VibecodingTask\n(autonomous loop)" as vibecode
+  rectangle "ErrorRecoveryExecutor\n(handles failures)" as recovery
+}
+
+package "INFRASTRUCTURE" {
+  rectangle "api-key-pool-gradle\n(LLM quota)" as pool
+  rectangle "koog-agents\n(autonomous loop driver)" as koog
+  rectangle "LLM Providers\n(Gemini, OpenAI, Claude)" as llm
+}
+
+package "VALIDATION" {
+  rectangle "QualityGateTask\n(sentiment, PII, off-topic)" as validator
+  rectangle "Dashboard\n(audit trail, metrics)" as dashboard
+}
+
+package "OUTPUT" {
+  rectangle "ExecutionTrace\n(step-by-step log)" as trace
+  rectangle "ReproductibilityID\n(can replay)" as repro_id
+  rectangle "AuditResults\n(quality scores)" as audit
+}
+
+user_intent --> intent
+intent --> context
+context --> planner
+planner --> vibecode
+vibecode --> recovery
+recovery --> executor: Error?
+executor: classifyError\npickStrategy\nretry
+recovery --> koog
+koog --> llm
+llm --> validator
+validator --> qg_rules
+validator --> response
+response --> trace
+response --> repro_id
+response --> audit
+response --> dashboard
+
+@enduml
+----
+
+---
+
+== Appendix C: Next Steps (Do This Tomorrow)
+
+1. **Read this document completely** — takes 2h
+2. **Create a GitHub Issue:** "Implement Protocol v1.0.0 stabilization"
+3. **List the 4 critical wins** (see "Critical Wins Needed")
+4. **Start Week 1:** Protocol contracts
+5. **Share with team** for feedback
+
+---
+
+== Document Metadata
+
+- **Version:** 1.0
+- **Date:** {docdate}
+- **Author:** cheroliv
+- **Status:** DRAFT → IN REVIEW → ACCEPTED
+- **Next Review:** When protocol v1.0.0 is implemented
+
