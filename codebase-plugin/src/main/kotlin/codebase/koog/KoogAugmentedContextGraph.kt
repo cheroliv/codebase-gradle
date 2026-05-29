@@ -120,7 +120,12 @@ class KoogAugmentedContextGraph {
      */
     private fun buildContextNode(state: AugmentedState): AugmentedState {
         val context = buildCompositeContext(state.workspaceRoot, state.intention)
-        return state.copy(compositeContext = context)
+        val partialContext = context.ragSection.contains("indisponible", ignoreCase = true) ||
+            context.docsSection.contains("indisponible", ignoreCase = true)
+        return state.copy(
+            compositeContext = context,
+            error = if (partialContext) "ContextBuildPartial" else null
+        )
     }
 
     /**
@@ -153,7 +158,7 @@ class KoogAugmentedContextGraph {
                 planJson = planState.planJson,
                 plan = planState.plan,
                 planError = planState.error,
-                error = planState.error
+                error = state.error ?: planState.error  // préserve l'erreur buildContext si existante
             )
         }
     }

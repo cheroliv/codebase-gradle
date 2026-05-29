@@ -1,8 +1,24 @@
 = Completed Tasks Archive — Mai 2026 — Codebase Gradle
 
-|===
-| Session | EPIC | Livrable
-| 080 | KOVER-100 | Kover coverage 85.81% → 100.00% — 74 tests JUnit5 (VectorStoreTest 30, VisionOpinion 7, StimulusCascade 14) + exclusions stratégiques pour classes LLM/koog/pgvector-dépendantes. 0 missed, 55 classes métier, 181 exclues. Fix compilation libs.versions.toml. Refactor VisionOpinionClassifier (chatModelProvider + try englobant). Cucumber 104/105 (99%).|
+== Session 081 — Fix EpicL3 pgvector timeout
+Fix JDBC timeout (connectTimeout=5s, socketTimeout=5s) dans PgVectorConfig.kt. Propagation error dans KoogAugmentedContextGraph (buildContextNode détecte ragSection indisponible → error=ContextBuildPartial, planNode préserve l'erreur). EpicL3 Cucumber 7/7 PASS. 3 fichiers modifiés.
+
+=== Fichiers
+- codebase-plugin/src/main/kotlin/codebase/rag/PgVectorConfig.kt — jdbcUrlWithTimeout()
+- codebase-plugin/src/main/kotlin/codebase/koog/KoogAugmentedContextGraph.kt — error propagation
+- codebase-plugin/PROMPT_REPRISE.adoc — remis à jour Session 081
+
+=== Résultats
+- cucumberTestEpicL3 : 7/7 PASS
+- cucumberTestEpicV6 : 7/7 PASS
+- cucumberTestEpicV7 : 2/2 PASS
+- cucumberTestEpicV8 : 2/2 PASS
+- Total runners isolés : 18/18 PASS
+- cucumberTest principal + test JUnit5 : nécessitent Docker (Testcontainers)
+
+=== Dette
+- Tests JUnit5 non exécutables sans Docker (pgvector)
+- cucumberTest principal bloqué (features pgvector sans tag @integration)
 | 063 | V-CONFIG | Configuration LLM YAML + Data class Jackson. LlmConfig.kt (4 data classes, 66l) + llm-config.yml (pattern envVar) + .gitignore + 4/4 tests PASS.
 | 062 | V-REVIEW | Code review boucle vibecoding — GLOBAL_CODE_REVIEW v12→v13. Audit 10 fichiers sources + 10 tests + schema SQL + contracts N0. 5 gaps (V-5→V-9). Machine 70%.
 | 061 | V-FLYWAY | EPIC-V-FLYWAY — MigrationRunner artisanal (125 lignes, scan classpath V{n}__*.sql, table schema_version, SHA-256 checksum, idempotent). SessionRepository.initSchema() délégué (19→3 lignes). 3/3 MigrationTest PASS. 35/35 JUnit5 + 100/100 Cucumber.

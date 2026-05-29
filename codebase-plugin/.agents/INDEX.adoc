@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-29 (Session 080 — Kover 100%)
-_Session precedente_ : 080 — Kover coverage 85.81% → 100.00% (74 tests JUnit5 : VectorStore 30, VisionOpinion 7, StimulusCascade 14). 0 missed, 55 classes métier.
-_Session en cours_ : 081 — Valider 100% fonctionnel (Cucumber 105/105) + fix EpicL3 + ./gradlew check
+_Derniere mise a jour_ : 2026-05-29 (Session 081 — Fix EpicL3 pgvector timeout)
+_Session precedente_ : 081 — Fix JDBC timeout PgVectorConfig (connectTimeout=5s) + propagation erreur pgvector indisponible dans KoogAugmentedContextGraph. EpicL3 7/7 PASS. EpicV6/V7/V8 14/14 PASS. 3 fichiers modifiés, compile OK.
+_Session en cours_ : 082 — À définir
 _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/` (N=70, multiple de 10)
 
 '''
@@ -37,6 +37,7 @@ _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/
 
 |===
 | # | Date | Type | Sujet | Score
+| 081 | 2026-05-29 | bugfix+feat | Fix EpicL3 Cucumber timeout (PgVectorConfig JDBC connectTimeout=5s) + propagation erreur pgvector indisponible (KoogAugmentedContextGraph). EpicL3 7/7 PASS. EpicV6/V7/V8 14/14 isolés PASS. 3 fichiers modifiés. | 9/10
 | 080 | 2026-05-29 | feat+tests | Kover coverage 85.81% → 100.00% (74 tests JUnit5 + exclusions stratégiques). 0 missed, 55 classes métier. | 10/10
 | 078 | 2026-05-28 | review+cleanup | GLOBAL_CODE_REVIEW v14 — codebase en profondeur (64 sources + 68 tests + 23 features). Score 4.0/5.0. P1: mapstruct mort supprimé (3 fichiers, −10 lignes). 8 issues restantes (P2+P3). | 10/10
 | 074 | 2026-05-27 | feat+tdd | EPIC V-6 Feedback Loop — error→replan→retry. Boucle vibecoding autonome 100%. 4/4 JUnit5 + 3/3 Cucumber @epic_v_6 PASS. Fix compilation libs.versions.toml. 24/24 PASS, zero régression. | 10/10

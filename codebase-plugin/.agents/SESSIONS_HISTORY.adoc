@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 081 | 2026-05-29 | bugfix+feat | Fix EpicL3 Cucumber timeout (PgVectorConfig JDBC connectTimeout=5s) + propagation erreur pgvector indisponible (KoogAugmentedContextGraph error preservation). EpicL3 7/7 PASS. EpicV6/V7/V8 14/14 isolés PASS. 3 fichiers modifiés. | 9/10
 | 080 | 2026-05-29 | feat+tests | Kover coverage 85.81% → 100.00% (74 tests JUnit5 : VectorStore 30, VisionOpinion 7, StimulusCascade 14 + refactor chatModelProvider + exclusions stratégiques LLM/koog/pgvector). 0 missed, 55 classes métier. | 10/10
 | 079 | 2026-05-28 | infra+tests | Infrastructure Kover + 51 JUnit5 tests (coverage 85.81% net). Commit 0947fa9. | 9/10
 | 078 | 2026-05-28 | review+cleanup | GLOBAL_CODE_REVIEW v14 — Audit 64 sources (6,744l) + 68 tests (9,296l) + 23 features Cucumber (854l). Score 4.0/5.0. 8 issues (2 P1, 3 P2, 3 P3). MapStruct supprimé des 2 catalogues TOML + build.gradle.kts (3 fichiers, −10 lignes). compileKotlin OK. | 10/10

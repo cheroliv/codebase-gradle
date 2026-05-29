@@ -1,22 +1,32 @@
-= PROMPT_REPRISE — Session 079 : Fix P2 gaps code review
-:sessions: 079
-:date: 2026-05-28
-:contexte: Session 078 TERMINÉE — GLOBAL_CODE_REVIEW v14. MapStruct supprimé (P1 fixé). 8 issues restantes.
-:prerequis: Session 078 (code review, 3 fichiers, compile OK)
+= PROMPT_REPRISE — Session 082 : Docker pgvector → ./gradlew check 100%
+:sessions: 082
+:date: 2026-05-29
+:contexte: Session 081 TERMINÉE — Fix EpicL3 pgvector timeout (JDBC connectTimeout=5s) + propagation error indisponible. 18/18 Cucumber isolés PASS. Kover 100%.
+:prerequis: Session 081, Docker disponible
 
-== Ce qui a été livré (Session 078 — Code Review)
-- ✅ GLOBAL_CODE_REVIEW v14 — score 4.0/5.0
-- ✅ P1 : mapstruct mort supprimé (3 fichiers, −10 lignes)
-- 🔲 P2 restants : ONNX phantom, layer violation GeminiConfig, ignoreFailures CI
-- 🔲 P3 restants : duplication EagerFiles/Graphify, path dur training, dossier tools/ vide
+== Ce qui a été livré (Session 081)
+- ✅ PgVectorConfig JDBC timeout (connectTimeout=5s, socketTimeout=5s)
+- ✅ KoogAugmentedContextGraph error propagation (ragSection indisponible → ContextBuildPartial)
+- ✅ EpicL3 Cucumber 7/7 PASS
+- ✅ EpicV6/V7/V8 Cucumber 14/14 PASS isolés
+- ✅ Compilation OK, 3 fichiers source modifiés
 
-== Objectif Session 079
-=== P0 — Appliquer les P2 restants
-- Déplacer GeminiConfig dans koog.llm (layer violation)
-- Retirer ignoreFailures du build.gradle.kts
-- Nettoyer doc ONNX si non utilisé
+== Bloquant
+- cucumberTest complet (105 scénarios) : ~50% nécessitent pgvector
+- test JUnit5 (~194 tests) : VectorStoreTest, MigrationTest, VibecodingTaskTest → PostgreSQL requis
+- Sans Docker, `./gradlew check` = FAIL
 
-=== P1 — Appliquer les P3
-- Factoriser collectEagerFiles/loadGraphifyStats dans un service partagé
-- Rendre path training configurable
-- Supprimer dossier tools/ vide
+== Objectif Session 082
+=== P0 — Docker pgvector
+- Vérifier que Docker est disponible (`docker ps`)
+- Trouver ou créer un docker-compose pgvector (port 5432)
+- Lancer le conteneur et vérifier la connexion
+
+=== P1 — Check end-to-end
+- Lancer `./gradlew :codebase-plugin:check` (test + cucumberTest + koverThresholdCheck)
+- Objectif : 0 failure, 100% coverage maintenu
+- Valider 105/105 Cucumber PASS
+
+=== P2 — Documentation
+- Mettre à jour TEST_COVERAGE_ANALYSIS.adoc avec les résultats
+- Reporter si CI Docker est faisable (.github/workflows/test.yml)

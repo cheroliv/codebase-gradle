@@ -1,0 +1,37 @@
+= Session 081 — Fix EpicL3 Cucumber timeout + Résilience pgvector hors-ligne
+:date: 2026-05-29
+:type: bugfix+feat
+:score: 9/10
+:duration: ~30min
+
+== Contexte
+Session 080 terminée (Kover 100%, 74 tests JUnit5). PROMPT_REPRISE était 2 sessions en retard (079).
+EpicL3 Cucumber timeoutait à 5 min : `DriverManager.getConnection()` sans timeout → pgvector hors-ligne bloquait.
+
+== Actions
+
+=== P0 — Fix JDBC timeout
+* `PgVectorConfig.kt` — ajout `connectTimeout=5&socketTimeout=5` dans l'URL JDBC
+* Fail-fast garanti : au lieu du timeout TCP OS (~2 min), l'erreur arrive en 5 secondes
+
+=== P1 — Fix propagation erreur pgvector indisponible
+* `KoogAugmentedContextGraph.kt` — `buildContextNode` détecte `ragSection` ou `docsSection` avec "indisponible" → `state.error = "ContextBuildPartial"`
+* `planNode` — préserve `state.error` existant, ne pas écraser par le `error` nullable du plan
+* Scénario "Erreur pgvector absente signalée" : `error='ContextBuildPartial'` → ✅
+
+=== Résultats
+* `cucumberTestEpicL3` : 7/7 PASS ✅ (contre timeout 5 min avant)
+* `cucumberTestEpicV6` : 7/7 PASS (3 skip épic_v_7/8 hors-scope)
+* `cucumberTestEpicV7` : 2/2 PASS
+* `cucumberTestEpicV8` : 2/2 PASS
+* Total runners isolés : 18/18 PASS
+* JUnit5 + cucumberTest principal : nécessitent Docker (Testcontainers pgvector)
+
+== Fichiers modifiés
+* `codebase-plugin/src/main/kotlin/codebase/rag/PgVectorConfig.kt` — `jdbcUrlWithTimeout()` (+10 lignes)
+* `codebase-plugin/src/main/kotlin/codebase/koog/KoogAugmentedContextGraph.kt` — propagation error (+2 lignes)
+* `codebase-plugin/PROMPT_REPRISE.adoc` — remise à jour (+39/-22)
+
+== Limites
+* Tests JUnit5 (cucumberTest + test) nécessitent Docker pour Testcontainers — non faisable en CI sans pgvector
+* Runners isolés (EpicV6/V7/V8/EpicL3) = seul faisceau de tests exécutable sans Docker
