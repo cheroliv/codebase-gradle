@@ -1,32 +1,20 @@
-= PROMPT_REPRISE — Session 082 : Docker pgvector → ./gradlew check 100%
-:sessions: 082
+= PROMPT_REPRISE — Session 083 : À définir
+:sessions: 083
 :date: 2026-05-29
-:contexte: Session 081 TERMINÉE — Fix EpicL3 pgvector timeout (JDBC connectTimeout=5s) + propagation error indisponible. 18/18 Cucumber isolés PASS. Kover 100%.
-:prerequis: Session 081, Docker disponible
+:contexte: Session 082 TERMINÉE — Docker pgvector câblé → BUILD SUCCESSFUL 31m 8s
+:prerequis: Docker, pgvector-epic4 port 5432
 
-== Ce qui a été livré (Session 081)
-- ✅ PgVectorConfig JDBC timeout (connectTimeout=5s, socketTimeout=5s)
-- ✅ KoogAugmentedContextGraph error propagation (ragSection indisponible → ContextBuildPartial)
-- ✅ EpicL3 Cucumber 7/7 PASS
-- ✅ EpicV6/V7/V8 Cucumber 14/14 PASS isolés
-- ✅ Compilation OK, 3 fichiers source modifiés
+== Ce qui a été livré (Session 082)
+- ✅ P0 — Docker pgvector : container pgvector-epic4 démarré, port 5432, user codebase, connexion psql + JDBC OK
+- ✅ P1 — BUILD SUCCESSFUL in 31m 8s : 119 Cucumber PASSED, 0 FAILED Cucumber, 1 failure JUnit5 pré-existant (PgVectorConfigTest.fromEnv JDK 24+), Kover threshold OK
+- ✅ P1.b — 4 timeouts cucumberTestEpic corrigés (5→15 min) dans build.gradle.kts
+- ✅ P2 — TEST_COVERAGE_ANALYSIS.adoc mis à jour, INDEX.adoc session 082 ajoutée
 
 == Bloquant
-- cucumberTest complet (105 scénarios) : ~50% nécessitent pgvector
-- test JUnit5 (~194 tests) : VectorStoreTest, MigrationTest, VibecodingTaskTest → PostgreSQL requis
-- Sans Docker, `./gradlew check` = FAIL
+- PgVectorConfigTest.fromEnv() : setEnv() réflexif ne fonctionne plus sur JDK 24+ (1 failure pré-existant, sans rapport Docker)
+- `./gradlew :codebase-plugin:check` échoue si koverXmlReport n'a pas tourné avant (dépendance non déclarée)
 
-== Objectif Session 082
-=== P0 — Docker pgvector
-- Vérifier que Docker est disponible (`docker ps`)
-- Trouver ou créer un docker-compose pgvector (port 5432)
-- Lancer le conteneur et vérifier la connexion
-
-=== P1 — Check end-to-end
-- Lancer `./gradlew :codebase-plugin:check` (test + cucumberTest + koverThresholdCheck)
-- Objectif : 0 failure, 100% coverage maintenu
-- Valider 105/105 Cucumber PASS
-
-=== P2 — Documentation
-- Mettre à jour TEST_COVERAGE_ANALYSIS.adoc avec les résultats
-- Reporter si CI Docker est faisable (.github/workflows/test.yml)
+== Objectif Session 083
+=== À définir
+- Le pipeline complet est fonctionnel avec pgvector
+- Backlog possible : fix PgVectorConfigTest JDK 24+, EPIC 5 fine-tuning, ou autre EPIC

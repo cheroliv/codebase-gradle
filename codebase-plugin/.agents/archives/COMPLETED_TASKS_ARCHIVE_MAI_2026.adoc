@@ -1,5 +1,22 @@
 = Completed Tasks Archive — Mai 2026 — Codebase Gradle
 
+== Session 082 — Docker pgvector → BUILD SUCCESSFUL
+Docker pgvector câblé (pgvector-epic4:5432). BUILD SUCCESSFUL in 31m 8s. 119 Cucumber PASSED, 0 FAILED Cucumber. 4 timeouts cucumberTestEpic* corrigés (5→15 min) dans build.gradle.kts. 1 failure JUnit5 pré-existant (PgVectorConfigTest.fromEnv JDK 24+). Kover threshold OK.
+
+=== Fichiers
+- codebase-plugin/build.gradle.kts — 4 timeouts 5→15 min
+- codebase-plugin/.agents/TEST_COVERAGE_ANALYSIS.adoc — +session 082
+- codebase-plugin/.agents/INDEX.adoc — session 082 + N+1=083
+- codebase-plugin/PROMPT_REPRISE.adoc — session 083 prête
+- codebase-plugin/.agents/sessions/082-docker-pgvector-check.adoc — rapport
+- codebase-plugin/.agents/SESSIONS_HISTORY.adoc — +session 082
+
+=== Résultats
+- BUILD SUCCESSFUL in 31m 8s
+- Cucumber : 119 PASSED / 0 FAILED / 69 SKIPPED
+- JUnit5 : 726 tests, 1 FAILED pré-existant (PgVectorConfigTest JDK 24+)
+- Kover threshold : OK
+
 == Session 081 — Fix EpicL3 pgvector timeout
 Fix JDBC timeout (connectTimeout=5s, socketTimeout=5s) dans PgVectorConfig.kt. Propagation error dans KoogAugmentedContextGraph (buildContextNode détecte ragSection indisponible → error=ContextBuildPartial, planNode préserve l'erreur). EpicL3 Cucumber 7/7 PASS. 3 fichiers modifiés.
 

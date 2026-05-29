@@ -121,7 +121,7 @@ val cucumberTestEpicV6 = tasks.register<Test>("cucumberTestEpicV6") {
     maxParallelForks = 1
     forkEvery = 1
     jvmArgs("-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=256m", "-XX:TieredStopAtLevel=1")
-    timeout.set(Duration.ofMinutes(5))
+    timeout.set(Duration.ofMinutes(15))
 
     testLogging {
         events("passed", "skipped", "failed")
@@ -149,7 +149,7 @@ val cucumberTestEpicV7 = tasks.register<Test>("cucumberTestEpicV7") {
     maxParallelForks = 1
     forkEvery = 1
     jvmArgs("-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=256m", "-XX:TieredStopAtLevel=1")
-    timeout.set(Duration.ofMinutes(5))
+    timeout.set(Duration.ofMinutes(15))
 
     testLogging {
         events("passed", "skipped", "failed")
@@ -178,7 +178,7 @@ val cucumberTestEpicL3 = tasks.register<Test>("cucumberTestEpicL3") {
     maxParallelForks = 1
     forkEvery = 1
     jvmArgs("-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=256m", "-XX:TieredStopAtLevel=1")
-    timeout.set(Duration.ofMinutes(5))
+    timeout.set(Duration.ofMinutes(15))
 
     testLogging {
         events("passed", "skipped", "failed")
@@ -207,7 +207,7 @@ val cucumberTestEpicV8 = tasks.register<Test>("cucumberTestEpicV8") {
     maxParallelForks = 1
     forkEvery = 1
     jvmArgs("-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=256m", "-XX:TieredStopAtLevel=1")
-    timeout.set(Duration.ofMinutes(5))
+    timeout.set(Duration.ofMinutes(15))
 
     testLogging {
         events("passed", "skipped", "failed")

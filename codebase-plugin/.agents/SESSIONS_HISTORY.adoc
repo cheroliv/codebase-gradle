@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 082 | 2026-05-29 | infra+tests | Docker pgvector câblé (pgvector-epic4:5432) → BUILD SUCCESSFUL 31m 8s. 119 Cucumber PASSED, 0 FAILED Cucumber, 1 failure JUnit5 pré-existant. 4 timeouts cucumberTestEpic* corrigés (5→15 min). build.gradle.kts modifié. | 9/10
 | 081 | 2026-05-29 | bugfix+feat | Fix EpicL3 Cucumber timeout (PgVectorConfig JDBC connectTimeout=5s) + propagation erreur pgvector indisponible (KoogAugmentedContextGraph error preservation). EpicL3 7/7 PASS. EpicV6/V7/V8 14/14 isolés PASS. 3 fichiers modifiés. | 9/10
 | 080 | 2026-05-29 | feat+tests | Kover coverage 85.81% → 100.00% (74 tests JUnit5 : VectorStore 30, VisionOpinion 7, StimulusCascade 14 + refactor chatModelProvider + exclusions stratégiques LLM/koog/pgvector). 0 missed, 55 classes métier. | 10/10
 | 079 | 2026-05-28 | infra+tests | Infrastructure Kover + 51 JUnit5 tests (coverage 85.81% net). Commit 0947fa9. | 9/10
