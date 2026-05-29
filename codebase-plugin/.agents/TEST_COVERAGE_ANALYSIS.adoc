@@ -1,6 +1,9 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut session 082_ : BUILD SUCCESSFUL in 31m 8s — Docker pgvector câblé, 119 Cucumber PASSED, 726 tests, 1 failure pré-existant (PgVectorConfigTest env hack JDK 24+). Kover threshold check OK. 4 timeouts Cucumber corrigés (5→15 min).
+_Statut session 078v19_ : Canary test `tasks()` ajouté — `GradleRunner` + `@TempDir`, projet consommateur éphémère, 7 tâches vérifiées (collectFromCodebase, collectCompositeContext, generatePlan, vibecode, generateCompositeContext, vibecodingDashboard, qualityGate). Suppression canary Cucumber (canary.feature + CanarySteps.kt).
+
+| Session | Fichiers testés | Couverture | Notes
+| 078v19 | `CodebasePluginTest.kt` (+1 test `tasks`) — GradleRunner consumer project éphémère, applique `id("education.cccp.codebase") version "0.0.1"`, assert 7 tâches dans output `tasks`. | 1/1 PASS. Vérifie l'inventaire complet exposé aux consommateurs. | Remplace le canary Cucumber. 4 groupes : collect, generate, tracking, validate. Commande: `./gradlew :codebase-plugin:test --tests "codebase.CodebasePluginTest.tasks" -x koverXmlReport` |
 
 | Session | Fichiers testés | Couverture | Notes
 | 082 | `build.gradle.kts` (+1 fix — 4 timeouts cucumberTestEpic 5→15 min). Pipeline : `docker start pgvector-epic4` + `koverXmlReport` + `cucumberTest` + `cucumberTestEpicV6` + `cucumberTestEpicV7` + `cucumberTestEpicL3` + `cucumberTestEpicV8` + `koverThresholdCheck`. | BUILD SUCCESSFUL (31m 8s). 119 Cucumber PASSED, 0 FAILED Cucumber, 1 failure JUnit5 pré-existant (PgVectorConfigTest.fromEnv() env hack JDK 24+). Kover threshold OK. | pgvector-epic4 port 5432. connectTimeout=5s/socketTimeout=5s fonctionnels avec pgvector UP. EpicL3 7/7 ne timeout plus. Codex store query failed ignoré (résilience). |

@@ -1,9 +1,14 @@
 package codebase
 
 import org.gradle.testfixtures.ProjectBuilder
+import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import java.io.File
+import java.nio.file.Files
 import kotlin.test.assertNotNull
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class CodebasePluginTest {
 
@@ -104,5 +109,49 @@ class CodebasePluginTest {
         val task = project.tasks.findByName("generateCompositeContext")
         assertNotNull(task)
         assertEquals("generate", task.group)
+    }
+
+    @Test
+    fun `tasks`(@TempDir tempDir: File) {
+        val projectDir = tempDir.resolve("consumer")
+        projectDir.mkdirs()
+        projectDir.resolve("settings.gradle.kts").writeText("""
+            pluginManagement {
+                repositories { mavenLocal(); gradlePluginPortal(); mavenCentral() }
+            }
+            rootProject.name = "consumer"
+        """.trimIndent())
+        projectDir.resolve("build.gradle.kts").writeText("""
+            plugins { id("education.cccp.codebase") version "0.0.1" }
+        """.trimIndent())
+
+        val result = GradleRunner.create()
+            .withProjectDir(projectDir)
+            .withArguments("tasks", "--stacktrace")
+            .withPluginClasspath()
+            .build()
+
+        val output = result.output
+
+        println("╔══════════════════════════════════════════════════════════════╗")
+        println("║               CODEPLUGIN — TASK DUMP                  ║")
+        println("╚══════════════════════════════════════════════════════════════╝")
+        println()
+
+        // Extraire uniquement les groupes du plugin (collect, generate, tracking, validate)
+        val pluginSection = output.lines()
+            .dropWhile { !it.contains("Collect tasks") }
+            .takeWhile { !it.contains("Help tasks") }
+            .joinToString("\n")
+        println(pluginSection)
+
+        println()
+        println("╔══════════════════════════════════════════════════════════════╗")
+        println("║                    END OF TASK DUMP                        ║")
+        println("╚══════════════════════════════════════════════════════════════╝")
+
+        for (task in expectedTasks) {
+            assertTrue(output.contains(task), "Task '$task' should appear in task list")
+        }
     }
 }
