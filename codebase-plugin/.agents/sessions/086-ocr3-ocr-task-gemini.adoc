@@ -1,0 +1,65 @@
+= Session 086 — OCR-3 : Brancher Gemini réel dans OcrTask
+:date: 2026-05-30
+:type: feat+tests
+:score: 10/10
+
+== Contexte
+
+Session 085 livré `GeminiVisionProvider` (95 lignes, multimodal, 6 tests).
+Session 084 livré `GeminiKeyPool` (82 lignes, rotation clés API, 9 tests).
+Session 083 livré bootstrapping `OcrTask` + `OcrEngine` + `FakeOcrEngine` (36 tests).
+
+OCR-3 = brancher le vrai tuyau Gemini Vision dans `OcrTask.executeOcr()`.
+
+== Actions
+
+=== OcrTask.kt — Détection image↔texte + branchement GeminiVisionProvider
+
+Fichier : `src/main/kotlin/codebase/ocr/OcrTask.kt` (143→201 lignes, +58)
+
+- Ajout `isImageFile(file)` — détection par extension (png/jpg/jpeg/gif/bmp/tiff)
+- Ajout `detectMimeType(extension)` — mapping extension→MIME, fallback `application/octet-stream`
+- Ajout `executeImageOcr()` — branche `GeminiVisionProvider.processImage()` via `runBlocking`
+- Ajout `executeTextOcr()` — conserve comportement existant `OcrEngine.process()`
+- Ajout `geminiVisionProvider` injectable (`@get:Internal var`), fallback `GeminiVisionProvider()` en prod
+- Fonctions `companion object` publiques pour testabilité
+- Import `codebase.koog.llm.GeminiVisionProvider` + `kotlinx.coroutines.runBlocking`
+- API publique inchangée — `ocrEngine` reste injectable, pas de breaking change
+
+=== OcrTaskTest.kt — 7 nouveaux tests OCR-3
+
+Fichier : `src/test/kotlin/codebase/ocr/OcrTaskTest.kt` (98→157 lignes, +59)
+
+1. `isImageFile detects PNG as image`
+2. `isImageFile detects JPG as image`
+3. `isImageFile detects JPEG as image`
+4. `isImageFile detects all supported image formats` (6 formats + uppercase)
+5. `isImageFile returns false for text files` (pdf/txt/adoc/md/xml/html/sans ext)
+6. `detectMimeType returns correct image MIME types`
+7. `detectMimeType returns octet-stream for unknown extensions`
+
+== Résultats
+
+- Compilation : OK, 0 nouveaux warnings
+- Tests OcrTask : 15 PASS (8 existants + 7 nouveaux), 0 FAIL
+- Tests CodebaseOcrExtension : 12 PASS, 0 FAIL
+- Total OCR : 27/27 PASS
+- 0 régression
+
+== Architecture
+
+Pattern Clean Architecture respecté :
+- `OcrEngine` (`fun interface`) = abstraction métier pour texte
+- `GeminiVisionProvider` = implémentation IA pour images
+- `OcrTask` = point d'entrée Gradle, détection automatique image↔texte
+- Injection testable : `ocrEngine` (texte) + `geminiVisionProvider` (image)
+
+== Fichiers produits
+
+- `src/main/kotlin/codebase/ocr/OcrTask.kt` — modifié (+58 lignes)
+- `src/test/kotlin/codebase/ocr/OcrTaskTest.kt` — modifié (+59 lignes, 7 tests)
+
+== Prochaine étape
+
+OCR-3 TERMINÉ. OCR-0 (contrats partagés `OcrRequest`/`OcrResult`/`OcrConfig` dans codex-gradle)
+est le prérequis bloquant pour OCR-4 (intégration pipeline complet).

@@ -672,6 +672,27 @@ Chaîne existante : anonymisation → chunking → embedding → pgvector
 * [ ] Intégration avec `GeminiConfig` existant (envVar GEMINI_API_KEY, model gemini-1.5-flash)
 * [ ] Tests Cucumber : "je scanne une image → j'obtiens du texte structuré AsciiDoc"
 
+==== OCR-3b : FakeVisionProvider + CI + Config YAML/CLI/gradle.properties
+
+*Gaps identifiés session 086*
+- Pas de test réel Gemini (pas de `GEMINI_API_KEY`)
+- Pas de CI/CD OCR (`ocr.yml`)
+- Pas de config YAML testée pour OCR
+- Pas de test CLI `-P` params réels
+- Pas de test DSL `gradle.properties`
+
+*Objectif* : Valider la plomberie OCR avec un `FakeVisionProvider` branché sur `GeminiKeyPool`
+(secrets de test, rotation, quota, fallback) — zéro appel réseau.
+
+* [ ] `FakeVisionProvider` — même signature que `GeminiVisionProvider`, retourne faux AsciiDoc structuré
+* [ ] Brancher `GeminiKeyPool` + secrets de test dans `FakeVisionProvider`
+* [ ] Tests : rotation pool, quota exceeded, fallback best-effort
+* [ ] Config YAML `llm-config.yml` testée pour la branche `gemini.ocr` (model, maxTokens, language)
+* [ ] CLI `-P` params : `./gradlew ocrDocument -PinputFile=x.png` via `ProjectBuilder`
+* [ ] DSL `gradle.properties` : `codebaseOcr { model, maxTokens, language }` testé en intégration
+* [ ] CI/CD : workflow `.github/workflows/ocr.yml` (compile + tests OCR uniquement, pas de vrai Gemini)
+* [ ] Tests Cucumber : "je scanne une image → j'obtiens du texte structuré AsciiDoc"
+
 ==== OCR-4 : Intégration pipeline complet
 
 * [ ] OcrResult → anonymisation automatique (EPIC 2, déjà existant)

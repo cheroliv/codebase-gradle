@@ -1,9 +1,18 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut session 078v19_ : Canary test `tasks()` ajouté — `GradleRunner` + `@TempDir`, projet consommateur éphémère, 7 tâches vérifiées (collectFromCodebase, collectCompositeContext, generatePlan, vibecode, generateCompositeContext, vibecodingDashboard, qualityGate). Suppression canary Cucumber (canary.feature + CanarySteps.kt).
+_Statut session 086_ : OCR-3 OcrTask multimodal — 7 nouveaux tests JUnit5 (OcrTaskTest.kt : isImageFile x4, detectMimeType x2, fallback x1). 15/15 OcrTask PASS, 12/12 CodebaseOcrExtension PASS. 27/27 OCR total, 0 régression. Zéro Cucumber touché.
+
+⚠️ **Gaps OCR identifiés** :
+- Pas de test réel Gemini (pas de `GEMINI_API_KEY`)
+- Pas de CI/CD OCR (pas de workflow `.github/workflows/ocr.yml`)
+- Pas de config YAML (`llm-config.yml`) testée pour la branche OCR
+- Pas de test CLI `-P` params réels (uniquement unitaire)
+- → OCR-3b : FakeVisionProvider + CI + Config YAML + CLI + gradle.properties
 
 | Session | Fichiers testés | Couverture | Notes
-| 078v19 | `CodebasePluginTest.kt` (+1 test `tasks`) — GradleRunner consumer project éphémère, applique `id("education.cccp.codebase") version "0.0.1"`, assert 7 tâches dans output `tasks`. | 1/1 PASS. Vérifie l'inventaire complet exposé aux consommateurs. | Remplace le canary Cucumber. 4 groupes : collect, generate, tracking, validate. Commande: `./gradlew :codebase-plugin:test --tests "codebase.CodebasePluginTest.tasks" -x koverXmlReport` |
+| 086 | `OcrTaskTest.kt` — 7 tests (detection PNG/JPG/JPEG/GIF/BMP/TIFF, uppercase, rejet pdf/txt/adoc/md/xml/html, MIME mapping, fallback octet-stream). | 15/15 OcrTask PASS + 12/12 CodebaseOcrExtension PASS. 27/27 OCR. | Detection image↔texte par extension dans OcrTask. GeminiVisionProvider injecte uniquement dans OcrTask (pas dans OcrTaskTest — tests unitaires utilisent FakeOcrEngine). Zero appel reseau. |
+| 085 | `GeminiVisionProviderTest.kt` — 6 tests (image PNG synthetique, validation bytes decodables, erreur sans API key, params varies, image 2000×2000 > 1KB, instanciation). | 6/6 PASS. 93 lignes. Utilise BufferedImage + ImageIO + assertj. | Zero appel reseau reel. Non-regression pool 18/18 inchange. Zero Cucumber, zero secret. |
+| 084 | `GeminiKeyPoolTest.kt` — 9 tests (rotation ROUND_ROBIN x2, LEAST_USED, quota exceeded skip, isQuotaExceeded, resetUsage, empty pool throw, instances all, fullPool 29 keys x5 models). | 9/9 PASS. 162 lignes, copie-adapte de OllamaPoolTest (161 lignes). IDs gemini-key-{port}, URLs generativelanguage.googleapis.com. | Fan-out 2 @xp paralleles (GeminiKeyPool.kt + GeminiKeyPoolTest.kt). Non-regression OllamaPool 9/9 PASS. Zero Cucumber, zero secret. |
 
 | Session | Fichiers testés | Couverture | Notes
 | 082 | `build.gradle.kts` (+1 fix — 4 timeouts cucumberTestEpic 5→15 min). Pipeline : `docker start pgvector-epic4` + `koverXmlReport` + `cucumberTest` + `cucumberTestEpicV6` + `cucumberTestEpicV7` + `cucumberTestEpicL3` + `cucumberTestEpicV8` + `koverThresholdCheck`. | BUILD SUCCESSFUL (31m 8s). 119 Cucumber PASSED, 0 FAILED Cucumber, 1 failure JUnit5 pré-existant (PgVectorConfigTest.fromEnv() env hack JDK 24+). Kover threshold OK. | pgvector-epic4 port 5432. connectTimeout=5s/socketTimeout=5s fonctionnels avec pgvector UP. EpicL3 7/7 ne timeout plus. Codex store query failed ignoré (résilience). |

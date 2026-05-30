@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-30 (Session 083 — Bootstrapping OCR assisté IA)
-_Session precedente_ : 082 — Docker pgvector câblé (pgvector-epic4 port 5432). BUILD SUCCESSFUL in 31m 8s. 119 Cucumber PASSED, 0 FAILED Cucumber, 1 failure JUnit5 pré-existant (PgVectorConfigTest env hack JDK 24+). Kover threshold OK. 4 timeouts cucumberTestEpic corrigés (5→15 min). `build.gradle.kts` modifié.
-_Session en cours_ : 083 — Bootstrapping EPIC OCR : DSL extension + OcrTask + OcrEngine + Cucumber BDD
+_Derniere mise a jour_ : 2026-05-30 (Session 086 — OCR-3 OcrTask multimodal : GeminiVisionProvider branché, 15 tests)
+_Session precedente_ : 085 — OCR-2 GeminiVisionProvider (95 lignes + 6 tests)
+_Session en cours_ : 087 — OCR-0 Contrats partages OcrRequest/OcrResult/OcrConfig dans codex-gradle
 _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/` (N=70, multiple de 10)
 
 '''
@@ -37,6 +37,9 @@ _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/
 
 |===
 | # | Date | Type | Sujet | Score
+| 086 | 2026-05-30 | feat+tests | OCR-3 Brancher GeminiVisionProvider dans OcrTask — detection image↔texte par extension, executeImageOcr (GeminiVisionProvider), executeTextOcr (OcrEngine), geminiVisionProvider injectable, companion isImageFile/detectMimeType. 15 tests PASS (8 existants + 7 nouveaux OCR-3 : PNG/JPG/JPEG/GIF/BMP/TIFF/MIME/fallback). 27/27 OCR total, 0 regression. | 10/10
+| 085 | 2026-05-30 | feat+tests | OCR-2 GeminiVisionProvider (multimodal) — 95 lignes, package codebase.koog.llm. `suspend fun processImage(bytes, mimeType, lang, model, maxTokens)`. Cache lazy GoogleAiGeminiChatModel, encode base64 → ImageContent, prompt OCR AsciiDoc structuré. 6 tests JUnit5 PASS (image PNG synthétique, erreur sans clé API, grande image 2000×2000). Zéro régression. | 10/10
+| 084 | 2026-05-30 | feat+tests | OCR-1 GeminiKeyPool (rotation clés API Gemini) — 82 lignes, pattern OllamaPool (session 065). Implémente LlmInstancePool N0. Rotation ROUND_ROBIN/LEAST_USED, skip quota exceeded. 9 tests JUnit5 PASS (fan-out 2 @xp parallèles). 0 régression OllamaPool. | 10/10
 | 083 | 2026-05-30 | feat+tests | Bootstrapping EPIC OCR : DSL CodebaseOcrExtension + OcrTask + OcrEngine + FakeOcrEngine. 36 tests PASS (12 JUnit5 ext + 8 JUnit5 task + 5 Cucumber @ocr + 11 CodebasePlugin). Chaîne priorité CLI>env>DSL>convention. Extension/Task/Cucumber isolé. 12 fichiers créés, 4 modifiés. | 9/10
 | 082 | 2026-05-29 | infra+tests | Docker pgvector câblé (pgvector-epic4:5432) → BUILD SUCCESSFUL 31m 8s. 119 Cucumber PASSED, 0 FAILED Cucumber. 4 timeouts cucumberTestEpic corrigés (5→15 min). `build.gradle.kts` modifié. 1 failure JUnit5 pré-existant (PgVectorConfigTest.fromEnv JDK 24+). | 9/10
 | 081 | 2026-05-29 | bugfix+feat | Fix EpicL3 Cucumber timeout (PgVectorConfig JDBC connectTimeout=5s) + propagation erreur pgvector indisponible (KoogAugmentedContextGraph). EpicL3 7/7 PASS. EpicV6/V7/V8 14/14 isolés PASS. 3 fichiers modifiés. | 9/10

@@ -1,0 +1,58 @@
+= Session 085 — OCR-2 GeminiVisionProvider (multimodal)
+:sessions: 085
+:date: 2026-05-30
+:type: feat+tests
+:score: 10/10
+:duree: ~15 min
+
+== Contexte
+
+Session 084 avait livré OCR-1 : `GeminiKeyPool` (82 lignes, rotation clés API Gemini).
+La machine OCR est prête côté pool. Reste à créer le provider multimodal qui appelle
+l'API Gemini Vision avec des bytes d'image.
+
+== Livrés
+
+=== GeminiVisionProvider.kt — 95 lignes
+
+- Package `codebase.koog.llm` (même que GeminiLlmProvider, LlmProvider)
+- Signature : `suspend fun processImage(imageBytes, mimeType, language, model, maxTokens): String`
+- Cache lazy : réutilise `GoogleAiGeminiChatModel` tant que model/maxTokens inchangés
+- Encode base64 → `ImageContent(base64, mimeType)` — API réelle langchain4j 1.14.1
+- Prompt OCR structuré : extraction texte + format AsciiDoc (titres, tableaux, listes)
+- Erreur wrappée en `IllegalStateException` avec message explicite
+- Zéro secret loggé — clé API transite directement via `config.resolveApiKey()` → builder
+
+=== GeminiVisionProviderTest.kt — 93 lignes, 6 tests
+
+- 1. `should generate synthetic test image` — BufferedImage → PNG bytes, header vérifié
+- 2. `should produce valid image bytes for Gemini Vision` — ImageIO.read décodable
+- 3. `should fail with clear error when GEMINI_API_KEY not set` — envVar inexistant → IllegalStateException
+- 4. `should accept various language and model parameters` — instanciation OK
+- 5. `should handle large image bytes` — 2000×2000 > 1KB PNG
+- 6. `provider class should be instantiable` — classe OK
+
+=== build.gradle.kts — +2 dépendances test
+
+- `kotlinx-coroutines-test:1.10.2` (déjà en versions.toml ? → non, ajouté inline)
+- `org.assertj:assertj-core:3.27.3`
+
+== Résultats
+
+- 6/6 GeminiVisionProviderTest PASS
+- 0/0 régression (GeminiKeyPool 9/9, OllamaPool 9/9 intacts)
+- Compilation OK, 0 warning sur les nouveaux fichiers
+- Secret scan clean (hits = fixtures synthétiques + refs env var)
+- git status : 6 modifiés (session 084 + 085), 5 nouveaux fichiers (GeminiKeyPool, GeminiKeyPoolTest, GeminiVisionProvider, GeminiVisionProviderTest, STRATEGIC_ROADMAP)
+
+== Décisions architecturales
+
+- `GeminiVisionProvider` N'hérite PAS de `OcrEngine` (fun interface text-only).
+  Classe autonome, sera pontée dans OCR-3 via adaptation dans OcrTask.
+- Pattern `ImageContent(base64, mimeType)` — API réelle langchain4j, pas ByteArray direct.
+- `GoogleAiGeminiChatModel.chat(UserMessage)` retourne `ChatResponse` → `.aiMessage().text()`.
+
+== Prochaine session
+
+OCR-3 : Brancher Gemini réel dans `OcrTask` — remplacer `NoOpOcrEngine`, détection type fichier,
+routage image → GeminiVisionProvider.
