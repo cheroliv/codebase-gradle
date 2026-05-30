@@ -1,13 +1,12 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut session 086_ : OCR-3 OcrTask multimodal — 7 nouveaux tests JUnit5 (OcrTaskTest.kt : isImageFile x4, detectMimeType x2, fallback x1). 15/15 OcrTask PASS, 12/12 CodebaseOcrExtension PASS. 27/27 OCR total, 0 régression. Zéro Cucumber touché.
+_Statut session 087_ : OCR-3b FakeVisionProvider + VisionProvider interface. 6 nouveaux tests JUnit5 (FakeVisionProviderTest x5 + OcrTaskTest x1 injection). Zéro régression. publishToMavenLocal OK. Cross-borough consommateurs compile OK.
 
-⚠️ **Gaps OCR identifiés** :
-- Pas de test réel Gemini (pas de `GEMINI_API_KEY`)
-- Pas de CI/CD OCR (pas de workflow `.github/workflows/ocr.yml`)
-- Pas de config YAML (`llm-config.yml`) testée pour la branche OCR
-- Pas de test CLI `-P` params réels (uniquement unitaire)
-- → OCR-3b : FakeVisionProvider + CI + Config YAML + CLI + gradle.properties
+⚠️ **Gaps OCR restants (session 088)** :
+- Pas de test CI/CD OCR (pas de workflow `.github/workflows/ocr.yml`)
+- Pas de config YAML (`llm-config.yml`) testée
+- Pas de test CLI `-P` via ProjectBuilder
+- → OCR-3b-P1/P2 : Config YAML/CLI/DSL + CI/CD
 
 | Session | Fichiers testés | Couverture | Notes
 | 086 | `OcrTaskTest.kt` — 7 tests (detection PNG/JPG/JPEG/GIF/BMP/TIFF, uppercase, rejet pdf/txt/adoc/md/xml/html, MIME mapping, fallback octet-stream). | 15/15 OcrTask PASS + 12/12 CodebaseOcrExtension PASS. 27/27 OCR. | Detection image↔texte par extension dans OcrTask. GeminiVisionProvider injecte uniquement dans OcrTask (pas dans OcrTaskTest — tests unitaires utilisent FakeOcrEngine). Zero appel reseau. |

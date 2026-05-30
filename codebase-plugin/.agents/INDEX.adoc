@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-30 (Session 086 — OCR-3 OcrTask multimodal : GeminiVisionProvider branché, 15 tests)
-_Session precedente_ : 085 — OCR-2 GeminiVisionProvider (95 lignes + 6 tests)
-_Session en cours_ : 087 — OCR-0 Contrats partages OcrRequest/OcrResult/OcrConfig dans codex-gradle
+_Derniere mise a jour_ : 2026-05-30 (Session 087 — OCR-3b P0 termine, P1+P2 session 088)
+_Session precedente_ : 086 — OCR-3 OcrTask multimodal : GeminiVisionProvider branche, 15 tests
+_Session en cours_ : 087 — CLOTUREE — FakeVisionProvider + VisionProvider interface
 _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/` (N=70, multiple de 10)
 
 '''

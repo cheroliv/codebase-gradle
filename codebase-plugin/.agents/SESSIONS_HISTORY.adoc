@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 087 | 2026-05-30 | feat+tests+refactor | OCR-3b FakeVisionProvider + VisionProvider interface — P0 terminé, 6 tests PASS, ZERO regression, publishToMavenLocal OK, cross-borough codex+planner compile OK | 10/10
 | 086 | 2026-05-30 | feat+tests | OCR-3 Brancher GeminiVisionProvider dans OcrTask — detection image↔texte par extension, executeImageOcr (GeminiVisionProvider via runBlocking), executeTextOcr (OcrEngine existant), geminiVisionProvider injectable, companion isImageFile/detectMimeType. 15 tests PASS (8 existants + 7 nouveaux). 27/27 OCR total, 0 regression. Prochaine session: 087 OCR-0 dans codex-gradle. | 10/10
 | 085 | 2026-05-30 | feat+tests | OCR-2 GeminiVisionProvider (multimodal) — 95 lignes, suspend fun processImage(). Cache lazy GoogleAiGeminiChatModel, encode base64 → ImageContent, prompt OCR AsciiDoc structuré. 6 tests JUnit5 PASS. Prochaine session: OCR-3 Brancher Gemini réel dans OcrTask. | 10/10
 | 084 | 2026-05-30 | feat+tests | OCR-1 GeminiKeyPool (rotation clés API Gemini) — 82 lignes, pattern OllamaPool. Implémente LlmInstancePool N0. Rotation ROUND_ROBIN/LEAST_USED, skip quota exceeded, fallback best-effort. 9 tests JUnit5 PASS (fan-out 2 @xp parallèles : GeminiKeyPool + GeminiKeyPoolTest). 0 régression OllamaPool 9/9. Prochaine session: OCR-2 GeminiVisionProvider multimodal. | 10/10
