@@ -598,6 +598,107 @@ Discussion originale session code review V16 (2026-05-27) :
 La littérature textuelle agentique peut être chunkée/ontologisée/SQL schématisée
 et transforme la préconisation agentique en tâche Gradle."
 
+== EPIC OCR : OCR Assisté IA (Gemini Vision) via contrats Codex
+
+**Statut** : CADRÉ — Prêt à démarrer
+**Priorité** : P0
+**Dépend de** : Codex N2 (contrats partagés `OcrResult`/`OcrConfig`/`OcrRequest`)
+**Origine** : Session 2026-05-30 — Discussion architecture OCR cross-borough
+
+_Pourquoi_ : Le pipeline d'acquisition documentaire (codex-gradle N2) sait extraire du texte
+depuis des PDFs natifs (PDFBox) et des EPUBs (Tika). Mais les documents scannés
+(factures, manuels papier, captures d'écran) nécessitent de l'OCR.
+
+Codex définira l'interface métier (contrats). Codebase fournira l'implémentation
+IA via Gemini Vision (GeminiLlmProvider déjà câblé depuis EPIC-V-5, session 064).
+Chaque compte Ollama est un compte Google → pool de clés API Gemini.
+
+Pattern DAG identique à `ContextChannel`/`ChannelBudget` (codebase-contracts) :
+codex (N2) définit les types, codebase (N1) les consomme.
+
+**Stratégie Gemini** : Les modèles Gemini (2.5-pro, 2.5-flash) sont nativement
+multimodaux (image + texte → texte structuré). Un seul appel peut faire
+OCR + structuration sémantique + classification en une passe.
+Langchain4j supporte déjà `UserMessage.from(ImageContent, TextContent)`.
+
+=== Pipeline cible
+
+```
+Document scanné (image/PDF non-textuel)
+    ↓
+OcrTask Gradle (codebase) — ./gradlew ocrDocument
+    ↓
+GeminiVisionProvider → GoogleAiGeminiChatModel multimodal
+    ↓ image/png + prompt structuré
+Gemini extrait texte + structure (titres, tableaux, blocs)
+    ↓
+OcrResult (contrat codex) → AsciiDoc structuré
+    ↓
+Chaîne existante : anonymisation → chunking → embedding → pgvector
+```
+
+=== Sous-tâches
+
+==== OCR-0 : Contrats partagés dans codex-gradle (prérequis externe)
+
+* [ ] Définir `OcrRequest` — input (bytes image/PDF + format + langue + prompt)
+* [ ] Définir `OcrResult` — output (texte structuré AsciiDoc + bounding boxes + confiance + métadonnées)
+* [ ] Définir `OcrConfig` — paramètres (provider, model, maxTokens, temperature)
+* [ ] Publier les contrats dans le package `codex.ocr` du codex-plugin
+* [ ] publishToMavenLocal pour consommation par codebase
+
+==== OCR-1 : GeminiKeyPool — rotation de clés API
+
+* [ ] Pattern `GeminiKeyPool` réutilisant l'architecture `OllamaPool` (session 065)
+* [ ] Lecture `GEMINI_API_KEY_1..N` via variables d'environnement
+* [ ] RotationStrategy ROUND_ROBIN sur les clés
+* [ ] Quota detection : HTTP 429 → rotation automatique
+* [ ] 1 pool par compte Google (Ollama Pro = 1 compte Google = N clés)
+* [ ] Tests : 4+ clés en rotation, quota exceeded → fallback
+
+==== OCR-2 : GeminiVisionProvider — multimodal
+
+* [ ] Étendre `GeminiLlmProvider` ou créer `GeminiVisionProvider` dédié
+* [ ] Support `UserMessage.from(ImageContent(bytes, mimeType), TextContent(prompt))`
+* [ ] Prompt engineering OCR : extraction texte + structuration AsciiDoc + détection langue
+* [ ] Fallback : si Gemini indisponible → Tesseract (OCR sans IA)
+* [ ] Tests : image synthétique avec texte connu → vérification output
+
+==== OCR-3 : OcrTask Gradle
+
+* [ ] Tâche `ocrDocument` — `./gradlew ocrDocument -PinputFile=scan.pdf`
+* [ ] Configuration via `OcrExtension` (provider, model, clés, langue)
+* [ ] Support batch : `-PinputDir=scans/` → tous les fichiers du répertoire
+* [ ] Intégration avec `GeminiConfig` existant (envVar GEMINI_API_KEY, model gemini-1.5-flash)
+* [ ] Tests Cucumber : "je scanne une image → j'obtiens du texte structuré AsciiDoc"
+
+==== OCR-4 : Intégration pipeline complet
+
+* [ ] OcrResult → anonymisation automatique (EPIC 2, déjà existant)
+* [ ] OcrResult AsciiDoc → chunking sémantique (réutilisation codex chunkDocument)
+* [ ] Chunks → embedding ONNX → pgvector (réutilisation codex codexIngest)
+* [ ] Test end-to-end : image scannée → pgvector → requêtable via RAG
+* [ ] Métriques : temps OCR, qualité extraction, coût tokens Gemini
+
+=== Bénéfice attendu
+
+Le pipeline d'acquisition documentaire passe de « texte natif uniquement »
+à « tout document, scanné ou natif, devient du texte structuré requêtable ».
+
+Le pool de clés Gemini (1 compte Google = 1 clé API) permet de
+monter en charge sans coût supplémentaire — chaque abonnement Ollama
+Pro existant est déjà un compte Google avec une clé API Gemini gratuite
+(jusqu'à 1500 requêtes/jour sur gemini-1.5-flash).
+
+=== Références
+
+- `GeminiLlmProvider.kt` — déjà câblé (session 064, EPIC-V-5)
+- `GeminiConfig.kt` — résolution GEMINI_API_KEY (session 063)
+- `OllamaPool.kt` — pattern de rotation à réutiliser (session 065)
+- `LlmProviderResolver.kt` — mapping model→provider (session 068)
+- LangChain4j Gemini multimodal : `dev.langchain4j:langchain4j-google-ai-gemini:1.14.1`
+  (déjà dans `libs.versions.toml` × 5 projets du workspace)
+
 == EPIC G : Publication Maven Central + Gradle Portal
 **Statut** : AUDITE (session 046) — Pret, aucune action supplementaire necessaire
 **Priorite** : P0

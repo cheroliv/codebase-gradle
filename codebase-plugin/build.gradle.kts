@@ -219,6 +219,34 @@ val cucumberTestEpicV8 = tasks.register<Test>("cucumberTestEpicV8") {
     filter { includeTestsMatching("codebase.scenarios.EpicV8CucumberRunner") }
 }
 
+val cucumberTestEpicOcr = tasks.register<Test>("cucumberTestEpicOcr") {
+    description = "Runs Cucumber BDD tests — EPIC OCR (Gemini Vision) only"
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = configurations.testRuntimeClasspath.get() +
+        sourceSets.test.get().output +
+        sourceSets.main.get().output +
+        files(tasks.jar.get().archiveFile)
+
+    dependsOn(tasks.classes)
+    useJUnitPlatform { excludeEngines("junit-jupiter") }
+    systemProperty("cucumber.junit-platform.naming-strategy", "long")
+    maxHeapSize = "1g"
+    maxParallelForks = 1
+    forkEvery = 1
+    jvmArgs("-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=256m", "-XX:TieredStopAtLevel=1")
+    timeout.set(Duration.ofMinutes(5))
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+        exceptionFormat = FULL
+    }
+    outputs.upToDateWhen { false }
+
+    filter { includeTestsMatching("codebase.scenarios.OcrCucumberRunner") }
+}
+
 tasks.withType<Test>().configureEach {
     ignoreFailures = true
     useJUnitPlatform()

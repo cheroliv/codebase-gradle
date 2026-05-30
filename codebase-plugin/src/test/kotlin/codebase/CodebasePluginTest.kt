@@ -19,11 +19,12 @@ class CodebasePluginTest {
         "vibecode",
         "vibecodingDashboard",
         "qualityGate",
-        "generateCompositeContext"
+        "generateCompositeContext",
+        "ocrDocument"
     )
 
     @Test
-    fun `apply plugin registers all 7 tasks`() {
+    fun `apply plugin registers all 8 tasks`() {
         val project = ProjectBuilder.builder().build()
         project.pluginManager.apply(CodebasePlugin::class.java)
 
@@ -33,12 +34,12 @@ class CodebasePluginTest {
     }
 
     @Test
-    fun `task count equals 7 after applying plugin`() {
+    fun `task count equals 8 after applying plugin`() {
         val project = ProjectBuilder.builder().withName("codebase").build()
         project.pluginManager.apply(CodebasePlugin::class.java)
 
         val registeredTasks = expectedTasks.mapNotNull { project.tasks.findByName(it) }
-        assertEquals(7, registeredTasks.size)
+        assertEquals(8, registeredTasks.size)
     }
 
     @Test
@@ -109,6 +110,16 @@ class CodebasePluginTest {
         val task = project.tasks.findByName("generateCompositeContext")
         assertNotNull(task)
         assertEquals("generate", task.group)
+    }
+
+    @Test
+    fun `ocrDocument is in collect group`() {
+        val project = ProjectBuilder.builder().build()
+        project.pluginManager.apply(CodebasePlugin::class.java)
+
+        val task = project.tasks.findByName("ocrDocument")
+        assertNotNull(task)
+        assertEquals("collect", task.group)
     }
 
     @Test

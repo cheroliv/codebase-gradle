@@ -2,6 +2,8 @@ package codebase
 
 import codebase.koog.VibecodingTask
 import codebase.koog.tracking.DashboardTask
+import codebase.ocr.CodebaseOcrExtension
+import codebase.ocr.OcrTask
 import codebase.quality.QualityGateTask
 import codebase.rag.AssembleWorkspaceContextTask
 import codebase.rag.CodebaseCompositeContextTask
@@ -12,6 +14,15 @@ import org.gradle.api.Project
 
 class CodebasePlugin : Plugin<Project> {
     override fun apply(project: Project) {
+        val ocrExt = project.extensions.create("codebaseOcr", CodebaseOcrExtension::class.java)
+        ocrExt.ocrProvider.convention("gemini")
+        ocrExt.geminiModel.convention("gemini-2.5-flash")
+        ocrExt.ocrLanguage.convention("fr")
+        ocrExt.outputFormat.convention("asciidoc")
+        ocrExt.ocrEnabled.convention(false)
+        ocrExt.maxTokens.convention(8192)
+        ocrExt.inputDir.convention(project.layout.projectDirectory)
+
         project.tasks.register(
             "collectFromCodebase",
             PrepareContextTask::class.java
@@ -92,6 +103,29 @@ class CodebasePlugin : Plugin<Project> {
             task.topK.set(project.providers.gradleProperty("topK").orElse("10"))
             task.trainingProjectDir.set(trainingPluginDir.absolutePath)
             task.outputFile.set(project.layout.buildDirectory.file("codebase/composite-context.json"))
+        }
+
+        project.tasks.register(
+            "ocrDocument",
+            OcrTask::class.java
+        ) { task ->
+            task.group = "collect"
+            task.description = "OCR assisté IA — extrait le texte structuré d'un document scanné via Gemini Vision"
+            task.ocrProvider.set(
+                project.providers.gradleProperty("ocrProvider").orElse(ocrExt.ocrProvider)
+            )
+            task.ocrLanguage.set(
+                project.providers.gradleProperty("ocrLanguage").orElse(ocrExt.ocrLanguage)
+            )
+            task.geminiModel.set(
+                project.providers.gradleProperty("geminiModel").orElse(ocrExt.geminiModel)
+            )
+            task.maxTokens.set(
+                project.providers.gradleProperty("maxTokens").map { it.toInt() }.orElse(ocrExt.maxTokens)
+            )
+            task.outputFormat.set(
+                project.providers.gradleProperty("outputFormat").orElse(ocrExt.outputFormat)
+            )
         }
     }
 }

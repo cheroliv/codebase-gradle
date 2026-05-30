@@ -1,0 +1,98 @@
+= Session 083 — Bootstrapping EPIC OCR (DSL + Tâche + Tests)
+
+:date: 2026-05-30
+:type: feat+tests
+:borough: codebase-gradle (Queens/N1)
+:score: 9/10
+
+== Contexte
+
+Discussion architecture OCR cross-borough avec @deep. L'OCR assisté IA (Gemini Vision)
+vit dans codebase-gradle (N1), pas dans codex (N2). Codex définira les contrats
+partagés (OCR-0). Codebase fournira l'implémentation via Gemini.
+
+Stratégie : chaque compte Ollama = 1 compte Google = 1 clé API Gemini.
+Pool de 9 comptes actifs (gaccount.yml) → rotation ROUND_ROBIN.
+
+== Actions
+
+1. **TDD : CodebaseOcrExtension** — `abstract class` 8 propriétés Property<T> + ListProperty
+   - Pattern planner/training : `extensions.create("codebaseOcr", CodebaseOcrExtension::class)`
+   - Propriétés : ocrProvider, geminiApiKeys, geminiModel, ocrLanguage, inputDir, outputFormat, ocrEnabled, maxTokens
+   - Conventions : gemini, gemini-2.5-flash, fr, asciidoc, projectDir, false, 8192
+
+2. **TDD : OcrTask** — `abstract class DefaultTask` + @Option/@Input/@Output
+   - Pattern QualityGateTask : `@DisableCachingByDefault`, `@TaskAction executeOcr()`
+   - Injection moteur : `OcrEngine` (fun interface Clean Architecture)
+   - Fallback : `NoOpOcrEngine` (main/), `FakeOcrEngine` (test/)
+   - `OcrInputFile` data class immuable
+
+3. **Enregistrement CodebasePlugin** — Extension + tâche `ocrDocument` (groupe `collect`)
+   - Chaîne priorité CLI > env var > DSL > convention (pattern planner)
+
+4. **MAJ CodebasePluginTest** — 7→8 tâches, test groupe `ocrDocument`
+
+5. **Cucumber BDD** — 5 scénarios @ocr, package isolé `scenarios.ocr`
+   - Conflit step definitions avec PrepareContextSteps → package dédié + runner dédié
+   - Tâche `cucumberTestEpicOcr` isolée (pas de pgvector)
+
+== Commandes exécutées
+
+- `./gradlew :codebase-plugin:test --tests "codebase.ocr.*"` → 20/20 PASS (12 ext + 8 task)
+- `./gradlew :codebase-plugin:test --tests "codebase.CodebasePluginTest"` → 11/11 PASS
+- `./gradlew :codebase-plugin:cucumberTestEpicOcr` → 5/5 PASS, 0 failures
+- `./gradlew :codebase-plugin:compileKotlin :codebase-plugin:compileTestKotlin` → BUILD SUCCESSFUL
+
+== Résultats
+
+| Test | Count | Status |
+| CodebaseOcrExtensionTest | 12 | ✅ |
+| OcrTaskTest | 8 | ✅ |
+| CodebasePluginTest | 11 | ✅ |
+| Cucumber @ocr | 5 | ✅ |
+| **Total** | **36** | **0 failure** |
+
+== Fichiers créés (12)
+
+- `src/main/kotlin/codebase/ocr/CodebaseOcrExtension.kt`
+- `src/main/kotlin/codebase/ocr/OcrEngine.kt`
+- `src/main/kotlin/codebase/ocr/OcrInputFile.kt`
+- `src/main/kotlin/codebase/ocr/NoOpOcrEngine.kt`
+- `src/main/kotlin/codebase/ocr/OcrTask.kt`
+- `src/test/kotlin/codebase/ocr/CodebaseOcrExtensionTest.kt`
+- `src/test/kotlin/codebase/ocr/OcrTaskTest.kt`
+- `src/test/kotlin/codebase/ocr/FakeOcrEngine.kt`
+- `src/test/kotlin/codebase/scenarios/ocr/OcrSteps.kt`
+- `src/test/kotlin/codebase/scenarios/OcrCucumberRunner.kt`
+- `src/test/features/ocr.feature`
+- Dossier `src/main/kotlin/codebase/ocr/` et `src/test/kotlin/codebase/ocr/`
+
+== Fichiers modifiés (4)
+
+- `CodebasePlugin.kt` — Extension + tâche
+- `CodebasePluginTest.kt` — 7→8 tâches
+- `build.gradle.kts` — `cucumberTestEpicOcr`
+- `.agents/INDEX.adoc` — Session 083 en cours
+
+== Leçons
+
+- Package Cucumber isolé (`scenarios.ocr`) évite les conflits de step definitions
+- `fun interface` OcrEngine = même pattern que LlmProvider (Clean Architecture)
+- `NoOpOcrEngine` dans main/ + `FakeOcrEngine` dans test/ = séparation propre
+- Chaîne CLI→env→DSL→convention alignée sur planner/training, pas d'improvisation
+
+== État EPIC OCR
+
+| Phase | Statut |
+|---|---|
+| OCR-0 | 🔲 Codex — contrats partagés `OcrRequest`/`OcrResult`/`OcrConfig` |
+| OCR-1 | 🔲 Codebase — `GeminiKeyPool` rotation `GEMINI_API_KEY_1..N` |
+| OCR-2 | 🔲 Codebase — `GeminiVisionProvider` multimodal |
+| OCR-3 | 🔲 Codebase — Brancher Gemini réel dans `OcrTask` |
+| OCR-4 | 🔲 Codebase — Pipeline complet OCR→anonymisation→embedding→pgvector |
+| **Boot** | ✅ **Infrastructure OCR (DSL + tâche + tests) — cette session** |
+
+== Prochaine session (084)
+
+Ajouté dans `PROMPT_REPRISE.adoc`.
+Priorité suggérée : OCR-1 (GeminiKeyPool) → OCR-2 (GeminiVisionProvider).
