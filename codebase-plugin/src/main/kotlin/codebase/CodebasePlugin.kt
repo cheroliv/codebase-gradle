@@ -126,6 +126,16 @@ class CodebasePlugin : Plugin<Project> {
             task.outputFormat.set(
                 project.providers.gradleProperty("outputFormat").orElse(ocrExt.outputFormat)
             )
+            // -PinputFile → CLI single-file mode
+            val inputFileProp = project.providers.gradleProperty("inputFile")
+            if (inputFileProp.isPresent) {
+                task.inputFile.set(project.layout.projectDirectory.file(inputFileProp.get()))
+            }
+            // llm-config.yml → GeminiVisionProvider config
+            val llmConfigFile = project.layout.projectDirectory.file("llm-config.yml").asFile
+            if (llmConfigFile.exists()) {
+                task.llmConfigFile = llmConfigFile
+            }
         }
     }
 }

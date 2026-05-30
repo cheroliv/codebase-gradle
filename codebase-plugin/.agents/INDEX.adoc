@@ -4,9 +4,10 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _Ontologie spatiale_ : voir `configuration/.agents/AGENT_GOVERNANCE.adoc`
 
-_Derniere mise a jour_ : 2026-05-30 (Session 087 — OCR-3b P0 termine, P1+P2 session 088)
-_Session precedente_ : 086 — OCR-3 OcrTask multimodal : GeminiVisionProvider branche, 15 tests
-_Session en cours_ : 087 — CLOTUREE — FakeVisionProvider + VisionProvider interface
+_Derniere mise a jour_ : 2026-05-30 (Session 088 — OCR-3b P1+P2 termine)
+_Session precedente_ : 087 — CLOTUREE — FakeVisionProvider + VisionProvider interface
+_Session en cours_ : 088 — CLOTUREE — OCR-3b P1 Config YAML/CLI/DSL + P2 CI/CD
+_Session suivante_ : 089 — Slider-gradle EPIC SLD-3 (playwright-jvm e2e tests) [cross-borough]
 _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/` (N=70, multiple de 10)
 
 '''
@@ -37,7 +38,8 @@ _Backup rotation_ : Sessions 061-070 → `.agents/backup/Y2026-sessions-061-070/
 
 |===
 | # | Date | Type | Sujet | Score
-| 086 | 2026-05-30 | feat+tests | OCR-3 Brancher GeminiVisionProvider dans OcrTask — detection image↔texte par extension, executeImageOcr (GeminiVisionProvider), executeTextOcr (OcrEngine), geminiVisionProvider injectable, companion isImageFile/detectMimeType. 15 tests PASS (8 existants + 7 nouveaux OCR-3 : PNG/JPG/JPEG/GIF/BMP/TIFF/MIME/fallback). 27/27 OCR total, 0 regression. | 10/10
+| 088 | 2026-05-30 | feat+tests+infra | OCR-3b P1 Config YAML/CLI/DSL + P2 CI/CD — -PinputFile CLI mappe CodebasePlugin → OcrTask, llm-config.yml → GeminiConfig → OcrTask, chaîne priorite CLI>DSL>YAML>convention, YAML corrompu fallback, .github/workflows/ocr.yml (push/PR JDK 24 OCR), 22/22 tests PASS (16 existants + 6 nouveaux), zero regression, publishToMavenLocal OK | 10/10
+| 087 | 2026-05-30 | feat+tests+refactor | OCR-3b FakeVisionProvider + VisionProvider interface — P0 terminé, 6 tests PASS, ZERO regression, publishToMavenLocal OK, cross-borough codex+planner compile OK | 10/10
 | 085 | 2026-05-30 | feat+tests | OCR-2 GeminiVisionProvider (multimodal) — 95 lignes, package codebase.koog.llm. `suspend fun processImage(bytes, mimeType, lang, model, maxTokens)`. Cache lazy GoogleAiGeminiChatModel, encode base64 → ImageContent, prompt OCR AsciiDoc structuré. 6 tests JUnit5 PASS (image PNG synthétique, erreur sans clé API, grande image 2000×2000). Zéro régression. | 10/10
 | 084 | 2026-05-30 | feat+tests | OCR-1 GeminiKeyPool (rotation clés API Gemini) — 82 lignes, pattern OllamaPool (session 065). Implémente LlmInstancePool N0. Rotation ROUND_ROBIN/LEAST_USED, skip quota exceeded. 9 tests JUnit5 PASS (fan-out 2 @xp parallèles). 0 régression OllamaPool. | 10/10
 | 083 | 2026-05-30 | feat+tests | Bootstrapping EPIC OCR : DSL CodebaseOcrExtension + OcrTask + OcrEngine + FakeOcrEngine. 36 tests PASS (12 JUnit5 ext + 8 JUnit5 task + 5 Cucumber @ocr + 11 CodebasePlugin). Chaîne priorité CLI>env>DSL>convention. Extension/Task/Cucumber isolé. 12 fichiers créés, 4 modifiés. | 9/10

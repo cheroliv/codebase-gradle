@@ -2,6 +2,8 @@ package codebase.ocr
 
 import codebase.koog.llm.GeminiVisionProvider
 import codebase.koog.llm.VisionProvider
+import codebase.rag.GeminiConfig
+import codebase.rag.LlmConfig
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
@@ -52,6 +54,15 @@ abstract class OcrTask : DefaultTask() {
     @get:Internal
     var geminiVisionProvider: VisionProvider? = null
 
+    /**
+     * Fichier YAML de config LLM (pattern keyRef/envVar, jamais de clé en dur).
+     * S'il existe (injecté par CodebasePlugin), les paramètres `geminiModel`,
+     * `maxTokens`, `ocrLanguage` sont lus depuis `llm-config.yml` → `GeminiConfig`.
+     * Sinon, les valeurs DSL/CLI/convention s'appliquent.
+     */
+    @get:Internal
+    var llmConfigFile: java.io.File? = null
+
     @get:Input
     @get:Optional
     @get:Option(option = "ocrProvider", description = "Fournisseur IA : gemini ou tesseract")
@@ -101,6 +112,12 @@ abstract class OcrTask : DefaultTask() {
     fun executeOcr() {
         val provider = ocrProvider.orNull ?: "gemini"
 
+        // Résoudre la config depuis llm-config.yml si fourni
+        val geminiConfig = resolveGeminiConfig()
+        if (geminiConfig != null) {
+            logger.lifecycle("[OCR] llm-config.yml chargé : modèle={}", geminiConfig.resolveModel())
+        }
+
         val inputPath = if (inputFile.isPresent) {
             inputFile.get().asFile.absolutePath
         } else {
@@ -115,8 +132,11 @@ abstract class OcrTask : DefaultTask() {
             throw IllegalArgumentException("Fichier d'entrée introuvable : $inputPath")
         }
 
+        // Chaîne de priorité : CLI > DSL > YAML > convention
         val lang = ocrLanguage.orNull ?: "fr"
-        val model = geminiModel.orNull ?: "gemini-2.5-flash"
+        val model = geminiModel.orNull
+            ?: geminiConfig?.resolveModel()
+            ?: "gemini-2.5-flash"
         val tokens = maxTokens.orNull ?: 8192
         val format = outputFormat.orNull ?: "asciidoc"
 
@@ -151,6 +171,24 @@ abstract class OcrTask : DefaultTask() {
 
         outputPath.writeText(result, Charsets.UTF_8)
         logger.lifecycle("[OCR] Résultat écrit dans : {}", outputPath.absolutePath)
+    }
+
+    /**
+     * Charge la configuration Gemini depuis llm-config.yml (s'il existe).
+     * Le fichier YAML est optionnel : s'il n'est pas fourni ou absent, retourne null.
+     */
+    private fun resolveGeminiConfig(): GeminiConfig? {
+        val configFile = llmConfigFile ?: return null
+        if (!configFile.exists()) {
+            logger.debug("[OCR] llm-config.yml absent, utilisation des valeurs DSL/CLI/convention")
+            return null
+        }
+        return try {
+            LlmConfig.fromYaml(configFile.readText(Charsets.UTF_8)).ai.gemini
+        } catch (e: Exception) {
+            logger.warn("[OCR] Erreur parsing llm-config.yml : {}, fallback DSL/CLI/convention", e.message)
+            null
+        }
     }
 
     private fun executeImageOcr(

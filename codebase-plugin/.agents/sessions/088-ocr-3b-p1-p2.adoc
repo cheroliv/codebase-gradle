@@ -1,0 +1,50 @@
+= Session 088 — OCR-3b P1 Config YAML/CLI/DSL + P2 CI/CD
+:date: 2026-05-30
+:score: 10/10
+:type: feat+tests+infra
+:prerequis: OCR-3b P0 FakeVisionProvider ✅ (session 087)
+
+== Résumé
+
+OCR-3b P1+P2 livré. 3 fichiers modifiés, 1 créé, 22/22 tests PASS, zero régression.
+
+== Actions
+
+=== P2 — CI/CD OCR Workflow
+- Créé `.github/workflows/ocr.yml` — push/PR sur main/master
+- JDK 24 Temurin, Gradle setup, timeout 10 min
+- Tests ciblés : `codebase.ocr.*` + `codebase.koog.llm.*`
+- Pas de build complet, pas de Cucumber, pas de pgvector
+
+=== P1 — Config YAML/CLI/DSL
+- `CodebasePlugin.kt` : +11 lignes — `-PinputFile` mappé, `llm-config.yml` injecté si présent
+- `OcrTask.kt` : +38 lignes — champ `llmConfigFile`, méthode `resolveGeminiConfig()`
+- Chaîne priorité : CLI > DSL > YAML > convention
+- YAML corrompu → fallback convention sans crash
+- `OcrTaskTest.kt` : +6 tests (127 lignes) :
+  * `llmConfigFile is null by default`
+  * `llmConfigFile can be set to an existing YAML`
+  * `executeOcr with YAML config resolves model from GeminiConfig`
+  * `executeOcr with -PinputFile via plugin and YAML config`
+  * `executeOcr with YAML model override falls back to convention when YAML absent`
+  * `executeOcr with corrupt YAML file falls back to convention`
+
+== Résultats
+
+| Livrable | Statut |
+| P2 CI/CD ocr.yml | ✅ Créé |
+| P1 -PinputFile CLI | ✅ CodebasePlugin |
+| P1 llm-config.yml → GeminiConfig | ✅ OcrTask |
+| Tests | ✅ 22/22 PASS (0 regression) |
+| publishToMavenLocal | ✅ BUILD SUCCESSFUL |
+| Compilation | ✅ BUILD SUCCESSFUL |
+
+== Fichiers modifiés
+
+- `codebase-plugin/src/main/kotlin/codebase/CodebasePlugin.kt` (+11 lignes)
+- `codebase-plugin/src/main/kotlin/codebase/ocr/OcrTask.kt` (+38 lignes)
+- `codebase-plugin/src/test/kotlin/codebase/ocr/OcrTaskTest.kt` (+127 lignes)
+
+== Fichiers créés
+
+- `.github/workflows/ocr.yml` (28 lignes)
