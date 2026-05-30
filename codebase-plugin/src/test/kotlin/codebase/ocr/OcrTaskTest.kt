@@ -95,4 +95,70 @@ class OcrTaskTest {
         assertEquals(4096, modified.maxTokens)
         assertTrue(modified !== input)
     }
+
+    // ── OCR-3 : Détection image vs texte ──────────────────────────────
+
+    @Test
+    fun `isImageFile detects PNG as image`() {
+        val file = File("/tmp/scan.png")
+        assertTrue(OcrTask.isImageFile(file))
+    }
+
+    @Test
+    fun `isImageFile detects JPG as image`() {
+        val file = File("/tmp/photo.jpg")
+        assertTrue(OcrTask.isImageFile(file))
+    }
+
+    @Test
+    fun `isImageFile detects JPEG as image`() {
+        val file = File("/tmp/photo.jpeg")
+        assertTrue(OcrTask.isImageFile(file))
+    }
+
+    @Test
+    fun `isImageFile detects all supported image formats`() {
+        for (ext in listOf("png", "jpg", "jpeg", "gif", "bmp", "tiff")) {
+            assertTrue(OcrTask.isImageFile(File("/tmp/doc.$ext")), "Failed for $ext")
+            assertTrue(OcrTask.isImageFile(File("/tmp/DOC.${ext.uppercase()}")), "Failed for uppercase $ext")
+        }
+    }
+
+    @Test
+    fun `isImageFile returns false for text files`() {
+        assertFalse(OcrTask.isImageFile(File("/tmp/doc.pdf")))
+        assertFalse(OcrTask.isImageFile(File("/tmp/doc.txt")))
+        assertFalse(OcrTask.isImageFile(File("/tmp/doc.adoc")))
+        assertFalse(OcrTask.isImageFile(File("/tmp/doc.md")))
+        assertFalse(OcrTask.isImageFile(File("/tmp/doc.xml")))
+        assertFalse(OcrTask.isImageFile(File("/tmp/doc.html")))
+        assertFalse(OcrTask.isImageFile(File("/tmp/doc")))
+    }
+
+    @Test
+    fun `detectMimeType returns correct image MIME types`() {
+        assertEquals("image/png", OcrTask.detectMimeType("png"))
+        assertEquals("image/jpeg", OcrTask.detectMimeType("jpg"))
+        assertEquals("image/jpeg", OcrTask.detectMimeType("jpeg"))
+        assertEquals("image/gif", OcrTask.detectMimeType("gif"))
+        assertEquals("image/bmp", OcrTask.detectMimeType("bmp"))
+        assertEquals("image/tiff", OcrTask.detectMimeType("tiff"))
+    }
+
+    @Test
+    fun `detectMimeType returns octet-stream for unknown extensions`() {
+        assertEquals("application/octet-stream", OcrTask.detectMimeType("pdf"))
+        assertEquals("application/octet-stream", OcrTask.detectMimeType("xyz"))
+    }
+
+    // ── OCR-3b : Injection FakeVisionProvider ──────────────────────────
+
+    @Test
+    fun `FakeVisionProvider is injectable into OcrTask`() {
+        val fakeProvider = codebase.koog.llm.FakeVisionProvider()
+        val task = org.gradle.testfixtures.ProjectBuilder.builder().build()
+            .tasks.register("ocr", OcrTask::class.java).get()
+        task.geminiVisionProvider = fakeProvider
+        kotlin.test.assertNotNull(task.geminiVisionProvider)
+    }
 }

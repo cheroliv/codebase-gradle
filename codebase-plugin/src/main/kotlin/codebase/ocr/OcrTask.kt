@@ -1,5 +1,8 @@
 package codebase.ocr
 
+import codebase.koog.llm.GeminiVisionProvider
+import codebase.koog.llm.VisionProvider
+import kotlinx.coroutines.runBlocking
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -45,6 +48,9 @@ abstract class OcrTask : DefaultTask() {
      */
     @get:Internal
     var ocrEngine: OcrEngine = NoOpOcrEngine()
+
+    @get:Internal
+    var geminiVisionProvider: VisionProvider? = null
 
     @get:Input
     @get:Optional
@@ -119,8 +125,14 @@ abstract class OcrTask : DefaultTask() {
             file.name, lang, provider, model, tokens
         )
 
-        val content = file.readText(Charsets.UTF_8)
-        val result = ocrEngine.process(content, lang, model, tokens)
+        val isImage = isImageFile(file)
+        val mimeType = detectMimeType(file.extension)
+
+        val result = if (isImage) {
+            executeImageOcr(file, mimeType, lang, model, tokens)
+        } else {
+            executeTextOcr(file, lang, model, tokens)
+        }
 
         val outputDir = project.layout.buildDirectory.dir("ocr").get().asFile
         outputDir.mkdirs()
@@ -139,5 +151,52 @@ abstract class OcrTask : DefaultTask() {
 
         outputPath.writeText(result, Charsets.UTF_8)
         logger.lifecycle("[OCR] Résultat écrit dans : {}", outputPath.absolutePath)
+    }
+
+    private fun executeImageOcr(
+        file: File,
+        mimeType: String,
+        language: String,
+        model: String,
+        maxTokens: Int
+    ): String {
+        logger.lifecycle("[OCR] Mode image détecté : mimeType={}", mimeType)
+
+        val provider = geminiVisionProvider ?: GeminiVisionProvider()
+        val imageBytes = file.readBytes()
+
+        return runBlocking {
+            provider.processImage(imageBytes, mimeType, language, model, maxTokens)
+        }
+    }
+
+    private fun executeTextOcr(
+        file: File,
+        language: String,
+        model: String,
+        maxTokens: Int
+    ): String {
+        logger.lifecycle("[OCR] Mode texte détecté")
+        val content = file.readText(Charsets.UTF_8)
+        return ocrEngine.process(content, language, model, maxTokens)
+    }
+
+    companion object {
+        private val IMAGE_EXTENSIONS = setOf("png", "jpg", "jpeg", "gif", "bmp", "tiff")
+
+        private val MIME_MAP = mapOf(
+            "png" to "image/png",
+            "jpg" to "image/jpeg",
+            "jpeg" to "image/jpeg",
+            "gif" to "image/gif",
+            "bmp" to "image/bmp",
+            "tiff" to "image/tiff"
+        )
+
+        fun isImageFile(file: File): Boolean =
+            file.extension.lowercase() in IMAGE_EXTENSIONS
+
+        fun detectMimeType(extension: String): String =
+            MIME_MAP[extension.lowercase()] ?: "application/octet-stream"
     }
 }
