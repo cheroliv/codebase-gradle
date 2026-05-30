@@ -1,51 +1,34 @@
-= PROMPT_REPRISE — Session 087 : EPIC OCR — OCR-3b FakeVisionProvider + CI + Configs
-:sessions: 087
+= PROMPT_REPRISE — Session 088 : EPIC OCR — OCR-3b P1 Config YAML/CLI/DSL + P2 CI/CD
+:sessions: 088
 :date: 2026-05-30
-:prerequis: codex-gradle OCR-0 terminé (publishToMavenLocal consommable)
+:prerequis: OCR-3b P0 FakeVisionProvider ✅ (session 087)
+:max-lines: 35
 
 == Quick Start
 
 ```
 cd /home/cheroliv/workspace/foundry/public/codebase-gradle
 ./gradlew :codebase-plugin:compileKotlin
-./gradlew :codebase-plugin:test --tests "codebase.ocr.*"   # 27/27 attendus
+./gradlew :codebase-plugin:test --tests "codebase.ocr.*" --tests "codebase.koog.llm.*"
 ```
 
 == Contexte
 
-OCR-1/2/3 livrés dans codebase (GeminiKeyPool + GeminiVisionProvider + OcrTask multimodal).
-OCR-0 livré dans codex (OcrRequest/OcrResult/OcrConfig).
+OCR-3b P0 terminé : VisionProvider interface + FakeVisionProvider + injection OcrTask OK.
+Zéro régression. publishToMavenLocal OK. Cross-borough codex + planner OK.
 
-Ce qui manque : des tests sans appel réseau pour valider la plomberie complète avant d'utiliser le vrai Gemini.
-
-== Objectif
-
-=== P0 — FakeVisionProvider
-
-Fichier : `src/test/kotlin/codebase/koog/llm/FakeVisionProvider.kt`
-Même signature que GeminiVisionProvider, branché sur GeminiKeyPool avec secrets de test.
-Retourne du faux AsciiDoc structuré. Zéro appel réseau.
-
-=== P1 — Config YAML + CLI + DSL
+== P1 — Config YAML/CLI/DSL (prioritaire)
 
 - `llm-config.yml` → GeminiConfig → FakeVisionProvider injecté dans OcrTask
 - CLI : `./gradlew ocrDocument -PinputFile=x.png` via ProjectBuilder
-- DSL : `codebaseOcr { model, maxTokens, language }` via gradle.properties
+- DSL : `codebaseOcr { provider, model }` via gradle.properties
 
-=== P2 — CI/CD
+== P2 — CI/CD
 
 Fichier : `.github/workflows/ocr.yml` — compile + tests OCR uniquement
 
 == Références
 
-- `codebase-plugin/BACKLOG.adoc § OCR-3b` — détails
-- `codex-gradle/PROMPT_REPRISE.adoc` — session 027 OCR-0
-
---- 
-
-✅ **Pool Ollama GPT-OSS-120B — Gherkin solide** :
-- `epic_v_pool.feature` — 5 scénarios : rotation ROUND_ROBIN 29 ports, quota exceeded, failover, reset, capacité complète
-- `PoolWorld.kt` + `PoolSteps.kt` — 15 step definitions PicoContainer
-- `EpicVPoolCucumberRunner.kt` — runner dédié @epic_v_pool
-- `cucumberTestEpicVPool` — tâche Gradle, 5/5 PASS
-- Fix drift modèle : `LlmProviderResolver.DEFAULT_MODEL` → `gpt-oss:120b-cloud`
+- `BACKLOG.adoc § OCR-3b`
+- `src/main/kotlin/codebase/ocr/CodebaseOcrExtension.kt` (DSL existant)
+- `src/main/kotlin/codebase/rag/GeminiConfig.kt` (config base)

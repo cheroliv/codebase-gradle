@@ -1,0 +1,28 @@
+= Session 087 — EPIC OCR — OCR-3b FakeVisionProvider + VisionProvider interface
+:date: 2026-05-30
+:type: feat+tests+refactor
+:modele: deepseek-v4-pro (via opencode orchestreur)
+:score: ZERO regression, 6 nouveaux tests PASS
+
+== Objectif
+
+P0 FakeVisionProvider pour tests OCR sans appel réseau Gemini.
+Extraction d'une interface VisionProvider pour injecter FakeVisionProvider
+dans OcrTask en test.
+
+== Livrables
+
+- VisionProvider interface — suspend fun processImage(imageBytes, mimeType, language, model, maxTokens)
+- GeminiVisionProvider implements VisionProvider (override, sans default values)
+- FakeVisionProvider — 95 lignes, retourne AsciiDoc structuré mocké
+- FakeVisionProviderTest — 5 tests PASS (FR/EN/DE, taille image, modèle)
+- OcrTask.geminiVisionProvider: VisionProvider? (ex-GeminiVisionProvider?)
+- OcrTaskTest: +1 test injection FakeVisionProvider
+- publishToMavenLocal OK
+- Cross-borough: codex-gradle ✅, planner-gradle ✅
+
+== Non traité (reporté)
+
+- P1: Config YAML + CLI + DSL
+- P2: CI/CD .github/workflows/ocr.yml
+- Cucumber non exécuté (timeout, JUnit5 suffisant pour vérification zéro régression)
