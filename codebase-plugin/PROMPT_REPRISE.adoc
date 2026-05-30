@@ -1,83 +1,51 @@
-= PROMPT_REPRISE — Session 084 : EPIC OCR — GeminiKeyPool + GeminiVisionProvider
-:sessions: 084
+= PROMPT_REPRISE — Session 087 : EPIC OCR — OCR-3b FakeVisionProvider + CI + Configs
+:sessions: 087
 :date: 2026-05-30
-:contexte: Session 083 TERMINÉE — Bootstrapping OCR : DSL + OcrTask + 36 tests PASS
-:prerequis: Gemini, `gaccount.yml` (configuration/identities/credentials/)
+:prerequis: codex-gradle OCR-0 terminé (publishToMavenLocal consommable)
 
-== Ce qui a été livré (Session 083)
-- ✅ `CodebaseOcrExtension.kt` — DSL `codebaseOcr { ... }` 8 propriétés (pattern planner)
-- ✅ `OcrTask.kt` — tâche `ocrDocument` (DefaultTask + @Option/@Input/@Output)
-- ✅ `OcrEngine.kt` — fun interface Clean Architecture (injectable)
-- ✅ `NoOpOcrEngine.kt` — fallback main/, `FakeOcrEngine.kt` — test/
-- ✅ `OcrInputFile.kt` — data class immuable
-- ✅ Enregistrement dans `CodebasePlugin.kt` — extension + tâche (groupe `collect`)
-- ✅ 36 tests PASS : 12 JUnit5 ext + 8 JUnit5 task + 5 Cucumber @ocr + 11 CodebasePlugin
+== Quick Start
 
-== Fichiers clés (produits session 083)
-- `src/main/kotlin/codebase/ocr/CodebaseOcrExtension.kt` — extension DSL
-- `src/main/kotlin/codebase/ocr/OcrEngine.kt` — fun interface
-- `src/main/kotlin/codebase/ocr/OcrTask.kt` — tâche Gradle (DefaultTask)
-- `src/main/kotlin/codebase/ocr/OcrInputFile.kt` — data class
-- `src/main/kotlin/codebase/ocr/NoOpOcrEngine.kt` — fallback
-- `src/test/features/ocr.feature` — 5 scénarios Cucumber @ocr
-
-== Fichiers modifiés (session 083)
-- `CodebasePlugin.kt` — extension `codebaseOcr` + tâche `ocrDocument`
-- `CodebasePluginTest.kt` — 7→8 tâches + test groupe `ocrDocument`
-- `build.gradle.kts` — tâche `cucumberTestEpicOcr` isolée
-- `.agents/INDEX.adoc` — session 083
-- `BACKLOG.adoc` — EPIC OCR cadré (OCR-0→OCR-4)
-
-== Objectif Session 084
-
-=== P0 — OCR-1 : GeminiKeyPool (rotation clés API)
-
-S'inspirer de `OllamaPool` (session 065, `OllamaLlmProvider.kt`) et de
-`LlmProviderResolver.kt` (session 068) pour créer un pool de clés Gemini
-avec rotation ROUND_ROBIN.
-
-- Pattern : `GeminiKeyPool` implémentant `LlmInstancePool` (contrat N0)
-- Sources clés : env vars `GEMINI_API_KEY_1..N` (injectées via GitHub secrets ou ~/.bashrc)
-- Détection quota : HTTP 429 → rotation automatique
-- Tests : 4+ clés en rotation, quota exceeded → fallback
-
-=== P1 — OCR-2 : GeminiVisionProvider (multimodal)
-
-Étendre `GeminiLlmProvider` (session 064) pour le multimodal.
-LangChain4j supporte déjà `UserMessage.from(ImageContent, TextContent)`.
-
-- Classe `GeminiVisionProvider` — réutilise `GeminiConfig` (session 063)
-- Prompt engineering OCR : extraction texte + structuration AsciiDoc
-- Tests : image synthétique avec texte connu → vérification output
-
-=== P2 — OCR-3 : Brancher Gemini réel dans OcrTask
-
-Remplacer `NoOpOcrEngine` → `GeminiVisionProvider` dans `OcrTask`.
-Intégration avec `GeminiConfig` existant (envVar GEMINI_API_KEY).
-
-=== P3 — OCR-0 (dépendance externe)
-
-Contrats partagés dans **codex-gradle** (`OcrRequest`/`OcrResult`/`OcrConfig`).
-Bloquant pour OCR-4 (pipeline complet OCR→anonymisation→embedding→pgvector).
-
-== Configuration requise
-
-Gemini API keys dans l'environnement :
 ```
-export GEMINI_API_KEY_1="AIza..."   # cheroliv92@gmail.com
-export GEMINI_API_KEY_2="AIza..."   # cheroliv.developer@gmail.com
-export GEMINI_API_KEY_3="AIza..."   # talaria.school@gmail.com
-# ...
+cd /home/cheroliv/workspace/foundry/public/codebase-gradle
+./gradlew :codebase-plugin:compileKotlin
+./gradlew :codebase-plugin:test --tests "codebase.ocr.*"   # 27/27 attendus
 ```
 
-Sources : `configuration/settings/gaccount.yml` + `configuration/identities/credentials/google/_generate_identities.sh`
+== Contexte
+
+OCR-1/2/3 livrés dans codebase (GeminiKeyPool + GeminiVisionProvider + OcrTask multimodal).
+OCR-0 livré dans codex (OcrRequest/OcrResult/OcrConfig).
+
+Ce qui manque : des tests sans appel réseau pour valider la plomberie complète avant d'utiliser le vrai Gemini.
+
+== Objectif
+
+=== P0 — FakeVisionProvider
+
+Fichier : `src/test/kotlin/codebase/koog/llm/FakeVisionProvider.kt`
+Même signature que GeminiVisionProvider, branché sur GeminiKeyPool avec secrets de test.
+Retourne du faux AsciiDoc structuré. Zéro appel réseau.
+
+=== P1 — Config YAML + CLI + DSL
+
+- `llm-config.yml` → GeminiConfig → FakeVisionProvider injecté dans OcrTask
+- CLI : `./gradlew ocrDocument -PinputFile=x.png` via ProjectBuilder
+- DSL : `codebaseOcr { model, maxTokens, language }` via gradle.properties
+
+=== P2 — CI/CD
+
+Fichier : `.github/workflows/ocr.yml` — compile + tests OCR uniquement
 
 == Références
 
-- `OllamaPool.kt` — `codebase/koog/llm/pool/OllamaPool.kt` (session 065)
-- `GeminiLlmProvider.kt` — `codebase/koog/llm/GeminiLlmProvider.kt` (session 064)
-- `GeminiConfig.kt` — `codebase/rag/LlmConfig.kt:49` (session 063)
-- `LlmProviderResolver.kt` — `codebase/koog/llm/LlmProviderResolver.kt` (session 068)
-- `LlmInstancePool` contrat N0 — `workspace-bom/llm-pool-contracts`
-- BACKLOG.adoc § EPIC OCR — détails OCR-1→OCR-4
-- LangChain4j Gemini multimodal : `dev.langchain4j:langchain4j-google-ai-gemini:1.14.1` (déjà dans libs.versions.toml)
+- `codebase-plugin/BACKLOG.adoc § OCR-3b` — détails
+- `codex-gradle/PROMPT_REPRISE.adoc` — session 027 OCR-0
+
+--- 
+
+✅ **Pool Ollama GPT-OSS-120B — Gherkin solide** :
+- `epic_v_pool.feature` — 5 scénarios : rotation ROUND_ROBIN 29 ports, quota exceeded, failover, reset, capacité complète
+- `PoolWorld.kt` + `PoolSteps.kt` — 15 step definitions PicoContainer
+- `EpicVPoolCucumberRunner.kt` — runner dédié @epic_v_pool
+- `cucumberTestEpicVPool` — tâche Gradle, 5/5 PASS
+- Fix drift modèle : `LlmProviderResolver.DEFAULT_MODEL` → `gpt-oss:120b-cloud`

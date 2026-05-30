@@ -16,7 +16,7 @@ import contracts.llmpool.RotationStrategy
  * - "gemini" → [GeminiLlmProvider]
  * - "ollama", "deepseek" → [OllamaLlmProvider] backed by Gemma4 Cloud pool
  *   (ROUND_ROBIN rotation across ports from `OLLAMA_POOL_PORTS` env var,
- *   default single port 11437, model `deepseek-v4-pro:cloud`)
+ *   default single port 11437, model `gpt-oss:120b-cloud`)
  * - any other string → [OllamaLlmProvider] single-instance with that model name
  *
  * NOTE: blank model is handled by the caller (VibecodingTask) — no provider
@@ -26,7 +26,8 @@ object LlmProviderResolver {
 
     private const val DEFAULT_HOST = "http://localhost:%d"
     private const val DEFAULT_PORT = 11437
-    private const val DEFAULT_MODEL = "deepseek-v4-pro:cloud"
+    /** Modèle par défaut pour le pool Gemma4 — aligné sur OllamaPoolTest */
+    private const val DEFAULT_MODEL = "gpt-oss:120b-cloud"
 
     /** Gemma4 Cloud pool — shared across all vibecoding sessions */
     private val gemma4Pool: OllamaPool by lazy {

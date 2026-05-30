@@ -71,6 +71,8 @@ dependencies {
 
     testImplementation(kotlin("test-junit5"))
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation("org.assertj:assertj-core:3.27.3")
     runtimeOnly(libs.logback.classic)
     testRuntimeOnly(libs.logback.classic)
     testImplementation(libs.testcontainers.postgresql)
@@ -217,6 +219,34 @@ val cucumberTestEpicV8 = tasks.register<Test>("cucumberTestEpicV8") {
     outputs.upToDateWhen { false }
 
     filter { includeTestsMatching("codebase.scenarios.EpicV8CucumberRunner") }
+}
+
+val cucumberTestEpicVPool = tasks.register<Test>("cucumberTestEpicVPool") {
+    description = "Runs Cucumber BDD tests — EPIC V-Pool (Ollama Pool GPT-OSS-120B rotation/quota/failover)"
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = configurations.testRuntimeClasspath.get() +
+        sourceSets.test.get().output +
+        sourceSets.main.get().output +
+        files(tasks.jar.get().archiveFile)
+
+    dependsOn(tasks.classes)
+    useJUnitPlatform { excludeEngines("junit-jupiter") }
+    systemProperty("cucumber.junit-platform.naming-strategy", "long")
+    maxHeapSize = "1g"
+    maxParallelForks = 1
+    forkEvery = 1
+    jvmArgs("-XX:+UseSerialGC", "-XX:MaxMetaspaceSize=256m", "-XX:TieredStopAtLevel=1")
+    timeout.set(Duration.ofMinutes(15))
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+        exceptionFormat = FULL
+    }
+    outputs.upToDateWhen { false }
+
+    filter { includeTestsMatching("codebase.scenarios.EpicVPoolCucumberRunner") }
 }
 
 val cucumberTestEpicOcr = tasks.register<Test>("cucumberTestEpicOcr") {
