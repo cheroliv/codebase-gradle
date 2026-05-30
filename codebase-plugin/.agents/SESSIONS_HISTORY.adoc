@@ -2,6 +2,7 @@
 
 |===
 | # | Date | Type | Sujet | Score
+| 088 | 2026-05-30 | feat+tests+infra | OCR-3b P1 Config YAML/CLI/DSL + P2 CI/CD — -PinputFile CLI mappe CodebasePlugin → OcrTask, llm-config.yml → GeminiConfig → OcrTask, chaîne priorité CLI>DSL>YAML>convention, YAML corrompu fallback convention sans crash, .github/workflows/ocr.yml (push/PR JDK 24), 22/22 tests PASS (16 existants + 6 nouveaux), zero régression, publishToMavenLocal OK | 10/10
 | 087 | 2026-05-30 | feat+tests+refactor | OCR-3b FakeVisionProvider + VisionProvider interface — P0 terminé, 6 tests PASS, ZERO regression, publishToMavenLocal OK, cross-borough codex+planner compile OK | 10/10
 | 086 | 2026-05-30 | feat+tests | OCR-3 Brancher GeminiVisionProvider dans OcrTask — detection image↔texte par extension, executeImageOcr (GeminiVisionProvider via runBlocking), executeTextOcr (OcrEngine existant), geminiVisionProvider injectable, companion isImageFile/detectMimeType. 15 tests PASS (8 existants + 7 nouveaux). 27/27 OCR total, 0 regression. Prochaine session: 087 OCR-0 dans codex-gradle. | 10/10
 | 085 | 2026-05-30 | feat+tests | OCR-2 GeminiVisionProvider (multimodal) — 95 lignes, suspend fun processImage(). Cache lazy GoogleAiGeminiChatModel, encode base64 → ImageContent, prompt OCR AsciiDoc structuré. 6 tests JUnit5 PASS. Prochaine session: OCR-3 Brancher Gemini réel dans OcrTask. | 10/10

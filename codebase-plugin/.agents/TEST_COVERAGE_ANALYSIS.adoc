@@ -1,12 +1,15 @@
 = Test Coverage Analysis — Codebase Gradle
 
-_Statut session 087_ : OCR-3b FakeVisionProvider + VisionProvider interface. 6 nouveaux tests JUnit5 (FakeVisionProviderTest x5 + OcrTaskTest x1 injection). Zéro régression. publishToMavenLocal OK. Cross-borough consommateurs compile OK.
+_Statut session 088_ : OCR-3b P1+P2 TERMINE. Config YAML/CLI/DSL + CI/CD. 22/22 tests PASS (16 existants + 6 nouveaux), zero régression. publishToMavenLocal OK. Cross-borough codex+planner OK.
 
-⚠️ **Gaps OCR restants (session 088)** :
-- Pas de test CI/CD OCR (pas de workflow `.github/workflows/ocr.yml`)
-- Pas de config YAML (`llm-config.yml`) testée
-- Pas de test CLI `-P` via ProjectBuilder
-- → OCR-3b-P1/P2 : Config YAML/CLI/DSL + CI/CD
+✅ **Gaps OCR comblés (session 088)** :
+- ✅ CI/CD OCR (`.github/workflows/ocr.yml`)
+- ✅ Config YAML (`llm-config.yml` → `GeminiConfig`)
+- ✅ CLI `-PinputFile` via ProjectBuilder
+- ✅ Fallback YAML corrompu → convention
+
+| Session | Fichiers testés | Couverture | Notes
+| 088 | `OcrTaskTest.kt` — 6 nouveaux tests (llmConfigFile null by default, llmConfigFile YAML existant, executeOcr avec YAML config, -PinputFile via plugin, fallback convention sans YAML, YAML corrompu fallback). | 22/22 PASS (16 existants + 6 nouveaux). Zéro régression. | Config YAML/CLI/DSL + CI/CD ocr.yml. Chaîne priorité CLI>DSL>YAML>convention. YAML corrompu fallback sans crash. publishToMavenLocal OK.
 
 | Session | Fichiers testés | Couverture | Notes
 | 086 | `OcrTaskTest.kt` — 7 tests (detection PNG/JPG/JPEG/GIF/BMP/TIFF, uppercase, rejet pdf/txt/adoc/md/xml/html, MIME mapping, fallback octet-stream). | 15/15 OcrTask PASS + 12/12 CodebaseOcrExtension PASS. 27/27 OCR. | Detection image↔texte par extension dans OcrTask. GeminiVisionProvider injecte uniquement dans OcrTask (pas dans OcrTaskTest — tests unitaires utilisent FakeOcrEngine). Zero appel reseau. |
